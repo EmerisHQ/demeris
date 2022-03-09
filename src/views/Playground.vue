@@ -10,20 +10,25 @@
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
   <hr />
-  <BestPrice
-    class="m-4"
-    number-of-exchanges-searched="2"
-    dex="gravity"
-    expected-rate="1.567"
-    limit-price="1.555"
-    denom="OSMO"
-    max-slippage="0.3"
-    min-received="9940.34"
-  />
+  <tippy placement="bottom-start" delay="0" :interactive="true" :arrow="false">
+    <Button class="w-60 h-0">Hover</Button>
+    <template #content>
+      <BestPrice
+        :number-of-exchanges-searched="2"
+        dex="gravity"
+        :expected-rate="1.567"
+        :limit-price="1.555"
+        denom="OSMO"
+        :max-slippage="0.3"
+        :min-received="9940.34"
+        :is-visible="isBestPriceVisible"
+      />
+    </template>
+  </tippy>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { interpret, State } from 'xstate';
 
 import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
@@ -37,6 +42,8 @@ import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 const state = reactive({
   key: undefined,
 });
+
+const isBestPriceVisible = ref(false);
 
 const transactionsStore = useTransactionsStore();
 const customMachine = transactionProcessMachine.withConfig({
@@ -61,3 +68,10 @@ const addService = (key: string, stateDefinition: any) => {
   transactionsStore.transactions[key] = service;
 };
 </script>
+
+<style lang="scss">
+//_tippy.scss applies padding which causes a background to appear
+.tippy-content {
+  padding: 0 !important;
+}
+</style>

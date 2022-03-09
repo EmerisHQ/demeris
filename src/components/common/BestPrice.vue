@@ -2,7 +2,8 @@
   <div class="w-72 bg-surface rounded-2xl theme-inverse dark:theme-inverse text-text -text-1">
     <div class="px-5 pt-5 pb-4">
       <div class="flex items-start text-muted mb-1">
-        {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }} <StarIcon class="ml-auto" />
+        {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }}
+        <StarIcon class="ml-auto" />
       </div>
       <div class="title text-0">
         {{ $t('components.bestPrice.bestPriceFrom') }} <span class="text-positive-text capitalize">{{ dex }}</span>
@@ -15,7 +16,7 @@
         }}<span class="ml-auto text-text">~{{ expectedRate }} {{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
-        {{ $t('components.bestPrice.limitPrice') }}<span class="ml-auto text-text">~{{ limitPrice }}{{ denom }}</span>
+        {{ $t('components.bestPrice.limitPrice') }}<span class="ml-auto text-text">~{{ limitPrice }} {{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.maxSlippage') }}<span class="ml-auto text-text">{{ maxSlippage }}%</span>
@@ -31,7 +32,6 @@
 import { useI18n } from 'vue-i18n';
 
 import StarIcon from '@/components/common/Icons/StarIcon.vue';
-// because props is unused
 // eslint-disable-next-line
 const props = defineProps({
   numberOfExchangesSearched: {
@@ -43,7 +43,7 @@ const props = defineProps({
     required: true,
   },
   expectedRate: {
-    type: String,
+    type: Number,
     required: true,
   },
   limitPrice: {
