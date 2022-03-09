@@ -214,7 +214,7 @@ const titleMap = {
 const getDepositDenoms = () => {
   return (transaction.value.data as AddLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync).sort();
 };
-console.log('transaction value >>>>> ', transaction.value);
+//console.log('transaction value >>>>> ', transaction.value);
 // console.log('coins >>> ', alphanumericSplit(transaction.value.data?.total));
 const subtitle = computed(() => {
   if (transaction.value.name.startsWith('ibc')) {

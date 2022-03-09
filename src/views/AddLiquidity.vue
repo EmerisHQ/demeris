@@ -305,6 +305,7 @@ import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
@@ -329,7 +330,7 @@ import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
-import { actionHandler, getBaseDenomSync } from '@/utils/actionHandler';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';

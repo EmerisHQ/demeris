@@ -32,6 +32,7 @@
         :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
+        data-cy="denom-amount-input"
       />
       <Price
         :amount="{ denom: baseDenom, amount: (parseFloat(inputAmount) * 10 ** precision).toString() }"
