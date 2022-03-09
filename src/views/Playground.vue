@@ -21,14 +21,13 @@
         denom="OSMO"
         :max-slippage="0.3"
         :min-received="9940.34"
-        :is-visible="isBestPriceVisible"
       />
     </template>
   </tippy>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive } from 'vue';
 import { interpret, State } from 'xstate';
 
 import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
@@ -42,8 +41,6 @@ import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 const state = reactive({
   key: undefined,
 });
-
-const isBestPriceVisible = ref(false);
 
 const transactionsStore = useTransactionsStore();
 const customMachine = transactionProcessMachine.withConfig({
