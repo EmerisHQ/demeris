@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
 
 import { getFirstAlphabet } from '@/utils/basic';
 interface Validator {
@@ -24,6 +24,6 @@ const props = withDefaults(defineProps<Props>(), {
   validator: () => ({ moniker: '' }),
 });
 const { validator } = toRefs(props);
-const imgUrl = ref<string>(validator.value?.avatar);
-const monikerFirst = ref<string>(getFirstAlphabet(validator.value?.moniker));
+const imgUrl = computed(() => validator.value?.avatar);
+const monikerFirst = computed(() => getFirstAlphabet(validator.value?.moniker));
 </script>
