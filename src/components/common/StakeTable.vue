@@ -45,7 +45,7 @@
           <tbody>
             <!-- claim rewards -->
             <tr
-              v-if="totalRewardsAmount"
+              v-if="totalRewardsAmount && totalRewardsAmount > 1"
               class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
               @click="goStakeActionPage(StakingActions.CLAIM)"
             >
@@ -287,7 +287,7 @@ export default defineComponent({
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-      );
+      ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
     });
     const getTimeToString = (isodate: string) => {
       return dayjs().to(dayjs(isodate));

@@ -3331,7 +3331,6 @@ export async function isValidIBCReserveDenom(
     return false;
   }
   if (!verifyTrace || !verifyTrace.verified) {
-    console.error("Couldn't verify trace for", JSON.stringify(verifyTrace));
     return false;
   }
   if (verifyTrace.path.split('/').length > 2) {
