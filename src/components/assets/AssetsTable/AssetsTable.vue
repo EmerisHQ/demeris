@@ -43,6 +43,7 @@
             v-for="(asset, index) in orderedUserBalances"
             :key="index"
             class="assets-table__row group cursor-pointer"
+            data-cy="asset-row"
             @click="handleClick(asset)"
           >
             <td class="py-5 align-middle group-hover:bg-fg transition">

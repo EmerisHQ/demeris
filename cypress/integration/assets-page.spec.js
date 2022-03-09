@@ -13,7 +13,7 @@ describe('Check availability of Assets page elements', function () {
 
   it('go to Assets page', function () {
     let assets = new Assets();
-    assets.goToAssertTab();
+    assets.goToAssetTab();
 
     assets.aktRow().should('be.visible');
     assets.atomRow().should('be.visible');
