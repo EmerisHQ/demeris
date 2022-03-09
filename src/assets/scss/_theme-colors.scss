@@ -25,10 +25,10 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --border: rgba(0, 0, 0, 0.07);
   --link: #094efd;
   --link-hover: var(--text);
-  --positive: #54f21b;
-  --positive-text: #018516;
-  --negative: #ff1b44;
-  --negative-text: #ca0842;
+  --positive: #00cf30;
+  --positive-text: #008223;
+  --negative: #fe475f;
+  --negative-text: #d80228;
   --warning: #fb7c07;
 }
 /* Dark mode custom properties */
@@ -50,10 +50,10 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --border: rgba(255, 255, 255, 0.09);
   --link: var(--quinary);
   --link-hover: #fff;
-  --positive: #54f21b;
-  --positive-text: #a8ff89;
-  --negative: #ff1b44;
-  --negative-text: #ff6c87;
+  --positive: #42ed05;
+  --positive-text: #89ff9b;
+  --negative: #ff3d56;
+  --negative-text: #ff6072;
   --warning: #fb7c07;
 }
 
