@@ -186,6 +186,7 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
+  [DemerisActionTypes.RESET_AIRDROPS]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.SET_SELECTED_AIRDROP](
     { commit }: ActionContext<State, RootState>,
     { params }: DemerisActionSetAirdropParams,
@@ -931,28 +932,36 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
     try {
-      const response = await axios.get(`https://api.github.com/repos/allinbits/Emeris-Airdrop/contents/airdropList`);
+      const response = fetch('https://api.github.com/repos/EmerisHQ/Emeris-Airdrop/contents/airdropList')
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_GIT_AIRDROPS_LIST });
       }
-      return response.data;
+      return response;
     } catch (e) {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
   async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
-      const response = await axios.get(
-        `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-      );
+      fetch(`https://raw.githubusercontent.com/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`)
+        .then((res) => res.json())
+        .then(async (data) => {
+          commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...data } });
+        });
 
-      commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
+  },
+  [DemerisActionTypes.RESET_AIRDROPS]({ commit }) {
+    commit(DemerisMutationTypes.RESET_AIRDROPS);
   },
   [DemerisActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });

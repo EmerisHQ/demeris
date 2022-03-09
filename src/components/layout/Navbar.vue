@@ -40,7 +40,8 @@
   </nav>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
@@ -53,28 +54,33 @@ export default defineComponent({
     StarsIcon,
   },
   setup() {
-    let gitAirdropsList = ref([]);
+    const router = useRouter();
 
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
 
     const getAllAirdrops = async () => {
-      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
-        subscribe: false,
-      });
-
-      gitAirdropsList.value.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+      apistore
+        .dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
           subscribe: false,
-          params: {
-            airdropFileName: item.name,
-          },
-        });
-      });
+        })
+        .then((res) =>
+          res.forEach((item) => {
+            apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+              subscribe: false,
+              params: {
+                airdropFileName: item.name,
+              },
+            });
+          }),
+        );
     };
 
     onMounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_AIRDROPS);
       if (isAirdropsFeatureRunning) {
         getAllAirdrops();
+      } else {
+        router.push('/');
       }
     });
 
