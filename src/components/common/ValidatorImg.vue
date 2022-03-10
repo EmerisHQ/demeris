@@ -1,5 +1,5 @@
 <template>
-  <template v-if="imgUrl">
+  <template v-if="imgUrl !== ''">
     <img :src="imgUrl" :alt="validator.moniker" class="w-full h-full block rounded-full relative z-10" />
   </template>
   <template v-else>
@@ -9,21 +9,57 @@
   </template>
 </template>
 
-<script lang="ts" setup>
-import { computed, toRefs } from 'vue';
+<script lang="ts">
+import axios from 'axios';
+import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 
-import { getFirstAlphabet } from '@/utils/basic';
-interface Validator {
-  moniker: string;
-  avatar?: string;
-}
-interface Props {
-  validator: Validator;
-}
-const props = withDefaults(defineProps<Props>(), {
-  validator: () => ({ moniker: '' }),
+import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic';
+export default defineComponent({
+  name: 'ValidatorImg',
+  props: {
+    validator: {
+      type: Object,
+      required: true,
+      default: () => {
+        return {};
+      },
+    },
+  },
+  setup(props) {
+    const { validator } = toRefs(props);
+    const imgUrl = ref('');
+    const monikerFirst = ref('');
+    watch(
+      () => validator.value,
+      async (newValue) => {
+        imgUrl.value = await fetchValidatorImg(newValue);
+        monikerFirst.value = getFirstAlphabet(newValue.moniker);
+      },
+    );
+
+    onMounted(async () => {
+      imgUrl.value = await fetchValidatorImg(validator.value);
+      monikerFirst.value = getFirstAlphabet(validator.value.moniker);
+    });
+    return {
+      imgUrl,
+      monikerFirst,
+    };
+  },
 });
-const { validator } = toRefs(props);
-const imgUrl = computed(() => validator.value?.avatar);
-const monikerFirst = computed(() => getFirstAlphabet(validator.value?.moniker));
+
+async function fetchValidatorImg(validator: Record<string, string>): Promise<string> {
+  if (!checkStringIsKeybase(validator?.identity)) return '';
+  try {
+    const res = await axios.get(
+      'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + validator.identity + '&fields=pictures',
+    );
+    const url = res.data?.them[0]?.pictures?.primary?.url ?? '';
+    return url;
+  } catch (e) {
+    return '';
+  }
+}
 </script>
+
+<style lang="scss" scoped></style>
