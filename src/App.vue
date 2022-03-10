@@ -308,6 +308,33 @@ export default defineComponent({
         }
       });
     }
+
+    const getAllAirdrops = async () => {
+      apistore
+        .dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+          subscribe: false,
+        })
+        .then((res) =>
+          res.forEach((item) => {
+            apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+              subscribe: false,
+              params: {
+                airdropFileName: item.name,
+              },
+            });
+          }),
+        );
+    };
+
+    onMounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_AIRDROPS);
+      if (featureRunning('AIRDROPS_FEATURE')) {
+        getAllAirdrops();
+      } else {
+        router.push('/welcome');
+      }
+    });
+
     return { initialized, status, showMaintenanceScreen };
   },
   errorCaptured(err) {
