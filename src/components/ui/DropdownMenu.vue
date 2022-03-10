@@ -27,6 +27,9 @@
 </template>
 
 <script setup lang="ts">
+import { useFocusWithin } from '@vueuse/core';
+import { ref, toRefs, watch } from 'vue';
+
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 interface Props {
@@ -34,7 +37,33 @@ interface Props {
   trigger?: string;
   delay?: number;
   interactive?: boolean;
+  icon?: string;
+  iconSize?: number;
+  label?: string;
   arrow?: boolean;
   offset?: number[];
 }
+const props = withDefaults(defineProps<Props>(), {
+  placement: 'right-start',
+  trigger: 'click',
+  delay: 0,
+  icon: '',
+  iconSize: 1.5,
+  label: '',
+  interactive: true,
+  arrow: false,
+  offset: () => [0, 0],
+});
+const { placement, trigger, delay, icon, iconSize, interactive, label, arrow, offset } = toRefs(props);
+const tippyInstance = ref();
+const focusWindow = ref();
+const { focused } = useFocusWithin(focusWindow);
+watch(focused, (focused) => {
+  window.requestAnimationFrame(() => {
+    const isFocusedElementInside = focusWindow.value.contains(document.activeElement);
+    if (!focused && !isFocusedElementInside) {
+      tippyInstance.value.tippy.hide();
+    }
+  });
+});
 </script>
