@@ -57,6 +57,7 @@ import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, wa
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import SwitchValidatorAmount from '@/components/stake/SwitchForm/SwitchValidatorAmount.vue';
@@ -65,7 +66,6 @@ import TransactionProcessCreator from '@/features/transactions/components/Transa
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { RestakeAction, RestakeForm } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
 type Step = 'validator' | 'amount' | 'review' | 'restake';
