@@ -10,9 +10,9 @@
       :class="[
         `button-${variant}`,
         { 'button-none': size === 'none' },
+        alignTextStyle,
         { 'text-0 leading-5 rounded-xl': size === 'md' },
         { 'button-sm -text-1 leading-4 rounded-lg': size === 'sm' },
-        { 'flex items-center justify-center': !name },
         { 'h-12': variant !== 'link' && size === 'md' },
         { 'h-9': variant !== 'link' && size === 'sm' },
         { 'w-12': !name && variant !== 'link' && size === 'md' },
@@ -35,7 +35,7 @@
         disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
       ]"
       :disabled="disabled"
-      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap outline-offset-4"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
@@ -58,7 +58,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 export default defineComponent({
@@ -68,6 +68,7 @@ export default defineComponent({
   },
   props: {
     name: { type: String, required: false, default: null },
+    alignText: { type: String, required: false, default: 'center' },
     variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
     size: { type: String, required: false, default: 'md' }, // 'sm'
     fullWidth: { type: Boolean, required: false, default: true },
@@ -91,8 +92,15 @@ export default defineComponent({
         }
       }
     }
+    const alignTextStyle = computed(() => {
+      if (!props.name && !props.alignText) return 'flex items-center justify-center';
+      if (props.alignText === 'center') return 'flex items-center justify-center';
+      if (props.alignText === 'left') return 'flex items-center justify-start';
+      if (props.alignText === 'right') return 'flex items-center justify-end';
+      return '';
+    });
 
-    return { buttonTooltipRef, toggleToolTip, emit };
+    return { alignTextStyle, buttonTooltipRef, toggleToolTip, emit };
   },
 });
 </script>
