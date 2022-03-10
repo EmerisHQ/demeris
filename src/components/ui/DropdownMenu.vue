@@ -9,7 +9,7 @@
       :arrow="arrow"
       :offset="offset"
     >
-      <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
+      <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12 px-2" rounded>
         <Icon v-if="icon" :name="icon" :icon-size="iconSize" class="mt-2" />
         <span v-if="label">{{ label }}</span>
       </Button>
