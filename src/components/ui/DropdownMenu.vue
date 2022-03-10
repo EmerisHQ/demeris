@@ -1,5 +1,5 @@
 <template>
-  <div ref="focusWindow">
+  <div ref="focusWindow" data-test="mainComponent">
     <tippy
       ref="tippyInstance"
       :placement="placement"
@@ -9,9 +9,15 @@
       :arrow="arrow"
       :offset="offset"
     >
-      <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12 px-2" rounded>
-        <Icon v-if="icon" :name="icon" :icon-size="iconSize" class="mt-2" />
-        <span v-if="label">{{ label }}</span>
+      <Button
+        :full-width="false"
+        variant="link"
+        class="text-muted hover:text-text w-12 px-2"
+        rounded
+        data-test="openMenuButton"
+      >
+        <Icon v-if="icon" data-test="openMenuButtonIcon" :name="icon" :icon-size="iconSize" class="mt-2" />
+        <span v-if="label" data-test="openMenuButtonLabel">{{ label }}</span>
       </Button>
       <template #content>
         <slot></slot>

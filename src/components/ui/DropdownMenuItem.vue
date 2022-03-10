@@ -1,5 +1,11 @@
 <template>
-  <Button class="py-3 px-6 hover:text-link" variant="link" align-text="left" @click="emit('clickEvent')">
+  <Button
+    class="py-3 px-6 hover:text-link"
+    variant="link"
+    align-text="left"
+    data-test="menuItemButton"
+    @click="emit('clickEvent')"
+  >
     <slot />
   </Button>
 </template>
