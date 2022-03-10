@@ -11,7 +11,18 @@
 
       <p class="text-muted">{{ subtitle }}</p>
 
-      <div :class="['w-full max-w-lg flex items-center justify-center', { '-space-x-8': transaction.name != 'stake' }]">
+      <div
+        :class="[
+          'w-full max-w-lg flex items-center justify-center',
+          {
+            '-space-x-8':
+              transaction.name !== 'stake' &&
+              transaction.name !== 'unstake' &&
+              transaction.name !== 'claim' &&
+              transaction.name !== 'switch',
+          },
+        ]"
+      >
         <template v-if="transaction.name == 'swap'">
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
@@ -30,9 +41,27 @@
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[1])" />
         </template>
 
-        <template v-if="transaction.name == 'stake'">
+        <template v-if="transaction.name === 'stake'">
           <div class="absolute w-full flex items-center justify-center">
             <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data[0]?.amount.denom)" />
+          </div>
+          <div class="flex items-center justify-center w-full">
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+          </div>
+        </template>
+
+        <template v-if="transaction.name === 'unstake' || transaction.name === 'switch'">
+          <div class="absolute w-full flex items-center justify-center">
+            <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data?.amount?.denom)" />
+          </div>
+          <div class="flex items-center justify-center w-full">
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+          </div>
+        </template>
+
+        <template v-if="transaction.name === 'claim'">
+          <div class="absolute w-full flex items-center justify-center">
+            <CircleSymbol size="lg" :denom="getBaseDenomSync(alphanumericSplit(transaction.data?.total)?.denom)" />
           </div>
           <div class="flex items-center justify-center w-full">
             <EphemerisSpinner class="flex-grow max-w-xs" />
@@ -69,6 +98,23 @@
                 denom: getBaseDenomSync(transaction.data[0].amount.denom),
               }"
             />
+          </p>
+        </template>
+        <template
+          v-if="transaction.name === 'unstake' || (transaction.name === 'switch' && transaction.data?.amount?.amount)"
+        >
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: transaction.data.amount.amount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'claim'">
+          <p class="font-medium text-1">
+            <AmountDisplay :amount="alphanumericSplit(transaction.data?.total)" />
           </p>
         </template>
         <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
@@ -141,6 +187,7 @@ import Button from '@/components/ui/Button.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import { AddLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
+import { alphanumericSplit } from '@/utils/basic';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 
@@ -167,7 +214,8 @@ const titleMap = {
 const getDepositDenoms = () => {
   return (transaction.value.data as AddLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync).sort();
 };
-
+//console.log('transaction value >>>>> ', transaction.value);
+// console.log('coins >>> ', alphanumericSplit(transaction.value.data?.total));
 const subtitle = computed(() => {
   if (transaction.value.name.startsWith('ibc')) {
     return t('components.txHandlingModal.ibcTransferSubtitle');

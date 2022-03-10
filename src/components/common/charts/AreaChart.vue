@@ -1,10 +1,10 @@
 <template>
-  <div class="chart">
+  <div>
     <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 17}px`" class="mb-8" />
     <div v-if="hasData">
       <apexchart
         v-if="!showLoading"
-        class="w-full"
+        class="w-full chart"
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
@@ -306,7 +306,7 @@ export default defineComponent({
 .apexcharts-tooltip-series-group {
   font-size: inherit !important;
   padding: 0 !important;
-  @apply justify-center;
+  justify-content: center !important;
 }
 
 .apexcharts-tooltip-y-group {

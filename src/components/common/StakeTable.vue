@@ -21,6 +21,7 @@
       </div>
 
       <Button
+        data-cy="stake-button"
         :name="$t('components.stakeTable.stake')"
         variant="link"
         :full-width="false"
@@ -32,7 +33,7 @@
     <template v-if="validatorList.length > 0">
       <div v-show="selectedTab === 1">
         <!-- staking reward table -->
-        <table class="w-full table-fixed mt-8 text-right">
+        <table class="w-full table-fixed mt-8 text-right" data-cy="staking-table">
           <colgroup>
             <col width="32%" />
             <col width="38%" />
@@ -44,7 +45,7 @@
           <tbody>
             <!-- claim rewards -->
             <tr
-              v-if="totalRewardsAmount"
+              v-if="totalRewardsAmount && totalRewardsAmount > 1"
               class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
               @click="goStakeActionPage(StakingActions.CLAIM)"
             >
@@ -74,7 +75,7 @@
             </tr>
 
             <!-- staked validators -->
-            <tr v-for="validator of stakingBalances" :key="validator.validator_address">
+            <tr v-for="validator of stakingBalances" :key="validator.validator_address" data-cy="validator-row">
               <td class="py-6 flex items-center transition">
                 <div class="inline-flex items-center mr-4">
                   <ValidatorBadge
@@ -286,7 +287,7 @@ export default defineComponent({
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-      );
+      ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
     });
     const getTimeToString = (isodate: string) => {
       return dayjs().to(dayjs(isodate));
