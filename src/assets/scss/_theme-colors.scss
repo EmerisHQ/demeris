@@ -14,7 +14,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --transparent: rgba(255, 255, 255, 0);
   --bg: #fff;
   --darkBanner: #171717;
-  // --bg-image: 148px repeat url('~@/assets/images/texture-grain.png'), #fff;
+  // --bg-image: 148px repeat url('../images/texture-grain.png'), #fff;
   --bg-image: var(--bg); // Gautier doesn't like the grain
   --fg: rgba(0, 0, 0, 0.03);
   --fg-solid: #f7f7f7;
@@ -40,13 +40,13 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --transparent: rgba(0, 0, 0, 0);
   --bg: #000;
   --darkBanner: #171717;
-  --bg-image: 148px repeat url('~@/assets/images/bg-dark.jpg'), #000;
+  --bg-image: 148px repeat url('../images/bg-dark.jpg'), #000;
   --fg: rgba(255, 255, 255, 0.1);
   --fg-solid: #1f1f1f;
   --surface: #181818;
-  --surface-image: 148px repeat url('~@/assets/images/texture-grain.png'), #171717;
+  --surface-image: 148px repeat url('../images/texture-grain.png'), #171717;
   --surface-2: #262626;
-  --surface-2-image: 148px repeat url('~@/assets/images/texture-grain.png'), #232323;
+  --surface-2-image: 148px repeat url('../images/texture-grain.png'), #232323;
   --border: rgba(255, 255, 255, 0.09);
   --link: var(--quinary);
   --link-hover: #fff;
@@ -123,7 +123,7 @@ html.dark {
 @variants dark, focus {
   /* Background utilities */
   .bg-brand {
-    background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
+    background: center / cover no-repeat url('../images/gradient-primary.jpg'), var(--primary);
   }
   .bg-brand-to-r {
     background: var(--primary) $brand-gradient-to-r;
@@ -132,7 +132,7 @@ html.dark {
     background: var(--primary) $brand-gradient-to-br;
   }
   .bg-gold-circular {
-    background: center / cover no-repeat url('~@/assets/images/texture-gold-circular.jpg'), var(--gold);
+    background: center / cover no-repeat url('../../assets/images/texture-gold-circular.jpg'), var(--gold);
   }
   .bg-gold-to-r {
     background: var(--gold) $gold-to-r;
@@ -149,12 +149,12 @@ html.dark {
 @variants dark, group-hover, focus-within, hover, focus {
   .border-brand {
     border-color: var(--primary);
-    border-image: url('~@/assets/images/gradient-primary.jpg');
+    border-image: url('../images/gradient-primary.jpg');
     border-image-slice: 20%;
   }
   .border-gold-circular {
     border-color: var(--gold);
-    border-image: url('~@/assets/images/texture-gold-circular.jpg');
+    border-image: url('../../assets/images/texture-gold-circular.jpg');
     border-image-slice: 20%;
   }
 }

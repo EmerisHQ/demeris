@@ -13,7 +13,7 @@ module.exports = {
       },
     },
     backgroundImage: {
-      grain: 'url(~@/assets/images/texture-grain.png)',
+      grain: 'url(../../assets/images/texture-grain.png)',
     },
     boxShadow: {
       button: '3px 9px 32px -4px rgba(0, 0, 0, 0.07)',

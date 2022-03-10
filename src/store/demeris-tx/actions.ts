@@ -60,7 +60,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       }
 
       const offlineSigner = isCypress
-        ? await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.EMERIS_MNEMONIC, {
             prefix: chain.node_info.bech32_config.main_prefix,
             hdPaths: [stringToPath(chain.derivation_path)],
           })

@@ -13,7 +13,7 @@
         </p>
       </div>
 
-      <img src="~@/assets/images/demo-account-banner.png" alt="Claimable airdrops header" class="w-1/2" />
+      <img src="../assets/images/demo-account-banner.png" alt="Claimable airdrops header" class="w-1/2" />
     </div>
 
     <div
@@ -28,7 +28,7 @@
         </p>
       </div>
 
-      <img src="~@/assets/images/claimable-airdrops-header.png" alt="Claimable airdrops header" class="w-1/2" />
+      <img src="../assets/images/claimable-airdrops-header.png" alt="Claimable airdrops header" class="w-1/2" />
     </div>
 
     <div

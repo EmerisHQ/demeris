@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="ephemeris relative flex items-center justify-center w-full">
-      <img class="absolute ephemeris-1" src="~@/assets/images/gold-ephemeris-ring-1.png" alt="Gold ephemeris ring" />
-      <img class="absolute ephemeris-2" src="~@/assets/images/gold-ephemeris-ring-2.png" alt="Gold ephemeris ring" />
+      <img class="absolute ephemeris-1" src="../../assets/images/gold-ephemeris-ring-1.png" alt="Gold ephemeris ring" />
+      <img class="absolute ephemeris-2" src="../../assets/images/gold-ephemeris-ring-2.png" alt="Gold ephemeris ring" />
     </div>
   </div>
 </template>

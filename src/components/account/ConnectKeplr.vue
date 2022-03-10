@@ -5,7 +5,7 @@
         <slot name="title">
           <img
             v-if="type !== 'welcome'"
-            src="~@/assets/images/keplr-wallet-logo.png"
+            src="../assets/images/keplr-wallet-logo.png"
             alt="Keplr logo"
             class="w-12 mx-auto mb-8"
           />

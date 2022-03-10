@@ -17,7 +17,7 @@ class FeatureManager {
   public load() {
     const urlParams = Object.fromEntries(new URLSearchParams(location.search));
     const appParams = {
-      ...process.env,
+      ...import.meta.env,
       ...urlParams,
     };
 

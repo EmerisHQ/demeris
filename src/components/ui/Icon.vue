@@ -22,10 +22,10 @@ export default defineComponent({
     color: { type: String, required: false, default: 'inherit' },
   },
 
-  setup(props) {
+  async setup(props) {
     const currentIcon = shallowRef('');
     const isReady = ref(false);
-    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
+    await import(/* @vite-ignore */ `@/components/common/Icons/${props.name}.vue`).then((val) => {
       currentIcon.value = val.default;
       isReady.value = true;
     });

@@ -6,7 +6,7 @@
     </div>
 
     <img
-      src="~@/assets/images/what-is-airdrop-bg.png"
+      src="../assets/images/what-is-airdrop-bg.png"
       alt="What is an airdrop"
       class="absolute right-0 rounded-2xl h-full"
     />
