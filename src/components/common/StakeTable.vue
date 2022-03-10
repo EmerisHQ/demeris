@@ -92,7 +92,7 @@
                 <Price :amount="{ denom: denom, amount: validator.amount }" />
               </td>
               <td class="text-right">
-                <DropdownMenu icon="ThreeDotsIcon" icon-size="1.5" placement="right-start" :offset="[-24, 0]">
+                <DropdownMenu icon="ThreeDotsIcon" :icon-size="1.5" placement="right-start" :offset="[-24, 0]">
                   <DropdownMenuItem
                     @click-event="
                       () => {

@@ -10,7 +10,8 @@
       :offset="offset"
     >
       <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
-        <Icon name="ThreeDotsIcon" :icon-size="1.5" class="mt-2" />
+        <Icon v-if="icon" :name="icon" :icon-size="iconSize" class="mt-2" />
+        <span v-if="label">{{ label }}</span>
       </Button>
       <template #content>
         <slot></slot>
@@ -30,6 +31,9 @@ interface Props {
   trigger?: string;
   delay?: number;
   interactive?: boolean;
+  icon?: string;
+  iconSize?: number;
+  label?: string;
   arrow?: boolean;
   offset?: number[];
 }
@@ -37,11 +41,14 @@ const props = withDefaults(defineProps<Props>(), {
   placement: 'right-start',
   trigger: 'click',
   delay: 0,
+  icon: '',
+  iconSize: 1.5,
+  label: '',
   interactive: true,
   arrow: false,
   offset: () => [0, 0],
 });
-const { placement, trigger, delay, interactive, arrow, offset } = toRefs(props);
+const { placement, trigger, delay, icon, iconSize, interactive, label, arrow, offset } = toRefs(props);
 const tippyInstance = ref();
 const focusWindow = ref();
 const { focused } = useFocusWithin(focusWindow);
