@@ -20,34 +20,28 @@
 </template>
 
 <script setup lang="ts">
-// TODO:
-// extend component to accept array of menu items
-
 import { useFocusWithin } from '@vueuse/core';
 import { ref, toRefs, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-
 interface Props {
-  placement?: string;
+  placement?: 'right-start' | 'left-start';
   trigger?: string;
   delay?: number;
   interactive?: boolean;
   arrow?: boolean;
   offset?: number[];
 }
-
 const props = withDefaults(defineProps<Props>(), {
   placement: 'right-start',
   trigger: 'click',
   delay: 0,
   interactive: true,
   arrow: false,
-  offset: () => [-24, 0],
+  offset: () => [0, 0],
 });
 const { placement, trigger, delay, interactive, arrow, offset } = toRefs(props);
-
 const tippyInstance = ref();
 const focusWindow = ref();
 const { focused } = useFocusWithin(focusWindow);
