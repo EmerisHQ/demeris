@@ -49,7 +49,7 @@ import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmount
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { Step, UnstakeAction } from '@/types/actions';
 
@@ -92,12 +92,12 @@ export default defineComponent({
     });
 
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
     const chainName = ref<string>(propsRef.validator.value.chain_name);
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );

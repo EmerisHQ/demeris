@@ -227,7 +227,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { event, pageview } from '@/utils/analytics';
@@ -338,21 +338,21 @@ export default {
     const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
     const precisionA = computed(
       () =>
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: reserveBaseDenoms.value[isReverse.value ? 1 : 0],
         }) || 6,
     );
     const precisionB = computed(
       () =>
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: reserveBaseDenoms.value[isReverse.value ? 0 : 1],
         }) || 6,
     );
 
     const precisionDiff = computed(() => {
       return (
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[0] }) -
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[1] })
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[0] }) -
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[1] })
       );
     });
 
@@ -365,7 +365,7 @@ export default {
     });
 
     const dexChain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      return store.getters[GlobalGetterTypes.API.getDexChain];
     });
 
     // TODO: Fetch from API the wallet available amount
@@ -387,7 +387,7 @@ export default {
       }
 
       const precision =
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6;
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6;
       const amount = new BigNumber(state.amount || 0).shiftedBy(precision);
       const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
@@ -399,8 +399,8 @@ export default {
         return false;
       }
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
 
       if (!priceA || !priceB) {
         return false;
@@ -458,10 +458,10 @@ export default {
         return;
       }
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
+      const priceA = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
       total = total.plus(new BigNumber(priceA).multipliedBy(state.receiveAmounts.coinA.amount));
 
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
+      const priceB = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
       total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
       state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
@@ -479,8 +479,8 @@ export default {
 
       const isReverse = reserveBalances.value[0].base_denom !== reserveBaseDenoms.value[0];
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
 
       const totalA = new BigNumber(reserveBalances.value[isReverse ? 1 : 0].amount)
         .multipliedBy(priceA)
@@ -646,8 +646,7 @@ export default {
       () => {
         if (state.isMaximumAmountChecked && state.selectedAsset) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) ||
-            6;
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6;
           const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount);
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 

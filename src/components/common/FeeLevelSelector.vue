@@ -28,49 +28,49 @@
       <button
         class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
-          gasPriceLevel === GasPriceLevel.LOW
+          gasPriceLevel === GasPriceLevel.Low
             ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
             : 'bg-fg font-normal'
         "
-        @click="gasPriceLevel = GasPriceLevel.LOW"
+        @click="gasPriceLevel = GasPriceLevel.Low"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          <CurrencyDisplay :value="fees[GasPriceLevel.LOW]" prevent-zero />
+          <CurrencyDisplay :value="fees[GasPriceLevel.Low]" prevent-zero />
         </div>
       </button>
       <button
         class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
-          gasPriceLevel === GasPriceLevel.AVERAGE
+          gasPriceLevel === GasPriceLevel.Average
             ? 'bg-brand dark:theme-inverse text-text font-medium'
             : 'bg-fg font-normal'
         "
-        @click="gasPriceLevel = GasPriceLevel.AVERAGE"
+        @click="gasPriceLevel = GasPriceLevel.Average"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          <CurrencyDisplay :value="fees[GasPriceLevel.AVERAGE]" prevent-zero />
+          <CurrencyDisplay :value="fees[GasPriceLevel.Average]" prevent-zero />
         </div>
       </button>
       <button
         class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
-          gasPriceLevel === GasPriceLevel.HIGH
+          gasPriceLevel === GasPriceLevel.High
             ? 'bg-brand dark:theme-inverse text-text font-medium'
             : 'bg-fg font-normal'
         "
-        @click="gasPriceLevel = GasPriceLevel.HIGH"
+        @click="gasPriceLevel = GasPriceLevel.High"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          <CurrencyDisplay :value="fees[GasPriceLevel.HIGH]" prevent-zero />
+          <CurrencyDisplay :value="fees[GasPriceLevel.High]" prevent-zero />
         </div>
       </button>
     </div>
 
     <Alert
-      v-if="gasPriceLevel === GasPriceLevel.LOW"
+      v-if="gasPriceLevel === GasPriceLevel.Low"
       status="warning"
       :message="$t('components.feeLevelSelector.slowWarning')"
       class="mt-4"
@@ -92,6 +92,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisFees } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -99,14 +100,8 @@ import { useStore } from 'vuex';
 import Alert from '@/components/ui/Alert.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
-import {
-  GlobalDemerisActionTypes,
-  GlobalDemerisGetterTypes,
-  RootStoreType,
-  TypedAPIStore,
-  TypedUSERStore,
-} from '@/store';
-import { GasPriceLevel, Step, SwapData } from '@/types/actions';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { Step, SwapData } from '@/types/actions';
 import { feeForSteps, getTicker } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -124,23 +119,22 @@ export default defineComponent({
   },
   emits: ['update:fees'],
   setup(props, { emit }) {
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
-    const libStore = useStore() as RootStoreType;
+    const store = useStore();
+    const typedstore = store as RootStoreTyped;
     const lowFee = ref({});
     const avgFee = ref({});
     const highFee = ref({});
     onMounted(async () => {
-      lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
-      avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
-      highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
+      lowFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.Low);
+      avgFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.Average);
+      highFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.High);
     });
     watch(
       () => props.steps,
       async () => {
-        lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
-        avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
-        highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
+        lowFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.Low);
+        avgFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.Average);
+        highFee.value = await feeForSteps(props.steps as Step[], EmerisFees.GasPriceLevel.High);
       },
     );
     const txCount = computed(() => {
@@ -155,10 +149,10 @@ export default defineComponent({
       for (const chain_name in lowFee.value) {
         for (const denom in lowFee.value[chain_name]) {
           const precision =
-            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? 6;
+          const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(lowFee.value[chain_name][denom])
@@ -176,10 +170,10 @@ export default defineComponent({
       for (const chain_name in avgFee.value) {
         for (const denom in avgFee.value[chain_name]) {
           const precision =
-            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? 6;
+          const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(avgFee.value[chain_name][denom])
@@ -196,10 +190,10 @@ export default defineComponent({
       for (const chain_name in highFee.value) {
         for (const denom in highFee.value[chain_name]) {
           const precision =
-            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? 6;
+          const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(highFee.value[chain_name][denom])
@@ -213,9 +207,9 @@ export default defineComponent({
     });
     const fees = computed(() => {
       const fees = {};
-      fees[GasPriceLevel.LOW] = lowFeeUSD.value;
-      fees[GasPriceLevel.AVERAGE] = avgFeeUSD.value;
-      fees[GasPriceLevel.HIGH] = highFeeUSD.value;
+      fees[EmerisFees.GasPriceLevel.Low] = lowFeeUSD.value;
+      fees[EmerisFees.GasPriceLevel.Average] = avgFeeUSD.value;
+      fees[EmerisFees.GasPriceLevel.High] = highFeeUSD.value;
       return fees;
     });
 
@@ -241,11 +235,11 @@ export default defineComponent({
         if (hasPoolCoinToSwap.value) {
           poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
-            apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            typedstore.getters[GlobalGetterTypes.API.getDexChain],
           );
           poolCoinDisplayDenoms.value[1] = await getTicker(
             swapTx.value.to.denom,
-            apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            typedstore.getters[GlobalGetterTypes.API.getDexChain],
           );
         }
       },
@@ -256,10 +250,10 @@ export default defineComponent({
       if (hasPoolCoinToSwap.value) {
         const swapFees = [];
         const swapFeeRate =
-          parseFloat(libStore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
+          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
         const tx = swapTx.value;
         const precision =
-          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
             name: tx.from.denom, //pool coin precision is same
           }) ?? 6;
         if (tx.from.denom.startsWith('pool')) {
@@ -280,18 +274,17 @@ export default defineComponent({
         let value = 0;
         const tx = swapTx.value;
         const swapFeeRate =
-          parseFloat(apistore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015;
+          parseFloat(typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ??
+          0.0015;
 
-        const fromPrecision =
-          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? '6';
-        const toPrecision =
-          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? '6';
-        const fromPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.from.denom });
-        const toPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.to.denom });
+        const fromPrecision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? 6;
+        const toPrecision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? 6;
+        const fromPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: tx.from.denom });
+        const toPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: tx.to.denom });
 
         value =
-          ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) ?? 0) +
-          ((toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision)) ?? 0);
+          ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, fromPrecision) ?? 0) +
+          ((toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, toPrecision) ?? 0);
         return value;
       } else {
         return null;
@@ -322,9 +315,9 @@ export default defineComponent({
     });
 
     const gasPriceLevel = computed({
-      get: () => apistore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
-      set: (level: GasPriceLevel) => {
-        userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
+      get: () => typedstore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
+      set: (level) => {
+        typedstore.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },
     });
 
@@ -334,15 +327,15 @@ export default defineComponent({
         data.isFeesOpen = !data.isFeesOpen;
       },
       gasPriceLevel,
-      GasPriceLevel,
+      GasPriceLevel: EmerisFees.GasPriceLevel,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     watch([fees, props], () => {
       const feeMap = {
-        [GasPriceLevel.LOW]: lowFee.value,
-        [GasPriceLevel.AVERAGE]: avgFee.value,
-        [GasPriceLevel.HIGH]: highFee.value,
+        [EmerisFees.GasPriceLevel.Low]: lowFee.value,
+        [EmerisFees.GasPriceLevel.Average]: avgFee.value,
+        [EmerisFees.GasPriceLevel.High]: highFee.value,
       };
       emit('update:fees', feeMap[gasPriceLevel.value]);
     });

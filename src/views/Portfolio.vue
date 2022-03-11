@@ -72,7 +72,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 
@@ -114,7 +114,7 @@ export default {
 
     const initialLoadComplete = computed(() => {
       if (featureRunning('REQUEST_PARALLELIZATION')) {
-        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+        return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
       } else {
         return true;
       }

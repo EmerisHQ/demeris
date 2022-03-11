@@ -1,38 +1,35 @@
+import { EmerisFees } from '@emeris/types';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { GasPriceLevel } from '@/types/actions';
+import { KeplrKeyData } from '@/types/user';
+import { Namespaced } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
 import { GetterTypes } from './getter-types';
-
-type Namespaced<T, N extends string> = {
-  [P in keyof T & string as `${N}/${P}`]: T[P];
-};
-import { KeplrKeyData } from './mutation-types';
-import { State } from './state';
+import { USERState } from './state';
 
 export type Getters = {
-  [GetterTypes.getKeplr](state: State): KeplrKeyData;
-  [GetterTypes.getGasLimit](state: State): number;
-  [GetterTypes.isSignedIn](state: State): boolean;
-  [GetterTypes.getKeyhashes](state: State): string[];
-  [GetterTypes.getCorrelationId](state: State): string;
-  [GetterTypes.getKeplrAccountName](state: State): string | null;
-  [GetterTypes.isDemoAccount](state: State): boolean;
-  [GetterTypes.hasSeenReedem](state: State): boolean;
-  [GetterTypes.viewUnverified](state: State): boolean;
-  [GetterTypes.viewLPAssetPools](state: State): boolean;
-  [GetterTypes.allowCustomSlippage](state: State): boolean;
-  [GetterTypes.getSlippagePerc](state: State): number;
+  [GetterTypes.getKeplr](state: USERState): KeplrKeyData;
+  [GetterTypes.getGasLimit](state: USERState): number;
+  [GetterTypes.isSignedIn](state: USERState): boolean;
+  [GetterTypes.getKeyhashes](state: USERState): string[];
+  [GetterTypes.getCorrelationId](state: USERState): string;
+  [GetterTypes.getKeplrAccountName](state: USERState): string | null;
+  [GetterTypes.isDemoAccount](state: USERState): boolean;
+  [GetterTypes.hasSeenReedem](state: USERState): boolean;
+  [GetterTypes.viewUnverified](state: USERState): boolean;
+  [GetterTypes.viewLPAssetPools](state: USERState): boolean;
+  [GetterTypes.allowCustomSlippage](state: USERState): boolean;
+  [GetterTypes.getSlippagePerc](state: USERState): number;
   [GetterTypes.getKeplrAddress](state): string;
-  [GetterTypes.theme](state: State): string;
-  [GetterTypes.getPreferredGasPriceLevel](state: State): GasPriceLevel;
+  [GetterTypes.theme](state: USERState): string;
+  [GetterTypes.getPreferredGasPriceLevel](state: USERState): EmerisFees.GasPriceLevel;
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisUSER'>;
 
-export const getters: GetterTree<State, RootState> & Getters = {
+export const getters: GetterTree<USERState, RootState> & Getters = {
   [GetterTypes.getKeplr]: (state) => {
     return state.keplr ?? null;
   },

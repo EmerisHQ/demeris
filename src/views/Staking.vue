@@ -94,7 +94,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -127,7 +127,7 @@ export default defineComponent({
     const inModal = ref(undefined);
     const store = useStore();
     const chain_name = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
+      store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
     );
 
     watch(

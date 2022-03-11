@@ -62,7 +62,7 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
@@ -118,9 +118,7 @@ export default defineComponent({
     });
 
     const stakingBalances = computed(() => {
-      return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
-      );
+      return stakingBalancesByChain(store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }));
     });
     const getStakingBalance = (address) => {
       return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;

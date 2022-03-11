@@ -107,7 +107,7 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
@@ -120,11 +120,10 @@ export default defineComponent({
     const router = useRouter();
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
+    const typedstore = useStore() as RootStoreTyped;
 
     pageview({ page_title: 'Redeem', page_path: '/redeem' });
-    userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+    typedstore.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
@@ -141,12 +140,12 @@ export default defineComponent({
             let balance = { ...newBalance };
             balance.hops = [];
             const verifyTrace =
-              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
                 chain_name: balance.on_chain,
                 hash: balance.ibc.hash,
               }) ??
-              (await apistore.dispatch(
-                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              (await typedstore.dispatch(
+                GlobalActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
@@ -181,7 +180,7 @@ export default defineComponent({
     };
 
     const getRoute = (hash, chain_name) => {
-      const verifyTrace = apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+      const verifyTrace = typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
         chain_name,
         hash,
       });

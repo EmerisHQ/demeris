@@ -43,8 +43,8 @@
 import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { typedstore } from '@/store/setup';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -58,12 +58,12 @@ export default defineComponent({
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
 
     const getAllAirdrops = async () => {
-      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+      gitAirdropsList.value = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {
         subscribe: false,
       });
 
       gitAirdropsList.value.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+        typedstore.dispatch(GlobalActionTypes.API.GET_AIRDROPS, {
           subscribe: false,
           params: {
             airdropFileName: item.name,
@@ -79,7 +79,7 @@ export default defineComponent({
     });
 
     const airdrops = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
     return {

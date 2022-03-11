@@ -1,167 +1,136 @@
 import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { OfflineSigner } from '@cosmjs/proto-signing';
+import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { SpVuexError } from '@starport/vuex';
-import { ActionContext, ActionTree } from 'vuex';
+import { ActionTree, DispatchOptions } from 'vuex';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
-import { GasPriceLevel } from '@/types/actions';
-import { Amount } from '@/types/base';
+import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
+import { SessionParams } from '@/types/user';
+import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
-import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
+import { USERStore } from '.';
+import { ActionTypes } from './action-types';
 import { demoAccount } from './demo-account';
-import { DemerisMutationTypes, UserData } from './mutation-types';
-import { ChainData, State } from './state';
+import { MutationTypes } from './mutation-types';
+import { USERState } from './state';
 
-type Namespaced<T, N extends string> = {
-  [P in keyof T & string as `${N}/${P}`]: T[P];
+type walletActions = 'common/wallet/signIn';
+type walletDispatch = {
+  dispatch<K extends walletActions>(key: K, payload?: { keplr: OfflineSigner }, options?: DispatchOptions): void;
 };
-export type DemerisConfig = {
-  endpoint: string;
-  wsEndpoint?: string;
-  refreshTime?: number;
-  hub_chain?: string;
-  gas_limit?: number;
+type UserActionContext = {
+  dispatch: Pick<USERStore<USERState>, 'dispatch'>['dispatch'] &
+    Pick<RootStoreTyped, 'dispatch'>['dispatch'] &
+    walletDispatch['dispatch'];
+  commit: Pick<USERStore<USERState>, 'commit'>['commit'];
+  state: USERState;
+  getters: Pick<USERStore<USERState>, 'getters'>['getters'];
+  rootState: RootState;
+  rootGetters: Pick<RootStoreTyped, 'getters'>['getters'];
 };
-export type DemerisTxParams = {
-  tx: string;
-  chain_name: string;
-  address: string;
+export type Subscription<K extends keyof Actions> = {
+  action: K;
+  payload?: Parameters<Actions[K]>[1];
 };
-export type DemerisTxResultParams = {
-  height: number;
-  stepType: string;
-};
-export type GasFee = {
-  amount: Array<Amount>;
-  gas: string;
-};
-
-export type DemerisSignParams = {
-  msgs: Array<EncodeObject>;
-  chain_name: string;
-  fee: GasFee;
-  registry: Registry;
-  memo?: string;
-};
-export type DemerisSessionParams = {
-  data: UserData;
-};
-export type TicketResponse = {
-  ticket: string;
-};
+export type Subscriptions = Subscription<keyof Actions>;
 export interface Actions {
-  [DemerisActionTypes.REDEEM_GET_HAS_SEEN]({ commit, getters }: ActionContext<State, RootState>): Promise<boolean>;
-  [DemerisActionTypes.REDEEM_SET_HAS_SEEN](
-    { commit, getters }: ActionContext<State, RootState>,
-    seen: boolean,
-  ): Promise<void>;
-  [DemerisActionTypes.BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
-  [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
-  [DemerisActionTypes.SET_SESSION_DATA](
-    { commit, getters, state }: ActionContext<State, RootState>,
-    { data: UserData }: DemerisSessionParams,
-  ): Promise<void>;
-  [DemerisActionTypes.LOAD_SESSION_DATA](
-    { commit, getters }: ActionContext<State, RootState>,
+  [ActionTypes.REDEEM_GET_HAS_SEEN](context: UserActionContext): Promise<boolean>;
+  [ActionTypes.REDEEM_SET_HAS_SEEN](context: UserActionContext, seen: boolean): Promise<void>;
+  [ActionTypes.BALANCES_LOADED](context: UserActionContext): Promise<void>;
+  [ActionTypes.STAKING_BALANCES_LOADED](context: UserActionContext): Promise<void>;
+  [ActionTypes.PRICES_LOADED](context: UserActionContext): Promise<void>;
+  [ActionTypes.SET_SESSION_DATA](context: UserActionContext, { data: UserData }: SessionParams): Promise<void>;
+  [ActionTypes.LOAD_SESSION_DATA](
+    context: UserActionContext,
     { walletName, isDemoAccount }: { walletName: string; isDemoAccount: boolean },
   ): Promise<void>;
-  [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
-  [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({
-    commit,
-    getters,
-    dispatch,
-  }: ActionContext<State, RootState>): Promise<boolean>;
+  [ActionTypes.SIGN_IN](context: UserActionContext): Promise<boolean>;
+  [ActionTypes.SIGN_IN_WITH_WATCHER](context: UserActionContext): Promise<boolean>;
   // Internal module actions
-  [DemerisActionTypes.SET_GAS_LIMIT](
-    { commit }: ActionContext<State, RootState>,
-    { gasLimit }: { gasLimit: number },
-  ): Promise<void>;
-  [DemerisActionTypes.SIGN_OUT]({ state, commit, dispatch }: ActionContext<State, RootState>): Promise<void>;
-  [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
-  [DemerisActionTypes.UNSUBSCRIBE](
-    { commit }: ActionContext<State, RootState>,
-    subscription: DemerisSubscriptions,
-  ): void;
-  [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }: ActionContext<State, RootState>): void;
+  [ActionTypes.SET_GAS_LIMIT](context: UserActionContext, { gasLimit }: { gasLimit: number }): Promise<void>;
+  [ActionTypes.SIGN_OUT](context: UserActionContext): Promise<void>;
+  [ActionTypes.RESET_STATE](context: UserActionContext): void;
+  [ActionTypes.UNSUBSCRIBE](context: UserActionContext, subscription: Subscriptions): void;
+  [ActionTypes.STORE_UPDATE](context: UserActionContext): void;
 }
 
 export type GlobalActions = Namespaced<Actions, 'demerisUSER'>;
 
-export const actions: ActionTree<State, RootState> & Actions = {
-  async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
+export const actions: ActionTree<USERState, RootState> & Actions = {
+  async [ActionTypes.REDEEM_GET_HAS_SEEN]() {
     const redeem = window.localStorage.getItem('redeem');
     return redeem === 'true' ? true : false;
   },
-  async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
+  async [ActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
     seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
   },
-  async [DemerisActionTypes.PRICES_LOADED]({ commit }) {
-    commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, false);
+  async [ActionTypes.PRICES_LOADED]({ commit }) {
+    commit(MutationTypes.SET_PRICES_FIRST_LOAD, false);
   },
-  async [DemerisActionTypes.BALANCES_LOADED]({ commit }) {
-    commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, false);
+  async [ActionTypes.BALANCES_LOADED]({ commit }) {
+    commit(MutationTypes.SET_BALANCES_FIRST_LOAD, false);
   },
-  async [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }) {
-    commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, false);
+  async [ActionTypes.STAKING_BALANCES_LOADED]({ commit }) {
+    commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, false);
   },
-  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
+  async [ActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
     if (data) {
       const newData = { ...JSON.parse(data), updateDT: Date.now() };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
-      commit('SET_SESSION_DATA', newData);
+      commit(MutationTypes.SET_SESSION_DATA, newData);
     } else {
       const newData = {
         customSlippage: false,
         viewUnverified: false,
         viewLPAssetPools: false,
-        gasPriceLevel: GasPriceLevel.AVERAGE,
+        gasPriceLevel: EmerisFees.GasPriceLevel.Average,
         hasSeenRedeem: false,
         slippagePerc: 0.1,
         updateDT: Date.now(),
         isDemoAccount,
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
-      commit('SET_SESSION_DATA', newData);
+      commit(MutationTypes.SET_SESSION_DATA, newData);
     }
-    commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
+    commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.SET_SESSION_DATA, payload: { data: null } });
   },
-  async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
+  async [ActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: SessionParams) {
     if (data) {
       window.localStorage.setItem(
         getters['getKeplrAccountName'],
         JSON.stringify({ ...state._Session, ...data, updateDT: Date.now() }),
       );
-      commit('SET_SESSION_DATA', { ...data, updateDT: Date.now() });
+      commit(MutationTypes.SET_SESSION_DATA, { ...data, updateDT: Date.now() });
     } else {
       window.localStorage.setItem(
         getters['getKeplrAccountName'],
         JSON.stringify({ ...state._Session, updateDT: Date.now() }),
       );
-      commit('SET_SESSION_DATA', { updateDT: Date.now() });
+      commit(MutationTypes.SET_SESSION_DATA, { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
+  async [ActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
-      await dispatch(DemerisActionTypes.SIGN_OUT);
+      await dispatch(ActionTypes.SIGN_OUT);
       // Prior to signing in with a new account we must SIGN_OUT to remove all account related data from the store
       // i.e. balances/staking_balances/subscriptions to those endpoints etc.
       // We could call global reset_state but then we'd have to reload all non user-specific data (pools, chains, denoms etc.)
-      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
-      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
-      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_PRICES_FIRST_LOAD, true);
       // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
       // This status is used for displaying skeleton loaders appropriately
 
       const isCypress = !!window['Cypress'];
       const chains =
-        rootGetters[GlobalDemerisGetterTypes.API.getChains] ??
+        rootGetters[GlobalGetterTypes.API.getChains] ??
         (await dispatch(
-          GlobalDemerisActionTypes.API.GET_CHAINS,
+          GlobalActionTypes.API.GET_CHAINS,
           {
             subscribe: false,
           },
@@ -170,7 +139,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       for (const chain in chains) {
         if (!chains[chain].node_info)
           chains[chain] = await dispatch(
-            GlobalDemerisActionTypes.API.GET_CHAIN,
+            GlobalActionTypes.API.GET_CHAIN,
             {
               subscribe: true,
               params: {
@@ -195,7 +164,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
           await addChain(chain);
         }
 
-        await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
+        await window.keplr['enable'](
+          (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id),
+        );
       }
       const paths = new Set();
       const toQuery = [];
@@ -207,8 +178,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
         paths.add(chain.derivation_path);
         toQuery.push(chain);
       }
-      const dexchain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
-        chain_name: rootGetters[GlobalDemerisGetterTypes.API.getDexChain],
+      const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
+        chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
       });
       let keyData;
       let signer;
@@ -230,17 +201,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
           address: fromHexString(keyHashfromAddress(account.address)),
         };
       }
-      commit(DemerisMutationTypes.SET_CORRELATION_ID, keyHashfromAddress(keyData.bech32Address));
-      commit(DemerisMutationTypes.SET_KEPLR, keyData);
+      commit(MutationTypes.SET_CORRELATION_ID, keyHashfromAddress(keyData.bech32Address));
+      commit(MutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
       analyticsConfig({ user_id: keyHashfromAddress(keyData.bech32Address) });
 
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
+      await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
         if (!isCypress) {
           await window.keplr.enable(chain.node_info.chain_id);
           const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {
           const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
             prefix: chain.node_info.bech32_config.main_prefix,
@@ -255,7 +226,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
             isNanoLedger: false,
             address: fromHexString(keyHashfromAddress(account.address)),
           };
-          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         }
       }
 
@@ -263,67 +234,55 @@ export const actions: ActionTree<State, RootState> & Actions = {
         ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
         : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
 
-      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
-      dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
-      dispatch(
-        GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
-        {
-          subscribe: true,
-        },
-        { root: true },
-      );
+      dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_STAKING_BALANCES, undefined, { root: true });
       return true;
     } catch (e) {
       console.error(e);
       return false;
     }
   },
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
+  async [ActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
-      await dispatch(DemerisActionTypes.SIGN_OUT);
-      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
-      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
-      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
+      await dispatch(ActionTypes.SIGN_OUT);
+      commit(MutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_PRICES_FIRST_LOAD, true);
       const key = demoAccount;
-      commit(DemerisMutationTypes.SET_KEPLR, { ...key });
+      commit(MutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
+        commit(MutationTypes.ADD_KEPLR_KEYHASH, hash);
       }
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
+      await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
-      commit(DemerisMutationTypes.SET_CORRELATION_ID, keyHashfromAddress(key.bech32Address));
+      commit(MutationTypes.SET_CORRELATION_ID, keyHashfromAddress(key.bech32Address));
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
       analyticsConfig({ user_id: keyHashfromAddress(key.bech32Address) });
-      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
-      dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
-      dispatch(
-        GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
-        {
-          subscribe: true,
-        },
-        { root: true },
-      );
+      dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_STAKING_BALANCES, undefined, { root: true });
       return true;
     } catch (e) {
       return false;
     }
   },
-  async [DemerisActionTypes.SET_GAS_LIMIT]({ commit }, { gasLimit }: { gasLimit: number }) {
+  async [ActionTypes.SET_GAS_LIMIT]({ commit }, { gasLimit }: { gasLimit: number }) {
     try {
-      commit('SET_GAS_LIMIT', { value: gasLimit });
+      commit(MutationTypes.SET_GAS_LIMIT, { value: gasLimit });
     } catch (e) {
       throw new SpVuexError('Demeris:SetGasLimit', 'Could not set Gas Limit');
     }
   },
-  [DemerisActionTypes.RESET_STATE]({ commit }) {
-    commit(DemerisMutationTypes.RESET_STATE);
+  [ActionTypes.RESET_STATE]({ commit }) {
+    commit(MutationTypes.RESET_STATE);
   },
-  async [DemerisActionTypes.SIGN_OUT]({ state, commit, dispatch }) {
-    await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
+  async [ActionTypes.SIGN_OUT]({ state, commit, dispatch }) {
+    await dispatch(GlobalActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
     event('sign_out', { event_label: 'Signed out', event_category: 'authentication' });
-    commit(DemerisMutationTypes.SIGN_OUT);
+    commit(MutationTypes.SIGN_OUT);
   },
-  [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
+  [ActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach(async (subscription_json) => {
       const subscription = JSON.parse(subscription_json);
       try {
@@ -333,7 +292,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
     });
   },
-  [DemerisActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
-    commit('UNSUBSCRIBE', subscription);
+  [ActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
+    commit(MutationTypes.UNSUBSCRIBE, subscription);
   },
 };

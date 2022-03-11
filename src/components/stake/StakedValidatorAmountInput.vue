@@ -46,7 +46,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { GlobalGetterTypes, RootStoreType } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
@@ -74,7 +74,7 @@ export default defineComponent({
     const store = useStore() as RootStoreType;
 
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
     const stakingDenom = computed(() => {
       return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;

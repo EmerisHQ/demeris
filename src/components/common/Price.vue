@@ -12,7 +12,7 @@ import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 
@@ -51,12 +51,12 @@ export default defineComponent({
     const price = ref();
 
     const priceObserver = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value });
+      return store.getters[GlobalGetterTypes.API.getPrice]({ denom: denom.value });
     });
 
     const displayPrice = computed(() => {
       const precision =
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: denom.value,
         }) ?? '6';
       let value;

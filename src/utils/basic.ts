@@ -4,9 +4,8 @@ import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 import findIndex from 'lodash/findIndex';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
-import { Chain } from '@/types/api';
 import { useStore } from '@/utils/useStore';
 
 export function fromHexString(hexString) {
@@ -20,11 +19,11 @@ export function toHexString(byteArray) {
     .join('');
 }
 export function getChainFromRecipient(recipient: string) {
-  const apistore = useStore() as TypedAPIStore;
+  const typedstore = useStore() as RootStoreTyped;
   const prefix = bech32.decode(recipient).prefix;
   return (
-    (Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]) as Chain[]).find(
-      (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
+    Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]).find(
+      (x) => x.node_info.bech32_config.prefix_account == prefix,
     )?.chain_name ?? null
   );
 }
@@ -47,12 +46,11 @@ export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
 }
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
-  const userstore = useStore() as TypedUSERStore;
-  const apistore = useStore() as TypedAPIStore;
-  if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
+  const typedstore = useStore() as RootStoreTyped;
+  if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
+    const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
         prefix: chain.node_info.bech32_config.main_prefix,

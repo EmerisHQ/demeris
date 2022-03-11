@@ -101,7 +101,7 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 export default defineComponent({
@@ -146,7 +146,7 @@ export default defineComponent({
         if (props.selectedDenom?.base_denom) {
           displayName.value = await getDisplayName(
             props.selectedDenom.base_denom,
-            useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+            useStore().getters[GlobalGetterTypes.API.getDexChain],
           );
         }
       },

@@ -223,7 +223,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
@@ -251,7 +251,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     /* variables */
     const selectedTab = ref<number>(1);
     const assetStakingAPY = ref<number | string>('-');
@@ -260,7 +260,7 @@ export default defineComponent({
     const propsRef = toRefs(props);
 
     const chain_name = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+      store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
     );
     watch(
       () => chain_name.value,
@@ -275,18 +275,18 @@ export default defineComponent({
 
     /* computeds */
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
     const assetPrecision = computed(() => {
       return (
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: propsRef.denom.value,
-        }) ?? '6'
+        }) ?? 6
       );
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+        store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
     });
     const getTimeToString = (isodate: string) => {
@@ -294,15 +294,15 @@ export default defineComponent({
     };
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+        store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
     const operator_prefix = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
+        chain_name: store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({
           denom: propsRef.denom.value,
         }),
-      }).val_addr;
+      }).node_info.bech32_config.val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
       const total = new BigNumber(totalRewardsAmount.value).plus(

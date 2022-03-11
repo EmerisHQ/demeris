@@ -385,7 +385,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import {
   AddLiquidityData,
   CreatePoolData,
@@ -599,14 +599,14 @@ export default defineComponent({
                   props.txResult.demandCoinSwappedAmount /
                   Math.pow(
                     10,
-                    store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                       name: sendBaseDenom.value,
                     }),
                   );
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
-                    store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    store.getters[GlobalGetterTypes.API.getDexChain],
                   ),
                 });
               } else {

@@ -30,7 +30,7 @@ import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 export default defineComponent({
   name: 'StakingBanner',
   components: {
@@ -54,7 +54,7 @@ export default defineComponent({
     const apr = ref<string>('');
 
     const chain_name = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.baseDenom.value }),
+      store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.baseDenom.value }),
     );
     watch(
       chain_name,

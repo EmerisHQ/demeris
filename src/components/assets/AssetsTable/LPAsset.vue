@@ -12,7 +12,7 @@ import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { VerifiedDenoms } from '@/types/api';
 
 export default defineComponent({
@@ -30,7 +30,7 @@ export default defineComponent({
     const store = useStore();
     const propsRef = toRefs(props);
     const verifiedDenoms = computed<VerifiedDenoms>(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
     const validPool = computed(() => {
       return verifiedDenoms.value.find((x) => x.name == propsRef.name.value) ?? false;

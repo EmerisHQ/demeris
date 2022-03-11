@@ -159,7 +159,7 @@
           size="sm"
           :tooltip-text="
             $t('context.transactions.controls.waitingTransactionTooltip', {
-              chain: globalStore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chainName }),
+              chain: globalStore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chainName }),
             })
           "
           disabled
@@ -192,7 +192,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 

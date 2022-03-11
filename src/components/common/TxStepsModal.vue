@@ -264,6 +264,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -289,17 +290,10 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
-import {
-  GlobalDemerisActionTypes,
-  GlobalDemerisGetterTypes,
-  TypedAPIStore,
-  TypedTXStore,
-  TypedUSERStore,
-} from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import {
   CreatePoolData,
   FeeTotals,
-  GasPriceLevel,
   IBCBackwardsData,
   IBCForwardsData,
   Step,
@@ -307,7 +301,6 @@ import {
   TransferData,
   WithdrawLiquidityData,
 } from '@/types/actions';
-import { Balances } from '@/types/api';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -364,23 +357,21 @@ export default defineComponent({
   setup(props, { emit }) {
     const emitter = useEmitter();
 
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
-    const txstore = useStore() as TypedTXStore;
+    const typedstore = useStore() as RootStoreTyped;
 
     const { t } = useI18n({ useScope: 'global' });
 
-    const gasPriceLevel = computed(() => userstore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => typedstore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel]);
 
     const isSignedIn = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return typedstore.getters[GlobalGetterTypes.USER.isSignedIn];
     });
     const interstitialProceed = ref(false);
     const chainsStatus = ref({ status: true, failed: [], relayer: true });
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
-          apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+          typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
             name: x,
           }),
         )
@@ -443,7 +434,7 @@ export default defineComponent({
       chainsStatus.value = await chainStatusForSteps(props.data);
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
-          return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+          return await feeForStep(step, gasPriceLevel.value);
         }),
       );
     });
@@ -504,7 +495,7 @@ export default defineComponent({
             });
             const fee =
               parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[gasPriceLevel.value]) *
-              userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit];
+              typedstore.getters[GlobalGetterTypes.USER.getGasLimit];
             const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
             if (baseDenomBalance) {
               const amount = parseCoins(baseDenomBalance.amount)[0];
@@ -527,7 +518,7 @@ export default defineComponent({
           chainsStatus.value = await chainStatusForSteps(newData);
           fees.value = await Promise.all(
             (newData as Step[])?.map(async (step) => {
-              return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+              return await feeForStep(step, gasPriceLevel.value);
             }),
           );
         }
@@ -598,7 +589,7 @@ export default defineComponent({
     watch(
       () => fees.value,
       async (newData) => {
-        const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
+        const toCheckBalances: EmerisAPI.Balances = JSON.parse(JSON.stringify(balances.value));
         if (currentStep.value == 0) {
           if (feeWarning.value.feeWarning) {
             feeWarning.value = await validateStepsFeeBalances(
@@ -632,7 +623,7 @@ export default defineComponent({
       },
     );
     const isDemoAccount = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return typedstore.getters[GlobalGetterTypes.USER.isDemoAccount];
     });
     const confirm = async () => {
       if (isDemoAccount.value) {
@@ -694,12 +685,12 @@ export default defineComponent({
                   {
                     amount:
                       '' +
-                      parseFloat(feeOptions[0].amount[gasPriceLevel.value as GasPriceLevel]) *
-                        userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+                      parseFloat(feeOptions[0].amount[gasPriceLevel.value]) *
+                        typedstore.getters[GlobalGetterTypes.USER.getGasLimit],
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '' + userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+                gas: '' + typedstore.getters[GlobalGetterTypes.USER.getGasLimit],
               };
               let tx;
               event('confirm_tx', {
@@ -709,7 +700,7 @@ export default defineComponent({
               //for supporting multi msgs
 
               try {
-                tx = await txstore.dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
+                tx = await typedstore.dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
                   msgs: res.msg,
                   chain_name: res.chain_name,
                   fee,
@@ -736,7 +727,7 @@ export default defineComponent({
                 let result;
                 try {
                   await ensureTraceChannel(stepTx);
-                  result = await txstore.dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, tx);
+                  result = await typedstore.dispatch(GlobalActionTypes.TX.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
@@ -751,7 +742,7 @@ export default defineComponent({
                   continue;
                 }
                 try {
-                  let txResultData = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+                  let txResultData = await typedstore.dispatch(GlobalActionTypes.API.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
@@ -772,7 +763,7 @@ export default defineComponent({
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
                   ) {
-                    txResultData = await apistore.getters[GlobalDemerisGetterTypes.API.getTxStatus]({
+                    txResultData = await typedstore.getters[GlobalGetterTypes.API.getTxStatus]({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
@@ -829,7 +820,7 @@ export default defineComponent({
                       let retries = 0;
                       while (retries < 10) {
                         try {
-                          endBlockEvent = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
+                          endBlockEvent = await typedstore.dispatch(GlobalActionTypes.API.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentDataRaw.data.name,
                           });

@@ -122,7 +122,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -174,7 +174,7 @@ export default defineComponent({
 
     //for receive coin chain_name(always cosmos hub)
     const dexChainName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      return store.getters[GlobalGetterTypes.API.getDexChain];
     });
 
     // minReceivedAmount & limit price
@@ -217,7 +217,7 @@ export default defineComponent({
             ((1 / Number(swapPrice)) *
               Number(
                 10 **
-                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                     name: fromCoinBaseDenom.value,
                   }),
               ) *
@@ -231,7 +231,7 @@ export default defineComponent({
 
     //user slippage tolerance
     const slippageTolerance = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
+      return store.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5;
     });
 
     const payCoinChainName = ref('');
@@ -239,19 +239,19 @@ export default defineComponent({
       () => data.value.from.denom,
       async () => {
         if (isNative(data.value.from.denom)) {
-          payCoinChainName.value = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+          payCoinChainName.value = store.getters[GlobalGetterTypes.API.getDexChain];
         } else {
           const verifyTrace =
-            store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-              chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+              chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
               hash: data.value.from.denom.split('/')[1],
             }) ??
             (await store.dispatch(
-              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              GlobalActionTypes.API.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                  chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                   hash: data.value.from.denom.split('/')[1],
                 },
               },
@@ -265,7 +265,7 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[store.getters[GlobalDemerisGetterTypes.API.getDexChain]]['uatom'];
+      return props.fees[store.getters[GlobalGetterTypes.API.getDexChain]]['uatom'];
     });
 
     const size = props.context === 'default' ? 'md' : 'sm';

@@ -110,7 +110,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -160,7 +160,7 @@ export default defineComponent({
     const store = useStore();
     const denomName = ref('-');
 
-    const gasPriceLevel = computed(() => store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel]);
 
     const currentStep = computed(() => {
       return props.response || props.step;
@@ -207,7 +207,7 @@ export default defineComponent({
         fromAmount = (
           parseInt(fromAmount) +
           parseFloat(firstTransaction.feeToAdd[0].amount[gasPriceLevel.value]) *
-            store.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
+            store.getters[GlobalGetterTypes.USER.getGasLimit]
         ).toString();
       }
       const from = {
@@ -237,13 +237,13 @@ export default defineComponent({
     });
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      const getName = (name: string) => store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
 
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      return 'Fees on ' + store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
     };
 
     const truncateAddress = (address: string) => {

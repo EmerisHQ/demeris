@@ -63,7 +63,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import SwitchValidatorAmount from '@/components/stake/SwitchForm/SwitchValidatorAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { RestakeAction, RestakeForm } from '@/types/actions';
 import { event } from '@/utils/analytics';
@@ -109,7 +109,7 @@ export default defineComponent({
 
     const propsRef = toRefs(props);
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
@@ -118,7 +118,7 @@ export default defineComponent({
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: RestakeForm = reactive({
@@ -139,7 +139,7 @@ export default defineComponent({
     };
 
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );

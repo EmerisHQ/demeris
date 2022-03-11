@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import {
   CreatePoolData,
   IBCBackwardsData,
@@ -47,7 +47,7 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
-  const dexChain = useStore().getters[GlobalDemerisGetterTypes.API.getDexChain];
+  const dexChain = useStore().getters[GlobalGetterTypes.API.getDexChain];
 
   switch (transaction.name) {
     case 'transfer':
@@ -163,8 +163,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
   const stepTx = getCurrentTransaction(context);
 
   const getDisplayPrice = (denom: string, amount: string) => {
-    const price = useStore().getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom });
-    const precision = useStore().getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? '6';
+    const price = useStore().getters[GlobalGetterTypes.API.getPrice]({ denom: denom });
+    const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? '6';
 
     return (price * parseInt(amount)) / Math.pow(10, precision);
   };
@@ -292,8 +292,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
 
       const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
       const displayName =
-        useStore().getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)
-          ?.display_name ?? null;
+        useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)?.display_name ??
+        null;
 
       event('usd_volume', {
         event_label: 'Withdraw Liquidity USD volume',

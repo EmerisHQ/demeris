@@ -199,7 +199,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
@@ -222,7 +222,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const denoms = ref([]);
     pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
 
@@ -236,8 +236,8 @@ export default defineComponent({
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-      const coinA = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const coinB = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
+      const coinA = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
+      const coinB = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
       const all = coinA && coinB;
 
       return {
@@ -321,13 +321,13 @@ export default defineComponent({
       }
 
       const fromPrecision =
-        apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: reserveBalances.value[0].base_denom,
-        }) ?? '6';
+        }) ?? 6;
       const toPrecision =
-        apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: reserveBalances.value[1].base_denom,
-        }) ?? '6';
+        }) ?? 6;
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {

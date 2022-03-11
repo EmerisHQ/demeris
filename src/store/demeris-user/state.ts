@@ -1,6 +1,6 @@
 import * as API from '@/types/api';
+import { KeplrKeyData, UserData } from '@/types/user';
 
-import { KeplrKeyData, UserData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
@@ -15,7 +15,7 @@ export type TransactionItem = {
   reject: (reason?: Error) => void;
   promise: Promise<string>;
 };
-export type State = {
+export type USERState = {
   gas_limit: number;
   balancesFirstLoad: boolean;
   correlationId: string;
@@ -25,7 +25,7 @@ export type State = {
   _Subscriptions: Set<string>;
   _Session: UserData | Record<string, never>;
 };
-export function getDefaultState(): State {
+export function getDefaultState(): USERState {
   return {
     gas_limit: 500000,
     balancesFirstLoad: true,

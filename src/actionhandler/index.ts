@@ -1,4 +1,4 @@
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
 import { getNativeChain } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
@@ -14,8 +14,8 @@ import { transfer } from './actions/transfer';
 import { withdrawLiquidity } from './actions/withdrawLiquidity';
 
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
-  const libStore = useStore();
-  const store = libStore as RootStoreType;
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
 
   const steps = [];
   try {
@@ -96,7 +96,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
       case 'swap':
         params = (action as Actions.SwapAction).params;
 
-        const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+        const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
         const swapFee = {
           amount: Math.ceil((parseInt(params.from.amount.amount) * parseFloat(swapFeeRate)) / 2) + '',
           denom: params.from.amount.denom,
@@ -107,7 +107,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.from.amount.denom,
           },
           chain_name: params.from.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
         if (transferToHubStep.steps.length > 0) {
           steps.push({
@@ -142,7 +142,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHubCreate.steps.length) {
@@ -160,7 +160,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHubCreate.steps.length) {
@@ -191,7 +191,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHub.steps.length) {
@@ -209,7 +209,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHub.steps.length) {
@@ -241,7 +241,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.poolCoin.amount.denom,
           },
           chain_name: params.poolCoin.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
         if (transferPoolCointoHub.steps.length) {
           steps.push({

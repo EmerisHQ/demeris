@@ -34,8 +34,7 @@ import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
-import { TypedAPIStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { setStore } from '@/utils/useStore';
 
 import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
@@ -80,8 +79,7 @@ export default defineComponent({
       wsEndpoint = process.env.VUE_APP_EMERIS_DEV_WEBSOCKET_ENDPOINT;
     }
     setStore(store); // make store availabe in some composition functions used in the store itself
-    const apistore = store as TypedAPIStore;
-    const userstore = store as TypedUSERStore;
+    const typedstore = store as RootStoreTyped;
     const initialized = ref(false);
     const router = useRouter();
     const { pools: _pools } = usePoolsFactory();
@@ -95,37 +93,37 @@ export default defineComponent({
           gasLimit = 500000;
           window.localStorage.setItem('gasLimit', gasLimit.toString());
         }
-        await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
+        await typedstore.dispatch(GlobalActionTypes.API.INIT, {
           wsEndpoint: wsEndpoint,
           endpoint: emerisEndpoint,
           hub_chain: 'cosmos-hub',
           refreshTime: 5000,
         });
-        userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+        typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
           gasLimit: gasLimit,
         });
         try {
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_VERIFIED_DENOMS, {
             subscribe: true,
           });
         } catch (e) {
           console.error('Could not load verified denoms: ' + e);
         }
-        apistore
-          .dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
+        typedstore
+          .dispatch(GlobalActionTypes.API.GET_CHAINS, {
             subscribe: false,
           })
           .then((chains) => {
             for (let chain in chains) {
-              apistore
-                .dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+              typedstore
+                .dispatch(GlobalActionTypes.API.GET_CHAIN, {
                   subscribe: true,
                   params: {
                     chain_name: chain,
                   },
                 })
                 .then((chain) => {
-                  apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
+                  typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
                     subscribe: true,
                     params: {
                       chain_name: chain.chain_name,
@@ -168,8 +166,8 @@ export default defineComponent({
                 // in order to calculate the TVL of the pool and thus the token's price.
                 // Otherwise we'd have to wait 5 seconds till the next polling cycle leading
                 // to worse UX.
-                apistore
-                  .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
+                typedstore
+                  .dispatch(GlobalActionTypes.API.GET_PRICES, {
                     subscribe: true,
                   })
                   .catch((e) => {
@@ -186,19 +184,19 @@ export default defineComponent({
               });
           });
         if (autoLogin()) {
-          userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+          typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
         } else {
           if (autoLoginDemo()) {
-            userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+            typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
           }
         }
         window.addEventListener('keplr_keystorechange', async () => {
           window.localStorage.setItem('lastEmerisSession', '');
           if (
-            userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] &&
-            !userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+            typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
+            !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
           ) {
-            userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+            typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
           }
         });
 
@@ -217,36 +215,36 @@ export default defineComponent({
           gasLimit = 500000;
           window.localStorage.setItem('gasLimit', gasLimit.toString());
         }
-        await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
+        await typedstore.dispatch(GlobalActionTypes.API.INIT, {
           endpoint: emerisEndpoint,
           hub_chain: 'cosmos-hub',
           refreshTime: 5000,
         });
-        await userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+        await typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
           gasLimit: gasLimit,
         });
         status.value = t('appInit.status.assetLoading');
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+        await typedstore.dispatch(GlobalActionTypes.API.GET_VERIFIED_DENOMS, {
           subscribe: true,
         });
         status.value = t('appInit.status.chainLoading');
-        let chains = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
+        let chains = await typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS, {
           subscribe: false,
         });
         for (let chain in chains) {
           status.value = t('appInit.status.chainDetails', {
-            displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
+            displayChain: typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chain }),
           });
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
             subscribe: true,
             params: {
               chain_name: chain,
             },
           });
           status.value = t('appInit.status.chainStatus', {
-            displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
+            displayChain: typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chain }),
           });
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
             subscribe: true,
             params: {
               chain_name: chain,
@@ -277,7 +275,7 @@ export default defineComponent({
         }
         status.value = t('appInit.status.priceFetching');
         try {
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_PRICES, {
             subscribe: true,
           });
         } catch (e) {
@@ -285,19 +283,19 @@ export default defineComponent({
         }
         status.value = t('appInit.status.signingIn');
         if (autoLogin()) {
-          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+          await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
         } else {
           if (autoLoginDemo()) {
-            await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+            await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
           }
         }
         window.addEventListener('keplr_keystorechange', async () => {
           window.localStorage.setItem('lastEmerisSession', '');
           if (
-            userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] &&
-            !userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+            typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
+            !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
           ) {
-            await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+            await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
           }
         });
         initialized.value = true;

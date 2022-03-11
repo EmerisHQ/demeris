@@ -12,7 +12,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 
 import RedeemIcon from '@/components/common/Icons/RedeemIcon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'RedeemButton',
@@ -20,7 +20,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = store.getters[GlobalDemerisGetterTypes.API.getAllBalances];
+    const balances = store.getters[GlobalGetterTypes.API.getAllBalances];
     const redeemable = [];
     for (let balance of balances) {
       // TODO: check for redeemable

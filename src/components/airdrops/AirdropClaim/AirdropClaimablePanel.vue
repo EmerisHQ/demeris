@@ -35,7 +35,7 @@ import { useStore } from 'vuex';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'AirdropClaimablePanel',
@@ -51,17 +51,16 @@ export default defineComponent({
   },
   setup() {
     const theme = useTheme();
-    const apistore = useStore() as TypedAPIStore;
+    const apistore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      return toRaw(apistore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
     const isDemoAccountBanner = computed(() => {
       return (
-        !apistore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] ||
-        apistore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+        !apistore.getters[GlobalGetterTypes.USER.isSignedIn] || apistore.getters[GlobalGetterTypes.USER.isDemoAccount]
       );
     });
 

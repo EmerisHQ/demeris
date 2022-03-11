@@ -20,8 +20,7 @@ import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
 
@@ -39,13 +38,13 @@ export default defineComponent({
     size: { type: String, required: false, default: 'md' },
   },
   setup(props) {
-    const store = useStore() as RootStoreType;
+    const store = useStore() as RootStoreTyped;
     const propsRef = toRefs(props);
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
     });
     const stakingDenom = computed(() => {
-      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;
+      return chain.value?.denoms.find((x) => x.stakable) ?? null;
     });
     const stakingBalance = computed(() => {
       return propsRef.validator.value?.stakedAmount;

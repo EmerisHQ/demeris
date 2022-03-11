@@ -1,10 +1,10 @@
-import { RootStoreType } from '@/store';
+import { RootStoreTyped } from '@/store';
 import { Amount } from '@/types/base';
 import { useStore } from '@/utils/useStore';
 
 export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
   const libStore = useStore();
-  const store = libStore as RootStoreType;
+  const store = libStore as RootStoreTyped;
   const result = {
     steps: [],
     output: {

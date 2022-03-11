@@ -253,7 +253,7 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import ValidatorCard from '@/components/stake/ValidatorCard.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 
 enum ValStyle {
@@ -308,12 +308,12 @@ export default defineComponent({
     const propsRef = toRefs(props);
     /* preset variables */
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
         chain_name: propsRef.validatorList.value[0].chain_name,
       });
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
-    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
+    const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom });
     const detailedValidator = ref(null);
     /* variables */
     const keyword = ref<string>('');

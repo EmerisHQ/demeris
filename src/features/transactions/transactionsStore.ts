@@ -1,9 +1,9 @@
+import { EmerisAPI } from '@emeris/types';
 import { defineStore } from 'pinia';
 import { interpret } from 'xstate';
 
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Step } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { hashObject } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
@@ -116,7 +116,7 @@ export const useTransactionsStore = defineStore('transactions', {
     }: {
       action: string;
       steps: Step[];
-      balances: Balance[];
+      balances: EmerisAPI.Balance[];
       machine?: typeof transactionProcessMachine;
     }): [string, TransactionProcessService] {
       const globalStore = useStore();
@@ -166,8 +166,8 @@ export const useTransactionsStore = defineStore('transactions', {
         balances,
         action,
         steps,
-        gasPriceLevel: globalStore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
-        gasLimit: globalStore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+        gasPriceLevel: globalStore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
+        gasLimit: globalStore.getters[GlobalGetterTypes.USER.getGasLimit],
       });
 
       service.subscribe((state) => {

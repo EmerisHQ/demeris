@@ -168,7 +168,7 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -233,7 +233,7 @@ export default defineComponent({
     const currentLimit = ref(props.limitRows);
     const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
 
     const allBalances = computed<Balances>(() => {
@@ -270,7 +270,7 @@ export default defineComponent({
 
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-      const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+      const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
       const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
@@ -344,7 +344,7 @@ export default defineComponent({
     > = computed(() => {
       let balances = balancesWithValue.value;
       balances.map(async (b) => {
-        let name = await getDisplayName(b.denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
+        let name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
         (b as any).name = name;
       });
       return balances;
@@ -364,7 +364,7 @@ export default defineComponent({
     const getUnavailableChains = (asset) => {
       const result = {};
       const statusMap = asset.chainsNames.reduce((acc, chain) => {
-        acc[chain] = store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
+        acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
         return acc;
       }, {});
 
@@ -401,8 +401,8 @@ export default defineComponent({
     });
 
     const getMarketCap = (denom: string) => {
-      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
-      const supply = store.getters[GlobalDemerisGetterTypes.API.getSupply]({ denom });
+      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+      const supply = store.getters[GlobalGetterTypes.API.getSupply]({ denom });
       let marketCap = price * supply;
       return marketCap;
     };

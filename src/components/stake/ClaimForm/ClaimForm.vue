@@ -37,7 +37,7 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { ClaimRewardsAction } from '@/types/actions';
 import { event } from '@/utils/analytics';
@@ -78,13 +78,13 @@ export default defineComponent({
 
     const propsRef = toRefs(props);
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const step = computed({
@@ -97,7 +97,7 @@ export default defineComponent({
     };
     onMounted(async () => {
       const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-      const chainName = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
+      const chainName = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
       const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
         reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
         return reward;

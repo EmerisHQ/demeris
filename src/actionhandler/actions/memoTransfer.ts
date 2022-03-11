@@ -1,4 +1,4 @@
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
 import { generateDenomHash, getChannel, isNative } from '@/utils/basic';
@@ -15,7 +15,7 @@ export async function memoTransfer({
   destination_chain_name: string;
   to_address: string;
 }) {
-  const apistore = useStore() as TypedAPIStore;
+  const typedstore = useStore() as RootStoreTyped;
   const result = {
     steps: [],
     mustAddFee: false,
@@ -41,21 +41,12 @@ export async function memoTransfer({
       });
       return result;
     } else {
-      if (apistore.getters[GlobalDemerisGetterTypes.API.isVerified]({ denom: amount.denom, chain_name })) {
+      if (typedstore.getters[GlobalGetterTypes.API.isVerified]({ denom: amount.denom, chain_name })) {
         // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
-        const primaryChannel =
-          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-            chain_name: chain_name,
-            destination_chain_name: destination_chain_name,
-          }) ??
-          (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-            {
-              subscribe: true,
-              params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
-            },
-            { root: true },
-          ));
+        const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+          chain_name: chain_name,
+          destination_chain_name: destination_chain_name,
+        });
         result.steps.push({
           name: 'ibc_forward',
           status: 'pending',
@@ -83,9 +74,9 @@ export async function memoTransfer({
   let verifyTrace;
   try {
     verifyTrace =
-      apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({ chain_name, hash: amount.denom.split('/')[1] }) ??
-      (await apistore.dispatch(
-        GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+      typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({ chain_name, hash: amount.denom.split('/')[1] }) ??
+      (await typedstore.dispatch(
+        GlobalActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -95,22 +86,10 @@ export async function memoTransfer({
   }
 
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
-    const primaryChannel =
-      apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-        chain_name: chain_name,
-        destination_chain_name: verifyTrace.trace[0].counterparty_name,
-      }) ??
-      (await apistore.dispatch(
-        GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-        {
-          subscribe: true,
-          params: {
-            chain_name: chain_name,
-            destination_chain_name: verifyTrace.trace[0].counterparty_name,
-          },
-        },
-        { root: true },
-      ));
+    const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+      chain_name: chain_name,
+      destination_chain_name: verifyTrace.trace[0].counterparty_name,
+    });
     if (primaryChannel == getChannel(verifyTrace.path, 0)) {
       result.steps.push({
         name: 'transfer',
@@ -205,22 +184,10 @@ export async function memoTransfer({
         });
       }
       if (verifyTrace.trace[0].counterparty_name != destination_chain_name) {
-        const primaryChannel =
-          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-            chain_name: verifyTrace.trace[0].counterparty_name,
-            destination_chain_name: destination_chain_name,
-          }) ??
-          (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-            {
-              subscribe: true,
-              params: {
-                chain_name: verifyTrace.trace[0].counterparty_name,
-                destination_chain_name: destination_chain_name,
-              },
-            },
-            { root: true },
-          ));
+        const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+          chain_name: verifyTrace.trace[0].counterparty_name,
+          destination_chain_name: destination_chain_name,
+        });
         result.steps.push({
           name: 'ibc_forward',
           status: 'pending',

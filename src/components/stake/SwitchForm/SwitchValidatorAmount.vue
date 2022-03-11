@@ -142,7 +142,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { RestakeForm, Step } from '@/types/actions';
 
@@ -183,13 +183,13 @@ export default defineComponent({
     const stakingRewardsData = ref(null);
 
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
@@ -198,7 +198,7 @@ export default defineComponent({
       return Math.pow(10, precision.value);
     });
     const hasPrice = computed(() => {
-      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
+      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenom });
 
       return !!price;
     });

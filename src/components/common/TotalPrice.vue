@@ -9,7 +9,7 @@ import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
@@ -29,19 +29,18 @@ export default defineComponent({
     const propsRef = toRefs(props);
     const { stakingBalances, unbondingDelegations } = useAccount();
 
-    const verifiedDenoms = computed(() => store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]);
+    const verifiedDenoms = computed(() => store.getters[GlobalGetterTypes.API.getVerifiedDenoms]);
     const liquidValue = computed(() => {
       if (propsRef.balances.value.length > 0) {
         return (propsRef.balances.value as Balances).reduce((total, balance) => {
           if (balance.verified) {
-            if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom })) {
+            if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: balance.base_denom })) {
               let totalValue =
-                parseInt(balance.amount) *
-                store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom });
+                parseInt(balance.amount) * store.getters[GlobalGetterTypes.API.getPrice]({ denom: balance.base_denom });
               let precision = Math.pow(
                 10,
                 parseInt(
-                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                     name: balance.base_denom,
                   }) || 6,
                 ),
@@ -67,14 +66,14 @@ export default defineComponent({
       return stakingBalances.value.reduce((total, stakingBalance) => {
         const stakedDenom = verifiedDenoms.value.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
         if (stakedDenom.length > 0) {
-          if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name })) {
+          if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: stakedDenom[0].name })) {
             let totalValue =
               parseInt(stakingBalance.amount) *
-                store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0;
+                store.getters[GlobalGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0;
             let precision = Math.pow(
               10,
               parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                   name: stakedDenom[0].name,
                 }) || 6,
               ),
@@ -105,14 +104,14 @@ export default defineComponent({
           if (unstakedAmounts.length > 0) {
             unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
           }
-          if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name })) {
+          if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name })) {
             let totalValue =
               parseInt(unstakedAmount) *
-                store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0;
+                store.getters[GlobalGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0;
             let precision = Math.pow(
               10,
               parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                   name: unstakedDenom[0].name,
                 }) || 6,
               ),

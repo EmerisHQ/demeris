@@ -1,9 +1,9 @@
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { Amount } from '@/types/base';
 import { useStore } from '@/utils/useStore';
 
 export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: Amount }) {
-  const apistore = useStore() as TypedAPIStore;
+  const typedstore = useStore() as RootStoreTyped;
   const result = {
     steps: [],
     output: {
@@ -14,7 +14,7 @@ export async function stake({ validatorAddress, amount }: { validatorAddress: st
       chain_name: '',
     },
   };
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+  const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms];
   const verified = verifiedDenoms.find((x) => x.name == amount.denom && x.stakable == true);
   if (!verified) {
     throw new Error('Token is not stakable');

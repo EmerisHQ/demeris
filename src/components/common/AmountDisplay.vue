@@ -5,7 +5,7 @@
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
     const ticker = ref('-');
 
     const displayValue = computed(() => {
-      const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
+      const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
       return parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
     });
 
@@ -34,7 +34,7 @@ export default defineComponent({
         if ((props.amount as Amount).denom !== undefined) {
           ticker.value = await getTicker(
             (props.amount as Amount).denom,
-            props.chain || store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            props.chain || store.getters[GlobalGetterTypes.API.getDexChain],
           );
           baseDenom.value = await getBaseDenom(props.amount.denom);
         }

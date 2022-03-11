@@ -91,7 +91,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { AddLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
@@ -164,13 +164,13 @@ export default defineComponent({
 
     const precisions = computed(() => {
       return {
-        coinA: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
-        coinB: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
+        coinA: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
+        coinB: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
       };
     });
 
     const chainName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      return store.getters[GlobalGetterTypes.API.getDexChain];
     });
 
     const hasPool = computed(() => {

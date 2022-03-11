@@ -1,11 +1,11 @@
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { ChainAmount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { getDenomHash, isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export async function redeem({ amount, chain_name }: ChainAmount) {
-  const apistore = useStore() as TypedAPIStore;
+  const typedstore = useStore() as RootStoreTyped;
   const result = {
     steps: [],
     output: {
@@ -26,12 +26,12 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
     let verifyTrace;
     try {
       verifyTrace =
-        apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+        typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
           chain_name,
           hash: amount.denom.split('/')[1],
         }) ??
-        (await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+        (await typedstore.dispatch(
+          GlobalActionTypes.API.GET_VERIFY_TRACE,
           {
             subscribe: false,
             params: {
