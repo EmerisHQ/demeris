@@ -39,7 +39,7 @@
     </div>
 
     <div class="flex-1 text-left flex flex-col">
-      <p class="item-title font-medium truncate">
+      <p class="item-title font-medium truncate w-52">
         <template v-if="action === 'transfer'">
           Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
@@ -76,7 +76,7 @@
         </template>
       </p>
 
-      <p class="item-description -text-1 opacity-75">
+      <p class="item-description -text-1 opacity-75 truncate w-52">
         <i18n-t
           v-if="state.matches('validating')"
           scope="global"
