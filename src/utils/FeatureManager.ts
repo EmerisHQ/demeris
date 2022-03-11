@@ -16,10 +16,8 @@ class FeatureManager {
 
   public load() {
     const urlParams = Object.fromEntries(new URLSearchParams(location.search));
-    const appParams = {
-      ...import.meta.env,
-      ...urlParams,
-    };
+    const envParams = import.meta.env;
+    const appParams = { ...envParams, ...urlParams };
     for (const [key, value] of Object.entries(appParams)) {
       if (key.startsWith('VITE_FEATURE_')) {
         this.features[key.replace('VITE_FEATURE_', '')] = value === 'true' || parseInt(value) === 1 ? true : false;

@@ -10,6 +10,7 @@
     "serve": "vue-cli-service serve",
     "build": "NODE_ENV=development vue-cli-service build --mode development",
     "test:unit": "jest",
+    "test:e2e": "cypress run",
     "lint": "vue-cli-service lint",
     "build:production": "vue-cli-service build --mode production",
     "generate:demo-acounts": "node .github/workflows/generate/demo-accounts.js",
