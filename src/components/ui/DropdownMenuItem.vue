@@ -4,7 +4,7 @@
     variant="link"
     align-text="left"
     data-test="menuItemButton"
-    @click="emit('clickEvent')"
+    @click="emit('click')"
   >
     <slot />
   </Button>
@@ -12,5 +12,5 @@
 
 <script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
-const emit = defineEmits<{ (e: 'clickEvent') }>();
+const emit = defineEmits<{ (e: 'click') }>();
 </script>

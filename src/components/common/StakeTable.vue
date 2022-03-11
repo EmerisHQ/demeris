@@ -94,7 +94,7 @@
               <td class="text-right">
                 <DropdownMenu icon="ThreeDotsIcon" :icon-size="1.5" placement="right-start" :offset="[-24, 0]">
                   <DropdownMenuItem
-                    @click-event="
+                    @click="
                       () => {
                         if (
                           !validatorList.find(
@@ -108,14 +108,10 @@
                   >
                     {{ $t('components.stakeTable.stake') }}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    @click-event="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
-                  >
+                  <DropdownMenuItem @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)">
                     {{ $t('components.stakeTable.unstake') }}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    @click-event="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
-                  >
+                  <DropdownMenuItem @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)">
                     {{ $t('components.stakeTable.switchValidator') }}
                   </DropdownMenuItem>
                 </DropdownMenu>
