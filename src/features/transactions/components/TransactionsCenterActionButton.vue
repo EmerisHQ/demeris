@@ -3,7 +3,7 @@
     <Button rounded variant="secondary" class="w-12 h-12 flex items-center justify-center" @click="handleClick">
       <div
         v-if="notificationsCount"
-        class="count flex items-center justify-center w-6 h-6 border-2 border-bg bg-negative rounded-full absolute -right-1 -top-1 font-medium"
+        class="actions-count flex items-center justify-center w-6 h-6 border-2 border-bg bg-negative rounded-full absolute -right-1 -top-1 font-medium"
       >
         <span :class="notificationsCount > 9 ? '-text-2' : '-text-1'">
           {{ notificationsCount }}
@@ -128,8 +128,8 @@ onUnmounted(() => {
 });
 </script>
 
-<style>
-.count {
+<style scoped>
+.actions-count {
   color: white;
 }
 </style>

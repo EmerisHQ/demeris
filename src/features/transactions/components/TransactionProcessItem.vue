@@ -15,13 +15,16 @@
   </Button>
 
   <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div class="item-icon w-8 pt-1.5">
+    <div class="item-icon w-8">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
-      <Icon v-if="state.matches('failed.sign')" name="QuestionIcon" class="text-warning" />
+      <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
-      <div v-else-if="state.matches('review') || state.matches('receipt')" class="-space-x-3 inline-flex items-center">
+      <div
+        v-else-if="state.matches('review') || state.matches('receipt')"
+        class="-space-x-3 inline-flex items-center pt-1.5"
+      >
         <CircleSymbol
           v-for="asset of getIconAssets()"
           :key="asset.denom"
@@ -40,7 +43,7 @@
     </div>
 
     <div class="flex-1 text-left flex flex-col">
-      <p class="item-title font-medium truncate w-52">
+      <p class="item-title font-medium truncate">
         <template v-if="action === 'transfer'">
           Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
@@ -77,7 +80,7 @@
         </template>
       </p>
 
-      <p class="item-description -text-1 opacity-75 truncate w-52">
+      <p class="item-description -text-1 opacity-75 truncate">
         <i18n-t
           v-if="state.matches('validating')"
           scope="global"
@@ -270,5 +273,12 @@ const getIconAssets = () => {
 <style lang="postcss">
 .transactions-center__close-btn .button {
   @apply w-6 h-6;
+}
+
+.transactions-center {
+  .item-title,
+  .item-description {
+    max-width: 11rem;
+  }
 }
 </style>
