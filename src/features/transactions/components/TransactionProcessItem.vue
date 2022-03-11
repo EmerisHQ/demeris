@@ -15,7 +15,7 @@
   </Button>
 
   <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div class="item-icon w-8">
+    <div class="item-icon w-8 pt-1.5">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
