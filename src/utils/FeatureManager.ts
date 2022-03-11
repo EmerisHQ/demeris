@@ -20,10 +20,9 @@ class FeatureManager {
       ...import.meta.env,
       ...urlParams,
     };
-
     for (const [key, value] of Object.entries(appParams)) {
-      if (key.indexOf('VUE_APP_FEATURE') === 0) {
-        this.features[key.substring(16)] = value === 'true' || parseInt(value) === 1 ? true : false;
+      if (key.startsWith('VITE_FEATURE_')) {
+        this.features[key.replace('VITE_FEATURE_', '')] = value === 'true' || parseInt(value) === 1 ? true : false;
       }
     }
   }

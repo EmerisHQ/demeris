@@ -14,7 +14,7 @@ export default defineConfig({
     global: {},
     process: { env: {} },
   },
-  // optimizeDeps: {
-  //   exclude: ['@cosmjs/utils', 'util'],
-  // },
+  server: {
+    port: 8080,
+  },
 });
