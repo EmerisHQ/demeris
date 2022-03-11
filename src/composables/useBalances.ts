@@ -3,9 +3,11 @@ import orderBy from 'lodash.orderby';
 import { computed } from 'vue';
 
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import getPrice from '@/utils/getPrice';
+import { useStore } from '@/utils/useStore';
 
 /**
  * Balance related composable, mostly based off copy pasting code from src/components/assets/AssetsTable/AssetsTable.vue
@@ -13,6 +15,7 @@ import getPrice from '@/utils/getPrice';
  */
 export default function useBalances() {
   const { balances: rawBalances } = useAccount();
+  const store = useStore() as RootStoreType;
   const allBalances = computed<Balances>(() => {
     let balances = [...(rawBalances.value as Balances)];
     //  remove pools
@@ -34,9 +37,10 @@ export default function useBalances() {
     const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
       const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
       const chainsNames = balances.map((item) => item.on_chain);
+      const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
       return {
         denom,
-        totalAmount,
+        totalAmount: totalAmount / Math.pow(10, precision),
         chainsNames,
       };
     });
@@ -57,7 +61,12 @@ export default function useBalances() {
   });
 
   const orderedUserAvailableBalances = computed(() => {
-    return orderBy(balancesWithAvailable.value, [(x) => x.totalAmount, 'name'], ['asc', 'asc']);
+    return orderBy(
+      balancesWithAvailable.value,
+      // Consider coin precision to sort by amount, as for CRO it can be high due to its precision
+      [(asset) => asset.totalAmount, 'name'],
+      ['asc', 'asc'],
+    );
   });
 
   const mostAvailableBalance = computed(() => {

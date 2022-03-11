@@ -21,7 +21,6 @@ const asset = ref<{ name: string; denom: string }>({ name: '', denom: '' });
 
 const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]);
 const { mostAvailableBalance } = useBalances();
-
 watch(
   mostAvailableBalance,
   (newValue) => {
