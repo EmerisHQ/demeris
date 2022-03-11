@@ -165,10 +165,10 @@ export default defineComponent({
           denomIconName = denom.toLowerCase();
         }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
+        const image = import(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
         return image;
       } catch {
-        return require(`@/assets/coins/empty.png`);
+        return import(`@/assets/coins/empty.png`);
       }
     });
 
