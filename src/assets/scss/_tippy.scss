@@ -1,18 +1,24 @@
 // body for specificity - probably should create a 'theme' for tippy instead.
 body {
-  .tippy-box {
+  .tippy-box:not([data-theme='translucent']) {
     @apply bg-text;
     @apply text-inverse;
     @apply -text-1;
     @apply leading-copy;
     @apply rounded-xl;
     @apply shadow-dropdown;
+
+    .tippy-content {
+      @apply py-2;
+      @apply px-3;
+    }
+
+    .tippy-arrow {
+      @apply text-text;
+    }
   }
-  .tippy-arrow {
-    @apply text-text;
-  }
-  .tippy-content {
-    @apply py-2;
-    @apply px-3;
+  .tippy-box[data-theme='translucent'] {
+    background: unset;
+    border-radius: unset;
   }
 }

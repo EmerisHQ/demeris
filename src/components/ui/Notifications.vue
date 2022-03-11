@@ -34,10 +34,12 @@
                 @click="expandNotifications()"
               >
                 <Transition name="fade" appear>
-                  <button
+                  <Button
                     v-if="showClearButton(displayIndex)"
-                    class="clear-all-button absolute z-40 bg-surface text-text -text-1 font-medium rounded-full focus:outline-none;"
                     :data-test="`clear-all-notifications-button-${displayIndex}`"
+                    size="none"
+                    class="clear-all-button px-2 transition-all w-6 h-6 absolute opacity-0 focus:opacity-75 z-40"
+                    rounded
                     @click="clearAllNotifications()"
                     @mouseover="isHoverClearAllButton = true"
                     @mouseleave="isHoverClearAllButton = false"
@@ -54,7 +56,7 @@
                       class="text-text"
                       >{{ clearAllLabel }}</span
                     >
-                  </button>
+                  </Button>
                 </Transition>
                 <div
                   :style="{ opacity: displayIndex === 0 || !isStacked ? 1 : 0 }"

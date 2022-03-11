@@ -32,24 +32,52 @@
         </div>
       </header>
 
-      <ul
-        class="flex flex-col space-y-1 overflow-y-visible"
-        :style="{ maxHeight: '300px' }"
-        :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
-      >
-        <li v-if="!pendingTransactions.length" class="px-6 text-muted">
-          {{ $t('context.transactions.widget.emptyMessage') }}
-        </li>
+      <div class="relative">
+        <ul
+          class="flex flex-col space-y-1 overflow-y-auto"
+          :style="{ maxHeight: '300px' }"
+          :class="[hasMore || state.viewAll ? 'pb-16' : 'pb-4']"
+        >
+          <li v-if="!pendingTransactions.length" class="px-6 text-muted">
+            {{ $t('context.transactions.widget.emptyMessage') }}
+          </li>
 
-        <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
-          <TransactionProcessItem
-            class="py-4 px-6"
-            :service="service"
-            @click="selectItem(id)"
-            @remove="onRemoveTransactionItem(id)"
-          />
-        </li>
-      </ul>
+          <tippy
+            v-for="[id, service] of pendingTransactions"
+            :key="id"
+            :arrow="false"
+            :offset="[0, -13]"
+            :interactive="true"
+            :interactive-border="0"
+            theme="translucent"
+            trigger="mouseenter focus"
+            placement="left"
+          >
+            <template #content>
+              <Button
+                v-tippy="{
+                  placement: 'left',
+                  trigger: 'mouseenter focus',
+                }"
+                :content="$t('context.transactions.widget.removeItem')"
+                size="none"
+                class="transactions-center__close-btn w-6 h-6 opacity-75"
+                rounded
+              >
+                <Icon name="CloseIcon" :icon-size="0.85" />
+              </Button>
+            </template>
+            <li class="relative transition-all group hover:bg-fg">
+              <TransactionProcessItem
+                class="py-4 px-6"
+                :service="service"
+                @click="selectItem(id)"
+                @remove="onRemoveTransactionItem(id)"
+              />
+            </li>
+          </tippy>
+        </ul>
+      </div>
 
       <Button
         v-if="hasMore || state.viewAll"
