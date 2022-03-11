@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, shallowRef } from 'vue';
+import { defineComponent, onMounted, ref, shallowRef } from 'vue';
 
 export default defineComponent({
   name: 'Icon',
@@ -22,12 +22,14 @@ export default defineComponent({
     color: { type: String, required: false, default: 'inherit' },
   },
 
-  async setup(props) {
+  setup(props) {
     const currentIcon = shallowRef('');
     const isReady = ref(false);
-    await import(/* @vite-ignore */ `@/components/common/Icons/${props.name}.vue`).then((val) => {
-      currentIcon.value = val.default;
-      isReady.value = true;
+    onMounted(async () => {
+      await import(`../../components/common/Icons/${props.name}.vue`).then((val) => {
+        currentIcon.value = val.default;
+        isReady.value = true;
+      });
     });
 
     return {
