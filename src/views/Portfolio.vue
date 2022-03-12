@@ -67,6 +67,7 @@ import { useStore } from 'vuex';
 import AssetsTable from '@/components/assets/AssetsTable';
 import PortfolioStakingBanner from '@/components/banners/PortfolioStakingBanner.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Intro from '@/components/common/Intro.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -83,6 +84,7 @@ import { featureRunning } from '@/utils/FeatureManager';
 export default {
   name: 'Portfolio',
   components: {
+    FeatureRunningConditional,
     PortfolioStakingBanner,
     AppLayout,
     Button,
