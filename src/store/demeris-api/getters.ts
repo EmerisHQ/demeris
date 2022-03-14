@@ -57,6 +57,8 @@ export type Getters = {
   [GetterTypes.getWebSocketEndpoint](state: State): string;
   [GetterTypes.getAllValidPools](state: State): Pool[];
   [GetterTypes.getEndpoint](state: State): string;
+  [GetterTypes.getGitEndpoint](state: State): string;
+  [GetterTypes.getRawGitEndpoint](state: State): string;
   [GetterTypes.getSupply](state: State, getters): { (params): number };
   [GetterTypes.getAllVerifiedTraces](state: State): Record<string, API.VerifyTrace>;
   [GetterTypes.getDexChain](state: State): string;
@@ -272,6 +274,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getEndpoint]: (state) => {
     return state.endpoint;
+  },
+  [GetterTypes.getGitEndpoint]: (state) => {
+    return state.gitEndpoint;
+  },
+  [GetterTypes.getRawGitEndpoint]: (state) => {
+    return state.rawGitEndpoint;
   },
   [GetterTypes.getWebSocketEndpoint]: (state) => {
     return state.wsEndpoint;
