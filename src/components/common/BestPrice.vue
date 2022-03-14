@@ -5,7 +5,7 @@
         {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }}
         <StarIcon class="ml-auto" />
       </div>
-      <div class="title text-0">
+      <div class="font-medium text-0">
         {{ $t('components.bestPrice.bestPriceFrom') }} <span class="text-positive-text capitalize">{{ dex }}</span>
       </div>
     </div>
@@ -13,17 +13,19 @@
     <div class="px-5 pt-4 pb-5">
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.expectedRate')
-        }}<span class="ml-auto text-text">~{{ expectedRate }} {{ denom }}</span>
+        }}<span class="ml-auto text-text font-medium">~{{ expectedRate }} {{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
-        {{ $t('components.bestPrice.limitPrice') }}<span class="ml-auto text-text">~{{ limitPrice }} {{ denom }}</span>
+        {{ $t('components.bestPrice.limitPrice')
+        }}<span class="ml-auto text-text font-medium">~{{ limitPrice }} {{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
-        {{ $t('components.bestPrice.maxSlippage') }}<span class="ml-auto text-text">{{ maxSlippage }}%</span>
+        {{ $t('components.bestPrice.maxSlippage')
+        }}<span class="ml-auto text-text font-medium">{{ maxSlippage }}%</span>
       </div>
       <div class="flex text-muted">
         {{ $t('components.bestPrice.minReceived') }}<br />{{ $t('components.bestPrice.fullSwapped')
-        }}<span class="ml-auto text-text"> {{ minReceived }} {{ denom }}</span>
+        }}<span class="ml-auto text-text font-medium"> {{ minReceived }} {{ denom }}</span>
       </div>
     </div>
   </div>
@@ -66,11 +68,3 @@ const props = defineProps({
 // eslint-disable-next-line
 const { t } = useI18n({ useScope: 'global' });
 </script>
-<style lang="scss" scoped>
-.title {
-  font-weight: 600;
-}
-.value {
-  font-weight: 500;
-}
-</style>
