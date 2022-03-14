@@ -360,6 +360,8 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
+    state.gitEndpoint = payload.gitEndpoint;
+    state.rawGitEndpoint = payload.rawGitEndpoint;
     state.wsEndpoint = payload.wsEndpoint;
     state.hub_chain = payload.hub_chain;
   },
