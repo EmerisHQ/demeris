@@ -81,7 +81,7 @@
           <AmountDisplay
             v-if="state.isUSDInputChecked"
             :amount="{
-              amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+              amount: form.balance.amount ? parseInt(form.balance.amount) * denomDecimals + '' : '0',
               denom: state.currentAsset?.base_denom,
             }"
           />

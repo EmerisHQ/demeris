@@ -297,6 +297,7 @@ import {
   IBCBackwardsData,
   IBCForwardsData,
   Step,
+  StepTransaction,
   SwapData,
   TransferData,
   WithdrawLiquidityData,
@@ -530,7 +531,7 @@ export default defineComponent({
     const toggleTxHandlingModal = () => {
       isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
     };
-    const transaction = ref({});
+    const transaction = ref({} as StepTransaction);
     const allTransactionResponses = ref({
       responses: [],
       fees: {},

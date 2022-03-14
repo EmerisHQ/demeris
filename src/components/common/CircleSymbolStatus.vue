@@ -15,12 +15,11 @@
   </tippy>
 </template>
 <script lang="ts">
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
 import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { DesignSizes } from '@/types/util';
 
 export default defineComponent({
   name: 'CircleSymbolStatus',
@@ -34,7 +33,7 @@ export default defineComponent({
       default: undefined,
     },
     size: {
-      type: String as PropType<CircleSymbolSize>,
+      type: String as PropType<DesignSizes>,
       default: 'md',
     },
   },

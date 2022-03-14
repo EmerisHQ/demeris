@@ -346,7 +346,6 @@
           }
         "
       />
-      {{ router?.pathname }}
       <Button
         v-if="status === 'unknown'"
         variant="link"

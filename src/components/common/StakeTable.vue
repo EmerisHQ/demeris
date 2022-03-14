@@ -60,7 +60,7 @@
               <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
               <td class="text-right font-medium bg-surface">
                 <div class="flex justify-end">
-                  +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                  +<Price :amount="{ denom: denom, amount: totalRewardsAmount + '' }" :show-dash="false" />
                 </div>
               </td>
               <td class="text-right rounded-r-xl bg-surface">

@@ -72,7 +72,7 @@ import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
 import Switch from '@/components/ui/Switch.vue';
-import { GlobalActionTypes, GlobalGetterTypes, TypedUSERStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   components: {
@@ -80,7 +80,7 @@ export default defineComponent({
     Switch,
   },
   setup() {
-    const store = useStore() as TypedUSERStore;
+    const store = useStore() as RootStoreTyped;
     const menuRef = ref(null);
 
     const isOpen = ref(false);

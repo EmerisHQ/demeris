@@ -11,8 +11,7 @@
 import { defineComponent, PropType } from 'vue';
 
 import ValidatorImg from '@/components/common/ValidatorImg.vue';
-
-export type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+import { DesignSizes } from '@/types/util';
 
 export default defineComponent({
   name: 'ValidatorBadge',
@@ -26,7 +25,7 @@ export default defineComponent({
       },
     },
     size: {
-      type: String as PropType<CircleSymbolSize>,
+      type: String as PropType<DesignSizes>,
       default: 'md',
     },
   },

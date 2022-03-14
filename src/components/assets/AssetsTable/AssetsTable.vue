@@ -61,9 +61,9 @@
             </td>
 
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               </div>
             </td>
             <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
@@ -111,23 +111,7 @@
             </td>
           </tr>
         </template>
-        <template v-else>
-          <tr :key="index" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
-            <td class="py-5 align-middle group-hover:bg-fg transition">
-              <div class="flex items-center">
-                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
-                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                  <span class="font-medium"><Denom :name="asset.denom" /></span>
-                  <LPAsset :name="asset.denom" />
-                </div>
-              </div>
-            </td>
-
-            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price :amount="{ denom: asset.denom, amount: null }" />
-            </td>
-          </tr>
-        </template>
+        <template v-else> </template>
       </tbody>
     </table>
 
@@ -414,7 +398,7 @@ export default defineComponent({
       currentLimit.value = undefined;
     };
 
-    const handleClick = (asset: Record<string, string>) => {
+    const handleClick = (asset) => {
       emit('row-click', asset);
     };
 

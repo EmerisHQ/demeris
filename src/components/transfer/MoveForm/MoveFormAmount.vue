@@ -100,7 +100,7 @@
             <AmountDisplay
               v-if="state.isUSDInputChecked"
               :amount="{
-                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                amount: form.balance.amount ? parseInt(form.balance.amount) * denomDecimals + '' : '0',
                 denom: state.currentAsset?.base_denom,
               }"
             />
@@ -248,7 +248,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
+import { GasPriceLevel, MoveAssetsForm, Step } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -277,7 +277,7 @@ export default defineComponent({
       required: true,
     },
     steps: {
-      type: Array,
+      type: Array as PropType<Step[]>,
       default: () => [],
     },
   },

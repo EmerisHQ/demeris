@@ -22,10 +22,10 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-export default {
+export default defineComponent({
   emits: ['active-filter'],
   setup(_, { emit }) {
     const { t } = useI18n({ useScope: 'global' });
@@ -61,5 +61,5 @@ export default {
 
     return { filtersItems, setActiveFilter, activeFilterItem };
   },
-};
+});
 </script>

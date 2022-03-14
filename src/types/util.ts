@@ -21,3 +21,5 @@ export type ChartPrices = Array<{ x: string; y: number }>;
 export type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
 };
+
+export type DesignSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';

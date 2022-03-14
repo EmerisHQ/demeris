@@ -77,7 +77,7 @@
             <AmountDisplay
               v-if="state.isUSDInputChecked"
               :amount="{
-                amount: +form.amount ? form.amount * denomDecimals : 0,
+                amount: form.amount ? parseInt(form.amount) * denomDecimals + '' : '0',
                 denom: baseDenom,
               }"
             />

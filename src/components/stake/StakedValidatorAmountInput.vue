@@ -40,13 +40,14 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, toRefs } from 'vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { DesignSizes } from '@/types/util';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
 
@@ -66,7 +67,7 @@ export default defineComponent({
         return {};
       },
     },
-    size: { type: String, required: false, default: 'md' },
+    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {

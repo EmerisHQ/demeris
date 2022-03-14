@@ -21,7 +21,7 @@
       >
         <div class="w-6 h-6 bg-text text-inverse rounded-md pt-1 text-center -text-1 mr-4">{{ index + 1 }}</div>
         <p class="w-96 -text-1 mr-6">
-          {{ item.description }}
+          {{ item.desc }}
         </p>
         <div class="w-30 flex items-center text-right">
           <div>

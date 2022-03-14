@@ -88,7 +88,6 @@ import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 type CircleSymbolVariant = 'asset' | 'chain';
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 import { EmerisAPI } from '@emeris/types';
 
@@ -96,6 +95,7 @@ import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
 
@@ -134,7 +134,7 @@ export default defineComponent({
       default: 'asset',
     },
     size: {
-      type: String as PropType<CircleSymbolSize>,
+      type: String as PropType<DesignSizes>,
       default: 'md',
     },
     customSize: {

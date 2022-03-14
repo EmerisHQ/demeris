@@ -72,7 +72,7 @@
         :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
-        @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
+        @input="$emit('update:amount', ($event.target as HTMLInputElement).value), $emit('change', inputHeader)"
       />
     </label>
   </div>
@@ -93,7 +93,7 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -102,8 +102,10 @@ import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes } from '@/store';
+import { DesignSizes } from '@/types/util';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
+
 export default defineComponent({
   name: 'DenomSelect',
   components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
@@ -122,7 +124,7 @@ export default defineComponent({
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
     showChain: { type: Boolean, default: false },
-    size: { type: String, required: false, default: 'md' },
+    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {

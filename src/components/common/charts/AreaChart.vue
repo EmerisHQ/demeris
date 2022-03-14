@@ -49,8 +49,8 @@ export default defineComponent({
       default: 'full',
     },
     height: {
-      type: String,
-      default: '320',
+      type: Number,
+      default: 320,
     },
     dataStream: {
       type: Array as PropType<ChartPrices>,

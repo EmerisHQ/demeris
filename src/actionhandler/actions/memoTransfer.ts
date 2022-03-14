@@ -59,19 +59,10 @@ export async function memoTransfer({
           },
         });
 
-        const counterpartyChannel =
-          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-            chain_name: destination_chain_name,
-            destination_chain_name: chain_name,
-          }) ??
-          (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-            {
-              subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
-            },
-            { root: true },
-          ));
+        const counterpartyChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+          chain_name: destination_chain_name,
+          destination_chain_name: chain_name,
+        });
         result.steps.push({
           name: 'transfer',
           status: 'pending',
