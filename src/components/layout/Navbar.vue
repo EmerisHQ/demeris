@@ -40,10 +40,10 @@
   </nav>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { apistore } from '@/store/setup';
 import { featureRunning } from '@/utils/FeatureManager';
 
@@ -53,30 +53,7 @@ export default defineComponent({
     StarsIcon,
   },
   setup() {
-    let gitAirdropsList = ref([]);
-
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
-
-    const getAllAirdrops = async () => {
-      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
-        subscribe: false,
-      });
-
-      gitAirdropsList.value.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
-          subscribe: false,
-          params: {
-            airdropFileName: item.name,
-          },
-        });
-      });
-    };
-
-    onMounted(() => {
-      if (isAirdropsFeatureRunning) {
-        getAllAirdrops();
-      }
-    });
 
     const airdrops = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];

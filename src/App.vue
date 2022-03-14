@@ -67,6 +67,8 @@ export default defineComponent({
     const store = useStore();
     let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
     let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
+    let githubEndpoint = process.env.VUE_APP_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
+    let rawGithubEndpoint = process.env.VUE_APP_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
     let wsEndpoint = process.env.VUE_APP_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
 
     if (featureRunning('USE_STAGING')) {
@@ -87,6 +89,7 @@ export default defineComponent({
     const { pools: _pools } = usePoolsFactory();
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
+
     onMounted(async () => {
       useTheme({ updateOnChange: true });
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
@@ -97,6 +100,8 @@ export default defineComponent({
       await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
         wsEndpoint: wsEndpoint,
         endpoint: emerisEndpoint,
+        gitEndpoint: githubEndpoint,
+        rawGitEndpoint: rawGithubEndpoint,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
       });
@@ -208,6 +213,29 @@ export default defineComponent({
         router.push('/welcome');
       }
     });
+
+    const getAllAirdrops = async () => {
+      const gitAirdropsList = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+        subscribe: false,
+      });
+
+      gitAirdropsList.forEach((item) => {
+        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+          subscribe: false,
+          params: {
+            airdropFileName: item.name,
+          },
+        });
+      });
+    };
+
+    onMounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_AIRDROPS);
+      if (featureRunning('AIRDROPS_FEATURE')) {
+        getAllAirdrops();
+      }
+    });
+
     return { initialized, status, showMaintenanceScreen };
   },
   errorCaptured(err) {
