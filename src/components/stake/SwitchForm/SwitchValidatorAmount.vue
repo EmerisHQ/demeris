@@ -128,6 +128,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -142,8 +143,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
-import { GlobalGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { RestakeForm, Step } from '@/types/actions';
 
 import ValidatorDisplay from '../ValidatorDisplay.vue';
@@ -164,7 +164,7 @@ export default defineComponent({
   },
   props: {
     size: { type: String, required: false, default: 'md' },
-    validators: { type: Array as PropType<any[]>, required: true, default: () => [] },
+    validators: { type: Array as PropType<EmerisAPI.Validator[]>, required: true, default: () => [] },
     steps: {
       type: Array as PropType<Step[]>,
       default: () => [],
@@ -172,7 +172,7 @@ export default defineComponent({
   },
   emits: ['previous', 'next'],
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
 
     const { getStakingRewardsByBaseDenom } = useStaking();
 
@@ -187,7 +187,7 @@ export default defineComponent({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,

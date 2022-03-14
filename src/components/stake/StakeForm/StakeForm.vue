@@ -39,6 +39,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -49,8 +50,7 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import StakeFormAmount from '@/components/stake/StakeForm/StakeFormAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { MultiStakeAction, MultiStakeForm, StakeForm } from '@/types/actions';
 import { event } from '@/utils/analytics';
 
@@ -76,7 +76,7 @@ export default defineComponent({
       default: '',
     },
     validators: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<EmerisAPI.Validator[]>,
       required: true,
       default: () => {
         return [];
@@ -93,7 +93,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const steps = ref([]);
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
     const propsRef = toRefs(props);
@@ -107,7 +107,7 @@ export default defineComponent({
       return propsRef.validators.value.some((val) => parseInt(val.stakedAmount) > 0);
     });
 
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,

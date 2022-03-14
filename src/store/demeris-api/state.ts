@@ -1,15 +1,8 @@
 import { EmerisAirdrops, EmerisAPI } from '@emeris/types';
 
 import { Pool } from '@/types/actions';
-import * as API from '@/types/api';
 import { ChartPrices, LoadingState } from '@/types/util';
 
-export type ChainMeta = {
-  primaryChannels?: Record<string, API.PrimaryChannel>;
-  relayerBalance?: API.RelayerBalance;
-  status?: boolean;
-};
-export type ChainData = API.Chain & ChainMeta;
 export type TransactionItem = {
   date: number;
   status: EmerisAPI.TicketResponse;
@@ -59,9 +52,9 @@ export function getDefaultState(): APIState {
       Tokens: [],
     },
     tokenPrices: [],
-    tokenPricesLoadingStatus: API.LoadingState.INIT,
+    tokenPricesLoadingStatus: LoadingState.INIT,
     tokenId: '',
-    tokenIdLoadingStatus: API.LoadingState.INIT,
+    tokenIdLoadingStatus: LoadingState.INIT,
     relayer: false,
     chains: {},
     airdrops: [],

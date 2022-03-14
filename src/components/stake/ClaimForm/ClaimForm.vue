@@ -28,6 +28,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -37,8 +38,7 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { ClaimRewardsAction } from '@/types/actions';
 import { event } from '@/utils/analytics';
 
@@ -59,7 +59,7 @@ export default defineComponent({
       default: undefined,
     },
     validators: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<EmerisAPI.Validator[]>,
       required: true,
       default: () => {
         return [];
@@ -71,7 +71,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const steps = ref([]);
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
     const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
@@ -82,7 +82,7 @@ export default defineComponent({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
       return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });

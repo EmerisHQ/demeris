@@ -1,20 +1,5 @@
-import * as API from '@/types/api';
 import { KeplrKeyData, UserData } from '@/types/user';
 
-export type ChainMeta = {
-  verifiedTraces?: Record<string, API.VerifyTrace>;
-  primaryChannels?: Record<string, API.PrimaryChannel>;
-  relayerBalance?: API.RelayerBalance;
-  status?: boolean;
-};
-export type ChainData = API.Chain & ChainMeta;
-export type TransactionItem = {
-  date: number;
-  status: API.Ticket;
-  resolve: (value?: unknown | PromiseLike<unknown>) => void;
-  reject: (reason?: Error) => void;
-  promise: Promise<string>;
-};
 export type USERState = {
   gas_limit: number;
   balancesFirstLoad: boolean;

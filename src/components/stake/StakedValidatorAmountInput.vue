@@ -46,8 +46,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
-import { GlobalGetterTypes, RootStoreType } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
 
@@ -71,13 +70,13 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const store = useStore() as RootStoreType;
+    const store = useStore() as RootStoreTyped;
 
     const chain = computed(() => {
       return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
     const stakingDenom = computed(() => {
-      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;
+      return chain.value?.denoms.find((x) => x.stakable) ?? null;
     });
     const propsRef = toRefs(props);
 
@@ -86,11 +85,11 @@ export default defineComponent({
       set: (value) => emit('update:modelValue', value),
     });
     const modelInBase = computed(() => {
-      return new BigNumber(model.value).multipliedBy(10 ** parseInt(stakingDenom.value.precision)).toString();
+      return new BigNumber(model.value).multipliedBy(10 ** stakingDenom.value.precision).toString();
     });
     const setMax = () => {
       model.value = new BigNumber(propsRef.validator.value.stakedAmount)
-        .dividedBy(10 ** parseInt(stakingDenom.value.precision))
+        .dividedBy(10 ** stakingDenom.value.precision)
         .toString();
     };
     const stakingBalance = computed(() => {

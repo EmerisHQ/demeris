@@ -96,7 +96,7 @@
             class="group"
             :class="{
               'opacity-50':
-                validator.disabled ||
+                validator.jailed ||
                 (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address),
               'cursor-pointer': !(
                 disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
@@ -242,6 +242,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
@@ -253,8 +254,7 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import ValidatorCard from '@/components/stake/ValidatorCard.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 enum ValStyle {
   LIST = 'list',
@@ -271,7 +271,7 @@ export default defineComponent({
       required: true,
     },
     validatorList: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<EmerisAPI.Validator[]>,
       required: true,
       default: () => [],
     },
@@ -303,7 +303,7 @@ export default defineComponent({
   emits: ['selectValidator'],
   setup(props, { emit }) {
     /* hooks */
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const isDisabled = ref(false);
     const propsRef = toRefs(props);
     /* preset variables */
@@ -312,7 +312,7 @@ export default defineComponent({
         chain_name: propsRef.validatorList.value[0].chain_name,
       });
     });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom });
     const detailedValidator = ref(null);
     /* variables */

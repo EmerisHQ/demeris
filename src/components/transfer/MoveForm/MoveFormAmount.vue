@@ -227,6 +227,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -246,10 +247,8 @@ import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
-import { Balances, Chain } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -274,7 +273,7 @@ export default defineComponent({
 
   props: {
     balances: {
-      type: Object as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
     steps: {
@@ -286,7 +285,7 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const form = inject<MoveAssetsForm>('moveForm');
     const router = useRouter();
 
@@ -350,7 +349,7 @@ export default defineComponent({
     });
 
     const availableChains = computed(() => {
-      const chains = store.getters[GlobalGetterTypes.API.getChains] as Record<string, ChainData>;
+      const chains = store.getters[GlobalGetterTypes.API.getChains];
       let results = [];
 
       if (state.chainsModalSource === 'to') {
@@ -482,7 +481,7 @@ export default defineComponent({
     const setCurrentAsset = async (asset: Record<string, unknown>) => {
       const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
       const targetChains = Object.values(store.getters[GlobalGetterTypes.API.getChains]).filter(
-        (chain: Chain) => chain.chain_name !== dexChain,
+        (chain) => chain.chain_name !== dexChain,
       );
 
       state.currentAsset = asset;
@@ -492,7 +491,7 @@ export default defineComponent({
       } else {
         form.on_chain = asset.on_chain as string;
       }
-      form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
+      form.to_chain = asset.on_chain !== dexChain ? dexChain : targetChains[0].chain_name;
 
       findDefaultDestinationChain();
       state.assetTicker = await getTicker(asset.base_denom, dexChain);
