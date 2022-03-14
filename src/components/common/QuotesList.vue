@@ -6,11 +6,7 @@
   <div class="pb-3">
     <div v-for="(quote, index) in quotes" :key="quote.toString()" class="mx-2">
       <tippy delay="0" :interactive="false" :arrow="false">
-        <QuotesListItem
-          :quote="quote"
-          :is-best-price="index === 0 ? true : false"
-          :class="index === quotes.length - 1 ? 'last:pb-4' : ''"
-        />
+        <QuotesListItem :quote="quote" :is-best-price="index === 0 ? true : false" />
         <template v-if="quote && quote.fee" #content>
           <FeeToken :denom="quote.fee?.denom" :amount="quote.fee?.amount" />
         </template>
