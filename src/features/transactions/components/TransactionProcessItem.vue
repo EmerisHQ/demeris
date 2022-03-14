@@ -67,7 +67,7 @@
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
         <template v-if="action === 'claim'">
-          Claim <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
         </template>
         <template v-if="action === 'stake'">
           Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
@@ -199,6 +199,7 @@ import Spinner from '@/components/ui/Spinner.vue';
 import { GlobalGetterTypes } from '@/store';
 import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 import {
   getCurrentTransaction,

@@ -210,7 +210,7 @@ export default defineComponent({
     };
 
     const onClose = () => {
-      transactionsStore.removeTransaction(transactionsStore.currentId);
+      transactionsStore.setTransactionAsPending(transactionsStore.currentId);
       const hasPrevPath = !!router.options.history.state.back;
       hasPrevPath ? router.back() : router.push('/');
     };
