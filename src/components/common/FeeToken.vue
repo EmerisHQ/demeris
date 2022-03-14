@@ -3,7 +3,7 @@
     <CircleSymbol :style="{ position: 'absolute' }" class="ml-0" :denom="denom" :glow="false" size="sm" />
     <div class="ml-8">
       <div class="font-medium">Fee token required</div>
-      <div class="text-muted theme-inverse">{{ amount }} {{ ticker }}</div>
+      <div class="text-muted theme-inverse dark:theme-inverse">{{ amount }} {{ ticker }}</div>
     </div>
   </div>
 </template>

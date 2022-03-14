@@ -9,7 +9,7 @@
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
-      <span v-else class="hover:opacity-90"
+      <span v-else class="hover:opacity-70"
         >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
       >
       <span class="ml-auto">~${{ quote.usdAmount }}</span>
