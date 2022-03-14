@@ -142,7 +142,7 @@ export default defineComponent({
     const isWarningNeeded = ref(null);
 
     const goBackToOrigin = () => {
-      router.push(originUrl.value);
+      router.push(originUrl.value ?? '/');
     };
 
     const cancelConnectKeplr = () => {
