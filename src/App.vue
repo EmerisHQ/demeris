@@ -205,10 +205,8 @@ export default defineComponent({
         });
 
         initialized.value = true;
-        const isReturnUser = ref(null);
-        isReturnUser.value = window.localStorage.getItem('isReturnUser');
-        if (!isReturnUser.value) {
-          router.push('/welcome');
+        if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
+          router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
         }
       });
     } else {
