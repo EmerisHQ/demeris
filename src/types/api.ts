@@ -432,3 +432,12 @@ export type TransactionDetailResponse = {
     timestamp: string;
   };
 };
+
+export type PriceQuote = {
+  dex: string;
+  amount: number;
+  denom: string;
+  numberOfTransactions: string;
+  usdAmount: number;
+  fee?: { amount: number; denom: string };
+};
