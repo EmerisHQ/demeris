@@ -314,12 +314,12 @@ export default defineComponent({
     }
 
     const getAllAirdrops = async () => {
-      const gitAirdropsList = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+      const gitAirdropsList = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {
         subscribe: false,
       });
 
       gitAirdropsList.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+        typedstore.dispatch(GlobalActionTypes.API.GET_AIRDROPS, {
           subscribe: false,
           params: {
             airdropFileName: item.name,
@@ -329,7 +329,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_AIRDROPS);
+      typedstore.dispatch(GlobalActionTypes.API.RESET_AIRDROPS);
       if (featureRunning('AIRDROPS_FEATURE')) {
         getAllAirdrops();
       }

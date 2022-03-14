@@ -4,7 +4,6 @@ import { computed } from 'vue';
 
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import getPrice from '@/utils/getPrice';
 import { useStore } from '@/utils/useStore';
@@ -16,8 +15,8 @@ import { useStore } from '@/utils/useStore';
 export default function useBalances() {
   const { balances: rawBalances } = useAccount();
   const store = useStore() as RootStoreTyped;
-  const allBalances = computed<Balances>(() => {
-    let balances = [...(rawBalances.value as Balances)];
+  const allBalances = computed(() => {
+    let balances = [...rawBalances.value];
     //  remove pools
     balances = balances.filter((balance) => {
       if (balance.base_denom.substring(0, 4) !== 'pool') {
@@ -30,7 +29,7 @@ export default function useBalances() {
         return balance;
       }
     });
-    return balances as Balances;
+    return balances;
   });
   const availableByAsset = computed(() => {
     const denomsAggregate = groupBy(allBalances.value, 'base_denom');

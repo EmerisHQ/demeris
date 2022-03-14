@@ -67,6 +67,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
@@ -77,7 +78,6 @@ import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 
 export default defineComponent({
@@ -101,7 +101,7 @@ export default defineComponent({
       required: true,
     },
     response: {
-      type: Object as PropType<WithdrawLiquidityEndBlockResponse>,
+      type: Object as PropType<EmerisBase.WithdrawLiquidityEndBlockResponse>,
       default: undefined,
     },
     isReceipt: {

@@ -20,7 +20,7 @@ export default function useAccount() {
       return TEST_DATA.balances;
     }
     */
-    return store.getters[GlobalGetterTypes.API.getAllBalances] || [];
+    return store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
   });
 
   const redeemableBalances = ref([]);

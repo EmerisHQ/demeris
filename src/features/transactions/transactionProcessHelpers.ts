@@ -1,3 +1,4 @@
+import { EmerisAPI, EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
@@ -14,7 +15,6 @@ import {
   TransferData,
   WithdrawLiquidityData,
 } from '@/types/actions';
-import { Balance, SwapEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -79,7 +79,7 @@ export const isProcessingState = (state: TransactionProcessState) => {
   return ['transacting', 'signing'].some(state.matches);
 };
 
-export const formatStepsWithFee = (context: TransactionProcessContext, balances: Balance[]): Step[] => {
+export const formatStepsWithFee = (context: TransactionProcessContext, balances: EmerisAPI.Balances): Step[] => {
   return context.input.steps.map((step) => {
     return {
       ...step,
@@ -146,7 +146,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
   });
 };
 
-export const getSwappedPercent = (endBlock: SwapEndBlockResponse) => {
+export const getSwappedPercent = (endBlock: EmerisBase.SwapEndBlockResponse) => {
   return (
     (Number(endBlock.exchanged_offer_coin_amount) /
       (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
