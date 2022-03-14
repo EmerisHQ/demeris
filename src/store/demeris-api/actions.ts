@@ -10,7 +10,6 @@ import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
 import TendermintWS from '@/utils/TendermintWS';
 
 import {
@@ -262,7 +261,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
         );
 
-        if (featureRunning('REQUEST_PARALLELIZATION') && response.data.balances) {
+        if (response.data.balances) {
           const tracesLoaded = [];
           for (const balance of response.data.balances as API.Balances) {
             if (
@@ -344,21 +343,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const balanceLoads = [];
-        for (const keyHash of keyHashes) {
-          balanceLoads.push(
-            dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }),
-          );
-        }
-        await Promise.all(balanceLoads);
-        if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
-          dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
-        }
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
-        }
+      const balanceLoads = [];
+      for (const keyHash of keyHashes) {
+        balanceLoads.push(dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
+      }
+      await Promise.all(balanceLoads);
+      if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
+        dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -369,22 +360,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const stakingBalanceLoads = [];
-        for (const keyHash of keyHashes) {
-          stakingBalanceLoads.push(
-            dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
-          );
-        }
-        await Promise.all(stakingBalanceLoads);
+      const stakingBalanceLoads = [];
+      for (const keyHash of keyHashes) {
+        stakingBalanceLoads.push(
+          dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
+        );
+      }
+      await Promise.all(stakingBalanceLoads);
 
-        if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
-          dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
-        }
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
-        }
+      if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
+        dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
@@ -543,17 +528,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const numberLoads = [];
-        for (const keyHash of keyHashes) {
-          numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
-        }
-        await Promise.all(numberLoads);
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
-        }
+      const numberLoads = [];
+      for (const keyHash of keyHashes) {
+        numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
       }
+      await Promise.all(numberLoads);
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');
     }
