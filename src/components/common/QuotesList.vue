@@ -3,10 +3,8 @@
     <div class="text-2 font-bold">Quotes</div>
     <div class="text-0 text-muted">Fees included</div>
   </div>
-  <!-- list -->
   <div class="pb-3">
     <div v-for="(quote, index) in quotes" :key="quote.toString()" class="mx-2">
-      <!-- list item -->
       <tippy delay="0" :interactive="false" :arrow="false">
         <QuotesListItem
           :quote="quote"
