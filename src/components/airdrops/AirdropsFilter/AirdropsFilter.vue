@@ -9,7 +9,7 @@
       'text-muted hover:text-text': item.value !== activeFilterItem,
     }"
   >
-    <a @click="setActiveFilter(item)">
+    <a @click="setActiveFilter(item.value)">
       {{ item.text }}
       <span
         v-if="item.value === activeFilterItem && activeFilterItem === 'mine'"
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
@@ -54,8 +54,12 @@ export default defineComponent({
       },
     ];
 
-    const setActiveFilter = (item: any) => {
-      activeFilterItem.value = item.value;
+    onMounted(() => {
+      setActiveFilter(activeFilterItem.value);
+    });
+
+    const setActiveFilter = (activeItem: string) => {
+      activeFilterItem.value = activeItem;
       emit('active-filter', activeFilterItem.value);
     };
 

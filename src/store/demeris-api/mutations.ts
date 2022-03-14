@@ -53,6 +53,7 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
+  [MutationTypes.RESET_AIRDROPS](state: S): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -239,7 +240,7 @@ export const mutations: MutationTree<APIState> & Mutations = {
       tempAirdrop.dateStatus = 'not_started';
     } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
       tempAirdrop.dateStatus = 'ongoing';
-    } else if (tempAirdrop.airdropEndDate.getTime() <= new Date().getTime()) {
+    } else if (new Date(tempAirdrop.airdropEndDate).getTime() <= new Date().getTime()) {
       tempAirdrop.dateStatus = 'ended';
     } else {
       tempAirdrop.dateStatus = 'not_started';
@@ -250,6 +251,9 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_TOKEN_ID_STATUS](state, payload) {
     state.tokenIdLoadingStatus = payload.value;
   },
+  [MutationTypes.RESET_AIRDROPS](state) {
+    state.airdrops = [];
+  },
   [MutationTypes.SET_CHAIN_STATUS](state, payload) {
     if (!isEqual(state.chains[payload.params.chain_name].status, payload.value as boolean)) {
       state.chains[payload.params.chain_name].status = payload.value as boolean;
@@ -257,6 +261,8 @@ export const mutations: MutationTree<APIState> & Mutations = {
   },
   [MutationTypes.INIT](state: APIState, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
+    state.gitEndpoint = payload.gitEndpoint;
+    state.rawGitEndpoint = payload.rawGitEndpoint;
     state.wsEndpoint = payload.wsEndpoint;
     state.hub_chain = payload.hub_chain;
   },

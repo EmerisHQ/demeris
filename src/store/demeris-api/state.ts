@@ -12,6 +12,8 @@ export type TransactionItem = {
 };
 export type APIState = {
   endpoint: string;
+  gitEndpoint: string;
+  rawGitEndpoint: string;
   wsEndpoint: string;
   hub_chain: string;
   balances: Record<string, EmerisAPI.Balances>;
@@ -38,6 +40,8 @@ export type APIState = {
 export function getDefaultState(): APIState {
   return {
     endpoint: '',
+    gitEndpoint: '',
+    rawGitEndpoint: '',
     wsEndpoint: '',
     hub_chain: 'cosmoshub-4',
     balances: {},

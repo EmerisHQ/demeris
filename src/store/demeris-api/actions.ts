@@ -31,6 +31,8 @@ type APIActionContext = {
 
 export type DemerisConfig = {
   endpoint: string;
+  gitEndpoint: string;
+  rawGitEndpoint: string;
   wsEndpoint?: string;
   refreshTime?: number;
   hub_chain?: string;
@@ -146,6 +148,8 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
   ): Promise<void>;
+
+  [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
   [ActionTypes.SET_SELECTED_AIRDROP](
     context: APIActionContext,
     payload: ActionParams<EmerisAirdrops.selectedAirdropReq>,
@@ -728,10 +732,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
     return getters['getTokenPrices'];
   },
-  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
+  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
     try {
       const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
-        `https://api.github.com/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
+        `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
       );
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_GIT_AIRDROPS_LIST });
@@ -741,10 +745,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [ActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+  async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response: AxiosResponse<EmerisAirdrops.Airdrop> = await axios.get(
-        `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+        `${getters['getRawGitEndpoint']}/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
 
       commit(MutationTypes.SET_AIRDROPS, { value: response.data });
@@ -757,6 +761,9 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   },
   [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(MutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
+  },
+  [ActionTypes.RESET_AIRDROPS]({ commit }) {
+    commit(MutationTypes.RESET_AIRDROPS);
   },
   [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
@@ -978,10 +985,18 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
   [ActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, wsEndpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
+    {
+      endpoint,
+      gitEndpoint,
+      rawGitEndpoint,
+      wsEndpoint,
+      hub_chain = 'cosmos-hub',
+      refreshTime = 5000,
+      gas_limit = 500000,
+    },
   ) {
     console.log('Vuex nodule: demeris initialized!');
-    commit(MutationTypes.INIT, { wsEndpoint, endpoint, hub_chain, gas_limit });
+    commit(MutationTypes.INIT, { wsEndpoint, endpoint, gitEndpoint, rawGitEndpoint, hub_chain, gas_limit });
     setInterval(() => {
       dispatch(ActionTypes.STORE_UPDATE);
     }, refreshTime);

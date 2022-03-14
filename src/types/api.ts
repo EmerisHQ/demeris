@@ -389,6 +389,7 @@ export type Airdrop = {
   airdropStartDate: Date;
   airdropEndDate: Date;
   airdropStatus: string;
+  eligibility: string;
   dateStatus: string;
   snapshotDate: string;
   snapshotBlockHeight: string;

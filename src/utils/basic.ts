@@ -4,7 +4,7 @@ import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 import findIndex from 'lodash/findIndex';
 
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { useStore } from '@/utils/useStore';
 
@@ -50,6 +50,7 @@ export async function getOwnAddress({ chain_name }) {
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
+    await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, { subscribe: true, params: { chain_name } });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {

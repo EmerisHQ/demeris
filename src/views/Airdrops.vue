@@ -2,7 +2,7 @@
   <AppLayout>
     <div class="md:flex justify-between">
       <aside class="w-3/12">
-        <AirdropsFilter />
+        <AirdropsFilter @active-filter="setActiveFilter" />
         <AirdropsInfo />
 
         <!-- Quick Info -->
@@ -27,10 +27,10 @@
         <section class="mt-12">
           <AirdropsTable
             :airdrops="airdrops"
+            :active-filter="activeFilter"
             :show-headers="false"
             :limit-rows="10"
             @row-click="openAirdropPage"
-            @active-filter="setActiveFilter"
           />
         </section>
       </div>

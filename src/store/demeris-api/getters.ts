@@ -52,6 +52,8 @@ export type Getters = {
   [GetterTypes.getWebSocketEndpoint](state: APIState): string;
   [GetterTypes.getAllValidPools](state: APIState): Pool[];
   [GetterTypes.getEndpoint](state: APIState): string;
+  [GetterTypes.getGitEndpoint](state: APIState): string;
+  [GetterTypes.getRawGitEndpoint](state: APIState): string;
   [GetterTypes.getSupply](state: APIState, getters): { (params): number };
   [GetterTypes.getAllVerifiedTraces](state: APIState): Record<string, EmerisAPI.VerifyTrace>;
   [GetterTypes.getDexChain](state: APIState): string;
@@ -250,6 +252,12 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   },
   [GetterTypes.getEndpoint]: (state) => {
     return state.endpoint;
+  },
+  [GetterTypes.getGitEndpoint]: (state) => {
+    return state.gitEndpoint;
+  },
+  [GetterTypes.getRawGitEndpoint]: (state) => {
+    return state.rawGitEndpoint;
   },
   [GetterTypes.getWebSocketEndpoint]: (state) => {
     return state.wsEndpoint;

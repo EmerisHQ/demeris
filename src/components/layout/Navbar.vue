@@ -40,11 +40,11 @@
   </nav>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
-import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
-import { typedstore } from '@/store/setup';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -53,31 +53,8 @@ export default defineComponent({
     StarsIcon,
   },
   setup() {
-    let gitAirdropsList = ref([]);
-
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
-
-    const getAllAirdrops = async () => {
-      gitAirdropsList.value = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {
-        subscribe: false,
-      });
-
-      gitAirdropsList.value.forEach((item) => {
-        typedstore.dispatch(GlobalActionTypes.API.GET_AIRDROPS, {
-          subscribe: false,
-          params: {
-            airdropFileName: item.name,
-          },
-        });
-      });
-    };
-
-    onMounted(() => {
-      if (isAirdropsFeatureRunning) {
-        getAllAirdrops();
-      }
-    });
-
+    const typedstore = useStore() as RootStoreTyped;
     const airdrops = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
