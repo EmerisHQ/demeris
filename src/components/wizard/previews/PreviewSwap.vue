@@ -64,16 +64,17 @@
       >
         <AmountDisplay
           :amount="{
-            amount:
+            amount: (
               10 **
               store.getters['demerisAPI/getDenomPrecision']({
                 name: fromCoinBaseDenom,
-              }),
+              })
+            ).toString(),
             denom: data.from.denom,
           }"
         />
         =
-        <AmountDisplay :amount="{ amount: limitPrice, denom: data.to.denom }" />
+        <AmountDisplay :amount="{ amount: limitPrice.toString(), denom: data.to.denom }" />
       </ListItem>
     </ListItem>
 
@@ -99,12 +100,18 @@
         <ul>
           <li>
             <AmountDisplay
-              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
+              :amount="{
+                amount: (((10000 - swapFeeRate * 10000) / 10000) * parseInt(data.from.amount)).toString(),
+                denom: data.from.denom,
+              }"
             />
           </li>
           <li class="mt-0.5">
             <AmountDisplay
-              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+              :amount="{
+                amount: (((10000 - swapFeeRate * 10000) / 10000) * parseInt(data.to.amount)).toString(),
+                denom: data.to.denom,
+              }"
             />
           </li>
         </ul>
@@ -125,6 +132,7 @@ import usePools from '@/composables/usePools';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
@@ -178,7 +186,7 @@ export default defineComponent({
     });
 
     // minReceivedAmount & limit price
-    const minReceivedAmount = ref({});
+    const minReceivedAmount = ref({} as Base.Amount);
     const limitPrice = ref(0);
     const fromCoinBaseDenom = ref('');
     const toCoinBaseDenom = ref('');
@@ -205,11 +213,12 @@ export default defineComponent({
 
         minReceivedAmount.value = {
           denom: toCoinBaseDenom.value,
-          amount:
+          amount: (
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
-            (1 - slippageTolerance.value / 100),
+            (1 - slippageTolerance.value / 100)
+          ).toString(),
         };
 
         limitPrice.value =
@@ -268,7 +277,7 @@ export default defineComponent({
       return props.fees[store.getters[GlobalGetterTypes.API.getDexChain]]['uatom'];
     });
 
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 
     return {
       data,

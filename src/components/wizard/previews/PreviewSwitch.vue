@@ -58,6 +58,7 @@ import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 export default defineComponent({
   name: 'PreviewSwitch',
   components: {
@@ -111,7 +112,7 @@ export default defineComponent({
     const getValidator = (address) => {
       return validators.value.find((x) => x.operator_address == address);
     };
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 
     return {
       store,

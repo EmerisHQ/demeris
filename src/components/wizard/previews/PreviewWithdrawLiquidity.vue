@@ -12,9 +12,15 @@
       </ListItem>
 
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-        <AmountDisplay :amount="{ amount: 10 ** precisions[0], denom: data.pool.reserve_coin_denoms[0] }" /> =
         <AmountDisplay
-          :amount="{ amount: receiveAmount.ratio * 10 ** precisions[0], denom: data.pool.reserve_coin_denoms[1] }"
+          :amount="{ amount: (10 ** precisions[0]).toString(), denom: data.pool.reserve_coin_denoms[0] }"
+        />
+        =
+        <AmountDisplay
+          :amount="{
+            amount: (receiveAmount.ratio * 10 ** precisions[0]).toString(),
+            denom: data.pool.reserve_coin_denoms[1],
+          }"
         />
       </ListItem>
     </div>
