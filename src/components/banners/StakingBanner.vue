@@ -31,6 +31,7 @@ import { useStore } from 'vuex';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
+
 export default defineComponent({
   name: 'StakingBanner',
   components: {

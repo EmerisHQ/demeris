@@ -46,9 +46,12 @@
         </section>
       </div>
 
-      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
+      <aside class="md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
         <LiquiditySwap />
         <Intro class="mt-4" />
+        <FeatureRunningConditional name="STAKING">
+          <PortfolioStakingBanner :balances="balances" class="mt-4" />
+        </FeatureRunningConditional>
       </aside>
     </div>
   </AppLayout>
@@ -62,7 +65,9 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import PortfolioStakingBanner from '@/components/banners/PortfolioStakingBanner.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Intro from '@/components/common/Intro.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -79,6 +84,8 @@ import { featureRunning } from '@/utils/FeatureManager';
 export default {
   name: 'Portfolio',
   components: {
+    FeatureRunningConditional,
+    PortfolioStakingBanner,
     AppLayout,
     Button,
     BuyCryptoBanner,
