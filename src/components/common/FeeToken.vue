@@ -31,4 +31,3 @@ const denomConfig = verifiedDenoms.find((item) => item.name === props.denom);
 
 const ticker = computed(() => (denomConfig && denomConfig.ticker ? denomConfig.ticker : props.denom));
 </script>
-<style lang="scss" scoped></style>
