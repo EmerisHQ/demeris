@@ -298,6 +298,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -327,9 +328,8 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -361,7 +361,7 @@ export default {
 
     const route = useRoute();
     const router = useRouter();
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const { useDenom } = useDenoms();
     const transactionsStore = useTransactionsStore();
     const poolId = computed(() => route.params.id as string);
@@ -406,7 +406,7 @@ export default {
       return true;
     });
 
-    const form = reactive<Record<string, { asset: Balance; amount: string }>>({
+    const form = reactive<Record<string, { asset: EmerisAPI.Balance; amount: string }>>({
       coinA: {
         asset: undefined,
         amount: '',
@@ -829,7 +829,7 @@ export default {
       router.push('/pools');
     };
 
-    const coinSelectHandler = (key: 'coinA' | 'coinB', balance: Balance) => {
+    const coinSelectHandler = (key: 'coinA' | 'coinB', balance: EmerisAPI.Balance) => {
       state.isMaximumAmountChecked = false;
       form[key].asset = balance;
     };
@@ -869,7 +869,7 @@ export default {
       goToStep('review');
     };
 
-    const toggleChainsModal = (asset?: Balance, source: 'coinA' | 'coinB' = 'coinA') => {
+    const toggleChainsModal = (asset?: EmerisAPI.Balance, source: 'coinA' | 'coinB' = 'coinA') => {
       if (asset) {
         coinSelectHandler(source, asset);
       }

@@ -150,9 +150,10 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -168,8 +169,7 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalGetterTypes } from '@/store';
-import { Balances } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -221,7 +221,7 @@ export default defineComponent({
       default: undefined,
     },
     balances: {
-      type: Array as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
   },
@@ -229,22 +229,25 @@ export default defineComponent({
   emits: ['row-click'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const currentLimit = ref(props.limitRows);
     const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
-
-    const allBalances = computed<Balances>(() => {
-      let balances = props.balances;
+    const propsRef = toRefs(props);
+    const allBalances = computed(() => {
+      let balances = propsRef.balances.value;
       if (props.showAllAssets) {
         balances = [
-          ...(props.balances as Balances),
+          ...propsRef.balances.value,
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
             on_chain: denom.chain_name,
             amount: '0' + denom.name,
+            verified: true,
+            address: '',
+            ibc: {},
           })),
         ];
       }
@@ -255,7 +258,7 @@ export default defineComponent({
             return balance;
           }
         });
-        return balances as Balances;
+        return balances;
       }
 
       if (props.hideZeroAssets) {
@@ -265,7 +268,7 @@ export default defineComponent({
           }
         });
       }
-      return balances as Balances;
+      return balances;
     });
 
     const balancesByAsset = computed(() => {

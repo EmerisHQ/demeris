@@ -95,14 +95,14 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           if (sourceBalance) {
             const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
-            const fee = parseInt(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]);
+            const fee = Math.ceil(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]);
             const txAmount = parseInt((transaction.data as IBCBackwardsData).amount.amount);
             if (txAmount + fee > amount) {
               if (txAmount === amount) {
                 transaction.feeToAdd = [];
                 transaction.addFee = false;
               } else {
-                transaction.feeToAdd[0].amount[context.input.gasPriceLevel] = amount - fee + '';
+                transaction.feeToAdd[0].amount[context.input.gasPriceLevel] = amount - fee;
               }
             }
           }
@@ -114,7 +114,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           if (baseDenomBalance) {
             const amount = parseCoins(baseDenomBalance.amount)[0];
-            if (parseInt(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]) < parseInt(amount.amount)) {
+            if (transaction.feeToAdd[0].amount[context.input.gasPriceLevel] < parseInt(amount.amount)) {
               transaction.feeToAdd = [];
               transaction.addFee = false;
             }

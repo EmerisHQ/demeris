@@ -12,8 +12,7 @@ import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
 import usePools from '@/composables/usePools';
-import { GlobalGetterTypes } from '@/store';
-import { VerifiedDenoms } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'LPAsset',
@@ -27,9 +26,9 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const propsRef = toRefs(props);
-    const verifiedDenoms = computed<VerifiedDenoms>(() => {
+    const verifiedDenoms = computed(() => {
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
     const validPool = computed(() => {

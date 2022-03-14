@@ -46,12 +46,12 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { defineComponent, PropType } from 'vue';
 
 import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Modal from '@/components/ui/Modal.vue';
-import { Airdrop } from '@/types/api';
 
 export default defineComponent({
   name: 'AirdropClaimModal',
@@ -66,7 +66,7 @@ export default defineComponent({
       default: false,
     },
     selectedAirdrop: {
-      type: Object as PropType<Airdrop>,
+      type: Object as PropType<EmerisAirdrops.Airdrop>,
       default: null,
     },
   },

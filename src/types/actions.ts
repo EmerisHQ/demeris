@@ -1,6 +1,6 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { EmerisBase } from '@emeris/types';
 
-import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
@@ -251,7 +251,7 @@ export type MoveAssetsForm = {
   to_chain: string;
 };
 export type FeeWDenom = {
-  amount: API.Fee;
+  amount: EmerisBase.GasPrice;
   denom: string;
   chain_name: string;
 };

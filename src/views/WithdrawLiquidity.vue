@@ -202,6 +202,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import { computed, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
@@ -227,9 +228,8 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
@@ -262,7 +262,7 @@ export default {
 
     const route = useRoute();
     const router = useRouter();
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const transactionsStore = useTransactionsStore();
 
     const actionSteps = ref([]);
@@ -560,7 +560,7 @@ export default {
       updateTotalCurrencyPrice();
     };
 
-    const toggleChainsModal = (asset?: Balance) => {
+    const toggleChainsModal = (asset?: EmerisAPI.Balance) => {
       if (asset) {
         state.selectedAsset = asset;
       }

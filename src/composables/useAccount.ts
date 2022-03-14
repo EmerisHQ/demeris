@@ -1,9 +1,9 @@
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -74,7 +74,9 @@ export default function useAccount() {
   const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
 
   const getNativeBalances = (
-    { balances, aggregate }: { balances?: Balances | Ref<Balances>; aggregate?: boolean } = { balances: [] },
+    { balances, aggregate }: { balances?: EmerisAPI.Balances | Ref<EmerisAPI.Balances>; aggregate?: boolean } = {
+      balances: [],
+    },
   ) => {
     const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
     const result = [];
@@ -125,7 +127,7 @@ export default function useAccount() {
     );
   };
 
-  const stakingBalances = computed<StakingBalances>(() => {
+  const stakingBalances = computed(() => {
     return store.getters[GlobalGetterTypes.API.getAllStakingBalances] || [];
   });
 
@@ -137,7 +139,7 @@ export default function useAccount() {
     });
   };
 
-  const unbondingDelegations = computed<UnbondingDelegations>(() => {
+  const unbondingDelegations = computed(() => {
     return store.getters[GlobalGetterTypes.API.getAllUnbondingDelegations] || [];
   });
   const unbondingDelegationsByChain = (chain_name: string) => {
@@ -148,7 +150,7 @@ export default function useAccount() {
     });
   };
 
-  const orderBalancesByPrice = (balances: Balances) => {
+  const orderBalancesByPrice = (balances: EmerisAPI.Balances) => {
     return balances
       .map((item) => {
         const amount = parseCoins(item.amount)[0].amount;

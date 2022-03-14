@@ -3,7 +3,6 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { FeeTotals, FeeWarning, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { TxParams, TxResponse } from '@/types/tx';
 import {
   chainStatusForSteps,
@@ -59,7 +58,7 @@ export interface TransactionProcessContext {
 }
 
 export type TransactionProcessEvents =
-  | ({ type: 'SET_DATA'; balances: Balance[] } & ContextInputSchema)
+  | ({ type: 'SET_DATA'; balances: EmerisAPI.Balance[] } & ContextInputSchema)
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -373,7 +372,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const fee = {
           amount: [
             {
-              amount: '' + parseFloat(feeResult[0].amount[context.input.gasPriceLevel]) * context.input.gasLimit,
+              amount: '' + feeResult[0].amount[context.input.gasPriceLevel] * context.input.gasLimit,
               denom: feeResult[0].denom,
             },
           ],

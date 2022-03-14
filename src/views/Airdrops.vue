@@ -39,6 +39,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -52,7 +53,6 @@ import Search from '@/components/common/Search.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { typedstore } from '@/store/setup';
-import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -87,7 +87,7 @@ export default {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
-    const openAirdropPage = (airdrop: Airdrop) => {
+    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
       router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
       typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {

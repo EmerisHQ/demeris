@@ -87,7 +87,6 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Balance } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -168,7 +167,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    const getUnavailableChains = ({ base_denom, on_chain }: Partial<Balance>) => {
+    const getUnavailableChains = ({ base_denom, on_chain }: Partial<EmerisAPI.Balance>) => {
       const result = [];
       let uniqueChainsList: string[] = [on_chain];
 

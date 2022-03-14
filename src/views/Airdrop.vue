@@ -85,6 +85,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -99,7 +100,6 @@ import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
 import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
 export default defineComponent({
@@ -126,7 +126,7 @@ export default defineComponent({
 
     const router = useRouter();
 
-    const openAirdropPage = (airdrop: Airdrop) => {
+    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
       router.push('/airdrop');
       typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {

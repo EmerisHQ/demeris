@@ -160,6 +160,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -182,9 +183,8 @@ import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { SwapAction } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
@@ -210,7 +210,7 @@ export default defineComponent({
 
   props: {
     defaultAsset: {
-      type: Object as PropType<Balance>,
+      type: Object as PropType<EmerisAPI.Balance>,
       default: undefined,
     },
   },
@@ -229,7 +229,7 @@ export default defineComponent({
     const isInit = ref(false);
     const slippage = ref(0);
     const { t } = useI18n({ useScope: 'global' });
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const transactionsStore = useTransactionsStore();
     const isFinished = ref(false); // keep track of txstepsmodal status
     const isSignedIn = computed(() => {
@@ -727,9 +727,8 @@ export default defineComponent({
             parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(
                 10,
-                parseInt(
-                  store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
-                ),
+
+                store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
               )
             ? true
             : false;
@@ -867,7 +866,7 @@ export default defineComponent({
         if (data.selectedPoolData) {
           const minimalDecimal = Math.pow(
             10,
-            parseInt(store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom })),
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }),
           );
 
           const reserveCoin =
@@ -994,14 +993,14 @@ export default defineComponent({
             params: {
               from: {
                 amount: {
-                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision)))),
+                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision))),
                   denom: data.payCoinData.denom,
                 },
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
                 amount: {
-                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision)))),
+                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision))),
                   denom: data.receiveCoinData.denom,
                 },
                 chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
@@ -1057,11 +1056,10 @@ export default defineComponent({
     function setMax() {
       const precisionDecimal = Math.pow(
         10,
-        parseInt(
-          store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-            name: data.payCoinData.base_denom,
-          }) ?? 6,
-        ),
+
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: data.payCoinData.base_denom,
+        }) ?? 6,
       );
 
       if (data.selectedPoolData) {
@@ -1117,9 +1115,8 @@ export default defineComponent({
         if (e.includes('Pay')) {
           const receiveCoinPrecisionDecimalDigits = Math.pow(
             10,
-            parseInt(
-              store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
-            ),
+
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
           );
           data.receiveCoinAmount = parseFloat(
             String(

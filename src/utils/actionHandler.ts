@@ -75,7 +75,7 @@ export async function msgFromStepTransaction(
     if (stepTx.addFee) {
       fromAmount = (
         parseInt(fromAmount) +
-        parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * typedstore.getters[GlobalGetterTypes.USER.getGasLimit]
+        Math.ceil(stepTx.feeToAdd[0].amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit])
       ).toString();
     }
     const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
@@ -655,9 +655,7 @@ export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Emeris
   const feeOption = fees[0];
   const used = {
     amount: {
-      amount: (
-        parseFloat(feeOption.amount[gasPriceLevel]) * typedstore.getters[GlobalGetterTypes.USER.getGasLimit]
-      ).toString(),
+      amount: (feeOption.amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit]).toString(),
       denom: feeOption.denom,
     },
     chain_name: feeOption.chain_name,
@@ -1210,8 +1208,7 @@ export async function validateStepFeeBalances(
             let additionalFee = 0;
             if (stepTx.addFee) {
               additionalFee =
-                parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) *
-                typedstore.getters[GlobalGetterTypes.USER.getGasLimit];
+                stepTx.feeToAdd[0].amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit];
             }
             if (rcptBalance) {
               const newIbcAmount =
@@ -1623,8 +1620,7 @@ export async function validateStepsFeeBalances(
               let additionalFee = 0;
               if (stepTx.addFee) {
                 additionalFee =
-                  parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) *
-                  typedstore.getters[GlobalGetterTypes.USER.getGasLimit];
+                  stepTx.feeToAdd[0].amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit];
               }
 
               if (rcptBalance) {

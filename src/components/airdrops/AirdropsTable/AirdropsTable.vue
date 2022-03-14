@@ -64,12 +64,12 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { defineComponent, PropType, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import { Airdrop } from '@/types/api';
 
 export default defineComponent({
   name: 'AirdropsTable',
@@ -90,7 +90,7 @@ export default defineComponent({
       default: undefined,
     },
     airdrops: {
-      type: Array as PropType<Airdrop[]>,
+      type: Array as PropType<EmerisAirdrops.Airdrop[]>,
       required: true,
     },
   },
@@ -98,7 +98,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const keyword = ref<string>('');
 
-    const handleClick = (airdrop: Airdrop) => {
+    const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
       emit('row-click', airdrop);
     };
 

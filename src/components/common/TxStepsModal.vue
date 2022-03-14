@@ -457,14 +457,14 @@ export default defineComponent({
             });
             if (sourceBalance) {
               const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
-              const fee = parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]);
+              const fee = Math.ceil(stepTx.feeToAdd[0].amount[gasPriceLevel.value]);
               const txAmount = parseInt((stepTx.data as IBCBackwardsData).amount.amount);
               if (txAmount + fee > amount) {
                 if (txAmount == amount) {
                   stepTx.feeToAdd = [];
                   stepTx.addFee = false;
                 } else {
-                  stepTx.feeToAdd[0].amount[gasPriceLevel.value] = amount - fee + '';
+                  stepTx.feeToAdd[0].amount[gasPriceLevel.value] = amount - fee;
                 }
               }
             }
@@ -478,7 +478,7 @@ export default defineComponent({
             });
             if (baseDenomBalance) {
               const amount = parseCoins(baseDenomBalance.amount)[0];
-              if (parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]) < parseInt(amount.amount)) {
+              if (Math.ceil(stepTx.feeToAdd[0].amount[gasPriceLevel.value]) < parseInt(amount.amount)) {
                 stepTx.feeToAdd = [];
                 stepTx.addFee = false;
               }
@@ -685,7 +685,7 @@ export default defineComponent({
                   {
                     amount:
                       '' +
-                      parseFloat(feeOptions[0].amount[gasPriceLevel.value]) *
+                      feeOptions[0].amount[gasPriceLevel.value] *
                         typedstore.getters[GlobalGetterTypes.USER.getGasLimit],
                     denom: feeOptions[0].denom,
                   },

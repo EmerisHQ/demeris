@@ -163,7 +163,7 @@ import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -182,7 +182,6 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { GasPriceLevel, SendAddressForm, Step } from '@/types/actions';
-import { Balances } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -206,7 +205,7 @@ export default defineComponent({
 
   props: {
     balances: {
-      type: Object as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
     fees: {
@@ -226,10 +225,10 @@ export default defineComponent({
     const router = useRouter();
     const form = inject<SendAddressForm>('transferForm');
     const { nativeBalances } = useAccount();
-
+    const propsRef = toRefs(props);
     const availableBalances = computed(() => {
-      if (props.balances.length) {
-        return props.balances;
+      if (propsRef.balances.value.length) {
+        return propsRef.balances.value;
       }
 
       return nativeBalances.value;
