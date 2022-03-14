@@ -17,8 +17,8 @@
             {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
           </div>
           <div>
-            <AmountDisplay :amount="{ amount: exchangeAmount.coinA, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: data.coinB.denom }" />
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinA + '', denom: data.coinA.denom }" /> =
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinB + '', denom: data.coinB.denom }" />
           </div>
         </div>
       </ListItem>
@@ -60,7 +60,7 @@
         <div class="text-right">
           <AmountDisplay
             class="font-medium text-1"
-            :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }"
+            :amount="{ amount: hasPool ? receiveAmount + '' : '1000000', denom: poolInfo.denom }"
           />
         </div>
         <CircleSymbol v-if="poolInfo.denoms.length" :pool-denoms="poolInfo.denoms" size="md" class="ml-3" />

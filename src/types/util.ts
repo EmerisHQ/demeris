@@ -23,3 +23,4 @@ export type Namespaced<T, N extends string> = {
 };
 
 export type DesignSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type ModalVariant = 'dialog' | 'center' | 'takeover' | 'bottom' | 'full';

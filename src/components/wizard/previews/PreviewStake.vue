@@ -26,7 +26,8 @@
             <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
             <div v-if="!isReceipt"><AmountDisplay :amount="stake.amount" /></div>
             <div v-if="getStakingBalance(stake.validatorAddress) != 0" class="text-muted -text-1">
-              Staked <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress), denom: baseDenom }" />
+              Staked
+              <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress) + '', denom: baseDenom }" />
             </div>
           </div>
           <div>
@@ -65,6 +66,7 @@ import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
@@ -126,7 +128,7 @@ export default defineComponent({
     const getValidatorMoniker = (address) => {
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
     };
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
     const getValidator = (address) => {
       return validators.value.find((x) => x.operator_address == address);
     };
