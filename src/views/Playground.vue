@@ -13,9 +13,16 @@
   <div class="max-w-5xl w-80 shadow-dropdown mt-20 mx-auto">
     <QuotesList
       :quotes="[
-        { dex: 'gravity', amount: 115.49, denom: 'osmo', numberOfTransactions: 1, usdAmount: 12322 },
-        { dex: 'gravity', amount: 115.49, denom: 'osmo', numberOfTransactions: 1, usdAmount: 12322 },
-        { dex: 'gravity', amount: 115.49, denom: 'osmo', numberOfTransactions: 1, usdAmount: 12322 },
+        { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 1, usdAmount: 12322 },
+        {
+          dex: 'gravity',
+          amount: 115.49,
+          denom: 'uosmo',
+          numberOfTransactions: 1,
+          usdAmount: 12322,
+          fee: { amount: 0.02, denom: 'uosmo' },
+        },
+        { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 1, usdAmount: 12322 },
       ]"
     />
   </div>
