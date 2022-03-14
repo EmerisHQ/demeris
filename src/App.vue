@@ -21,9 +21,9 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
@@ -83,7 +83,6 @@ export default defineComponent({
     const apistore = store as TypedAPIStore;
     const userstore = store as TypedUSERStore;
     const initialized = ref(false);
-    const route = useRoute();
     const router = useRouter();
     const { pools: _pools } = usePoolsFactory();
     const { t } = useI18n({ useScope: 'global' });
@@ -204,12 +203,9 @@ export default defineComponent({
         });
 
         initialized.value = true;
-        const fullPath = computed(() => route.fullPath);
-        watch(fullPath, (newFullPath) => {
-          if (newFullPath !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
-            router.push({ name: 'Welcome', params: { originUrl: newFullPath } });
-          }
-        });
+        if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
+          router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
+        }
       });
     } else {
       onMounted(async () => {
