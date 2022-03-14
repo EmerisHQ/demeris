@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.16.0",
-    "@emeris/types": "^0.0.25",
+    "@emeris/types": "^0.0.26",
     "@keplr-wallet/types": "^0.8.11",
     "@pinia/testing": "^0.0.8",
     "@rushstack/eslint-patch": "^1.1.0",
