@@ -1,5 +1,6 @@
+import { EmerisBase } from '@emeris/types';
+
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { AmountWithMeta } from '@/types/base';
 
 import { useStore } from './useStore';
 
@@ -56,7 +57,7 @@ export async function addChain(chain_name: string): Promise<void> {
         bech32PrefixConsPub: chain.node_info.bech32_config.cons_pub,
       },
       currencies: chain.denoms.map((x) => {
-        const y: AmountWithMeta = {
+        const y: EmerisBase.AmountWithMeta = {
           amount: '0',
           denom: '',
           coinDenom: '',
@@ -75,7 +76,7 @@ export async function addChain(chain_name: string): Promise<void> {
       feeCurrencies: chain.denoms
         .filter((x) => x.fee_token)
         .map((x) => {
-          const y: AmountWithMeta = {
+          const y: EmerisBase.AmountWithMeta = {
             amount: '0',
             denom: '',
             coinDenom: '',

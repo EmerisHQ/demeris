@@ -1,5 +1,6 @@
+import { EmerisBase } from '@emeris/types';
+
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Amount } from '@/types/base';
 import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
 import { generateDenomHash, getChannel, isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -9,7 +10,7 @@ export async function move({
   chain_name,
   destination_chain_name,
 }: {
-  amount: Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
   destination_chain_name: string;
 }) {
@@ -17,10 +18,8 @@ export async function move({
   const result = {
     steps: [],
     output: {
-      amount: {
-        denom: '',
-        amount: '0',
-      },
+      denom: '',
+      amount: '0',
       chain_name: '',
     },
     mustAddFee: false,
@@ -28,7 +27,7 @@ export async function move({
   if (isNative(amount.denom)) {
     // If NOT an IBC denom
     if (chain_name == destination_chain_name) {
-      result.output = { amount, chain_name };
+      result.output = { amount: amount.amount, denom: amount.denom, chain_name };
       return result;
     } else {
       if (typedstore.getters[GlobalGetterTypes.API.isVerified]({ denom: amount.denom, chain_name })) {
@@ -55,10 +54,8 @@ export async function move({
           destination_chain_name: chain_name,
         });
         result.output = {
-          amount: {
-            amount: amount.amount,
-            denom: generateDenomHash(invPrimaryChannel, amount.denom),
-          },
+          amount: amount.amount,
+          denom: generateDenomHash(invPrimaryChannel, amount.denom),
           chain_name: destination_chain_name,
         };
         return result;
@@ -84,7 +81,7 @@ export async function move({
       destination_chain_name: verifyTrace.trace[0].counterparty_name,
     });
     if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-      result.output = { amount, chain_name };
+      result.output = { amount: amount.amount, denom: amount.denom, chain_name };
       return result;
     } else {
       result.steps.push({
@@ -119,10 +116,8 @@ export async function move({
       });
 
       result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
-        },
+        amount: amount.amount,
+        denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
         chain_name: destination_chain_name,
       };
       return result;
@@ -169,10 +164,8 @@ export async function move({
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         });
         result.output = {
-          amount: {
-            amount: amount.amount,
-            denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
-          },
+          amount: amount.amount,
+          denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
           chain_name: destination_chain_name,
         };
       } else {
@@ -188,10 +181,8 @@ export async function move({
           },
         });
         result.output = {
-          amount: {
-            amount: amount.amount,
-            denom: verifyTrace.base_denom,
-          },
+          amount: amount.amount,
+          denom: verifyTrace.base_denom,
           chain_name: destination_chain_name,
         };
       }

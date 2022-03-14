@@ -151,12 +151,10 @@ export default defineComponent({
           validatorSrcAddress: form.validatorAddress,
           validatorDstAddress: form.toValidatorAddress,
           amount: {
-            amount: {
-              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
-                .multipliedBy(10 ** precision.value)
-                .toString(),
-              denom: form.denom,
-            },
+            amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+              .multipliedBy(10 ** precision.value)
+              .toString(),
+            denom: form.denom,
             chain_name: form.chain_name,
           },
         },

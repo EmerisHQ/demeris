@@ -1,5 +1,6 @@
+import { EmerisBase } from '@emeris/types';
+
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Amount } from '@/types/base';
 import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
 import { getChannel, isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -10,7 +11,7 @@ export async function transfer({
   destination_chain_name,
   to_address,
 }: {
-  amount: Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
   destination_chain_name: string;
   to_address: string;
@@ -20,10 +21,8 @@ export async function transfer({
     steps: [],
     mustAddFee: false,
     output: {
-      amount: {
-        denom: '',
-        amount: '0',
-      },
+      denom: '',
+      amount: '0',
       chain_name: '',
     },
   };

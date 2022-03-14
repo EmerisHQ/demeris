@@ -120,7 +120,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         const swapStep = await swap({
           from: {
             amount: params.from.amount.amount,
-            denom: transferToHubStep.output.amount.denom,
+            denom: transferToHubStep.output.denom,
           },
           to: {
             amount: params.to.amount.amount,
@@ -173,8 +173,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
 
         const createPoolStep = await createPool({
-          coinA: transferCoinAtoHubCreate.output.amount,
-          coinB: transferCoinBtoHubCreate.output.amount,
+          coinA: { amount: transferCoinAtoHubCreate.output.amount, denom: transferCoinAtoHubCreate.output.denom },
+          coinB: { amount: transferCoinBtoHubCreate.output.amount, denom: transferCoinBtoHubCreate.output.denom },
         });
         steps.push({
           name: 'createpool',
@@ -223,8 +223,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
         const addLiquidityStep = await addLiquidity({
           pool_id: params.pool_id,
-          coinA: transferCoinAtoHub.output.amount,
-          coinB: transferCoinBtoHub.output.amount,
+          coinA: { amount: transferCoinAtoHubCreate.output.amount, denom: transferCoinAtoHubCreate.output.denom },
+          coinB: { amount: transferCoinBtoHubCreate.output.amount, denom: transferCoinBtoHubCreate.output.denom },
         });
         steps.push({
           name: 'addliquidity',
@@ -253,7 +253,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
         const withdrawLiquidityStep = await withdrawLiquidity({
           pool_id: params.pool_id,
-          poolCoin: transferPoolCointoHub.output.amount,
+          poolCoin: { amount: transferPoolCointoHub.output.amount, denom: transferPoolCointoHub.output.denom },
         });
         steps.push({
           name: 'withdrawliquidity',
@@ -304,8 +304,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
                 validatorSrcAddress: params.validatorSrcAddress,
                 validatorDstAddress: params.validatorDstAddress,
                 amount: {
-                  amount: (params as Actions.RestakeParams).amount.amount.amount,
-                  denom: params.amount.amount.denom,
+                  amount: (params as Actions.RestakeParams).amount.amount,
+                  denom: params.amount.denom,
                 },
                 chain_name: params.amount.chain_name,
               },
@@ -334,7 +334,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
         const stakingStep = await stake({
           validatorAddress: params.validatorAddress,
-          amount: transferStakingCoinToNative.output.amount,
+          amount: {
+            amount: transferStakingCoinToNative.output.amount,
+            denom: transferStakingCoinToNative.output.denom,
+          },
         });
         steps.push({
           name: 'stake',

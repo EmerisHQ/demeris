@@ -78,7 +78,6 @@ import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 
 export default defineComponent({
   name: 'PreviewWithdrawLiquidity',
@@ -97,7 +96,7 @@ export default defineComponent({
       default: undefined,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     response: {

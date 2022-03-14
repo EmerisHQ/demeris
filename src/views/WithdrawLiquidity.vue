@@ -90,7 +90,7 @@
               <button
                 v-if="state.selectedAsset"
                 class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
-                @click="toggleChainsModal(null, 'coinA')"
+                @click="toggleChainsModal(null)"
               >
                 <div>
                   {{ $t('pages.withdrawLiquidity.from') }}
@@ -137,13 +137,13 @@
               <ListItem inset size="md" label="Pool price">
                 <AmountDisplay
                   :amount="{
-                    amount: 10 ** store.getters['demerisAPI/getDenomPrecision']({ name: reserveBaseDenoms[0] }),
+                    amount: (10 ** precisionA).toString(),
                     denom: reserveBaseDenoms[0],
                   }"
                 />
                 =
                 <AmountDisplay
-                  :amount="{ amount: exchangeAmount * 10 ** precisionDiff, denom: reserveBaseDenoms[1] }"
+                  :amount="{ amount: (exchangeAmount * 10 ** precisionDiff).toString(), denom: reserveBaseDenoms[1] }"
                 />
               </ListItem>
               <div class="mt-6 mb-2">
@@ -203,8 +203,8 @@
 
 <script lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { computed, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { computed, defineComponent, reactive, Ref, ref, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -233,7 +233,7 @@ import { WithdrawLiquidityAction } from '@/types/actions';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
-export default {
+export default defineComponent({
   name: 'WithdrawLiquidity',
   components: {
     Alert,
@@ -603,10 +603,8 @@ export default {
         params: {
           pool_id: BigInt(pool.value.id),
           poolCoin: {
-            amount: {
-              denom: state.selectedAsset.base_denom,
-              amount: new BigNumber(state.amount).shiftedBy(6).toString(),
-            },
+            denom: state.selectedAsset.base_denom,
+            amount: new BigNumber(state.amount).shiftedBy(6).toString(),
             chain_name: state.selectedAsset.on_chain,
           },
         },
@@ -694,11 +692,11 @@ export default {
       goBack,
       onClose,
       resetHandler,
-      store,
+      precisionA,
       precisionDiff,
     };
   },
-};
+});
 </script>
 
 <style lang="scss"></style>

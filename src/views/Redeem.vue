@@ -162,7 +162,7 @@ export default defineComponent({
               name: 'redeem',
               params: [
                 {
-                  amount: parseCoins(balance.amount)[0],
+                  ...parseCoins(balance.amount)[0],
                   chain_name: balance.on_chain,
                 },
               ],

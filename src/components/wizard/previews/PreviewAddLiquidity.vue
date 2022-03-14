@@ -94,7 +94,6 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -115,7 +114,7 @@ export default defineComponent({
       default: undefined,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     response: {

@@ -111,12 +111,10 @@ export default defineComponent({
         params: {
           validatorAddress: validatorObj.value.operator_address,
           amount: {
-            amount: {
-              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
-                .multipliedBy(10 ** precision.value)
-                .toString(),
-              denom: baseDenom,
-            },
+            amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+              .multipliedBy(10 ** precision.value)
+              .toString(),
+            denom: baseDenom,
             chain_name: validatorObj.value.chain_name,
           },
         },

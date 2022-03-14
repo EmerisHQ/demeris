@@ -1,13 +1,17 @@
+import { EmerisBase } from '@emeris/types';
 import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
 
-import { GlobalGetterTypes } from '@/store';
-import { Amount } from '@/types/base';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
-export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolean): ComputedRef<number> {
-  const store = useStore();
-  const denom = ref((amount as Amount).denom);
+export default function (
+  amount: EmerisBase.ChainAmount | EmerisBase.Amount,
+  showZero?: boolean,
+  autoUpdate?: boolean,
+): ComputedRef<number> {
+  const store = useStore() as RootStoreTyped;
+  const denom = ref(amount.denom);
   const isLoaded = ref(false);
 
   const price = ref();
@@ -20,11 +24,11 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
     const precision =
       store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: denom.value,
-      }) ?? '6';
+      }) ?? 6;
     let value;
 
-    if ((amount as Amount).amount) {
-      value = (price.value * parseInt((amount as Amount).amount)) / Math.pow(10, parseInt(precision));
+    if (amount.amount) {
+      value = (price.value * parseInt(amount.amount)) / Math.pow(10, precision);
     } else {
       value = 0;
     }
@@ -33,11 +37,11 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
   });
 
   watch(
-    () => amount as Amount,
+    () => amount,
     async (value) => {
-      denom.value = value.chain_name
-        ? await getBaseDenom((value as Amount).denom, value.chain_name)
-        : await getBaseDenom((value as Amount).denom);
+      denom.value = (value as EmerisBase.ChainAmount).chain_name
+        ? await getBaseDenom(value.denom, (value as EmerisBase.ChainAmount).chain_name)
+        : await getBaseDenom(value.denom);
       if (!isLoaded.value) {
         price.value = priceObserver.value;
       }
@@ -50,7 +54,7 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
     () => [autoUpdate, amount, priceObserver],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ([autoUpdate, amount], [_, oldAmount]) => {
-      if (autoUpdate || (amount as Amount).denom !== (oldAmount as Amount).denom) {
+      if (autoUpdate || (amount as EmerisBase.Amount).denom !== (oldAmount as EmerisBase.Amount).denom) {
         nextTick(() => {
           price.value = priceObserver.value;
         });

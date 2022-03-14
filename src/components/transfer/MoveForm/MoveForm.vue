@@ -122,10 +122,8 @@ export default defineComponent({
           name: 'move',
           params: {
             from: {
-              amount: {
-                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                denom: await form.balance.denom,
-              },
+              amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+              denom: await form.balance.denom,
               chain_name: form.on_chain,
             },
             to: {

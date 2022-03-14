@@ -5,7 +5,6 @@ import Long from 'long';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
-import { ChainAmount } from '@/types/base';
 import { useStore } from '@/utils/useStore';
 
 import {
@@ -650,14 +649,15 @@ export async function feeForSteps(
   return feeTotals;
 }
 
-export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: EmerisFees.GasPriceLevel): ChainAmount {
+export function getUsedFee(
+  fees: Array<Actions.FeeWDenom>,
+  gasPriceLevel: EmerisFees.GasPriceLevel,
+): EmerisBase.ChainAmount {
   const typedstore = useStore() as RootStoreTyped;
   const feeOption = fees[0];
   const used = {
-    amount: {
-      amount: (feeOption.amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit]).toString(),
-      denom: feeOption.denom,
-    },
+    amount: (feeOption.amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit]).toString(),
+    denom: feeOption.denom,
     chain_name: feeOption.chain_name,
   };
   return used;

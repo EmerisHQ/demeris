@@ -300,7 +300,7 @@
 <script lang="ts">
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
+import { computed, defineComponent, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -335,7 +335,7 @@ import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 
-export default {
+export default defineComponent({
   name: 'AddLiquidity',
   components: {
     Alert,
@@ -761,17 +761,14 @@ export default {
       }
       const baseParams = {
         coinA: {
-          amount: {
-            amount: new BigNumber(form.coinA.amount).shiftedBy(precisions[0]).toString(),
-            denom: coinAdenom,
-          },
+          amount: new BigNumber(form.coinA.amount).shiftedBy(precisions[0]).toString(),
+          denom: coinAdenom,
+
           chain_name: form.coinA.asset.on_chain,
         },
         coinB: {
-          amount: {
-            amount: new BigNumber(form.coinB.amount).shiftedBy(precisions[1]).toString(),
-            denom: coinBdenom,
-          },
+          amount: new BigNumber(form.coinB.amount).shiftedBy(precisions[1]).toString(),
+          denom: coinBdenom,
           chain_name: form.coinB.asset.on_chain,
         },
       };
@@ -1156,7 +1153,7 @@ export default {
       isReversePairName,
     };
   },
-};
+});
 </script>
 
 <style lang="scss">

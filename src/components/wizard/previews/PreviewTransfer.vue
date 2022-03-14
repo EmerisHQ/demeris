@@ -102,6 +102,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -112,7 +113,6 @@ import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { getOwnAddress } from '@/utils/basic';
 
@@ -214,7 +214,7 @@ export default defineComponent({
         address: '',
         amount: fromAmount,
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
-        denom: (firstTransaction.data.amount as Base.Amount).denom,
+        denom: (firstTransaction.data.amount as EmerisBase.Amount).denom,
       };
 
       const to = {
@@ -224,7 +224,7 @@ export default defineComponent({
           lastTransaction.data.to_chain ||
           lastTransaction.data.destination_chain_name ||
           lastTransaction.data.chain_name,
-        denom: (lastTransaction.data.amount as Base.Amount).denom,
+        denom: (lastTransaction.data.amount as EmerisBase.Amount).denom,
       };
 
       //from.address = store.getters['demerisAPI/getOwnAddress']({ chain_name: from.chain });

@@ -138,10 +138,8 @@ export default defineComponent({
             memo: form.memo,
             params: {
               from: {
-                amount: {
-                  amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                  denom: form.balance.denom,
-                },
+                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+                denom: form.balance.denom,
                 chain_name: form.chain_name,
               },
               to: {

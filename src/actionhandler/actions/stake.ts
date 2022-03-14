@@ -1,16 +1,15 @@
+import { EmerisBase } from '@emeris/types';
+
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { Amount } from '@/types/base';
 import { useStore } from '@/utils/useStore';
 
-export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: Amount }) {
+export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: EmerisBase.Amount }) {
   const typedstore = useStore() as RootStoreTyped;
   const result = {
     steps: [],
     output: {
-      amount: {
-        denom: '',
-        amount: 0,
-      },
+      denom: '',
+      amount: 0,
       chain_name: '',
     },
   };

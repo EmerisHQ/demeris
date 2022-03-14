@@ -120,6 +120,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -131,7 +132,6 @@ import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
@@ -152,7 +152,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {
@@ -186,7 +186,7 @@ export default defineComponent({
     });
 
     // minReceivedAmount & limit price
-    const minReceivedAmount = ref({} as Base.Amount);
+    const minReceivedAmount = ref({} as EmerisBase.Amount);
     const limitPrice = ref(0);
     const fromCoinBaseDenom = ref('');
     const toCoinBaseDenom = ref('');

@@ -138,12 +138,8 @@ export default defineComponent({
           return {
             validatorAddress: x.validatorAddress,
             amount: {
-              amount: {
-                amount: new BigNumber(x.amount != '' ? x.amount ?? 0 : 0)
-                  .multipliedBy(10 ** precision.value)
-                  .toString(),
-                denom: x.denom,
-              },
+              amount: new BigNumber(x.amount != '' ? x.amount ?? 0 : 0).multipliedBy(10 ** precision.value).toString(),
+              denom: x.denom,
               chain_name: x.from_chain,
             },
             chain_name: x.chain_name,

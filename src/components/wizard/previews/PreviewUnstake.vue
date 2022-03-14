@@ -54,6 +54,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
@@ -65,7 +66,7 @@ import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+
 export default defineComponent({
   name: 'PreviewUnstake',
   components: {
@@ -84,7 +85,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {

@@ -988,26 +988,24 @@ export default defineComponent({
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
           const toPrecision =
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData.base_denom }) || 6;
-          const swapParams = {
+          const swapParams: SwapAction = {
             name: 'swap',
             params: {
               from: {
-                amount: {
-                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision))),
-                  denom: data.payCoinData.denom,
-                },
+                amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision))),
+                denom: data.payCoinData.denom,
+
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
-                amount: {
-                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision))),
-                  denom: data.receiveCoinData.denom,
-                },
+                amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision))),
+                denom: data.receiveCoinData.denom,
+
                 chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
               },
             },
           };
-          data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+          data.actionHandlerResult = await actionHandler(swapParams);
         } else {
           if (!isOpen.value) {
             // do not reset steps while steps modal is open

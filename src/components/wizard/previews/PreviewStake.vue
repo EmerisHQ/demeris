@@ -52,6 +52,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
@@ -65,7 +66,6 @@ import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { DesignSizes } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -86,7 +86,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {
