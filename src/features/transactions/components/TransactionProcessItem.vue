@@ -17,10 +17,14 @@
   <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
+      <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
-      <div v-else-if="state.matches('review') || state.matches('receipt')" class="-space-x-3 inline-flex items-center">
+      <div
+        v-else-if="state.matches('review') || state.matches('receipt')"
+        class="-space-x-3 inline-flex items-center pt-1.5"
+      >
         <CircleSymbol
           v-for="asset of getIconAssets()"
           :key="asset.denom"
@@ -63,7 +67,7 @@
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
         <template v-if="action === 'claim'">
-          Claim <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
         </template>
         <template v-if="action === 'stake'">
           Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
@@ -76,7 +80,7 @@
         </template>
       </p>
 
-      <p class="item-description -text-1 opacity-75">
+      <p class="item-description -text-1 opacity-75 truncate">
         <i18n-t
           v-if="state.matches('validating')"
           scope="global"
@@ -110,7 +114,7 @@
           scope="global"
           keypath="context.transactions.widget.description.failed.sign"
           tag="span"
-          class="text-negative"
+          class="text-warning"
         />
         <i18n-t
           v-else-if="state.matches('failed.unknown')"
@@ -195,6 +199,7 @@ import Spinner from '@/components/ui/Spinner.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 import {
   getCurrentTransaction,
@@ -269,5 +274,12 @@ const getIconAssets = () => {
 <style lang="postcss">
 .transactions-center__close-btn .button {
   @apply w-6 h-6;
+}
+
+.transactions-center {
+  .item-title,
+  .item-description {
+    max-width: 11rem;
+  }
 }
 </style>

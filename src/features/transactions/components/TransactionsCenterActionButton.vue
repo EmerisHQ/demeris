@@ -3,10 +3,11 @@
     <Button rounded variant="secondary" class="w-12 h-12 flex items-center justify-center" @click="handleClick">
       <div
         v-if="notificationsCount"
-        class="flex items-center justify-center w-6 h-6 border-2 border-bg bg-negative rounded-full absolute -right-1 -top-1 font-medium -text-1 text-text"
+        class="actions-count flex items-center justify-center w-6 h-6 border-2 border-bg bg-negative rounded-full absolute -right-1 -top-1 font-medium"
       >
-        <span v-if="notificationsCount > 3">3+</span>
-        <span v-else>{{ notificationsCount }}</span>
+        <span :class="notificationsCount > 9 ? '-text-2' : '-text-1'">
+          {{ notificationsCount }}
+        </span>
       </div>
       <Icon name="MenuIcon" :icon-size="7" />
     </Button>
@@ -126,3 +127,9 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style scoped>
+.actions-count {
+  color: white;
+}
+</style>
