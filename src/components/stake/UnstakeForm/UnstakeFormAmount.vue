@@ -114,7 +114,7 @@ export default defineComponent({
         .toString();
     });
     const isValid = computed(() => {
-      return parseFloat(remainingStake.value) >= 0;
+      return parseFloat(remainingStake.value) >= 0 && parseFloat(form.amount) > 0;
     });
     const goToReview = () => {
       emit('next');

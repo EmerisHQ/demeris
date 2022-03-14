@@ -407,7 +407,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const vp = await validPools(pools);
       commit('SET_VALID_POOLS', vp);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       throw new SpVuexError('Demeris:ValidatePools', 'Could not perform pool validation.');
     }
     return getters['getAllValidPools'];

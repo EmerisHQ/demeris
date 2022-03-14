@@ -1,7 +1,7 @@
 import { Navbar } from './navbar';
 
 export class Assets {
-  goToAssertTab() {
+  goToAssetTab() {
     let navbar = new Navbar();
     // wait for navbar logo to be visible
     cy.waitFor(navbar.navbarLogo());

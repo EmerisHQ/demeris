@@ -52,13 +52,14 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
-import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
+import { getBaseDenom } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { getChainFromRecipient } from '@/utils/basic';
 

@@ -164,6 +164,7 @@ import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, 
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
@@ -185,7 +186,7 @@ import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
-import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
+import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
