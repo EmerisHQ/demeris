@@ -860,6 +860,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
+        const chainName = (params as API.ChainReq).chain_name;
+        if (!chainName) {
+          console.error('Demeris:GetChain', 'No chain name provided.');
+          resolver();
+          commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+          return null;
+        }
         const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
         commit(DemerisMutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
         if (subscribe) {
