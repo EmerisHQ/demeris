@@ -19,7 +19,6 @@
           </div>
         </h2>
       </div>
-
       <Button
         data-cy="stake-button"
         :name="$t('components.stakeTable.stake')"
@@ -93,58 +92,29 @@
                 <Price :amount="{ denom: denom, amount: validator.amount }" />
               </td>
               <td class="text-right">
-                <tippy
-                  placement="right-start"
-                  trigger="click"
-                  delay="0"
-                  :interactive="true"
-                  :arrow="false"
-                  :offset="[-24, 0]"
-                >
-                  <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
-                    <Icon name="ThreeDotsIcon" :icon-size="1.5" />
-                  </Button>
-                  <template #content>
-                    <div class="w-64 text-0 font-normal text-left -mx-3">
-                      <div
-                        class="py-2 px-6"
-                        :class="{
-                          'text-muted': validatorList.find(
+                <DropdownMenu icon="ThreeDotsIcon" :icon-size="1.5" placement="right-start" :offset="[-24, 0]">
+                  <DropdownMenuItem
+                    @click="
+                      () => {
+                        if (
+                          !validatorList.find(
                             (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
-                          ).jailed,
-                          'cursor-pointer hover:text-link': !validatorList.find(
-                            (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
-                          ).jailed,
-                        }"
-                        @click="
-                          () => {
-                            if (
-                              !validatorList.find(
-                                (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
-                              ).jailed
-                            ) {
-                              goStakeActionPage(StakingActions.STAKE, validator.validator_address);
-                            }
-                          }
-                        "
-                      >
-                        {{ $t('components.stakeTable.stake') }}
-                      </div>
-                      <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
-                      >
-                        {{ $t('components.stakeTable.unstake') }}
-                      </div>
-                      <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
-                      >
-                        {{ $t('components.stakeTable.switchValidator') }}
-                      </div>
-                    </div>
-                  </template>
-                </tippy>
+                          ).jailed
+                        ) {
+                          goStakeActionPage(StakingActions.STAKE, validator.validator_address);
+                        }
+                      }
+                    "
+                  >
+                    {{ $t('components.stakeTable.stake') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)">
+                    {{ $t('components.stakeTable.unstake') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)">
+                    {{ $t('components.stakeTable.switchValidator') }}
+                  </DropdownMenuItem>
+                </DropdownMenu>
               </td>
             </tr>
           </tbody>
@@ -219,6 +189,8 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
+import DropdownMenu from '@/components/ui/DropdownMenu.vue';
+import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
@@ -230,6 +202,8 @@ import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 export default defineComponent({
   components: {
     Button,
+    DropdownMenu,
+    DropdownMenuItem,
     Ticker,
     Price,
     Icon,
