@@ -23,7 +23,7 @@
       :name="$t('components.stakeTable.stake')"
       variant="link"
       :full-width="false"
-      @click="() => goStakeActionPage(StakingActions.STAKE)"
+      @click="() => goToStakingPage()"
     >
       <Icon name="PlusIcon" :icon-size="1.5" />
     </Button>
@@ -34,6 +34,7 @@
 import { toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
 import { computed, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
@@ -41,9 +42,11 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { StakingActions } from '@/types/actions';
 
 const emit = defineEmits(['selectTab']);
 
+const router = useRouter();
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
@@ -102,4 +105,7 @@ const totalStakedAssetDisplayAmount = computed(() => {
     return totalDisplay.toFixed(assetPrecision.value);
   }
 });
+const goToStakingPage = () => {
+  router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
+};
 </script>
