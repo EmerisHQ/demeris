@@ -4,6 +4,7 @@ import 'tippy.js/dist/tippy.css';
 import { BrowserTracing } from '@sentry/tracing';
 import * as Sentry from '@sentry/vue';
 import vueLib from '@starport/vue';
+import { Buffer } from 'buffer';
 import mitt from 'mitt';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
@@ -20,6 +21,8 @@ import App from './App.vue';
 import router from './router';
 import { store } from './store/setup';
 import { featureRunning } from './utils/FeatureManager';
+
+window.Buffer = Buffer;
 
 const i18n = createI18n({
   globalInjection: true,

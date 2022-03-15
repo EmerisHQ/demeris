@@ -8,14 +8,14 @@
     "noImplicitAny": false,
     "moduleResolution": "node",
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"],
-    "types": ["webpack-env", "node", "long", "jest"],
+    "types": ["webpack-env", "node", "long", "jest", "vite/client", "vitest/globals"],
     "paths": {
       "@/*": ["src/*"]
     },

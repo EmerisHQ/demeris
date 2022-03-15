@@ -4,11 +4,11 @@
 		  type: string (the icon to display)
 		//-->
   <div class="icon flex items-center justify-center" :style="`font-size:${iconSize}rem;`">
-    <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`" />
+    <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`"></component>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, shallowRef } from 'vue';
+import { defineAsyncComponent, defineComponent, onMounted, ref, shallowRef } from 'vue';
 
 export default defineComponent({
   name: 'Icon',
@@ -26,10 +26,9 @@ export default defineComponent({
     const currentIcon = shallowRef('');
     const isReady = ref(false);
     onMounted(async () => {
-      await import(`../../components/common/Icons/${props.name}.vue`).then((val) => {
-        currentIcon.value = val.default;
-        isReady.value = true;
-      });
+      const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
+      currentIcon.value = icon;
+      isReady.value = true;
     });
 
     return {
