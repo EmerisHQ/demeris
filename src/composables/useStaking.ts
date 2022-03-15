@@ -20,7 +20,7 @@ export default function useStaking() {
       const inflation = await store.dispatch(GlobalDemerisActionTypes.API.GET_INFLATION, { chain_name });
       return Math.trunc(inflation * 10000) / 100;
     } catch (_e) {
-      return 0;
+      return null;
     }
   };
 

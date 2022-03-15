@@ -1,6 +1,6 @@
 <template>
   <router-link
-    v-if="apr"
+    v-if="apr != ''"
     class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     :to="`/staking/${baseDenom}/stake`"
   >
@@ -63,9 +63,7 @@ export default defineComponent({
       async (newValue) => {
         if (!newValue) return;
         const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
-
-        //   display -.- instead of a faulty 0 value APY
-        if (isNaN(inflation) || Number(inflation) <= 0) return;
+        if (inflation === null || isNaN(inflation)) return;
         apr.value = new BigNumber(inflation).toFixed(2);
       },
       { immediate: true },
