@@ -163,36 +163,67 @@ export type RestakeData = {
   amount: EmerisBase.Amount;
   chain_name: string;
 };
-
-export type StepTransaction = {
-  name:
-    | 'ibc_forward'
-    | 'ibc_backward'
-    | 'swap'
-    | 'transfer'
-    | 'addliquidity'
-    | 'withdrawliquidity'
-    | 'createpool'
-    | 'claim'
-    | 'stake'
-    | 'unstake'
-    | 'switch';
+export type BaseStepTx = {
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
   feeToAdd?: FeeWDenom[];
-  data:
-    | IBCBackwardsData
-    | IBCForwardsData
-    | SwapData
-    | TransferData
-    | AddLiquidityData
-    | WithdrawLiquidityData
-    | CreatePoolData
-    | ClaimData
-    | StakeData[]
-    | UnstakeData
-    | RestakeData;
 };
+export type IBCBackwardsStepTx = BaseStepTx & {
+  name: 'ibc_forward';
+  data: IBCBackwardsData;
+};
+export type IBCForwardsStepTx = BaseStepTx & {
+  name: 'ibc_backward';
+  data: IBCForwardsData;
+};
+export type SwapStepTx = BaseStepTx & {
+  name: 'swap';
+  data: SwapData;
+};
+export type TransferStepTx = BaseStepTx & {
+  name: 'transfer';
+  data: TransferData;
+};
+export type AddLiqStepTx = BaseStepTx & {
+  name: 'addliquidity';
+  data: AddLiquidityData;
+};
+export type WithdrawLiqStepTx = BaseStepTx & {
+  name: 'withdrawliquidity';
+  data: WithdrawLiquidityData;
+};
+export type CreatePoolStepTx = BaseStepTx & {
+  name: 'createpool';
+  data: CreatePoolData;
+};
+export type ClaimStepTx = BaseStepTx & {
+  name: 'claim';
+  data: ClaimData;
+};
+export type StakeStepTx = BaseStepTx & {
+  name: 'stake';
+  data: StakeData[];
+};
+export type UnstakeStepTx = BaseStepTx & {
+  name: 'unstake';
+  data: UnstakeData;
+};
+export type RestakeStepTx = BaseStepTx & {
+  name: 'switch';
+  data: RestakeData;
+};
+export type StepTransaction =
+  | IBCBackwardsStepTx
+  | IBCForwardsStepTx
+  | SwapStepTx
+  | TransferStepTx
+  | AddLiqStepTx
+  | WithdrawLiqStepTx
+  | CreatePoolStepTx
+  | ClaimStepTx
+  | StakeStepTx
+  | UnstakeStepTx
+  | RestakeStepTx;
 export type Step = {
   name:
     | 'transfer'
