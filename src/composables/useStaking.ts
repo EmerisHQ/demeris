@@ -20,7 +20,7 @@ export default function useStaking() {
     return Math.trunc(inflation * 10000) / 100;
   };
 
-  const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
+  const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<StakingRewards> => {
     try {
       const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
       return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
@@ -50,4 +50,9 @@ export default function useStaking() {
     getChainDisplayInflationByBaseDenom,
     getStakingRewardsByBaseDenom,
   };
+}
+
+export interface StakingRewards {
+  rewards: { reward: string; validator_address: string }[];
+  total: string;
 }
