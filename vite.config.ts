@@ -19,7 +19,7 @@ export default defineConfig({
   },
   define: {
     'process.env': process.env,
-    // 'process.platform': {},
+    ...(process.env.NODE_ENV !== 'test' && { 'process.platform': {} }),
   },
   server: {
     port: 8080,
