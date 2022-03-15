@@ -1,5 +1,6 @@
 <template>
   <router-link
+    v-if="apr"
     class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     :to="`/staking/${baseDenom}/stake`"
   >
