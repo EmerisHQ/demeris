@@ -19,11 +19,15 @@ export default function useStaking() {
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
     const chain_name = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
-    const inflation = await store.dispatch(GlobalActionTypes.API.GET_INFLATION, {
-      subscribe: false,
-      params: { chain_name },
-    });
-    return Math.trunc(inflation * 10000) / 100;
+    try {
+      const inflation = await store.dispatch(GlobalActionTypes.API.GET_INFLATION, {
+        subscribe: false,
+        params: { chain_name },
+      });
+      return Math.trunc(inflation * 10000) / 100;
+    } catch (_e) {
+      return 0;
+    }
   };
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
