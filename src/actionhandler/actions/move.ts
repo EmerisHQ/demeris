@@ -72,6 +72,7 @@ export async function move({
         { root: true },
       ));
   } catch (e) {
+    console.log(e);
     //  If we cannot verify the trace, throw error
     throw new Error('Trace not verified');
   }

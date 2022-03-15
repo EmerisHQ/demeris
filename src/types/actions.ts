@@ -2,20 +2,6 @@ import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { EmerisBase } from '@emeris/types';
 
 export type BaseAction = {
-  name:
-    | 'swap'
-    | 'redeem'
-    | 'addliquidity'
-    | 'withdrawliquidity'
-    | 'transfer'
-    | 'move'
-    | 'createpool'
-    | 'memo-transfer'
-    | 'claim'
-    | 'stake'
-    | 'multistake'
-    | 'unstake'
-    | 'switch';
   memo?: string;
 };
 export type SwapParams = {
@@ -71,25 +57,26 @@ export type RestakeParams = {
   amount: EmerisBase.ChainAmount;
 };
 export type RedeemParams = Array<EmerisBase.ChainAmount>;
-export type SwapAction = BaseAction & { params: SwapParams };
-export type MoveAction = BaseAction & { params: MoveParams };
-export type RedeemAction = BaseAction & { params: RedeemParams };
-export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
-export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
-export type TransferAction = BaseAction & { params: TransferParams };
-export type MemoTransferAction = BaseAction & { params: TransferParams };
-export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
-export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
-export type MultiStakeAction = BaseAction & { params: MultiStakeParams };
-export type StakeAction = BaseAction & { params: StakeParams };
-export type UnstakeAction = BaseAction & { params: UnstakeParams };
-export type RestakeAction = BaseAction & { params: RestakeParams };
-export type Any =
+export type SwapAction = BaseAction & { name: 'swap'; params: SwapParams };
+export type MoveAction = BaseAction & { name: 'move'; params: MoveParams };
+export type RedeemAction = BaseAction & { name: 'redeem'; params: RedeemParams };
+export type AddLiquidityAction = BaseAction & { name: 'addliquidity'; params: AddLiquidityParams };
+export type WithdrawLiquidityAction = BaseAction & { name: 'withdrawliquidity'; params: WithdrawLiquidityParams };
+export type TransferAction = BaseAction & { name: 'transfer'; params: TransferParams };
+export type MemoTransferAction = BaseAction & { name: 'memo-transfer'; params: TransferParams };
+export type CreatePoolAction = BaseAction & { name: 'createpool'; params: CreatePoolParams };
+export type ClaimRewardsAction = BaseAction & { name: 'claim'; params: ClaimRewardsParams };
+export type MultiStakeAction = BaseAction & { name: 'multistake'; params: MultiStakeParams };
+export type StakeAction = BaseAction & { name: 'stake'; params: StakeParams };
+export type UnstakeAction = BaseAction & { name: 'unstake'; params: UnstakeParams };
+export type RestakeAction = BaseAction & { name: 'switch'; params: RestakeParams };
+export type UserAction =
   | SwapAction
   | RedeemAction
   | TransferAction
   | AddLiquidityAction
   | WithdrawLiquidityAction
+  | MemoTransferAction
   | CreatePoolAction
   | MoveAction
   | ClaimRewardsAction

@@ -58,7 +58,7 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { SendAddressForm, TransferAction } from '@/types/actions';
+import { MemoTransferAction, SendAddressForm, TransferAction } from '@/types/actions';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { getChainFromRecipient } from '@/utils/basic';
@@ -133,7 +133,7 @@ export default defineComponent({
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
             }) || 6;
-          const action: TransferAction = {
+          const action: TransferAction | MemoTransferAction = {
             name: form.memo && form.memo != '' ? 'memo-transfer' : 'transfer',
             memo: form.memo,
             params: {

@@ -20,6 +20,8 @@ export type Getters = {
     (params: EmerisAPI.AddrReq): EmerisAPI.UnbondingDelegations | null;
   };
   [GetterTypes.getNumbersChain](state: APIState): { (params: EmerisAPI.ChainAddrReq): EmerisAPI.SeqNumber | null };
+
+  [GetterTypes.getRelayerChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
   [GetterTypes.getAllBalances](state: APIState, getters, rootState, rootGetters): EmerisAPI.Balances | null;
   [GetterTypes.getAllStakingBalances](state: APIState): EmerisAPI.StakingBalances | null;
   [GetterTypes.getAllUnbondingDelegations](state: APIState): EmerisAPI.UnbondingDelegations | null;
@@ -88,6 +90,10 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   },
   [GetterTypes.getUnbondingDelegations]: (state) => (params) => {
     return state.unbondingDelegations[params.address] ?? null;
+  },
+
+  [GetterTypes.getRelayerChainStatus]: (_state) => (_params) => {
+    return true;
   },
   [GetterTypes.getAllBalances]: (state: APIState, _getters, _rootState, rootGetters) => {
     if (!rootGetters[GlobalUserGetterTypes.getKeplr]) {

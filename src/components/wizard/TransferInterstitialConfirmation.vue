@@ -50,7 +50,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
 import { RootStoreTyped } from '@/store';
-import { BaseAction, IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
+import { IBCBackwardsData, IBCForwardsData, Step, TransferData, UserAction } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -63,7 +63,7 @@ export default defineComponent({
       default: false,
     },
     action: {
-      type: String as PropType<BaseAction['name']>,
+      type: String as PropType<UserAction['name']>,
       default: 'swap',
     },
     steps: {

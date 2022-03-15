@@ -1279,8 +1279,18 @@ export async function validateStepFeeBalances(
       }
     }
     if (stepTx.name == 'stake') {
-      const data = stepTx.data as Actions.StakeData;
-
+      const alldata = stepTx.data as Actions.StakeData[];
+      const data = {
+        chain_name: alldata[0].chain_name,
+        amount: {
+          amount: alldata
+            .reduce((acc, stakedata) => {
+              return parseInt(stakedata.amount.amount) + acc;
+            }, 0)
+            .toString(),
+          denom: alldata[0].amount.denom,
+        },
+      };
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
