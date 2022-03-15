@@ -10,7 +10,6 @@ import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
 import TendermintWS from '@/utils/TendermintWS';
 
 import {
@@ -34,6 +33,8 @@ import { ChainData, State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;
+  gitEndpoint: string;
+  rawGitEndpoint: string;
   wsEndpoint?: string;
   refreshTime?: number;
   hub_chain?: string;
@@ -179,13 +180,14 @@ export interface Actions {
   ): Promise<any>;
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.GET_GIT_AIRDROPS_LIST](
-    { commit }: ActionContext<State, RootState>,
+    { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionGetGitAirdropsListParams,
   ): Promise<any>;
   [DemerisActionTypes.GET_AIRDROPS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
+  [DemerisActionTypes.RESET_AIRDROPS]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.SET_SELECTED_AIRDROP](
     { commit }: ActionContext<State, RootState>,
     { params }: DemerisActionSetAirdropParams,
@@ -221,7 +223,7 @@ export interface Actions {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
-    { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
+    { endpoint, gitEndpoint, rawGitEndpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>, keyHashes: string[]): void;
@@ -262,7 +264,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
         );
 
-        if (featureRunning('REQUEST_PARALLELIZATION') && response.data.balances) {
+        if (response.data.balances) {
           const tracesLoaded = [];
           for (const balance of response.data.balances as API.Balances) {
             if (
@@ -344,21 +346,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const balanceLoads = [];
-        for (const keyHash of keyHashes) {
-          balanceLoads.push(
-            dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }),
-          );
-        }
-        await Promise.all(balanceLoads);
-        if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
-          dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
-        }
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
-        }
+      const balanceLoads = [];
+      for (const keyHash of keyHashes) {
+        balanceLoads.push(dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
+      }
+      await Promise.all(balanceLoads);
+      if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
+        dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -369,22 +363,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const stakingBalanceLoads = [];
-        for (const keyHash of keyHashes) {
-          stakingBalanceLoads.push(
-            dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
-          );
-        }
-        await Promise.all(stakingBalanceLoads);
+      const stakingBalanceLoads = [];
+      for (const keyHash of keyHashes) {
+        stakingBalanceLoads.push(
+          dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
+        );
+      }
+      await Promise.all(stakingBalanceLoads);
 
-        if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
-          dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
-        }
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
-        }
+      if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
+        dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
@@ -543,17 +531,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        const numberLoads = [];
-        for (const keyHash of keyHashes) {
-          numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
-        }
-        await Promise.all(numberLoads);
-      } else {
-        for (const keyHash of keyHashes) {
-          await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
-        }
+      const numberLoads = [];
+      for (const keyHash of keyHashes) {
+        numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
       }
+      await Promise.all(numberLoads);
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');
     }
@@ -929,9 +911,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getTokenPrices'];
   },
-  async [DemerisActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get(`https://api.github.com/repos/allinbits/Emeris-Airdrop/contents/airdropList`);
+      const response = await axios.get(
+        `${getters['getGitEndpoint']}/repos/EmerisHQ/Emeris-Airdrop/contents/airdropList`,
+      );
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_GIT_AIRDROPS_LIST });
       }
@@ -940,19 +924,27 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get(
-        `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-      );
+      const response = await fetch(
+        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+      )
+        .then((res) => res.json())
+        .then(async (data) => {
+          return data;
+        });
 
-      commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
+      commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
+
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
+  },
+  [DemerisActionTypes.RESET_AIRDROPS]({ commit }) {
+    commit(DemerisMutationTypes.RESET_AIRDROPS);
   },
   [DemerisActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
@@ -1184,10 +1176,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, wsEndpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
+    {
+      endpoint,
+      gitEndpoint,
+      rawGitEndpoint,
+      wsEndpoint,
+      hub_chain = 'cosmos-hub',
+      refreshTime = 5000,
+      gas_limit = 500000,
+    },
   ) {
     console.log('Vuex nodule: demeris initialized!');
-    commit('INIT', { wsEndpoint, endpoint, hub_chain, gas_limit });
+    commit('INIT', { wsEndpoint, endpoint, gitEndpoint, rawGitEndpoint, hub_chain, gas_limit });
     setInterval(() => {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);

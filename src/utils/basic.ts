@@ -4,7 +4,7 @@ import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 import findIndex from 'lodash/findIndex';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { Chain } from '@/types/api';
 import { useStore } from '@/utils/useStore';
@@ -52,6 +52,7 @@ export async function getOwnAddress({ chain_name }) {
   if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
+    await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, { subscribe: true, params: { chain_name } });
     const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
@@ -159,7 +160,7 @@ export function parseCoins(input: string): Coin[] {
     .split(',')
     .filter(Boolean)
     .map((part) => {
-      const match = part.match(/^([0-9]+)([a-zA-Z0-9\/-]{2,127})$/);
+      const match = part.match(/^([0-9]+)(?:\.[0-9]+)?([a-zA-Z0-9\/-]{2,127})$/);
       if (!match) throw new Error('Got an invalid coin string');
       return {
         amount: BigInt(match[1]).toString(),
