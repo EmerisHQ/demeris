@@ -197,7 +197,17 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
+import {
+  AddLiquidityData,
+  ClaimData,
+  CreatePoolData,
+  RestakeData,
+  StakeData,
+  SwapData,
+  TransferData,
+  UnstakeData,
+  WithdrawLiquidityData,
+} from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -265,6 +275,26 @@ const getIconAssets = () => {
     const denomA = (transaction.value.data as CreatePoolData).coinA.denom;
     const denomB = (transaction.value.data as CreatePoolData).coinB.denom;
     assets.push({ denom: denomA }, { denom: denomB });
+  }
+
+  if (name === 'claim') {
+    const denom = parseCoins((transactionAction.value.data as ClaimData).total)[0].denom;
+    assets.push({ denom });
+  }
+
+  if (name === 'stake') {
+    const denom = (transactionAction.value.data as StakeData[])[0].amount.denom;
+    assets.push({ denom });
+  }
+
+  if (name === 'unstake') {
+    const denom = (transactionAction.value.data as UnstakeData).amount.denom;
+    assets.push({ denom });
+  }
+
+  if (name === 'switch') {
+    const denom = (transactionAction.value.data as RestakeData).amount.denom;
+    assets.push({ denom });
   }
 
   return assets;
