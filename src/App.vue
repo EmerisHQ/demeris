@@ -87,176 +87,60 @@ export default defineComponent({
     const { pools: _pools } = usePoolsFactory();
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
-    if (featureRunning('REQUEST_PARALLELIZATION')) {
-      onMounted(async () => {
-        useTheme({ updateOnChange: true });
-        let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
-        if (!gasLimit) {
-          gasLimit = 500000;
-          window.localStorage.setItem('gasLimit', gasLimit.toString());
-        }
-        await typedstore.dispatch(GlobalActionTypes.API.INIT, {
-          wsEndpoint: wsEndpoint,
-          endpoint: emerisEndpoint,
-          gitEndpoint: githubEndpoint,
-          rawGitEndpoint: rawGithubEndpoint,
-          hub_chain: 'cosmos-hub',
-          refreshTime: 5000,
-        });
-        typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
-          gasLimit: gasLimit,
-        });
-        try {
-          await typedstore.dispatch(GlobalActionTypes.API.GET_VERIFIED_DENOMS, {
-            subscribe: true,
-          });
-        } catch (e) {
-          console.error('Could not load verified denoms: ' + e);
-        }
-        typedstore
-          .dispatch(GlobalActionTypes.API.GET_CHAINS, {
-            subscribe: false,
-          })
-          .then((chains) => {
-            for (let chain in chains) {
-              typedstore
-                .dispatch(GlobalActionTypes.API.GET_CHAIN, {
-                  subscribe: true,
-                  params: {
-                    chain_name: chain,
-                  },
-                })
-                .then((chain) => {
-                  typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
-                    subscribe: true,
-                    params: {
-                      chain_name: chain.chain_name,
-                    },
-                  });
-                });
-            }
-          })
-          .catch((e) => {
-            console.error('Could not load chain information: ' + e);
-          });
-        store
-          .dispatch('common/env/config', {
-            apiNode: liquidityEndpoint,
-            rpcNode: null,
-            wsNode: null,
-            chainId: 'cosmos-hub',
-            addrPrefix: 'cosmos',
-            sdkVersion: 'Stargate',
-            getTXApi: null,
-            offline: true,
-            refresh: 10000,
-          })
-          .then(() => {
-            store
-              .dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
-                options: { subscribe: true },
-              })
-              .catch((e) => {
-                console.error('Could not load liquidity pools: ' + e);
-              })
-              .finally(() => {
-                // Pool token prices are calculated as part of the GET_PRICES dispatch
-                // This is something to fix during the refactor/revamp of the store where
-                // most of the functionality in composables such as usePool(s)/usePrice etc.
-                // will be relegated to getters in the store.
-                // In the meantime however, in order to calculate pool token prices during
-                // the first call to the /prices endpoint, we must have pool details available
-                // so we can grab their reserve account address and reserve denom balances
-                // in order to calculate the TVL of the pool and thus the token's price.
-                // Otherwise we'd have to wait 5 seconds till the next polling cycle leading
-                // to worse UX.
-                typedstore
-                  .dispatch(GlobalActionTypes.API.GET_PRICES, {
-                    subscribe: true,
-                  })
-                  .catch((e) => {
-                    console.error('Could not load denom prices: ' + e);
-                  });
-              });
-            store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } }).catch((e) => {
-              console.error('Could not load liquidity module params: ' + e);
-            });
-            store
-              .dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } })
-              .catch((e) => {
-                console.error('Could not load denom supply: ' + e);
-              });
-          });
-        if (autoLogin()) {
-          typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-        } else {
-          if (autoLoginDemo()) {
-            typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-          }
-        }
-        window.addEventListener('keplr_keystorechange', async () => {
-          window.localStorage.setItem('lastEmerisSession', '');
-          if (
-            typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
-            !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-          ) {
-            typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-          }
-        });
 
-        initialized.value = true;
-        if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
-          router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
-        }
+    onMounted(async () => {
+      useTheme({ updateOnChange: true });
+      let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
+      if (!gasLimit) {
+        gasLimit = 500000;
+        window.localStorage.setItem('gasLimit', gasLimit.toString());
+      }
+      await typedstore.dispatch(GlobalActionTypes.API.INIT, {
+        wsEndpoint: wsEndpoint,
+        endpoint: emerisEndpoint,
+        gitEndpoint: githubEndpoint,
+        rawGitEndpoint: rawGithubEndpoint,
+        hub_chain: 'cosmos-hub',
+        refreshTime: 5000,
       });
-    } else {
-      onMounted(async () => {
-        useTheme({ updateOnChange: true });
-        let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
-        if (!gasLimit) {
-          gasLimit = 500000;
-          window.localStorage.setItem('gasLimit', gasLimit.toString());
-        }
-        await typedstore.dispatch(GlobalActionTypes.API.INIT, {
-          endpoint: emerisEndpoint,
-          gitEndpoint: githubEndpoint,
-          rawGitEndpoint: rawGithubEndpoint,
-          hub_chain: 'cosmos-hub',
-          refreshTime: 5000,
-        });
-        await typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
-          gasLimit: gasLimit,
-        });
-        status.value = t('appInit.status.assetLoading');
+      typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
+        gasLimit: gasLimit,
+      });
+      try {
         await typedstore.dispatch(GlobalActionTypes.API.GET_VERIFIED_DENOMS, {
           subscribe: true,
         });
-        status.value = t('appInit.status.chainLoading');
-        let chains = await typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS, {
+      } catch (e) {
+        console.error('Could not load verified denoms: ' + e);
+      }
+      typedstore
+        .dispatch(GlobalActionTypes.API.GET_CHAINS, {
           subscribe: false,
+        })
+        .then((chains) => {
+          for (let chain in chains) {
+            typedstore
+              .dispatch(GlobalActionTypes.API.GET_CHAIN, {
+                subscribe: true,
+                params: {
+                  chain_name: chain,
+                },
+              })
+              .then((chain) => {
+                typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
+                  subscribe: true,
+                  params: {
+                    chain_name: chain.chain_name,
+                  },
+                });
+              });
+          }
+        })
+        .catch((e) => {
+          console.error('Could not load chain information: ' + e);
         });
-        for (let chain in chains) {
-          status.value = t('appInit.status.chainDetails', {
-            displayChain: typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chain }),
-          });
-          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          });
-          status.value = t('appInit.status.chainStatus', {
-            displayChain: typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chain }),
-          });
-          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          });
-        }
-        status.value = t('appInit.status.liquidityConfigure');
-        await store.dispatch('common/env/config', {
+      store
+        .dispatch('common/env/config', {
           apiNode: liquidityEndpoint,
           rpcNode: null,
           wsNode: null,
@@ -266,50 +150,64 @@ export default defineComponent({
           getTXApi: null,
           offline: true,
           refresh: 10000,
-        });
-        status.value = t('appInit.status.poolFetching');
-        try {
-          await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
-            options: { subscribe: true },
+        })
+        .then(() => {
+          store
+            .dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+              options: { subscribe: true },
+            })
+            .catch((e) => {
+              console.error('Could not load liquidity pools: ' + e);
+            })
+            .finally(() => {
+              // Pool token prices are calculated as part of the GET_PRICES dispatch
+              // This is something to fix during the refactor/revamp of the store where
+              // most of the functionality in composables such as usePool(s)/usePrice etc.
+              // will be relegated to getters in the store.
+              // In the meantime however, in order to calculate pool token prices during
+              // the first call to the /prices endpoint, we must have pool details available
+              // so we can grab their reserve account address and reserve denom balances
+              // in order to calculate the TVL of the pool and thus the token's price.
+              // to worse UX.
+              typedstore
+                .dispatch(GlobalActionTypes.API.GET_PRICES, {
+                  subscribe: true,
+                })
+                .catch((e) => {
+                  console.error('Could not load denom prices: ' + e);
+                });
+            });
+          store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } }).catch((e) => {
+            console.error('Could not load liquidity module params: ' + e);
           });
-          await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-          await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } });
-        } catch (e) {
-          console.error(e);
-        }
-        status.value = t('appInit.status.priceFetching');
-        try {
-          await typedstore.dispatch(GlobalActionTypes.API.GET_PRICES, {
-            subscribe: true,
-          });
-        } catch (e) {
-          //
-        }
-        status.value = t('appInit.status.signingIn');
-        if (autoLogin()) {
-          await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-        } else {
-          if (autoLoginDemo()) {
-            await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-          }
-        }
-        window.addEventListener('keplr_keystorechange', async () => {
-          window.localStorage.setItem('lastEmerisSession', '');
-          if (
-            typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
-            !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-          ) {
-            await typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-          }
+          store
+            .dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } })
+            .catch((e) => {
+              console.error('Could not load denom supply: ' + e);
+            });
         });
-        initialized.value = true;
-        const isReturnUser = ref(null);
-        isReturnUser.value = window.localStorage.getItem('isReturnUser');
-        if (!isReturnUser.value) {
-          router.push('/welcome');
+      if (autoLogin()) {
+        typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      } else {
+        if (autoLoginDemo()) {
+          typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
+        }
+      }
+      window.addEventListener('keplr_keystorechange', async () => {
+        window.localStorage.setItem('lastEmerisSession', '');
+        if (
+          typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
+          !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+        ) {
+          typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
         }
       });
-    }
+
+      initialized.value = true;
+      if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
+        router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
+      }
+    });
 
     const getAllAirdrops = async () => {
       const gitAirdropsList = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {

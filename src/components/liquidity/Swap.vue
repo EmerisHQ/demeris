@@ -13,23 +13,7 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
-      <template #deactivated>
-        <ReviewModal
-          :data="actionHandlerResult"
-          action-name="swap"
-          variant="widget"
-          @close="reviewModalToggle"
-          @reset="
-            () => {
-              reviewModalToggle();
-              reset();
-            }
-          "
-          @goback="() => reviewModalToggle()"
-        />
-      </template>
-
+    <template v-if="isOpen && !isSlippageSettingModalOpen">
       <TransactionProcessCreator
         :steps="actionHandlerResult"
         action="swap"
@@ -53,7 +37,7 @@
         "
         @previous="reviewModalToggle"
       />
-    </FeatureRunningConditional>
+    </template>
 
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -168,7 +152,6 @@ import { useStore } from 'vuex';
 import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -189,9 +172,6 @@ import { getTicker } from '@/utils/actionHandler';
 import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
-
-import FeatureRunningConditional from '../common/FeatureRunningConditional.vue';
 
 export default defineComponent({
   name: 'Swap',
@@ -204,8 +184,6 @@ export default defineComponent({
     SlippageSettingModal,
     FeeLevelSelector,
     TransactionProcessCreator,
-    FeatureRunningConditional,
-    ReviewModal,
   },
 
   props: {
@@ -241,8 +219,6 @@ export default defineComponent({
         chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
       });
     });
-
-    const gasPriceLevel = computed(() => store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel]);
 
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
@@ -783,56 +759,33 @@ export default defineComponent({
     });
 
     //tx fee setting
-    if (featureRunning('REQUEST_PARALLELIZATION')) {
-      watch(
-        () => [
-          data.payCoinData?.denom,
-          store.getters[GlobalGetterTypes.API.getFeeTokens]({
-            chain_name: data.payCoinData?.on_chain,
-          }),
-          store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
-        ],
-        async ([denom, feeTokens, gasPriceLevel]) => {
-          if (!denom || feeTokens.length === 0 || !gasPriceLevel) {
-            return;
-          }
 
-          if (
-            denom.startsWith('pool') ||
-            (denom.startsWith('ibc') && data.payCoinData?.on_chain == store.getters[GlobalGetterTypes.API.getDexChain])
-          ) {
-            txFee.value = 0;
-          } else {
-            const fees = await getFeeForChain(data.payCoinData?.on_chain);
-            txFee.value =
-              fees[0].amount[gasPriceLevel] *
-              10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
-          }
-        },
-      );
-    } else {
-      watch(
-        () => data.payCoinData?.denom,
-        async () => {
-          if (!data.payCoinData) {
-            return;
-          }
+    watch(
+      () => [
+        data.payCoinData?.denom,
+        store.getters[GlobalGetterTypes.API.getFeeTokens]({
+          chain_name: data.payCoinData?.on_chain,
+        }),
+        store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
+      ],
+      async ([denom, feeTokens, gasPriceLevel]) => {
+        if (!denom || feeTokens.length === 0 || !gasPriceLevel) {
+          return;
+        }
 
-          if (
-            data.payCoinData?.denom.startsWith('pool') ||
-            (data.payCoinData?.denom.startsWith('ibc') &&
-              data.payCoinData?.on_chain == store.getters[GlobalGetterTypes.API.getDexChain])
-          ) {
-            txFee.value = 0;
-          } else {
-            const fees = await getFeeForChain(data.payCoinData?.on_chain);
-            txFee.value =
-              fees[0].amount[gasPriceLevel.value] *
-              10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
-          }
-        },
-      );
-    }
+        if (
+          denom.startsWith('pool') ||
+          (denom.startsWith('ibc') && data.payCoinData?.on_chain == store.getters[GlobalGetterTypes.API.getDexChain])
+        ) {
+          txFee.value = 0;
+        } else {
+          const fees = await getFeeForChain(data.payCoinData?.on_chain);
+          txFee.value =
+            fees[0].amount[gasPriceLevel] *
+            10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+        }
+      },
+    );
 
     //max button text set
     watch(

@@ -43,7 +43,6 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
-import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -72,11 +71,7 @@ export default defineComponent({
     });
 
     const initialLoadComplete = computed(() => {
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
-      } else {
-        return true;
-      }
+      return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
     });
     return {
       balances,

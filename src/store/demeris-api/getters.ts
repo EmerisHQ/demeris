@@ -7,7 +7,6 @@ import { Pool } from '@/types/actions';
 import { ChartPrices, Namespaced } from '@/types/util';
 import { parseCoins } from '@/utils/basic';
 import { keyHashfromAddress } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
@@ -287,11 +286,7 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   },
 
   [GetterTypes.getFeeTokens]: (state) => (params) => {
-    if (featureRunning('REQUEST_PARALLELIZATION')) {
-      return state.chains[params.chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
-    } else {
-      return state.chains[params.chain_name]?.denoms?.filter((x) => x.fee_token) ?? null;
-    }
+    return state.chains[params.chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
   },
   [GetterTypes.getChain]: (state) => (params) => {
     return state.chains[params.chain_name] ?? null;
@@ -325,11 +320,7 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return state.tokenIdLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
-    if (featureRunning('REQUEST_PARALLELIZATION')) {
-      return state.chains[params.chain_name]?.status;
-    } else {
-      return state.chains[params.chain_name]?.status ?? false;
-    }
+    return state.chains[params.chain_name]?.status;
   },
   [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
     return Object.values(state.chains)?.find((chain) => {

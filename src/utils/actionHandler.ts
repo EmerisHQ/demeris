@@ -16,7 +16,6 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
-import { featureRunning } from './FeatureManager';
 
 // Action-handler / action composing using the blocks above
 
@@ -423,26 +422,9 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        await Promise.all(
-          ibcDenoms.map((denom) =>
-            typedstore.dispatch(
-              GlobalActionTypes.API.GET_VERIFY_TRACE,
-              {
-                subscribe: false,
-                params: {
-                  chain_name: chain,
-                  hash: denom.split('/')[1],
-                },
-              },
-              { root: true },
-            ),
-          ),
-        );
-        break;
-      } else {
-        for (const denom of ibcDenoms) {
-          await typedstore.dispatch(
+      await Promise.all(
+        ibcDenoms.map((denom) =>
+          typedstore.dispatch(
             GlobalActionTypes.API.GET_VERIFY_TRACE,
             {
               subscribe: false,
@@ -452,10 +434,10 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
               },
             },
             { root: true },
-          );
-        }
-        break;
-      }
+          ),
+        ),
+      );
+      break;
     } catch (e) {
       error = e;
       retries++;
@@ -704,105 +686,56 @@ export async function validBalances(balances: EmerisAPI.Balances): Promise<Emeri
   const validBalances = [];
   const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms];
 
-  if (featureRunning('REQUEST_PARALLELIZATION')) {
-    await Promise.all(
-      balances.map(async (balance) => {
-        // TODO: refactor this into something prettier.
-        const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-        if (ownAddress) {
-          const hashAddress = keyHashfromAddress(ownAddress);
+  await Promise.all(
+    balances.map(async (balance) => {
+      // TODO: refactor this into something prettier.
+      const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+      if (ownAddress) {
+        const hashAddress = keyHashfromAddress(ownAddress);
 
-          if (balance.address !== hashAddress) {
+        if (balance.address !== hashAddress) {
+          return;
+        }
+
+        if (Object.keys(balance.ibc).length == 0) {
+          if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+            validBalances.push(balance);
+          }
+        } else {
+          if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+            return;
+          }
+          let verifyTrace;
+          try {
+            verifyTrace =
+              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              }) ??
+              (await typedstore.dispatch(
+                GlobalActionTypes.API.GET_VERIFY_TRACE,
+                { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+                { root: true },
+              ));
+          } catch (e) {
             return;
           }
 
-          if (Object.keys(balance.ibc).length == 0) {
-            if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
-              validBalances.push(balance);
-            }
-          } else {
-            if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
-              return;
-            }
-            let verifyTrace;
-            try {
-              verifyTrace =
-                typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
-                  chain_name: balance.on_chain,
-                  hash: balance.ibc.hash,
-                }) ??
-                (await typedstore.dispatch(
-                  GlobalActionTypes.API.GET_VERIFY_TRACE,
-                  { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
-                  { root: true },
-                ));
-            } catch (e) {
-              return;
-            }
+          if (!verifyTrace || !verifyTrace.verified) {
+            return;
+          }
 
-            if (!verifyTrace || !verifyTrace.verified) {
-              return;
-            }
-
-            const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
-              chain_name: balance.on_chain,
-              destination_chain_name: verifyTrace.trace[0].counterparty_name,
-            });
-            if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-              validBalances.push(balance);
-            }
+          const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+            chain_name: balance.on_chain,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
+          });
+          if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+            validBalances.push(balance);
           }
         }
-      }),
-    );
-  } else {
-    for (const balance of balances) {
-      const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-      if (!ownAddress) continue;
-      const hashAddress = keyHashfromAddress(ownAddress);
-
-      if (balance.address !== hashAddress) {
-        continue;
       }
-
-      if (Object.keys(balance.ibc).length == 0) {
-        if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
-          validBalances.push(balance);
-        }
-      } else {
-        if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
-          continue;
-        }
-        let verifyTrace;
-        try {
-          verifyTrace =
-            typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
-              chain_name: balance.on_chain,
-              hash: balance.ibc.hash,
-            }) ??
-            (await typedstore.dispatch(
-              GlobalActionTypes.API.GET_VERIFY_TRACE,
-              { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
-              { root: true },
-            ));
-        } catch (e) {
-          continue;
-        }
-
-        if (!verifyTrace || !verifyTrace.verified) {
-          continue;
-        }
-
-        const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
-          chain_name: balance.on_chain,
-          destination_chain_name: verifyTrace.trace[0].counterparty_name,
-        });
-        if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-          validBalances.push(balance);
-        }
-      }
-    }
-  }
+    }),
+  );
   return validBalances;
 }
 
@@ -812,60 +745,8 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms];
   const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
-  if (featureRunning('REQUEST_PARALLELIZATION')) {
-    await Promise.all(
-      pools.map(async (pool) => {
-        const firstDenom = pool.reserve_coin_denoms[0];
-        const secondDenom = pool.reserve_coin_denoms[1];
-
-        if (!firstDenom.includes('ibc')) {
-          if (verifiedDenoms.find((item) => item.name === firstDenom)) {
-            // first denom is base denom and valid, check second denom
-            if (!secondDenom.includes('ibc')) {
-              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-                // first denom is base denom and valid, second denom is base denom and valid
-
-                validPools.push(pool);
-              } else {
-                return;
-              }
-            } else {
-              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-                // first denom is base and valid, second denom is IBC and valid
-                validPools.push(pool);
-              } else {
-                return;
-              }
-            }
-          } else {
-            return;
-          }
-        } else {
-          if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
-            if (!secondDenom.includes('ibc')) {
-              // second denom is not IBC denom
-              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-                // first denom is IBC and valid, second denom is base and valid
-                validPools.push(pool);
-              } else {
-                return;
-              }
-            } else {
-              // second denom is IBC denom, check if it goes through primary channel
-              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-                validPools.push(pool);
-              } else {
-                return;
-              }
-            }
-          } else {
-            return;
-          }
-        }
-      }),
-    );
-  } else {
-    for (const pool of pools) {
+  await Promise.all(
+    pools.map(async (pool) => {
       const firstDenom = pool.reserve_coin_denoms[0];
       const secondDenom = pool.reserve_coin_denoms[1];
 
@@ -878,18 +759,18 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 
               validPools.push(pool);
             } else {
-              continue;
+              return;
             }
           } else {
             if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
               // first denom is base and valid, second denom is IBC and valid
               validPools.push(pool);
             } else {
-              continue;
+              return;
             }
           }
         } else {
-          continue;
+          return;
         }
       } else {
         if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
@@ -899,22 +780,22 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
               // first denom is IBC and valid, second denom is base and valid
               validPools.push(pool);
             } else {
-              continue;
+              return;
             }
           } else {
             // second denom is IBC denom, check if it goes through primary channel
             if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
               validPools.push(pool);
             } else {
-              continue;
+              return;
             }
           }
         } else {
-          continue;
+          return;
         }
       }
-    }
-  }
+    }),
+  );
   return validPools;
 }
 export async function chainStatusForSteps(steps: Actions.Step[]) {
