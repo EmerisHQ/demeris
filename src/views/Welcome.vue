@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { defineComponent, nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -118,12 +118,17 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    originUrl: {
+      type: String,
+      required: true,
+    },
   },
 
-  setup() {
+  setup(props) {
     useMeta({ title: '' });
     pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
     const router = useRouter();
+    const { originUrl } = toRefs(props);
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
@@ -136,10 +141,14 @@ export default defineComponent({
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);
 
+    const goBackToOrigin = () => {
+      router.push(originUrl.value ?? '/');
+    };
+
     const cancelConnectKeplr = () => {
       connectKeplrRef.value.cancel();
       isReturnUser.value = true;
-      router.push('/');
+      goBackToOrigin();
     };
     const cancelAgreeWarning = () => {
       isWarningNeeded.value = null;
@@ -159,7 +168,7 @@ export default defineComponent({
     // right now it skips past the welcome flow
     const tryDemo = () => {
       isReturnUser.value = true;
-      router.push('/');
+      goBackToOrigin();
     };
 
     onMounted(async () => {

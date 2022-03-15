@@ -16,7 +16,10 @@
 
       <div class="flex items-center flex-col mt-12">
         <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
-        <a class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitTryDemo">
+        <a
+          class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70 cursor-pointer"
+          @click="signInDemo"
+        >
           {{ $t('generic_cta.tryTheDemo') }}
         </a>
       </div>
@@ -26,8 +29,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
+import { GlobalDemerisActionTypes } from '@/store';
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -49,9 +54,9 @@ export default defineComponent({
     const emitCancel = () => {
       emit('cancel');
     };
-
-    const emitTryDemo = () => {
-      emit('try-demo');
+    const store = useStore();
+    const signInDemo = () => {
+      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
     };
 
     const openUrl = () => {
@@ -65,7 +70,7 @@ export default defineComponent({
       location.reload();
     };
 
-    return { emitCancel, openUrl, reloadApp, emitTryDemo };
+    return { emitCancel, openUrl, reloadApp, signInDemo };
   },
 });
 </script>
