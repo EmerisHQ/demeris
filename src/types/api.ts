@@ -373,6 +373,13 @@ export type AirdropClaimAction = {
   unlockPercentage: number;
 };
 
+export enum AirdropDateStatus {
+  NOT_ANNOUNCED = 'NOT_ANNOUNCED',
+  NOT_STARTED = 'NOT_STARTED',
+  ONGOING = 'ONGOING',
+  ENDED = 'ENDED',
+}
+
 export type Airdrop = {
   project: string;
   projectWebsiteUrl: string;
@@ -390,7 +397,7 @@ export type Airdrop = {
   airdropEndDate: Date;
   airdropStatus: string;
   eligibility: string;
-  dateStatus: string;
+  dateStatus: AirdropDateStatus;
   snapshotDate: string;
   snapshotBlockHeight: string;
   eligibilityCriteria: AirdropEligibilityCriteria[];
