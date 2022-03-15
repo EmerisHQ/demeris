@@ -929,32 +929,30 @@ export const actions: ActionTree<State, RootState> & Actions = {
       value: API.LoadingState.LOADING,
     });
 
-    setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-        )
-          .then((res) => res.json())
-          .then(async (data) => {
-            return data;
-          });
-
-        commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
-          value: API.LoadingState.LOADED,
+    try {
+      const response = await fetch(
+        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+      )
+        .then((res) => res.json())
+        .then(async (data) => {
+          return data;
         });
 
-        commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
+      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+        value: API.LoadingState.LOADED,
+      });
 
-        if (subscribe) {
-          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
-        }
-      } catch (e) {
-        commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
-          value: API.LoadingState.ERROR,
-        });
-        throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
+      commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
+
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
-    }, 4000);
+    } catch (e) {
+      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+        value: API.LoadingState.ERROR,
+      });
+      throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
+    }
   },
   [DemerisActionTypes.RESET_AIRDROPS]({ commit }) {
     commit(DemerisMutationTypes.RESET_AIRDROPS);
