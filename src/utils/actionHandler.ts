@@ -706,6 +706,20 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
+  const chains =
+    apistore.getters[GlobalDemerisGetterTypes.API.getChains] ??
+    (await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
+      subscribe: false,
+    }));
+  for (const chain in chains) {
+    if (!chains[chain].primary_channel)
+      chains[chain] = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+  }
   await Promise.all(
     balances.map(async (balance) => {
       // TODO: refactor this into something prettier.
