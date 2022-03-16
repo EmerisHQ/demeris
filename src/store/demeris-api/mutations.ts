@@ -318,21 +318,20 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_AIRDROPS](state: State, payload: DemerisMutations) {
     const tempAirdrop = payload.value as API.Airdrop;
 
-    if (tempAirdrop.eligibilityCheckEndpoint) {
-      tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');
-    }
-
-    if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
-      tempAirdrop.dateStatus = 'not_started';
+    if (!tempAirdrop.airdropStartDate && !tempAirdrop.airdropEndDate) {
+      tempAirdrop.dateStatus = API.AirdropDateStatus.NOT_ANNOUNCED;
+    } else if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
+      tempAirdrop.dateStatus = API.AirdropDateStatus.NOT_STARTED;
     } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
-      tempAirdrop.dateStatus = 'ongoing';
+      tempAirdrop.dateStatus = API.AirdropDateStatus.ONGOING;
     } else if (new Date(tempAirdrop.airdropEndDate).getTime() <= new Date().getTime()) {
-      tempAirdrop.dateStatus = 'ended';
-    } else {
-      tempAirdrop.dateStatus = 'not_started';
+      tempAirdrop.dateStatus = API.AirdropDateStatus.ENDED;
     }
 
     state.airdrops.push(tempAirdrop);
+  },
+  [MutationTypes.SET_AIRDROPS_STATUS](state: State, payload: DemerisMutations) {
+    state.airdropsStatus = payload.value as API.LoadingState;
   },
   [MutationTypes.RESET_AIRDROPS](state: State) {
     state.airdrops = [];

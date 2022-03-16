@@ -38,6 +38,7 @@ export type State = {
   tokenIdLoadingStatus: API.LoadingState;
   validPools: Pool[];
   airdrops: API.Airdrop[];
+  airdropsStatus: API.LoadingState;
   selectedAirdrop: API.Airdrop;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
@@ -68,6 +69,7 @@ export function getDefaultState(): State {
     relayer: false,
     chains: {},
     airdrops: [],
+    airdropsStatus: API.LoadingState.INIT,
     selectedAirdrop: null,
     traces: {},
     transactions: new Map(),
