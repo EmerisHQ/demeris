@@ -40,7 +40,7 @@ jobs:
         uses: jakepartusch/wait-for-netlify-action@v1.3
         id: waitFor200
         with:
-          site_name: "emeris"
+          site_name: "emeris-app"
       - name: Install Playwright
         run: npx playwright install --with-deps      
       - name: Run Playwright tests
