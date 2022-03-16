@@ -5,8 +5,7 @@ import { GetterTree } from 'vuex';
 import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import { ChartPrices, LoadingState, Namespaced } from '@/types/util';
-import { parseCoins } from '@/utils/basic';
-import { keyHashfromAddress } from '@/utils/basic';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
@@ -302,7 +301,7 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return state.chains[params.chain_name] ?? null;
   },
   [GetterTypes.getPrimaryChannel]: (state) => (params) => {
-    return state.chains[params.chain_name]?.primary_channel[params.destination_chain_name] ?? null;
+    return state.chains?.[params.chain_name]?.primary_channel[params.destination_chain_name] ?? null;
   },
   [GetterTypes.getPrimaryChannels]: (state) => (params) => {
     const channels = [];

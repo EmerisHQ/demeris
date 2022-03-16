@@ -1,13 +1,15 @@
-import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import useSafeGetters from '@/composables/useSafeGetters';
+import { GlobalActionTypes, RootStoreTyped } from '@/store';
 import { keyHashfromAddress } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useStaking() {
   const store = useStore() as RootStoreTyped;
+  const { getChainName } = useSafeGetters();
 
   const getValidatorsByBaseDenom = async (base_denom: string) => {
     //TODO: have our own curated DB for validator list
-    const chain_name = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
+    const chain_name = await getChainName(base_denom);
     const rawValidators = await store.dispatch(GlobalActionTypes.API.GET_VALIDATORS, {
       subscribe: false,
       params: { chain_name },
@@ -18,7 +20,7 @@ export default function useStaking() {
   };
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
-    const chain_name = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
+    const chain_name = await getChainName(base_denom);
     try {
       const inflation = await store.dispatch(GlobalActionTypes.API.GET_INFLATION, {
         subscribe: false,
@@ -32,7 +34,7 @@ export default function useStaking() {
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<StakingRewards> => {
     try {
-      const chain_name = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
+      const chain_name = await getChainName(base_denom);
       return await store.dispatch(GlobalActionTypes.API.GET_STAKING_REWARDS, {
         subscribe: false,
         params: { chain_name },
