@@ -610,7 +610,7 @@ export async function feeForSteps(
 ): Promise<Actions.FeeTotals> {
   const feeTotals = {};
 
-  let used;
+  let used: EmerisBase.ChainAmount;
   if (steps) {
     for (const step of steps) {
       for (const stepTx of step.transactions) {
@@ -621,10 +621,9 @@ export async function feeForSteps(
         }
         used = getUsedFee(fees, gasPriceLevel);
 
-        feeTotals[used.chain_name][used.amount.denom]
-          ? (feeTotals[used.chain_name][used.amount.denom] =
-              feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
-          : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
+        feeTotals[used.chain_name][used.denom]
+          ? (feeTotals[used.chain_name][used.denom] = feeTotals[used.chain_name][used.denom] + parseFloat(used.amount))
+          : (feeTotals[used.chain_name][used.denom] = parseFloat(used.amount));
       }
     }
   }
@@ -642,6 +641,7 @@ export function getUsedFee(
     denom: feeOption.denom,
     chain_name: feeOption.chain_name,
   };
+  console.log(used);
   return used;
 }
 
