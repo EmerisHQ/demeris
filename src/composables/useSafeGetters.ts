@@ -18,7 +18,7 @@ export default function useSafeGetters() {
             { root: true },
           ));
         for (const chain in chains) {
-          if (!chains[chain].node_info)
+          if (!chains[chain]?.node_info)
             chains[chain] = await store.dispatch(
               GlobalDemerisActionTypes.API.GET_CHAIN,
               {
