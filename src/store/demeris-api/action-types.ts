@@ -48,6 +48,7 @@ export enum DemerisActionTypes {
   UNSUBSCRIBE = 'UNSUBSCRIBE',
   STORE_UPDATE = 'STORE_UPDATE',
   TRACE_TX_RESPONSE = 'TRACE_TX_RESPONSE',
+  GET_TX_FROM_RPC = 'GET_TX_FROM_RPC',
 }
 export enum GlobalDemerisActionTypes {
   // Cross-chain endpoint actions
@@ -97,6 +98,7 @@ export enum GlobalDemerisActionTypes {
   UNSUBSCRIBE = 'demerisAPI/UNSUBSCRIBE',
   STORE_UPDATE = 'demerisAPI/STORE_UPDATE',
   TRACE_TX_RESPONSE = 'demerisAPI/TRACE_TX_RESPONSE',
+  GET_TX_FROM_RPC = 'demerisAPI/GET_TX_FROM_RPC',
 }
 export type DemerisActionParams = {
   subscribe: boolean;

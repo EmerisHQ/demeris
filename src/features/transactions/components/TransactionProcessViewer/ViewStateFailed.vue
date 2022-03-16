@@ -144,17 +144,17 @@
       >
         <Alert status="info" :show-icon="false">
           <ul class="space-y-3">
-            <li v-if="lastResult?.status.status">
+            <li v-if="state.context.error">
+              <h5 class="font-medium text-text">{{ $t('context.transactions.error') }}</h5>
+              <p class="mt-0.5">{{ state.context.error?.message || state.context.error }}</p>
+            </li>
+            <li v-if="lastResult?.status?.status">
               <h5 class="font-medium text-text">{{ $t('context.transactions.status') }}</h5>
               <p class="mt-0.5">{{ lastResult.status.status }}</p>
             </li>
             <li v-if="lastResult?.txhash">
               <h5 class="font-medium text-text">{{ $t('context.transactions.ticket') }}</h5>
               <p class="mt-0.5">{{ lastResult.txhash }}</p>
-            </li>
-            <li v-if="state.context.error">
-              <h5 class="font-medium text-text">{{ $t('context.transactions.error') }}</h5>
-              <p class="mt-0.5">{{ state.context.error?.message || state.context.error }}</p>
             </li>
           </ul>
         </Alert>

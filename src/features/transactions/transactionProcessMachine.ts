@@ -492,8 +492,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
-            await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
-
             while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
@@ -512,30 +510,52 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (!destTx) {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to fetch destination hash',
+                data: { ...responseData },
+              });
             }
           }
         };
 
         const traceResponse = async () => {
+          await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
           await findIBCDestHash();
 
+          let traceResult;
+
+          const RPCFallback = async () => {
+            try {
+              traceResult = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_FROM_RPC, {
+                chain_name: responseData.chain_name,
+                txhash: responseData.txhash,
+              });
+            } catch (e) {
+              console.error(e);
+              debugger;
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
+            }
+          };
+
           try {
-            const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+            traceResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
-              stepType: currentStep.name,
             });
-            responseData.websocket = wsResult;
+          } catch {
+            RPCFallback();
+          }
 
-            await fetchEndBlock(wsResult.height);
+          if (traceResult) {
+            responseData.websocket = traceResult;
+
+            await fetchEndBlock(traceResult.height);
 
             // @ts-ignore
             callback({ type: 'GOT_RESPONSE', data: responseData });
-          } catch {
-            // @ts-ignore
-            return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
           }
         };
 
@@ -571,7 +591,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         formattedSteps: formatStepsWithFee(context, event.balances),
       })),
       setError: assign({
-        error: (_, event: DoneEventData<any>) => event.data,
+        error: (_, event: any) => event.error || event.data,
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =

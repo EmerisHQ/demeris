@@ -1040,12 +1040,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       let done = false;
 
-      const getTxRPC = async () => {
+      const getTx = async () => {
         const result = await wss.call('tx', [txHash64, false]).catch(reject);
         handleMessage(result);
       };
 
-      const subscribeTxRPC = () => {
+      const subscribeTx = () => {
         wss.subscribe(
           {
             query: subscribeQuery,
@@ -1055,8 +1055,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       };
 
       const handleOpen = () => {
-        getTxRPC();
-        subscribeTxRPC();
+        getTx();
+        subscribeTx();
       };
 
       const handleMessage = async (data: Record<string, any>) => {
@@ -1089,6 +1089,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
         reject(new Error('Could not find transaction response'));
       }, timeout);
     });
+  },
+
+  async [DemerisActionTypes.GET_TX_FROM_RPC]({ getters }, { txhash, chain_name }) {
+    const chain = getters['getChain']({ chain_name }) as ChainData;
+    const rpcUrl = chain?.public_node_endpoints?.tendermint_rpc?.[0];
+
+    if (!rpcUrl) {
+      throw new Error(`${chain_name} RPC endpoint not found`);
+    }
+
+    try {
+      const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
+      return data?.result?.tx_result;
+    } catch (e) {
+      throw new Error('Could not find transaction response from RPC');
+    }
   },
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS](
