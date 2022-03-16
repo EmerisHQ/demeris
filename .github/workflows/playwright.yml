@@ -50,13 +50,11 @@ jobs:
       
       - name: Install Playwright
         run: npx playwright install --with-deps
+      - name: Serve build
+        run: serve -s dist -l 8080
       - name: Run Playwright tests
-        with:
-          start: serve -s dist -l 8080
-          wait-on: 'http://localhost:8080'
-          wait-on-timeout: 180
         run: npx playwright test
-        
+
       - uses: actions/upload-artifact@v2
         if: always()
         with:
