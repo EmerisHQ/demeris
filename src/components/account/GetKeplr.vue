@@ -18,6 +18,7 @@
         <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
         <a
           class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70 cursor-pointer"
+          data-cy="tryTheDemoButton"
           @click="signInDemo"
         >
           {{ $t('generic_cta.tryTheDemo') }}
