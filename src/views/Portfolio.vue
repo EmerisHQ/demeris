@@ -79,7 +79,6 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Portfolio',
@@ -120,11 +119,7 @@ export default {
     };
 
     const initialLoadComplete = computed(() => {
-      if (featureRunning('REQUEST_PARALLELIZATION')) {
-        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
-      } else {
-        return true;
-      }
+      return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
     });
     const poolsInvested = computed(() => {
       const poolsCopy = pools.value?.slice() ?? [];

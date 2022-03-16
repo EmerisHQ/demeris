@@ -16,11 +16,15 @@ export default function useStaking() {
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
     const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
-    const inflation = await store.dispatch(GlobalDemerisActionTypes.API.GET_INFLATION, { chain_name });
-    return Math.trunc(inflation * 10000) / 100;
+    try {
+      const inflation = await store.dispatch(GlobalDemerisActionTypes.API.GET_INFLATION, { chain_name });
+      return Math.trunc(inflation * 10000) / 100;
+    } catch (_e) {
+      return null;
+    }
   };
 
-  const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
+  const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<StakingRewards> => {
     try {
       const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
       return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
@@ -50,4 +54,9 @@ export default function useStaking() {
     getChainDisplayInflationByBaseDenom,
     getStakingRewardsByBaseDenom,
   };
+}
+
+export interface StakingRewards {
+  rewards: { reward: string; validator_address: string }[];
+  total: string;
 }

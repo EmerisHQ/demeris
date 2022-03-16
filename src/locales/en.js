@@ -674,6 +674,12 @@ export const messages = {
       showDetails: 'Show details',
       hideDetails: 'Hide details',
     },
+    generic_error: {
+      default: {
+        msg: "We couldn't load your data.",
+        userActionMsg: 'Please wait.',
+      },
+    },
     maintenance: {
       title: 'Emeris will be back soon',
       subTitle:
