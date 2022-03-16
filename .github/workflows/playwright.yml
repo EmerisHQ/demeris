@@ -36,7 +36,15 @@ jobs:
       - name: Install (npm)
         run: npm install
 
-      - name: Waiting for 200 from the Netlify Preview
+      - name: Wait for build to succeed
+        uses: fountainhead/action-wait-for-check@v1.0.0
+        id: wait-for-Netlify
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'Pages changed - emeris-app'
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Wait for deploy preview
+        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
         uses: jakepartusch/wait-for-netlify-action@v1.3
         id: waitFor200
         with:
