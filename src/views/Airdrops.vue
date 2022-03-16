@@ -76,6 +76,7 @@ export default {
     );
 
     const activeFilter = ref('');
+    const keyword = ref('');
 
     const setActiveFilter = (value: string) => {
       activeFilter.value = value;
@@ -96,7 +97,7 @@ export default {
       });
     };
 
-    return { airdrops, openAirdropPage, activeFilter, setActiveFilter };
+    return { airdrops, openAirdropPage, activeFilter, keyword, setActiveFilter };
   },
 };
 </script>

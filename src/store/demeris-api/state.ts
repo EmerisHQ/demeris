@@ -34,6 +34,7 @@ export type APIState = {
   validPools: Pool[];
   airdrops: EmerisAirdrops.Airdrop[];
   selectedAirdrop: EmerisAirdrops.Airdrop;
+  airdropsStatus: LoadingState;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
 };
@@ -62,6 +63,7 @@ export function getDefaultState(): APIState {
     relayer: false,
     chains: {},
     airdrops: [],
+    airdropsStatus: LoadingState.INIT,
     selectedAirdrop: null,
     traces: {},
     transactions: new Map(),

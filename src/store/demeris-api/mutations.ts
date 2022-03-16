@@ -49,6 +49,7 @@ export type Mutations<S = APIState> = {
     state: S,
     payload: { params: EmerisAPI.TokenIdReq; value: EmerisAPI.TokenIdResponse },
   ): void;
+  [MutationTypes.SET_AIRDROPS_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_TOKEN_ID_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
@@ -232,21 +233,20 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_AIRDROPS](state, payload) {
     const tempAirdrop = payload.value;
 
-    if (tempAirdrop.eligibilityCheckEndpoint) {
-      tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');
-    }
-
-    if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
-      tempAirdrop.dateStatus = 'not_started';
+    if (!tempAirdrop.airdropStartDate && !tempAirdrop.airdropEndDate) {
+      tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED;
+    } else if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
+      tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.NOT_STARTED;
     } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
-      tempAirdrop.dateStatus = 'ongoing';
+      tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ONGOING;
     } else if (new Date(tempAirdrop.airdropEndDate).getTime() <= new Date().getTime()) {
-      tempAirdrop.dateStatus = 'ended';
-    } else {
-      tempAirdrop.dateStatus = 'not_started';
+      tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ENDED;
     }
 
     state.airdrops.push(tempAirdrop);
+  },
+  [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
+    state.airdropsStatus = payload.value;
   },
   [MutationTypes.SET_TOKEN_ID_STATUS](state, payload) {
     state.tokenIdLoadingStatus = payload.value;

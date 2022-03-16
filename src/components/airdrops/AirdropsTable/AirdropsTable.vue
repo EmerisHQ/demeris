@@ -33,7 +33,7 @@
         <td class="py-5 align-middle group-hover:bg-fg transition">
           <div class="flex items-center">
             <div>
-              <img v-if="airdrop.tokenIcon" :src="airdrop.tokenIcon" alt="Airdrop Logo" class="w-10" />
+              <img v-if="airdrop.tokenIcon" :src="airdrop.tokenIcon" alt="Airdrop Logo" class="w-10 rounded-full" />
 
               <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
                 {{ airdrop.chainName ? airdrop.chainName.slice(0, 1) : '-' }}
@@ -49,17 +49,18 @@
         </td>
 
         <td class="py-5 align-middle text-muted group-hover:bg-fg transition">
-          <p v-if="airdrop.dateStatus === 'not_started'">
+          <p v-if="airdrop.dateStatus === 'NOT_ANNOUNCED'">{{ 'Not Announced' }}</p>
+          <p v-if="airdrop.dateStatus === 'NOT_STARTED'">
             {{ airdrop.airdropStartDate ? `Starts ${airdrop.airdropStartDate}` : 'Start date not announced' }}
           </p>
-          <p v-else-if="airdrop.dateStatus === 'ongoing'">
+          <p v-else-if="airdrop.dateStatus === 'ONGOING'">
             {{ airdrop.airdropEndDate ? `Ends ${airdrop.airdropEndDate}` : 'End date not announced' }}
           </p>
-          <p v-else>{{ airdrop.airdropEndDate ? airdrop.airdropEndDate : 'End date not announced' }}</p>
+          <p v-else>{{ airdrop.airdropEndDate ? `Ended ${airdrop.airdropEndDate}` : 'End date not announced' }}</p>
         </td>
 
         <td class="py-5 align-middle group-hover:bg-fg transition">
-          <SkeletonLoader width="50%" height="30px" class="float-right" />
+          <SkeletonLoader width="50%" height="20px" class="float-right" />
         </td>
       </tr>
     </tbody>
@@ -129,7 +130,9 @@ export default defineComponent({
       } else if (activeFilter === 'past') {
         const mappedAirdropsObj = {
           sectionTitle: null,
-          airdrops: props.airdrops.filter((airdropItem) => airdropItem.dateStatus === 'ended'),
+          airdrops: props.airdrops.filter(
+            (airdropItem) => airdropItem.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED,
+          ),
         };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else {

@@ -9,6 +9,7 @@ import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from 
 import { SessionParams } from '@/types/user';
 import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
+import { hashObject } from '@/utils/basic';
 import { fromHexString, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
@@ -201,10 +202,11 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
           address: fromHexString(keyHashfromAddress(account.address)),
         };
       }
-      commit(MutationTypes.SET_CORRELATION_ID, keyHashfromAddress(keyData.bech32Address));
+      const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
+      commit(MutationTypes.SET_CORRELATION_ID, encryptedUID);
       commit(MutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      analyticsConfig({ user_id: keyHashfromAddress(keyData.bech32Address) });
+      analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {

@@ -4,7 +4,7 @@ import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
-import { ChartPrices, Namespaced } from '@/types/util';
+import { ChartPrices, LoadingState, Namespaced } from '@/types/util';
 import { parseCoins } from '@/utils/basic';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -71,6 +71,7 @@ export type Getters = {
   [GetterTypes.getPrimaryChannel](state: APIState): { (params: EmerisAPI.ChainCounterPartyReq): string | null };
   [GetterTypes.getTokenPrices](state: APIState): ChartPrices | null;
   [GetterTypes.getAirdrops](state: APIState): EmerisAirdrops.Airdrop[] | null;
+  [GetterTypes.getAirdropsStatus](state: APIState): LoadingState | null;
   [GetterTypes.getSelectedAirdrop](state: APIState): EmerisAirdrops.Airdrop | null;
   [GetterTypes.getTokenId](state: APIState): string | null;
   [GetterTypes.getChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
@@ -315,6 +316,9 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   },
   [GetterTypes.getAirdrops]: (state) => {
     return state.airdrops;
+  },
+  [GetterTypes.getAirdropsStatus]: (state) => {
+    return state.airdropsStatus;
   },
   [GetterTypes.getSelectedAirdrop]: (state) => {
     return state.selectedAirdrop;

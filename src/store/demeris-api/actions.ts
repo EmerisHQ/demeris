@@ -733,16 +733,25 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
   },
   async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+    commit(MutationTypes.SET_AIRDROPS_STATUS, {
+      value: LoadingState.LOADING,
+    });
     try {
       const response: AxiosResponse<EmerisAirdrops.Airdrop> = await axios.get(
         `${getters['getRawGitEndpoint']}/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+      commit(MutationTypes.SET_AIRDROPS_STATUS, {
+        value: LoadingState.LOADED,
+      });
 
       commit(MutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
+      commit(MutationTypes.SET_AIRDROPS_STATUS, {
+        value: LoadingState.ERROR,
+      });
       throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },

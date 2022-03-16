@@ -27,12 +27,17 @@
       exact-active-class="text-text font-medium"
       to="/airdrops"
     >
-      {{ $t('navbar.airdrops') }}
-      <span class="blinking"></span>
+      <div class="flex items-center">
+        {{ $t('navbar.airdrops') }}
+        <span v-if="airdropsLoading">
+          <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
+        </span>
+        <span v-if="showBlinker" class="blinking"></span>
+      </div>
 
-      <div class="airdrop-hover bg-text text-inverse py-2.5 px-4 mt-4 rounded-lg">
+      <div v-if="showBlinker" class="airdrop-hover bg-text text-inverse py-2 px-3 mt-3 rounded-lg">
         <div class="flex items-center">
-          <StarsIcon />
+          <Icon name="StarsIcon" />
           <p class="-text-1 ml-1">3 airdrops found</p>
         </div>
       </div>
@@ -41,27 +46,45 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
-import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
+import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { LoadingState } from '@/types/util';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'Navbar',
   components: {
-    StarsIcon,
+    Icon,
   },
   setup() {
+    const route = useRoute();
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
     const typedstore = useStore() as RootStoreTyped;
     const airdrops = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
+    const onAirdropsPage = computed(() => {
+      return route.fullPath.includes('/airdrops');
+    });
+
+    const airdropsLoading = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+    });
+
+    const showBlinker = computed(() => {
+      return !onAirdropsPage.value && !airdropsLoading.value;
+    });
+
     return {
       isAirdropsFeatureRunning,
       airdrops,
+      onAirdropsPage,
+      airdropsLoading,
+      showBlinker,
     };
   },
 });
