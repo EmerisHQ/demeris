@@ -1,12 +1,13 @@
 <template>
   <router-link
+    v-if="shouldShowBanner"
     class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     :to="`/staking/${baseDenom}/stake`"
   >
     <h5 class="font-bold text-1">{{ $t('components.stakingBanner.title') }} {{ displayDenom }}</h5>
     <p class="staking-banner__text -text-1 leading-5 text-muted">
       {{ $t('components.stakingBanner.text') }}
-      <span class="text-text font-medium"> {{ apr || '-.-' }}% {{ $t('components.stakingBanner.textAPR') }}. </span>
+      <span class="text-text font-medium"> {{ apr }}% {{ $t('components.stakingBanner.textAPR') }}. </span>
     </p>
     <img
       :src="require(`@/assets/images/stake-panel-ephemeris.png`)"
@@ -50,6 +51,7 @@ export default defineComponent({
   setup(props) {
     const { getChainDisplayInflationByBaseDenom } = useStaking();
     const store = useStore();
+    let shouldShowBanner = ref<boolean>(false);
 
     const propsRef = toRefs(props);
     const apr = ref<string>('');
@@ -62,14 +64,14 @@ export default defineComponent({
       async (newValue) => {
         if (!newValue) return;
         const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
-
-        //   display -.- instead of a faulty 0 value APY
-        if (isNaN(inflation) || Number(inflation) <= 0) return;
-        apr.value = new BigNumber(inflation).toFixed(2);
+        if (inflation === null || isNaN(inflation)) return;
+        apr.value = inflation > 0 ? new BigNumber(inflation).toFixed(2) : '-.-';
+        shouldShowBanner.value = true;
       },
       { immediate: true },
     );
     return {
+      shouldShowBanner,
       apr,
     };
   },

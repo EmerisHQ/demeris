@@ -479,6 +479,15 @@ export const messages = {
         transactionSuccessful: 'Transaction successful. Please refresh this page.',
         transactionFailed: 'Transaction failed. Please refresh this page.',
       },
+      bestPrice: {
+        exchangesSearched: 'exchanges searched',
+        bestPriceFrom: 'Emeris found the best price from ',
+        expectedRate: 'Expected rate ',
+        limitPrice: 'Limit price ',
+        maxSlippage: 'Max slippage ',
+        minReceived: 'Min. received ',
+        fullSwapped: '(if 100% swapped) ',
+      },
     },
     context: {
       feeLevels: {
@@ -664,6 +673,12 @@ export const messages = {
       balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
       showDetails: 'Show details',
       hideDetails: 'Hide details',
+    },
+    generic_error: {
+      default: {
+        msg: "We couldn't load your data.",
+        userActionMsg: 'Please wait.',
+      },
     },
     maintenance: {
       title: 'Emeris will be back soon',

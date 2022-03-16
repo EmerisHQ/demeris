@@ -177,6 +177,7 @@ import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import StakeTable from '@/components/asset/StakeTable.vue';
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import StakingBanner from '@/components/banners/StakingBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -187,7 +188,6 @@ import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
-import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';

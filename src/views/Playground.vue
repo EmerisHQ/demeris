@@ -9,6 +9,21 @@
     <Button class="flex-1">Add Liquidity</Button>
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
+  <hr />
+  <tippy placement="bottom-start" delay="0" :interactive="true" :arrow="false">
+    <Button class="w-60 h-0">Hover</Button>
+    <template #content>
+      <BestPrice
+        :number-of-exchanges-searched="2"
+        dex="gravity"
+        :expected-rate="1.567"
+        :limit-price="1.555"
+        denom="OSMO"
+        :max-slippage="0.3"
+        :min-received="9940.34"
+      />
+    </template>
+  </tippy>
 </template>
 
 <script lang="ts" setup>
@@ -17,6 +32,7 @@ import { interpret, State } from 'xstate';
 
 import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
 import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
+import BestPrice from '@/components/common/BestPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
 import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
@@ -49,3 +65,10 @@ const addService = (key: string, stateDefinition: any) => {
   transactionsStore.transactions[key] = service;
 };
 </script>
+
+<style lang="scss">
+//_tippy.scss applies padding which causes a background to appear
+.tippy-content {
+  padding: 0 !important;
+}
+</style>
