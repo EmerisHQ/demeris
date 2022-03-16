@@ -8,11 +8,30 @@ export default function useSafeGetters() {
     let chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     if (!chain_name) {
       try {
-        await store.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
-          subscribe: true,
-        });
+        const chains =
+          store.getters[GlobalDemerisGetterTypes.API.getChains] ??
+          (await store.dispatch(
+            GlobalDemerisActionTypes.API.GET_CHAINS,
+            {
+              subscribe: false,
+            },
+            { root: true },
+          ));
+        for (const chain in chains) {
+          if (!chains[chain].node_info)
+            chains[chain] = await store.dispatch(
+              GlobalDemerisActionTypes.API.GET_CHAIN,
+              {
+                subscribe: true,
+                params: {
+                  chain_name: chain,
+                },
+              },
+              { root: true },
+            );
+        }
       } catch (e) {
-        console.error('Could not load verified denoms: ' + e);
+        console.error('Error occurred while fetching chain data: ' + e);
       }
       chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     }
