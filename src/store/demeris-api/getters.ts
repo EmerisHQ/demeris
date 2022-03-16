@@ -4,12 +4,12 @@ import { GetterTree } from 'vuex';
 import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
-import { parseCoins } from '@/utils/basic';
-import { keyHashfromAddress } from '@/utils/basic';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
 import { ChainData, State } from './state';
+
 type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
 };
@@ -320,7 +320,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getPrimaryChannel]: (state) => (params) => {
     return (
-      state.chains[(params as API.ChainReq).chain_name]?.primary_channel[
+      state.chains?.[(params as API.ChainReq).chain_name].primary_channel?.[
         (params as API.ChainReq).destination_chain_name
       ] ?? null
     );
