@@ -43,7 +43,8 @@ export function chainAddressfromAddress(prefix: string, address: string) {
 }
 export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
   const words = bech32.toWords(Buffer.from(keyhash, 'hex'));
-  return keyhash != '' ? bech32.encode(prefix, words) : '';
+  // TODO: remove this replace once the backend stops adding non-zero ASCII in the response
+  return keyhash !== '' ? bech32.encode(prefix.replace(/[\u200B-\u200D\uFEFF]/g, ''), words) : '';
 }
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
