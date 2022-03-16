@@ -389,6 +389,7 @@ export type Airdrop = {
   airdropStartDate: Date;
   airdropEndDate: Date;
   airdropStatus: string;
+  eligibility: string;
   dateStatus: string;
   snapshotDate: string;
   snapshotBlockHeight: string;
@@ -437,7 +438,7 @@ export type PriceQuote = {
   dex: string;
   amount: number;
   denom: string;
-  numberOfTransactions: string;
+  numberOfTransactions: number;
   usdAmount: number;
   fee?: { amount: number; denom: string };
 };

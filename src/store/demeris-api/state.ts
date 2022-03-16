@@ -16,6 +16,8 @@ export type TransactionItem = {
 };
 export type State = {
   endpoint: string;
+  gitEndpoint: string;
+  rawGitEndpoint: string;
   wsEndpoint: string;
   hub_chain: string;
   balances: Record<string, API.Balances>;
@@ -43,6 +45,8 @@ export type State = {
 export function getDefaultState(): State {
   return {
     endpoint: '',
+    gitEndpoint: '',
+    rawGitEndpoint: '',
     wsEndpoint: '',
     hub_chain: 'cosmoshub-4',
     balances: {},
