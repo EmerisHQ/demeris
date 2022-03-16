@@ -8,6 +8,7 @@ import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { config as analyticsConfig, event } from '@/utils/analytics';
+import { hashObject } from '@/utils/basic';
 import { fromHexString, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
@@ -230,10 +231,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
           address: fromHexString(keyHashfromAddress(account.address)),
         };
       }
-      commit(DemerisMutationTypes.SET_CORRELATION_ID, keyHashfromAddress(keyData.bech32Address));
+
+      const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
+      commit(DemerisMutationTypes.SET_CORRELATION_ID, encryptedUID);
       commit(DemerisMutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      analyticsConfig({ user_id: keyHashfromAddress(keyData.bech32Address) });
+      analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
