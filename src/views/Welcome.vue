@@ -12,7 +12,7 @@
       </div>
     </header>
 
-    <div v-show="isMobile" class="welcome-modal__bg">
+    <div v-if="isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -21,7 +21,7 @@
     </div>
 
     <div
-      v-show="
+      v-if="
         ((isEmerisSupported && isKeplrInstalled && !isWarningNeeded) ||
           (isEmerisSupported && isKeplrInstalled && isWarningAgreed)) &&
         !isMobile
@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div v-show="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
+    <div v-if="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <div v-show="isEmerisSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
+    <div v-if="isEmerisSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <div v-show="!isEmerisSupported && !isMobile" class="welcome-modal__bg">
+    <div v-if="!isEmerisSupported && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
