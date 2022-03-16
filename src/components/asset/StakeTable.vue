@@ -48,7 +48,7 @@ watch(
 );
 </script>
 <style scoped>
-* >>> .tippy-box {
+* :deep(.tippy-box) {
   background: var(--surface);
   color: var(--text);
 }

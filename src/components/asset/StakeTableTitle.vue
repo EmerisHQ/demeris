@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import { toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed, defineEmits } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
