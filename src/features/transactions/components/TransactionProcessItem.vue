@@ -17,7 +17,7 @@
   <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
-      <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
+      <Icon v-else-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
@@ -278,22 +278,22 @@ const getIconAssets = () => {
   }
 
   if (name === 'claim') {
-    const denom = parseCoins((transactionAction.value.data as ClaimData).total)[0].denom;
+    const denom = parseCoins((transaction.value.data as ClaimData).total)[0].denom;
     assets.push({ denom });
   }
 
   if (name === 'stake') {
-    const denom = (transactionAction.value.data as StakeData[])[0].amount.denom;
+    const denom = (transaction.value.data as StakeData[])[0].amount.denom;
     assets.push({ denom });
   }
 
   if (name === 'unstake') {
-    const denom = (transactionAction.value.data as UnstakeData).amount.denom;
+    const denom = (transaction.value.data as UnstakeData).amount.denom;
     assets.push({ denom });
   }
 
   if (name === 'switch') {
-    const denom = (transactionAction.value.data as RestakeData).amount.denom;
+    const denom = (transaction.value.data as RestakeData).amount.denom;
     assets.push({ denom });
   }
 
