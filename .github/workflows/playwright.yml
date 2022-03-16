@@ -42,9 +42,7 @@ jobs:
         with:
           site_name: "emeris"
       - name: Install Playwright
-        run: npx playwright install --with-deps
-      - name: Serve build
-        run: serve -s dist -l 8080
+        run: npx playwright install --with-deps      
       - name: Run Playwright tests
         run: npx playwright test
 
