@@ -17,19 +17,24 @@ export default function useSafeGetters() {
             },
             { root: true },
           ));
+        const promises = [];
         for (const chain in chains) {
-          if (!chains[chain]?.node_info)
-            chains[chain] = await store.dispatch(
-              GlobalDemerisActionTypes.API.GET_CHAIN,
-              {
-                subscribe: true,
-                params: {
-                  chain_name: chain,
+          if (!chains[chain]?.node_info) {
+            promises.push(
+              store.dispatch(
+                GlobalDemerisActionTypes.API.GET_CHAIN,
+                {
+                  subscribe: true,
+                  params: {
+                    chain_name: chain,
+                  },
                 },
-              },
-              { root: true },
+                { root: true },
+              ),
             );
+          }
         }
+        await Promise.all(promises);
       } catch (e) {
         console.error('Error occurred while fetching chain data: ' + e);
       }
