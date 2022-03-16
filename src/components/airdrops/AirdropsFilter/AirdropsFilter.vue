@@ -9,8 +9,11 @@
       'text-muted hover:text-text': item.value !== activeFilterItem,
     }"
   >
-    <a @click="setActiveFilter(item.value)">
+    <a class="flex items-center" @click="setActiveFilter(item.value)">
       {{ item.text }}
+      <span v-if="item.value === activeFilterItem && airdropsLoading">
+        <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
+      </span>
       <span
         v-if="item.value === activeFilterItem && activeFilterItem === 'mine'"
         class="ml-2 bg-brand py-1 px-2 rounded-full -text-1 font-medium text-text"
@@ -22,10 +25,18 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
+import { apistore } from '@/store/setup';
+import { LoadingState } from '@/types/api';
+
 export default {
+  components: {
+    Icon,
+  },
   emits: ['active-filter'],
   setup(_, { emit }) {
     const { t } = useI18n({ useScope: 'global' });
@@ -63,7 +74,11 @@ export default {
       emit('active-filter', activeFilterItem.value);
     };
 
-    return { filtersItems, setActiveFilter, activeFilterItem };
+    const airdropsLoading = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+    });
+
+    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading };
   },
 };
 </script>
