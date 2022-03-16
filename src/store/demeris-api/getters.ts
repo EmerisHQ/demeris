@@ -338,6 +338,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getAirdrops]: (state) => {
     return state.airdrops;
   },
+  [GetterTypes.getAirdropsStatus]: (state) => {
+    return state.airdropsStatus;
+  },
   [GetterTypes.getSelectedAirdrop]: (state) => {
     return state.selectedAirdrop;
   },

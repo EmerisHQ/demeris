@@ -925,6 +925,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
   async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+    commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+      value: API.LoadingState.LOADING,
+    });
+
     try {
       const response = await fetch(
         `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
@@ -934,12 +938,19 @@ export const actions: ActionTree<State, RootState> & Actions = {
           return data;
         });
 
+      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+        value: API.LoadingState.LOADED,
+      });
+
       commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
 
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
+      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+        value: API.LoadingState.ERROR,
+      });
       throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },

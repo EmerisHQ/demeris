@@ -2,6 +2,7 @@ import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
+import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
 
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
@@ -43,7 +44,8 @@ export function chainAddressfromAddress(prefix: string, address: string) {
 }
 export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
   const words = bech32.toWords(Buffer.from(keyhash, 'hex'));
-  return keyhash != '' ? bech32.encode(prefix, words) : '';
+  // TODO: remove this replace once the backend stops adding non-zero ASCII in the response
+  return keyhash !== '' ? bech32.encode(prefix.replace(/[\u200B-\u200D\uFEFF]/g, ''), words) : '';
 }
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
@@ -192,6 +194,10 @@ export function getFirstAlphabet(str: string) {
   });
   if (index !== -1) return str[index];
   return '';
+}
+
+export function getDisplayAmount(rawAmount: string | number, precision = 6): string {
+  return new BigNumber(rawAmount).dividedBy(10 ** precision).toFixed(precision);
 }
 
 export function checkStringIsKeybase(str: string) {

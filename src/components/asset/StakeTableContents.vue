@@ -57,7 +57,9 @@
                 {{ getValidatorMoniker(validator.validator_address) }}
               </span>
             </td>
-            <td class="text-right text-muted">{{ getDisplayAmount(validator.amount) }} <Ticker :name="denom" /></td>
+            <td class="text-right text-muted">
+              {{ getDisplayAmount(validator.amount, assetPrecision) }} <Ticker :name="denom" />
+            </td>
             <td class="text-right font-medium">
               <Price :amount="{ denom: denom, amount: validator.amount }" />
             </td>
@@ -131,7 +133,9 @@
                   </span>
                 </div>
               </td>
-              <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
+              <td class="text-right text-muted">
+                {{ getDisplayAmount(entry.balance, assetPrecision) }} <Ticker :name="denom" />
+              </td>
               <td class="text-right font-medium">
                 <Price :amount="{ denom: denom, amount: entry.balance }" />
               </td>
@@ -144,7 +148,6 @@
   <SkeletonLoader v-else width="100%" height="300px" />
 </template>
 <script lang="ts" setup>
-import BigNumber from 'bignumber.js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, ref, toRefs, watch } from 'vue';
@@ -163,7 +166,7 @@ import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
-import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
+import { chainAddressfromKeyhash, getDisplayAmount, keyHashfromAddress } from '@/utils/basic';
 
 dayjs.extend(relativeTime);
 const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom } = useStaking();
@@ -223,13 +226,8 @@ const totalRewardsDisplayAmount = computed(() => {
   if (propsRef.totalRewardsAmount.value < 1) {
     return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
   }
-  return new BigNumber(propsRef.totalRewardsAmount.value ?? 0)
-    .dividedBy(10 ** assetPrecision.value)
-    .toFixed(assetPrecision.value);
+  return getDisplayAmount(propsRef.totalRewardsAmount.value ?? 0, assetPrecision.value);
 });
-const getDisplayAmount = (amount: any): number => {
-  return Number(amount) / 10 ** assetPrecision.value;
-};
 const getValidatorMoniker = (address: string): string => {
   let moniker;
   validatorList.value.some((vali) => {
