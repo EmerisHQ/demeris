@@ -57,6 +57,7 @@ export type Getters = {
   [GetterTypes.getRawGitEndpoint](state: APIState): string;
   [GetterTypes.getSupply](state: APIState, getters): { (params): number };
   [GetterTypes.getAllVerifiedTraces](state: APIState): Record<string, EmerisAPI.VerifyTrace>;
+  [GetterTypes.getBech32Config](state: APIState): { (params: EmerisAPI.ChainReq): EmerisBase.Bech32Config | null };
   [GetterTypes.getDexChain](state: APIState): string;
   [GetterTypes.getTxStatus](state: APIState): {
     (params: EmerisAPI.TicketReq): Promise<EmerisAPI.TicketResponse> | null;
@@ -290,7 +291,9 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     }
     return result;
   },
-
+  [GetterTypes.getBech32Config]: (state) => (params) => {
+    return state.chains[params.chain_name]?.node_info.bech32_config ?? null;
+  },
   [GetterTypes.getFeeTokens]: (state) => (params) => {
     return state.chains[params.chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
   },
