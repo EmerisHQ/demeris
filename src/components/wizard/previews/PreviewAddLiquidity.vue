@@ -142,7 +142,7 @@ export default defineComponent({
       return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
     function isBlockResponse(resp): resp is EmerisBase.AddLiquidityEndBlockResponse {
-      return !!(resp as EmerisBase.AddLiquidityEndBlockResponse).accepted_coins;
+      return !!(resp as EmerisBase.AddLiquidityEndBlockResponse)?.accepted_coins;
     }
     const data = computed(() => {
       if (isBlockResponse(props.response)) {

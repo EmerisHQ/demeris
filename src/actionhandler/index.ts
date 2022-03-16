@@ -209,11 +209,10 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
             transactions: [...transferCoinBtoHub.steps],
           });
         }
-
         const addLiquidityStep = await addLiquidity({
           pool_id: action.params.pool_id,
-          coinA: { amount: transferCoinAtoHubCreate.output.amount, denom: transferCoinAtoHubCreate.output.denom },
-          coinB: { amount: transferCoinBtoHubCreate.output.amount, denom: transferCoinBtoHubCreate.output.denom },
+          coinA: { amount: transferCoinAtoHub.output.amount, denom: transferCoinAtoHub.output.denom },
+          coinB: { amount: transferCoinBtoHub.output.amount, denom: transferCoinBtoHub.output.denom },
         });
         steps.push({
           name: 'addliquidity',
