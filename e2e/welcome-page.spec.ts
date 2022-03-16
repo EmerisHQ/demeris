@@ -10,7 +10,6 @@ test.beforeEach(async ({ page }) => {
 test.describe('Welcome page', () => {
   test('Should have Try Demo button', async ({ page }) => {
     const demoBtn = await page.locator('[data-cy=tryTheDemoButton]', { hasText: 'Try the demo' });
-    await page.screenshot({ path: 'screenshot.png' });
     await expect(demoBtn).toBeVisible();
   });
 });
