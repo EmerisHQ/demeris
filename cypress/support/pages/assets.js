@@ -1,16 +1,4 @@
-import { Navbar } from './navbar';
-
 export class Assets {
-  goToAssetTab() {
-    let navbar = new Navbar();
-    // wait for navbar logo to be visible
-    cy.waitFor(navbar.navbarLogo());
-    //go to assert tab
-    navbar.assetsTab().click();
-
-    cy.url().should('include', '/assets');
-  }
-
   aktRow() {
     return this.tableAssetsRow('AKT');
   }
