@@ -195,8 +195,8 @@ export function getFirstAlphabet(str: string) {
   return '';
 }
 
-export function getDisplayAmount(rawAmount: string | number, precision = 6): number {
-  return Number(new BigNumber(rawAmount).dividedBy(10 ** precision).toFixed(precision));
+export function getDisplayAmount(rawAmount: string | number, precision = 6): string {
+  return new BigNumber(rawAmount).dividedBy(10 ** precision).toFixed(precision);
 }
 
 export function checkStringIsKeybase(str: string) {
