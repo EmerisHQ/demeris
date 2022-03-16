@@ -745,22 +745,10 @@ export async function validBalances(balances: Balances): Promise<Balances> {
             return;
           }
 
-          const primaryChannel =
-            apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-              chain_name: balance.on_chain,
-              destination_chain_name: verifyTrace.trace[0].counterparty_name,
-            }) ??
-            (await apistore.dispatch(
-              GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-              {
-                subscribe: false,
-                params: {
-                  chain_name: balance.on_chain,
-                  destination_chain_name: verifyTrace.trace[0].counterparty_name,
-                },
-              },
-              { root: true },
-            ));
+          const primaryChannel = apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+            chain_name: balance.on_chain,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
+          });
           if (primaryChannel == getChannel(verifyTrace.path, 0)) {
             validBalances.push(balance);
           }
