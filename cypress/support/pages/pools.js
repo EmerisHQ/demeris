@@ -1,11 +1,4 @@
-import { Navbar } from './navbar';
-
 export class Pools {
-  goTo() {
-    const navbar = new Navbar();
-    navbar.poolsTab().click();
-  }
-
   // ADD LIQUIDITY
   addLiquidityButton() {
     return cy.get('.add-liquidity').contains('Add liquidity');
