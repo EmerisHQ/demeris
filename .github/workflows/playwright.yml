@@ -36,6 +36,8 @@ jobs:
       - name: Install (npm)
         run: npm install
 
+      - name: Install Playwright
+        run: npx playwright install --with-deps    
       - name: Wait for build to succeed
         uses: fountainhead/action-wait-for-check@v1.0.0
         id: wait-for-Netlify
@@ -48,9 +50,7 @@ jobs:
         uses: jakepartusch/wait-for-netlify-action@v1.3
         id: waitFor200
         with:
-          site_name: "emeris-app"
-      - name: Install Playwright
-        run: npx playwright install --with-deps      
+          site_name: "emeris-app"  
       - name: Run Playwright tests
         run: npx playwright test
         env: 
