@@ -8,11 +8,11 @@ import {
   CreatePoolData,
   IBCBackwardsData,
   IBCForwardsData,
+  RestakeData,
   StakeData,
   Step,
   StepTransaction,
   SwapData,
-  SwitchStakingValidatorData,
   TransferData,
   UnstakeData,
   WithdrawLiquidityData,
@@ -63,7 +63,7 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
     case 'unstake':
       return (transaction.data as UnstakeData).chain_name;
     case 'switch':
-      return (transaction.data as SwitchStakingValidatorData).chain_name;
+      return (transaction.data as RestakeData).chain_name;
     default:
       return dexChain;
   }
