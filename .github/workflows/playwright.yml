@@ -39,7 +39,7 @@ jobs:
       - name: Install Serve
         run: npm install -g serve
       - name: Install Playwright
-        run: npx playwright install 
+        run: npx playwright install --with-deps
       - name: Build
         run: npm run build
       - name: Run Playwright tests
