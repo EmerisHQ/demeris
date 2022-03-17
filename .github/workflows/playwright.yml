@@ -36,25 +36,19 @@ jobs:
       - name: Install (npm)
         run: npm install
 
+      - name: Install Serve
+        run: npm install -g serve
       - name: Install Playwright
-        run: npx playwright install --with-deps    
-      - name: Wait for build to succeed
-        uses: fountainhead/action-wait-for-check@v1.0.0
-        id: wait-for-Netlify
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'Pages changed - emeris-app'
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Wait for deploy preview
-        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
-        uses: jakepartusch/wait-for-netlify-action@v1.3
-        id: waitFor200
-        with:
-          site_name: "emeris-app"  
+        run: npx playwright install --with-deps
+      - name: Build
+        run: npm run build
       - name: Run Playwright tests
-        run: npx playwright test
+      - run: 
+          serve -s dist -l 8080 &
+      - run:
+          npx playwright test
         env: 
-          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.waitFor200.outputs.url }}
+          PLAYWRIGHT_TEST_BASE_URL: 'http://localhost:8080'
 
       - uses: actions/upload-artifact@v2
         if: always()
