@@ -43,9 +43,8 @@ jobs:
       - name: Build
         run: npm run build
       - name: Run Playwright tests
-      - run: 
+        run: 
           serve -s dist -l 8080 &
-      - run:
           npx playwright test
         env: 
           PLAYWRIGHT_TEST_BASE_URL: 'http://localhost:8080'
