@@ -1,49 +1,49 @@
 import {
-  DemerisStore as DemerisStoreAPI,
-  GlobalDemerisActionTypes as GlobalDemerisActionTypesAPI,
+  APIState,
+  GlobalActionTypes as GlobalActionTypesAPI,
   GlobalGetterTypes as GlobalGetterTypesAPI,
   module as moduleAPI,
   namespace as namespaceAPI,
-  State as StateAPI,
+  NamespacedAPIStore,
 } from '@/store/demeris-api';
 import {
-  DemerisStore as DemerisStoreTX,
-  GlobalDemerisActionTypes as GlobalDemerisActionTypesTX,
+  GlobalActionTypes as GlobalActionTypesTX,
   GlobalGetterTypes as GlobalGetterTypesTX,
   module as moduleTX,
   namespace as namespaceTX,
-  State as StateTX,
+  NamespacedTXStore,
+  TXState,
 } from '@/store/demeris-tx';
 import {
-  DemerisStore as DemerisStoreUSER,
-  GlobalDemerisActionTypes as GlobalDemerisActionTypesUSER,
+  GlobalActionTypes as GlobalActionTypesUSER,
   GlobalGetterTypes as GlobalGetterTypesUSER,
   module as moduleUSER,
   namespace as namespaceUSER,
-  State as StateUSER,
+  NamespacedUSERStore,
+  USERState,
 } from '@/store/demeris-user';
 
 export type RootState = {
-  [namespaceAPI]: StateAPI;
-  [namespaceTX]: StateTX;
-  [namespaceUSER]: StateUSER;
+  [namespaceAPI]: APIState;
+  [namespaceTX]: TXState;
+  [namespaceUSER]: USERState;
   [key: string]: unknown;
 };
 
-export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStoreUSER<S>;
+import { Store as VuexStore } from 'vuex';
+export type RootStore<S> = NamespacedAPIStore<S> & NamespacedTXStore<S> & NamespacedUSERStore<S>;
 
-export type RootStoreType = RootStore<Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>>;
+export type RootStoreTyped = RootStore<
+  Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>
+>;
+export type RootStoreUntyped = VuexStore<RootState>;
 
-export type TypedAPIStore = DemerisStoreAPI<Pick<RootState, typeof namespaceAPI>>;
-export type TypedUSERStore = DemerisStoreUSER<Pick<RootState, typeof namespaceUSER>>;
-export type TypedTXStore = DemerisStoreTX<Pick<RootState, typeof namespaceTX>>;
-
-export const GlobalDemerisActionTypes = {
-  TX: GlobalDemerisActionTypesTX,
-  USER: GlobalDemerisActionTypesUSER,
-  API: GlobalDemerisActionTypesAPI,
+export const GlobalActionTypes = {
+  TX: GlobalActionTypesTX,
+  USER: GlobalActionTypesUSER,
+  API: GlobalActionTypesAPI,
 };
-export const GlobalDemerisGetterTypes = {
+export const GlobalGetterTypes = {
   TX: GlobalGetterTypesTX,
   USER: GlobalGetterTypesUSER,
   API: GlobalGetterTypesAPI,

@@ -33,7 +33,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalActionTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -55,9 +55,9 @@ export default defineComponent({
     const emitCancel = () => {
       emit('cancel');
     };
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const signInDemo = () => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+      store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     };
 
     const openUrl = () => {

@@ -3,7 +3,12 @@
     <p class="-text-1 text-muted mb-4">Current Balance</p>
     <div class="flex justify-between items-center">
       <div class="w-10 h-10 mr-4">
-        <img v-if="selectedAirdrop.tokenIcon" :src="selectedAirdrop.tokenIcon" alt="Airdrop Logo" />
+        <img
+          v-if="selectedAirdrop.tokenIcon"
+          :src="selectedAirdrop.tokenIcon"
+          alt="Airdrop Logo"
+          class="rounded-full"
+        />
         <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
           {{ selectedAirdrop.chainName.slice(0, 1) }}
         </div>
@@ -22,7 +27,7 @@ import { computed, defineComponent, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'AirdropsCurrentBalance',
@@ -31,10 +36,10 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
     return { selectedAirdrop };

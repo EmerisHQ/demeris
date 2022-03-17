@@ -1,85 +1,49 @@
 import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
-import { ActionContext, ActionTree } from 'vuex';
+import { ActionTree } from 'vuex';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
-import { DemerisMutationTypes } from '@/store/demeris-tx/mutation-types';
-import { Amount } from '@/types/base';
+import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
+import { SignParams, TxParams, TxResponse } from '@/types/tx';
+import { Namespaced } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
-import { DemerisActionTypes } from './action-types';
-import { DemerisSubscriptions } from './action-types';
+import { TXStore } from '.';
+import { ActionTypes } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
-import { ChainData, State } from './state';
+import { MutationTypes } from './mutation-types';
+import { TXState } from './state';
 
-type Namespaced<T, N extends string> = {
-  [P in keyof T & string as `${N}/${P}`]: T[P];
-};
-export type DemerisConfig = {
-  endpoint: string;
-  refreshTime?: number;
-  hub_chain?: string;
-  gas_limit?: number;
-};
-export type DemerisTxParams = {
-  tx: string;
-  chain_name: string;
-  address: string;
-};
-export type DemerisTxResultParams = {
-  height: number;
-  stepType: string;
-};
-export type GasFee = {
-  amount: Array<Amount>;
-  gas: string;
-};
-
-export type DemerisSignParams = {
-  msgs: Array<EncodeObject>;
-  chain_name: string;
-  fee: GasFee;
-  registry: Registry;
-  memo?: string;
-};
-
-export type TicketResponse = {
-  ticket: string;
+type TxActionContext = {
+  dispatch: Pick<TXStore<TXState>, 'dispatch'>['dispatch'] & Pick<RootStoreTyped, 'dispatch'>['dispatch'];
+  commit: Pick<TXStore<TXState>, 'commit'>['commit'];
+  state: TXState;
+  getters: Pick<TXStore<TXState>, 'getters'>['getters'];
+  rootState: RootState;
+  rootGetters: Pick<RootStoreTyped, 'getters'>['getters'];
 };
 export interface Actions {
-  [DemerisActionTypes.BROADCAST_TX](
-    { commit, getters }: ActionContext<State, RootState>,
-    { tx, chain_name }: DemerisTxParams,
-  ): Promise<TicketResponse>;
-  [DemerisActionTypes.SIGN_WITH_KEPLR](
-    { commit, getters }: ActionContext<State, RootState>,
-    { msgs, chain_name }: DemerisSignParams,
-  ): Promise<DemerisTxParams>;
-  [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
-  [DemerisActionTypes.UNSUBSCRIBE](
-    { commit }: ActionContext<State, RootState>,
-    subscription: DemerisSubscriptions,
-  ): void;
+  [ActionTypes.BROADCAST_TX](contex: TxActionContext, { tx, chain_name }: TxParams): Promise<TxResponse>;
+  [ActionTypes.SIGN_WITH_KEPLR](contex: TxActionContext, { msgs, chain_name }: SignParams): Promise<TxParams>;
+  [ActionTypes.RESET_STATE](contex: TxActionContext): void;
 }
 
 export type GlobalActions = Namespaced<Actions, 'demerisTX'>;
 
-export const actions: ActionTree<State, RootState> & Actions = {
+export const actions: ActionTree<TXState, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ dispatch, rootGetters }, { msgs, chain_name, fee, registry, memo }) {
+  async [ActionTypes.SIGN_WITH_KEPLR]({ dispatch, rootGetters }, { msgs, chain_name, fee, registry, memo }) {
     try {
       const isCypress = !!window['Cypress'];
-      let chain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
+      let chain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name,
-      }) as ChainData;
+      });
       if (!chain || !chain.node_info) {
         chain = await dispatch(
-          GlobalDemerisActionTypes.API.GET_CHAIN,
+          GlobalActionTypes.API.GET_CHAIN,
           {
             subscribe: true,
             params: {
@@ -106,7 +70,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
       const numbers = await dispatch(
-        GlobalDemerisActionTypes.API.GET_NUMBERS_CHAIN,
+        GlobalActionTypes.API.GET_NUMBERS_CHAIN,
         {
           subscribe: false,
           params: {
@@ -120,8 +84,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const signerData = numbers;
       const cosmjsSignerData = {
         chainId: chain.node_info.chain_id,
-        accountNumber: parseInt(signerData.account_number),
-        sequence: parseInt(signerData.sequence_number),
+        accountNumber: signerData.account_number,
+        sequence: signerData.sequence_number,
       };
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
@@ -134,10 +98,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.BROADCAST_TX]({ rootGetters }, { tx, chain_name, address }: DemerisTxParams) {
-    axios.defaults.headers.post['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
+  async [ActionTypes.BROADCAST_TX]({ rootGetters }, { tx, chain_name, address }) {
+    axios.defaults.headers.post['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
-      const response = await axios.post(rootGetters[GlobalDemerisGetterTypes.API.getEndpoint] + '/tx/' + chain_name, {
+      const response = await axios.post(rootGetters[GlobalGetterTypes.API.getEndpoint] + '/tx/' + chain_name, {
         tx_bytes: tx,
         address,
       });
@@ -148,11 +112,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  [DemerisActionTypes.RESET_STATE]({ commit }) {
-    commit(DemerisMutationTypes.RESET_STATE);
-  },
-
-  [DemerisActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
-    commit('UNSUBSCRIBE', subscription);
+  [ActionTypes.RESET_STATE]({ commit }) {
+    commit(MutationTypes.RESET_STATE);
   },
 };

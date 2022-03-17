@@ -1,13 +1,11 @@
-import { Amount } from '@/types/base';
+import { EmerisBase } from '@emeris/types';
 
-export async function createPool({ coinA, coinB }: { coinA: Amount; coinB: Amount }) {
+export async function createPool({ coinA, coinB }: { coinA: EmerisBase.Amount; coinB: EmerisBase.Amount }) {
   const result = {
     steps: [],
     output: {
-      amount: {
-        denom: '',
-        amount: 0,
-      },
+      denom: '',
+      amount: 0,
       chain_name: '',
     },
   };

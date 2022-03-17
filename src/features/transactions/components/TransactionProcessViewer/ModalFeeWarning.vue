@@ -67,7 +67,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { featureRunning } from '@/utils/FeatureManager';
 
 import { ProvideViewerKey } from '../../transactionProcessHelpers';
@@ -81,7 +81,7 @@ const transactionsStore = useTransactionsStore();
 const emitter = useEmitter();
 const store = useStore();
 
-const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]);
+const isSignedIn = computed(() => store.getters[GlobalGetterTypes.USER.isSignedIn]);
 const action = computed(() => state.value.context.input.action);
 const feeWarning = computed(() => state.value.context.fees.validation);
 

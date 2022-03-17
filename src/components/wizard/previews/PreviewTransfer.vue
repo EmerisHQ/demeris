@@ -102,6 +102,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -110,9 +111,8 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { getOwnAddress } from '@/utils/basic';
 
@@ -160,7 +160,7 @@ export default defineComponent({
     const store = useStore();
     const denomName = ref('-');
 
-    const gasPriceLevel = computed(() => store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel]);
 
     const currentStep = computed(() => {
       return props.response || props.step;
@@ -207,14 +207,14 @@ export default defineComponent({
         fromAmount = (
           parseInt(fromAmount) +
           parseFloat(firstTransaction.feeToAdd[0].amount[gasPriceLevel.value]) *
-            store.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
+            store.getters[GlobalGetterTypes.USER.getGasLimit]
         ).toString();
       }
       const from = {
         address: '',
         amount: fromAmount,
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
-        denom: (firstTransaction.data.amount as Base.Amount).denom,
+        denom: (firstTransaction.data.amount as EmerisBase.Amount).denom,
       };
 
       const to = {
@@ -224,7 +224,7 @@ export default defineComponent({
           lastTransaction.data.to_chain ||
           lastTransaction.data.destination_chain_name ||
           lastTransaction.data.chain_name,
-        denom: (lastTransaction.data.amount as Base.Amount).denom,
+        denom: (lastTransaction.data.amount as EmerisBase.Amount).denom,
       };
 
       //from.address = store.getters['demerisAPI/getOwnAddress']({ chain_name: from.chain });
@@ -237,13 +237,13 @@ export default defineComponent({
     });
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      const getName = (name: string) => store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
 
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      return 'Fees on ' + store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
     };
 
     const truncateAddress = (address: string) => {

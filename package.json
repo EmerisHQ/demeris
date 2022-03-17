@@ -72,6 +72,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.16.0",
+    "@emeris/types": "^0.0.27",
     "@keplr-wallet/types": "^0.8.11",
     "@pinia/testing": "^0.0.8",
     "@playwright/test": "^1.20.0",
@@ -80,6 +81,7 @@
     "@types/jest": "^27.0.3",
     "@types/lodash": "4.14.171",
     "@types/lodash.groupby": "^4.6.6",
+    "@types/lodash.isequal": "^4.5.5",
     "@types/lodash.orderby": "^4.6.6",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",

@@ -25,10 +25,10 @@ import { useStore } from 'vuex';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
+import { GlobalActionTypes, RootStoreTyped } from '@/store';
 import { featureRunning } from '@/utils/FeatureManager';
 const store = useStore();
-const apistore = store as TypedAPIStore;
+const apistore = store as RootStoreTyped;
 interface Props {
   chainName: string;
 }
@@ -41,8 +41,11 @@ async function getDaysToUnstake() {
   isResponseError.value = false;
   isLoading.value = true;
   try {
-    const unstakingParams = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_UNSTAKING_PARAM, {
-      chain_name: chainName.value,
+    const unstakingParams = await apistore.dispatch(GlobalActionTypes.API.GET_UNSTAKING_PARAM, {
+      subscribe: false,
+      params: {
+        chain_name: chainName.value,
+      },
     });
     daysToUnstake.value = (Math.round(unstakingParams.unbonding_time / 1000000000 / 60 / 60 / 24) * 100) / 100;
   } catch {

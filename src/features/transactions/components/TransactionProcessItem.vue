@@ -44,38 +44,52 @@
 
     <div class="flex-1 text-left flex flex-col">
       <p class="item-title font-medium truncate">
-        <template v-if="action === 'transfer'">
+        <template
+          v-if="
+            action == 'transfer' &&
+            (transactionAction.name === 'transfer' ||
+              transactionAction.name === 'ibc_backward' ||
+              transactionAction.name === 'ibc_forward')
+          "
+        >
           Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
-        <template v-if="action === 'move'">
+        <template
+          v-if="
+            action == 'move' &&
+            (transactionAction.name === 'transfer' ||
+              transactionAction.name === 'ibc_backward' ||
+              transactionAction.name === 'ibc_forward')
+          "
+        >
           Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
-        <template v-if="action === 'swap'">
+        <template v-if="action == 'swap' && transactionAction.name === 'swap'">
           Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
           <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
         </template>
-        <template v-if="action === 'addliquidity'">
+        <template v-if="action == 'addliquidity' && transactionAction.name === 'addliquidity'">
           Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
-        <template v-if="action === 'withdrawliquidity'">
+        <template v-if="action === 'withdrawliquidity' && transactionAction.name === 'withdrawliquidity'">
           Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[0])" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[1])" />
         </template>
-        <template v-if="action === 'createpool'">
+        <template v-if="action === 'createpool' && transactionAction.name === 'createpool'">
           Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
-        <template v-if="action === 'claim'">
+        <template v-if="action === 'claim' && transactionAction.name === 'claim'">
           Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
         </template>
-        <template v-if="action === 'stake'">
+        <template v-if="action === 'stake' && transactionAction.name === 'stake'">
           Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
         </template>
-        <template v-if="action === 'unstake'">
+        <template v-if="action === 'unstake' && transactionAction.name === 'unstake'">
           Unstake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
-        <template v-if="action === 'switch'">
+        <template v-if="action === 'switch' && transactionAction.name === 'switch'">
           Restake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
       </p>
@@ -163,7 +177,7 @@
           size="sm"
           :tooltip-text="
             $t('context.transactions.controls.waitingTransactionTooltip', {
-              chain: globalStore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chainName }),
+              chain: globalStore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chainName }),
             })
           "
           disabled
@@ -196,18 +210,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import {
-  AddLiquidityData,
-  ClaimData,
-  CreatePoolData,
-  RestakeData,
-  StakeData,
-  SwapData,
-  TransferData,
-  UnstakeData,
-  WithdrawLiquidityData,
-} from '@/types/actions';
+import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -249,51 +252,51 @@ const getIconAssets = () => {
   const name = transaction.value.name;
   const assets = [];
 
-  if (name === 'transfer' || name.startsWith('ibc')) {
-    const denom = (transaction.value.data as TransferData).amount.denom;
+  if (name === 'transfer' || name === 'ibc_backward' || name === 'ibc_forward') {
+    const denom = transaction.value.data.amount.denom;
     const chainName = getSourceChainFromTransaction(transaction.value);
     assets.push({ denom, chainName });
   }
 
   if (name === 'swap') {
-    const denom = (transaction.value.data as SwapData).to.denom;
+    const denom = transaction.value.data.to.denom;
     assets.push({ denom });
   }
 
   if (name === 'addliquidity') {
-    const denomA = (transaction.value.data as AddLiquidityData).coinA.denom;
-    const denomB = (transaction.value.data as AddLiquidityData).coinB.denom;
+    const denomA = transaction.value.data.coinA.denom;
+    const denomB = transaction.value.data.coinB.denom;
     assets.push({ denom: denomA }, { denom: denomB });
   }
 
   if (name === 'withdrawliquidity') {
-    const denoms = (transaction.value.data as WithdrawLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync);
+    const denoms = transaction.value.data.pool.reserve_coin_denoms.map(getBaseDenomSync);
     assets.push(...denoms);
   }
 
   if (name === 'createpool') {
-    const denomA = (transaction.value.data as CreatePoolData).coinA.denom;
-    const denomB = (transaction.value.data as CreatePoolData).coinB.denom;
+    const denomA = transaction.value.data.coinA.denom;
+    const denomB = transaction.value.data.coinB.denom;
     assets.push({ denom: denomA }, { denom: denomB });
   }
 
   if (name === 'claim') {
-    const denom = parseCoins((transaction.value.data as ClaimData).total)[0].denom;
+    const denom = parseCoins(transaction.value.data.total)[0].denom;
     assets.push({ denom });
   }
 
   if (name === 'stake') {
-    const denom = (transaction.value.data as StakeData[])[0].amount.denom;
+    const denom = transaction.value.data[0].amount.denom;
     assets.push({ denom });
   }
 
   if (name === 'unstake') {
-    const denom = (transaction.value.data as UnstakeData).amount.denom;
+    const denom = transaction.value.data.amount.denom;
     assets.push({ denom });
   }
 
   if (name === 'switch') {
-    const denom = (transaction.value.data as RestakeData).amount.denom;
+    const denom = transaction.value.data.amount.denom;
     assets.push({ denom });
   }
 

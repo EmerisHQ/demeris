@@ -1,7 +1,7 @@
-<script lang="ts">
 import { useRouter } from 'vue-router';
 
-import { ButtonFunctionData } from '@/types/setups';
+import { ButtonFunctionData } from '@/types/util';
+
 export default function () {
   const router = useRouter();
 
@@ -25,4 +25,3 @@ export default function () {
     buttonFunction,
   };
 }
-</script>
