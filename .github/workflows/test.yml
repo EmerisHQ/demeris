@@ -79,19 +79,28 @@ jobs:
       - name: Install dependencies
         run: sudo DEBIAN_FRONTEND=noninteractive apt -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
-      - name: Install Serve
-        run: npm install -g serve
+      - name: Wait for build to succeed
+        uses: fountainhead/action-wait-for-check@v1.0.0
+        id: wait-for-Netlify
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'Pages changed - emeris-app'
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Wait for deploy preview
+        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
+        uses: jakepartusch/wait-for-netlify-action@v1.3
+        id: waitFor200
+        with:
+          site_name: "emeris-app"
 
-      - name: Build
-        run: npm run build
-      
       - name: Cypress run
         uses: cypress-io/github-action@v2
         id: cypress
         with:
-          start: serve -s dist -l 8080
-          wait-on: 'http://localhost:8080'
-          wait-on-timeout: 180
+          wait-on: ${{ steps.waitFor200.outputs.url }}
+          wait-on-timeout: 10
+        env:
+          CYPRESS_BASE_URL: ${{ steps.waitFor200.outputs.url }}
 
       - name: Upload Screenshots
         uses: actions/upload-artifact@v2
