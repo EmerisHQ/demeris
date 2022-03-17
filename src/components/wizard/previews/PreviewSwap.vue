@@ -64,16 +64,17 @@
       >
         <AmountDisplay
           :amount="{
-            amount:
+            amount: (
               10 **
               store.getters['demerisAPI/getDenomPrecision']({
                 name: fromCoinBaseDenom,
-              }),
+              })
+            ).toString(),
             denom: data.from.denom,
           }"
         />
         =
-        <AmountDisplay :amount="{ amount: limitPrice, denom: data.to.denom }" />
+        <AmountDisplay :amount="{ amount: limitPrice.toString(), denom: data.to.denom }" />
       </ListItem>
     </ListItem>
 
@@ -99,12 +100,18 @@
         <ul>
           <li>
             <AmountDisplay
-              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
+              :amount="{
+                amount: (((10000 - swapFeeRate * 10000) / 10000) * parseInt(data.from.amount)).toString(),
+                denom: data.from.denom,
+              }"
             />
           </li>
           <li class="mt-0.5">
             <AmountDisplay
-              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+              :amount="{
+                amount: (((10000 - swapFeeRate * 10000) / 10000) * parseInt(data.to.amount)).toString(),
+                denom: data.to.denom,
+              }"
             />
           </li>
         </ul>
@@ -113,6 +120,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -122,9 +130,9 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
@@ -144,7 +152,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {
@@ -174,11 +182,11 @@ export default defineComponent({
 
     //for receive coin chain_name(always cosmos hub)
     const dexChainName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      return store.getters[GlobalGetterTypes.API.getDexChain];
     });
 
     // minReceivedAmount & limit price
-    const minReceivedAmount = ref({});
+    const minReceivedAmount = ref({} as EmerisBase.Amount);
     const limitPrice = ref(0);
     const fromCoinBaseDenom = ref('');
     const toCoinBaseDenom = ref('');
@@ -205,11 +213,12 @@ export default defineComponent({
 
         minReceivedAmount.value = {
           denom: toCoinBaseDenom.value,
-          amount:
+          amount: (
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
-            (1 - slippageTolerance.value / 100),
+            (1 - slippageTolerance.value / 100)
+          ).toString(),
         };
 
         limitPrice.value =
@@ -217,7 +226,7 @@ export default defineComponent({
             ((1 / Number(swapPrice)) *
               Number(
                 10 **
-                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                     name: fromCoinBaseDenom.value,
                   }),
               ) *
@@ -231,7 +240,7 @@ export default defineComponent({
 
     //user slippage tolerance
     const slippageTolerance = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
+      return store.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5;
     });
 
     const payCoinChainName = ref('');
@@ -239,19 +248,19 @@ export default defineComponent({
       () => data.value.from.denom,
       async () => {
         if (isNative(data.value.from.denom)) {
-          payCoinChainName.value = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+          payCoinChainName.value = store.getters[GlobalGetterTypes.API.getDexChain];
         } else {
           const verifyTrace =
-            store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-              chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+              chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
               hash: data.value.from.denom.split('/')[1],
             }) ??
             (await store.dispatch(
-              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              GlobalActionTypes.API.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                  chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                   hash: data.value.from.denom.split('/')[1],
                 },
               },
@@ -265,10 +274,10 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[store.getters[GlobalDemerisGetterTypes.API.getDexChain]]['uatom'];
+      return props.fees[store.getters[GlobalGetterTypes.API.getDexChain]]['uatom'];
     });
 
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 
     return {
       data,

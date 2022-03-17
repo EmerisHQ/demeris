@@ -55,6 +55,7 @@ export default defineComponent({
     // 1. Convert output of the aggregation API to a form usable by this component
     // 2. Add X transaction over Y chains logic
     // 3. add conditional right arrow logic (swap vs transfer icon)
+    // Create type for items if applicable
     const items = ref([
       { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
       { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },

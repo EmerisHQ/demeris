@@ -11,8 +11,8 @@
         class="relative z-10 h-12 w-full py-2 text-0 font-normal text-text placeholder-inactive hover:placeholder-muted focus:placeholder-inactive bg-fg focus:bg-surface rounded-xl focus:rounded-lg border-none appearance-none"
         :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
         v-bind="$attrs"
-        @focus="$emit('focus:value', $event.target.value)"
-        @blur="$emit('blur:value', $event.target.value)"
+        @focus="$emit('focus:value', ($event.target as HTMLInputElement).value)"
+        @blur="$emit('blur:value', ($event.target as HTMLInputElement).value)"
       />
       <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4 pointer-events-none">
         <slot name="end" />

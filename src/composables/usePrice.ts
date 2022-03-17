@@ -1,16 +1,16 @@
 import { computed } from 'vue';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { useStore } from '@/utils/useStore';
 
 export default function usePrice() {
-  const apistore = useStore() as TypedAPIStore;
+  const typedstore = useStore() as RootStoreTyped;
 
   function getDisplayPrice(denom, amount) {
     const formatedValue = computed(() => {
       let value = 0;
-      if (apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom })) {
-        value = parseFloat(amount) * apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+      if (typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom })) {
+        value = parseFloat(amount) * typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
         const formatter = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',

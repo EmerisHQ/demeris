@@ -17,8 +17,8 @@
             {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
           </div>
           <div>
-            <AmountDisplay :amount="{ amount: exchangeAmount.coinA, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: data.coinB.denom }" />
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinA + '', denom: data.coinA.denom }" /> =
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinB + '', denom: data.coinB.denom }" />
           </div>
         </div>
       </ListItem>
@@ -60,7 +60,7 @@
         <div class="text-right">
           <AmountDisplay
             class="font-medium text-1"
-            :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }"
+            :amount="{ amount: hasPool ? receiveAmount + '' : '1000000', denom: poolInfo.denom }"
           />
         </div>
         <CircleSymbol v-if="poolInfo.denoms.length" :pool-denoms="poolInfo.denoms" size="md" class="ml-3" />
@@ -81,6 +81,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -91,10 +92,8 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import { AddLiquidityEndBlockResponse } from '@/types/api';
-import * as Base from '@/types/base';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -115,11 +114,11 @@ export default defineComponent({
       default: undefined,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     response: {
-      type: Object as PropType<AddLiquidityEndBlockResponse | Actions.Step>,
+      type: Object as PropType<EmerisBase.AddLiquidityEndBlockResponse | Actions.Step>,
       default: undefined,
     },
     isReceipt: {
@@ -142,35 +141,35 @@ export default defineComponent({
     const creationFee = computed(() => {
       return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
-
+    function isBlockResponse(resp): resp is EmerisBase.AddLiquidityEndBlockResponse {
+      return !!(resp as EmerisBase.AddLiquidityEndBlockResponse)?.accepted_coins;
+    }
     const data = computed(() => {
-      if ((props.response as AddLiquidityEndBlockResponse)?.accepted_coins) {
-        const [coinA, coinB] = parseCoins((props.response as AddLiquidityEndBlockResponse).accepted_coins);
-        const pool = pools.value?.find(
-          (item) => item.pool_coin_denom === (props.response as AddLiquidityEndBlockResponse).pool_coin_denom,
-        );
+      if (isBlockResponse(props.response)) {
+        const endBlock = props.response;
+        const [coinA, coinB] = parseCoins(endBlock.accepted_coins);
+        const pool = pools.value?.find((item) => item.pool_coin_denom === endBlock.pool_coin_denom);
 
         return {
           coinA,
           coinB,
           pool,
         };
+      } else {
+        const step = props.response || props.step;
+        return step.transactions[0].data as Actions.CreatePoolData;
       }
-
-      const step = (props.response as Actions.Step) || props.step;
-
-      return step.transactions[0].data as Actions.CreatePoolData;
     });
 
     const precisions = computed(() => {
       return {
-        coinA: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
-        coinB: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
+        coinA: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
+        coinB: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
       };
     });
 
     const chainName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      return store.getters[GlobalGetterTypes.API.getDexChain];
     });
 
     const hasPool = computed(() => {
@@ -229,8 +228,8 @@ export default defineComponent({
     };
 
     const receiveAmount = computed(() => {
-      if (props.response) {
-        return +(props.response as AddLiquidityEndBlockResponse).pool_coin_amount;
+      if (isBlockResponse(props.response)) {
+        return +props.response.pool_coin_amount;
       }
 
       const result = calculateSupplyTokenAmount([
@@ -247,11 +246,11 @@ export default defineComponent({
     });
 
     const refundedAmount = computed(() => {
-      if (!(props.response as AddLiquidityEndBlockResponse)?.refunded_coins) {
-        return;
+      if (isBlockResponse(props.response)) {
+        return parseCoins(props.response.refunded_coins)[0];
+      } else {
+        return null;
       }
-
-      return parseCoins((props.response as AddLiquidityEndBlockResponse).refunded_coins)[0];
     });
 
     watch(data, updatePoolInfo, { immediate: true });

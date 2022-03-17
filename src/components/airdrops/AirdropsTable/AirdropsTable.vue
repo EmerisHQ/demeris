@@ -68,12 +68,12 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import { Airdrop, AirdropDateStatus } from '@/types/api';
 
 export default defineComponent({
   name: 'AirdropsTable',
@@ -94,7 +94,7 @@ export default defineComponent({
       default: undefined,
     },
     airdrops: {
-      type: Array as PropType<Airdrop[]>,
+      type: Array as PropType<EmerisAirdrops.Airdrop[]>,
       required: true,
     },
     activeFilter: {
@@ -107,7 +107,7 @@ export default defineComponent({
     const keyword = ref<string>('');
     let mappedAirdrops = ref([]);
 
-    const handleClick = (airdrop: Airdrop) => {
+    const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
       emit('row-click', airdrop);
     };
 
@@ -130,7 +130,9 @@ export default defineComponent({
       } else if (activeFilter === 'past') {
         const mappedAirdropsObj = {
           sectionTitle: null,
-          airdrops: props.airdrops.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
+          airdrops: props.airdrops.filter(
+            (airdropItem) => airdropItem.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED,
+          ),
         };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else {

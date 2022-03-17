@@ -1,6 +1,7 @@
+import { BigNumber } from 'bignumber.js';
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, RootStoreType, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -10,8 +11,8 @@ import usePools from './usePools';
 const usePoolInstances = {};
 
 function usePool(id: string) {
-  const apistore = useStore() as TypedAPIStore;
-  const store = useStore() as RootStoreType;
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
   let initialized;
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
@@ -42,14 +43,14 @@ function usePool(id: string) {
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 
     watch(
-      () => apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] }),
+      () => typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] }),
       updateTotalLiquidityPrice,
       {
         immediate: true,
       },
     );
     watch(
-      () => apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] }),
+      () => typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] }),
       updateTotalLiquidityPrice,
       {
         immediate: true,
@@ -67,7 +68,7 @@ function usePool(id: string) {
       return [];
     }
     return (
-      apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
+      typedstore.getters[GlobalGetterTypes.API.getBalances]({
         address: keyHashfromAddress(pool.value?.reserve_account_address),
       }) || []
     ).map((item) => {
@@ -85,8 +86,8 @@ function usePool(id: string) {
     const amountB = amounts.find((item) => getBaseDenomSync(item.denom) === sortedBalances[1].base_denom).amount;
 
     const poolCoinAmount = Math.min(
-      (totalSupply.value * amountA) / sortedBalances[0].amount,
-      (totalSupply.value * amountB) / sortedBalances[1].amount,
+      (totalSupply.value * amountA) / parseInt(sortedBalances[0].amount),
+      (totalSupply.value * amountB) / parseInt(sortedBalances[1].amount),
     );
 
     return poolCoinAmount;
@@ -100,15 +101,15 @@ function usePool(id: string) {
     const baseDenoms = await getReserveBaseDenoms(pool.value);
     const prices = [];
     baseDenoms.map((denom) => {
-      const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+      const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
 
-      const precision = apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) || 6;
+      const precision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) || 6;
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
       });
       const amount = balance?.amount;
       if (price && amount) {
-        const liquidityPrice = (amount / Math.pow(10, precision)) * price;
+        const liquidityPrice = new BigNumber(amount).dividedBy(Math.pow(10, precision)).multipliedBy(price).toNumber();
         prices.push(liquidityPrice);
       }
     });

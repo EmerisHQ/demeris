@@ -27,7 +27,7 @@ import { computed, defineComponent, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'AirdropsCurrentBalance',
@@ -36,10 +36,10 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
     return { selectedAirdrop };

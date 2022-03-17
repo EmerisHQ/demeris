@@ -25,10 +25,12 @@
 
 <script lang="ts">
 import { computed, ref } from '@vue/runtime-core';
+import { defineComponent } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';
-export default {
+
+export default defineComponent({
   name: 'MoonpayModal',
   components: { Modal },
   setup() {
@@ -58,7 +60,7 @@ export default {
     });
     return { isModalOpen, toggleMoonpayModal, mpUrl };
   },
-};
+});
 </script>
 
 <style lang="scss">

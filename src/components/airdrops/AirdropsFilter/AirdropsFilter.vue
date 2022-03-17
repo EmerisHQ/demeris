@@ -25,22 +25,23 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { LoadingState } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { LoadingState } from '@/types/util';
 
-export default {
+export default defineComponent({
+  name: 'AirdropsFilter',
   components: {
     Icon,
   },
   emits: ['active-filter'],
   setup(_, { emit }) {
     const { t } = useI18n({ useScope: 'global' });
-
+    const typedstore = useStore() as RootStoreTyped;
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
@@ -75,10 +76,10 @@ export default {
     };
 
     const airdropsLoading = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
     return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading };
   },
-};
+});
 </script>

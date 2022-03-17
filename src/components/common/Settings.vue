@@ -28,7 +28,7 @@ import SettingsModal from '@/components/common/SettingsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'Settings',
@@ -50,11 +50,11 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
 
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
     });
     const toggleWalletModal = () => {
       isWalletModalOpen.value = !isWalletModalOpen.value;

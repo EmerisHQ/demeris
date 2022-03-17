@@ -1,24 +1,23 @@
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { Amount } from '@/types/base';
+import { EmerisBase } from '@emeris/types';
+
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { useStore } from '@/utils/useStore';
 
-export async function swap({ from, to }: { from: Amount; to: Amount }) {
-  const libStore = useStore();
-  const store = libStore as RootStoreType;
+export async function swap({ from, to }: { from: EmerisBase.Amount; to: EmerisBase.Amount }) {
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
   // Get the list of available pools
   const result = {
     steps: [],
     output: {
-      amount: {
-        denom: '',
-        amount: 0,
-      },
+      denom: '',
+      amount: 0,
       chain_name: '',
     },
   };
   const liquidityPools =
     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await libStore.dispatch(
+    (await store.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -42,11 +41,9 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
       },
     });
     result.output = {
-      amount: {
-        amount: 0,
-        denom: to.denom,
-      },
-      chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+      amount: 0,
+      denom: to.denom,
+      chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
     };
     return result;
   } else {

@@ -35,6 +35,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -44,9 +45,8 @@ import { actionHandler } from '@/actionhandler';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
-import { Balances } from '@/types/api';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
@@ -66,7 +66,7 @@ export default defineComponent({
 
   props: {
     balances: {
-      type: Object as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
     step: {
@@ -79,11 +79,11 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const steps = ref([]);
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -114,7 +114,7 @@ export default defineComponent({
         step.value != 'review'
       ) {
         const precision =
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({
             name: await getBaseDenom(form.balance.denom, form.on_chain),
           }) || 6;
 
@@ -122,10 +122,8 @@ export default defineComponent({
           name: 'move',
           params: {
             from: {
-              amount: {
-                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                denom: await form.balance.denom,
-              },
+              amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+              denom: await form.balance.denom,
               chain_name: form.on_chain,
             },
             to: {

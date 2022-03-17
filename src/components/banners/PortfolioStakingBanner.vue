@@ -12,14 +12,14 @@ import { useStore } from 'vuex';
 import StakingBanner from '@/components/banners/StakingBanner.vue';
 import useAccount from '@/composables/useAccount';
 import useBalances from '@/composables/useBalances';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
-const store = useStore();
+const store = useStore() as RootStoreTyped;
 const { nativeBalances } = useAccount();
 
 const asset = ref<{ name: string; denom: string }>({ name: '', denom: '' });
 
-const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]);
+const isDemoAccount = computed(() => store.getters[GlobalGetterTypes.USER.isDemoAccount]);
 const { mostAvailableBalance } = useBalances();
 watch(
   mostAvailableBalance,

@@ -42,7 +42,7 @@ import { useStore } from 'vuex';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -61,17 +61,17 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const keplrAccountName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAccountName];
+      return store.getters[GlobalGetterTypes.USER.getKeplrAccountName];
     });
     const keplrAddress = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAddress];
+      return store.getters[GlobalGetterTypes.USER.getKeplrAddress];
     });
     const isPriceApiAvailable = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
+      return store.getters[GlobalGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
     });
 
     const initialLoadComplete = computed(() => {
-      return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+      return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
     });
     return {
       balances,

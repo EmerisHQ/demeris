@@ -36,7 +36,7 @@ import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import useTheme from '@/composables/useTheme';
-import { TokenPrices } from '@/types/api';
+import { ChartPrices } from '@/types/util';
 
 export default defineComponent({
   name: 'AreaChart',
@@ -49,11 +49,11 @@ export default defineComponent({
       default: 'full',
     },
     height: {
-      type: String,
-      default: '320',
+      type: Number,
+      default: 320,
     },
     dataStream: {
-      type: Array as PropType<TokenPrices[]>,
+      type: Array as PropType<ChartPrices>,
       required: true,
     },
     showLoading: {

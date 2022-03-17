@@ -19,16 +19,16 @@ import StakeTableContents from '@/components/asset/StakeTableContents.vue';
 import StakeTableTitle from '@/components/asset/StakeTableTitle.vue';
 import AsyncBoundary from '@/components/common/AsyncBoundary.vue';
 import useStaking, { StakingRewards } from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
-const store = useStore();
+const store = useStore() as RootStoreTyped;
 const stakingRewardsData = ref<StakingRewards>(null);
 const selectedTab = ref<number>(1);
 const props = defineProps<{ denom: string }>();
 const { getStakingRewardsByBaseDenom } = useStaking();
 
 const isSignedIn = computed(() => {
-  return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+  return store.getters[GlobalGetterTypes.USER.isSignedIn];
 });
 
 const selectTab = (tabNumber?: number): void => {
@@ -48,7 +48,7 @@ watch(
 );
 </script>
 <style scoped>
-* >>> .tippy-box {
+* :deep(.tippy-box) {
   background: var(--surface);
   color: var(--text);
 }

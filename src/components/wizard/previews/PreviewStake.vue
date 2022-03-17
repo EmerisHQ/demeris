@@ -26,7 +26,8 @@
             <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
             <div v-if="!isReceipt"><AmountDisplay :amount="stake.amount" /></div>
             <div v-if="getStakingBalance(stake.validatorAddress) != 0" class="text-muted -text-1">
-              Staked <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress), denom: baseDenom }" />
+              Staked
+              <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress) + '', denom: baseDenom }" />
             </div>
           </div>
           <div>
@@ -51,6 +52,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
@@ -62,9 +64,9 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
@@ -84,7 +86,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {
@@ -118,9 +120,7 @@ export default defineComponent({
     });
 
     const stakingBalances = computed(() => {
-      return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
-      );
+      return stakingBalancesByChain(store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }));
     });
     const getStakingBalance = (address) => {
       return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
@@ -128,7 +128,7 @@ export default defineComponent({
     const getValidatorMoniker = (address) => {
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
     };
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
     const getValidator = (address) => {
       return validators.value.find((x) => x.operator_address == address);
     };

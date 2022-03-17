@@ -1,49 +1,44 @@
-import { Pool } from '@/types/actions';
-import * as API from '@/types/api';
+import { EmerisAirdrops, EmerisAPI } from '@emeris/types';
 
-export type ChainMeta = {
-  primaryChannels?: Record<string, API.PrimaryChannel>;
-  relayerBalance?: API.RelayerBalance;
-  status?: boolean;
-};
-export type ChainData = API.Chain & ChainMeta;
+import { Pool } from '@/types/actions';
+import { ChartPrices, LoadingState } from '@/types/util';
+
 export type TransactionItem = {
   date: number;
-  status: API.Ticket;
+  status: EmerisAPI.TicketResponse;
   resolve: (value?: unknown | PromiseLike<unknown>) => void;
   reject: (reason?: Error) => void;
-  promise: Promise<API.Ticket>;
+  promise: Promise<EmerisAPI.TicketResponse>;
 };
-export type State = {
+export type APIState = {
   endpoint: string;
   gitEndpoint: string;
   rawGitEndpoint: string;
   wsEndpoint: string;
   hub_chain: string;
-  balances: Record<string, API.Balances>;
-  stakingBalances: Record<string, API.StakingBalances>;
-  unstakingParams: Record<string, API.UnstakingParam>;
-  unbondingDelegations: Record<string, API.UnbondingDelegations>;
-  numbers: Record<string, API.Numbers>;
-  chainnumbers: Record<string, Record<string, API.SeqNumber>>;
-  verifiedDenoms: API.VerifiedDenoms;
-  prices: API.Prices;
+  balances: Record<string, EmerisAPI.Balances>;
+  stakingBalances: Record<string, EmerisAPI.StakingBalances>;
+  unstakingParams: Record<string, EmerisAPI.StakingParams>;
+  unbondingDelegations: Record<string, EmerisAPI.UnbondingDelegations>;
+  chainnumbers: Record<string, Record<string, EmerisAPI.SeqNumber>>;
+  verifiedDenoms: EmerisAPI.VerifiedDenoms;
+  prices: EmerisAPI.Prices;
   relayer: boolean;
-  chains: Record<string, ChainData>;
-  traces: Record<string, Record<string, API.VerifyTrace>>;
+  chains: Record<string, EmerisAPI.Chain>;
+  traces: Record<string, Record<string, EmerisAPI.VerifyTrace>>;
   transactions: Map<string, TransactionItem>;
-  tokenPrices: API.TokenPrices[];
-  tokenPricesLoadingStatus: API.LoadingState;
+  tokenPrices: ChartPrices;
+  tokenPricesLoadingStatus: LoadingState;
   tokenId: string;
-  tokenIdLoadingStatus: API.LoadingState;
+  tokenIdLoadingStatus: LoadingState;
   validPools: Pool[];
-  airdrops: API.Airdrop[];
-  airdropsStatus: API.LoadingState;
-  selectedAirdrop: API.Airdrop;
+  airdrops: EmerisAirdrops.Airdrop[];
+  selectedAirdrop: EmerisAirdrops.Airdrop;
+  airdropsStatus: LoadingState;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
 };
-export function getDefaultState(): State {
+export function getDefaultState(): APIState {
   return {
     endpoint: '',
     gitEndpoint: '',
@@ -54,7 +49,6 @@ export function getDefaultState(): State {
     stakingBalances: {},
     unstakingParams: {},
     unbondingDelegations: {},
-    numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
     validPools: null,
@@ -63,13 +57,13 @@ export function getDefaultState(): State {
       Tokens: [],
     },
     tokenPrices: [],
-    tokenPricesLoadingStatus: API.LoadingState.INIT,
+    tokenPricesLoadingStatus: LoadingState.INIT,
     tokenId: '',
-    tokenIdLoadingStatus: API.LoadingState.INIT,
+    tokenIdLoadingStatus: LoadingState.INIT,
     relayer: false,
     chains: {},
     airdrops: [],
-    airdropsStatus: API.LoadingState.INIT,
+    airdropsStatus: LoadingState.INIT,
     selectedAirdrop: null,
     traces: {},
     transactions: new Map(),

@@ -52,7 +52,8 @@ import Price from '@/components/common/Price.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
+import { DesignSizes } from '@/types/util';
 
 export default defineComponent({
   name: 'ValidatorSelect',
@@ -63,7 +64,7 @@ export default defineComponent({
       required: true,
       default: '',
     },
-    size: { type: String, required: false, default: 'md' },
+    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
     validator: {
       type: Object,
       required: true,
@@ -78,7 +79,7 @@ export default defineComponent({
     const store = useStore();
     const baseDenom = route.params.denom as string;
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
