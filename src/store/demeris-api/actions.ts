@@ -296,6 +296,21 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
 
       const balanceLoads = [];
+
+      const chains =
+        getters['getChains'] ??
+        (await dispatch(ActionTypes.GET_CHAINS, {
+          subscribe: false,
+        }));
+      for (const chain in chains) {
+        if (!chains[chain].primary_channel)
+          chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
+            subscribe: true,
+            params: {
+              chain_name: chain,
+            },
+          });
+      }
       for (const keyHash of keyHashes) {
         balanceLoads.push(dispatch(ActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
       }

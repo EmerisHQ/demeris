@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -13,6 +13,23 @@ export default function useAccount() {
   const isDemoAccount = computed(() => {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
+  const init = async () => {
+    const chains =
+      store.getters[GlobalGetterTypes.API.getChains] ??
+      (await store.dispatch(GlobalActionTypes.API.GET_CHAINS, {
+        subscribe: false,
+      }));
+    for (const chain in chains) {
+      if (!chains[chain].primary_channel)
+        chains[chain] = await store.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+          subscribe: true,
+          params: {
+            chain_name: chain,
+          },
+        });
+    }
+  };
+  const initialized = init();
   const allbalances = computed(() => {
     // TODO: Remove after cloud is fully deployed
     /*
@@ -39,6 +56,7 @@ export default function useAccount() {
   watch(
     () => allbalances.value,
     async (newBalances) => {
+      await initialized;
       const result = await validBalances(newBalances);
       balances.value = result.sort((a, b) => {
         const coinA = parseCoins(a.amount)[0];
@@ -51,7 +69,6 @@ export default function useAccount() {
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
   };
-
   const userAccountBalances = computed(() => {
     const sortedBalances = {
       verified: [],
