@@ -21,7 +21,7 @@
     </div>
 
     <div
-      v-if="
+      v-show="
         ((isEmerisSupported && isKeplrInstalled && !isWarningNeeded) ||
           (isEmerisSupported && isKeplrInstalled && isWarningAgreed)) &&
         !isMobile
@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div v-if="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
+    <div v-show="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -49,15 +49,15 @@
       </div>
     </div>
 
-    <div v-if="isEmerisSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
+    <div v-show="isEmerisSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
-        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
+        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" @connect="cancelConnectKeplr" />
       </div>
     </div>
 
-    <div v-if="!isEmerisSupported && !isMobile" class="welcome-modal__bg">
+    <div v-show="!isEmerisSupported && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -146,7 +146,7 @@ export default defineComponent({
     };
 
     const cancelConnectKeplr = () => {
-      connectKeplrRef.value.cancel();
+      connectKeplrRef.value?.cancel();
       isReturnUser.value = true;
       goBackToOrigin();
     };

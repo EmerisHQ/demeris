@@ -18,7 +18,7 @@
         <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
         <a
           class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70 cursor-pointer"
-          data-cy="tryTheDemoButton"
+          data-cy="tryTheDemoButtonInstall"
           @click="signInDemo"
         >
           {{ $t('generic_cta.tryTheDemo') }}
@@ -29,11 +29,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalActionTypes, RootStoreTyped } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -49,7 +49,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['cancel', 'try-demo'],
+  emits: ['cancel', 'try-demo', 'connect'],
 
   setup(_, { emit }) {
     const emitCancel = () => {
@@ -60,6 +60,14 @@ export default defineComponent({
       store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     };
 
+    const isSignedIn = computed(() => {
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
+    });
+    watch(isSignedIn, () => {
+      if (isSignedIn.value) {
+        emit('connect');
+      }
+    });
     const openUrl = () => {
       window.open(
         'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en',
