@@ -640,7 +640,6 @@ export function getUsedFee(
     denom: feeOption.denom,
     chain_name: feeOption.chain_name,
   };
-  console.log(used);
   return used;
 }
 
@@ -704,21 +703,10 @@ export async function validBalances(balances: EmerisAPI.Balances): Promise<Emeri
           if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
             return;
           }
-          let verifyTrace;
-          try {
-            verifyTrace =
-              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
-                chain_name: balance.on_chain,
-                hash: balance.ibc.hash,
-              }) ??
-              (await typedstore.dispatch(
-                GlobalActionTypes.API.GET_VERIFY_TRACE,
-                { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
-                { root: true },
-              ));
-          } catch (e) {
-            return;
-          }
+          const verifyTrace = typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+            chain_name: balance.on_chain,
+            hash: balance.ibc.hash,
+          });
 
           if (!verifyTrace || !verifyTrace.verified) {
             return;

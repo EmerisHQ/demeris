@@ -3,33 +3,17 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
-import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
-export default function useAccount() {
+let useAccountInstance = null;
+function useAccount() {
   const store = useStore() as RootStoreTyped;
   const isDemoAccount = computed(() => {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
-  const init = async () => {
-    const chains =
-      store.getters[GlobalGetterTypes.API.getChains] ??
-      (await store.dispatch(GlobalActionTypes.API.GET_CHAINS, {
-        subscribe: false,
-      }));
-    for (const chain in chains) {
-      if (!chains[chain].primary_channel)
-        chains[chain] = await store.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-          subscribe: true,
-          params: {
-            chain_name: chain,
-          },
-        });
-    }
-  };
-  const initialized = init();
   const allbalances = computed(() => {
     // TODO: Remove after cloud is fully deployed
     /*
@@ -53,10 +37,10 @@ export default function useAccount() {
     { immediate: true },
   );
   */
+
   watch(
     () => allbalances.value,
     async (newBalances) => {
-      await initialized;
       const result = await validBalances(newBalances);
       balances.value = result.sort((a, b) => {
         const coinA = parseCoins(a.amount)[0];
@@ -195,4 +179,11 @@ export default function useAccount() {
     unbondingDelegations,
     unbondingDelegationsByChain,
   };
+}
+
+export default function useAccountFactory() {
+  if (!useAccountInstance) {
+    useAccountInstance = useAccount();
+  }
+  return useAccountInstance;
 }

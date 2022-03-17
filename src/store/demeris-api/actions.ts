@@ -248,7 +248,6 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-
       return getters['getBalances'](params);
     }
   },
