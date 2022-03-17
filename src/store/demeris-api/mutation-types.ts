@@ -1,10 +1,4 @@
-import { GasPriceLevel, Pool } from '@/types/actions';
-import * as API from '@/types/api';
-
-import { DemerisConfig } from './actions';
-import { ChainData } from './state';
-
-export enum DemerisMutationTypes {
+export enum MutationTypes {
   SET_BALANCES = 'SET_BALANCES',
   SET_POOL_BALANCES = 'SET_POOL_BALANCES',
   SET_VERIFY_TRACE = 'SET_VERIFY_TRACE',
@@ -44,56 +38,3 @@ export enum DemerisMutationTypes {
   SUBSCRIBE = 'SUBSCRIBE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
 }
-export type APIPromise = {
-  hash: string;
-  promise: Promise<void>;
-};
-export type UserData = {
-  customSlippage?: boolean;
-  viewLPAssetPools?: boolean;
-  viewUnverified?: boolean;
-  gasPriceLevel?: GasPriceLevel;
-  hasSeenRedeem?: boolean;
-  slippagePerc?: number;
-  isDemoAccount?: boolean;
-  theme?: string;
-  updateDT?: number;
-};
-export type UserSession = {
-  walletName: string;
-  walletData: UserData;
-};
-export type DemerisMutationArgs =
-  | API.Balances
-  | boolean
-  | number
-  | API.Prices
-  | API.FeeAddress
-  | API.FeeAddresses
-  | API.Bech32Config
-  | API.PrimaryChannels
-  | API.PrimaryChannel
-  | API.TokenPrices
-  | API.LoadingState
-  | API.TokenId
-  | API.Airdrop
-  | API.StakingBalances
-  | API.UnstakingParamReq
-  | API.UnbondingDelegations
-  | API.Numbers
-  | API.SeqNumber
-  | API.VerifyTrace
-  | API.Chains
-  | API.Chain
-  | ChainData
-  | API.Ticket
-  | API.RelayerBalances
-  | API.VerifiedDenoms
-  | DemerisConfig
-  | string
-  | Pool[];
-
-export type DemerisMutations = {
-  params?: API.APIRequests;
-  value: DemerisMutationArgs;
-};

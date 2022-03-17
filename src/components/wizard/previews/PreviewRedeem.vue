@@ -48,9 +48,8 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
 import { getOwnAddress } from '@/utils/basic';
 
 export default defineComponent({
@@ -102,11 +101,8 @@ export default defineComponent({
 
     const transactionInfo = computed(() => {
       const transactions = (props.step as Actions.Step).transactions;
-      const firstTransaction = transactions[0] as Record<string, any>;
-      const [lastTransaction] = (transactions.length > 1 ? transactions.slice(-1) : transactions) as Record<
-        string,
-        any
-      >[];
+      const firstTransaction = transactions[0];
+      const [lastTransaction] = transactions.length > 1 ? transactions.slice(-1) : transactions;
 
       const from = {
         address: '',
@@ -114,8 +110,10 @@ export default defineComponent({
           const amount = (item.data as Actions.TransferData).amount.amount;
           return acc + +amount;
         }, 0),
-        chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
-        denom: (firstTransaction.data.amount as Base.Amount).denom,
+        chain:
+          (firstTransaction.data as Actions.IBCForwardsData).from_chain ||
+          (firstTransaction.data as Actions.TransferData).chain_name,
+        denom: (firstTransaction.data as Actions.TransferData).amount.denom,
       };
 
       let totalFees = 0;
@@ -128,12 +126,12 @@ export default defineComponent({
 
       const to = {
         amount: from.amount,
-        address: lastTransaction.data.to_address,
+        address: (lastTransaction.data as Actions.TransferData).to_address,
         chain:
-          lastTransaction.data.to_chain ||
-          lastTransaction.data.destination_chain_name ||
-          lastTransaction.data.chain_name,
-        denom: (lastTransaction.data.amount as Base.Amount).denom,
+          (lastTransaction.data as Actions.IBCBackwardsData).to_chain ||
+          (lastTransaction.data as any).destination_chain_name || //TODO: No Action data  contains this field?
+          (lastTransaction.data as Actions.TransferData).chain_name,
+        denom: (lastTransaction.data as Actions.TransferData).amount.denom,
       };
 
       if (stepType.value === 'transfer') {
@@ -160,12 +158,12 @@ export default defineComponent({
     );
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      const getName = (name: string) => store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      return 'Fees on ' + store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
     };
     return {
       stepType,

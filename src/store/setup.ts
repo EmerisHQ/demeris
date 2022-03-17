@@ -2,30 +2,17 @@ import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as baseUseStore } from 'vuex';
 
 import {
-  DemerisStore as DemerisStoreAPI,
-  GlobalDemerisActionTypes as GlobalDemerisActionTypesAPI,
+  GlobalActionTypes as GlobalActionTypesAPI,
   module as moduleAPI,
   namespace as namespaceAPI,
 } from '@/store/demeris-api';
-import { DemerisStore as DemerisStoreTX, module as moduleTX, namespace as namespaceTX } from '@/store/demeris-tx';
-import {
-  DemerisStore as DemerisStoreUSER,
-  module as moduleUSER,
-  namespace as namespaceUSER,
-} from '@/store/demeris-user';
+import { module as moduleTX, namespace as namespaceTX } from '@/store/demeris-tx';
+import { module as moduleUSER, namespace as namespaceUSER } from '@/store/demeris-user';
 
 import init from './config';
-import { RootState } from './index';
+import { RootState, RootStoreTyped, RootStoreUntyped } from './index';
 
-export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStoreUSER<S>;
-
-export type RootStoreType = RootStore<Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>>;
-
-export type TypedAPIStore = DemerisStoreAPI<Pick<RootState, typeof namespaceAPI>>;
-export type TypedUSERStore = DemerisStoreUSER<Pick<RootState, typeof namespaceUSER>>;
-export type TypedTXStore = DemerisStoreTX<Pick<RootState, typeof namespaceTX>>;
-
-export const key: InjectionKey<VuexStore<RootState>> = Symbol();
+export const key: InjectionKey<RootStoreUntyped> = Symbol();
 // add all modules to vuex
 const initstore = createStore<RootState>({
   modules: {
@@ -37,30 +24,22 @@ const initstore = createStore<RootState>({
 });
 
 // add library modules
-init(initstore as RootStoreType);
+init(initstore as RootStoreTyped);
 
 initstore.subscribe((mutation) => {
   if (mutation.type == 'tendermint.liquidity.v1beta1/QUERY' && mutation.payload.query == 'LiquidityPools') {
-    initstore.dispatch(GlobalDemerisActionTypesAPI.VALIDATE_POOLS, mutation.payload.value.pools);
+    initstore.dispatch(GlobalActionTypesAPI.VALIDATE_POOLS, mutation.payload.value.pools);
   }
 });
 
 //Module typed exports
 export const store = initstore as VuexStore<any>;
-export const apistore: TypedAPIStore = initstore as TypedAPIStore;
-export const userstore: TypedUSERStore = initstore as TypedUSERStore;
-export const txstore: TypedTXStore = initstore as TypedTXStore;
+export const typedstore: RootStoreTyped = initstore as RootStoreTyped;
 
 //Composition API exports
-export function useStore(): VuexStore<any> {
-  return baseUseStore(key) as VuexStore<any>;
+export function useStore(): RootStoreUntyped {
+  return baseUseStore(key);
 }
-export function useEmerisAPIStore(): TypedAPIStore {
-  return baseUseStore(key) as TypedAPIStore;
-}
-export function useEmerisUSERStore(): TypedUSERStore {
-  return baseUseStore(key) as TypedUSERStore;
-}
-export function useEmerisTXStore(): TypedTXStore {
-  return baseUseStore(key) as TypedTXStore;
+export function useTypedStore(): RootStoreTyped {
+  return baseUseStore(key);
 }

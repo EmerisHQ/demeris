@@ -1,17 +1,24 @@
-import { RootStoreType } from '@/store';
-import { Amount } from '@/types/base';
+import { EmerisBase } from '@emeris/types';
+
+import { RootStoreTyped } from '@/store';
 import { useStore } from '@/utils/useStore';
 
-export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
+export async function addLiquidity({
+  pool_id,
+  coinA,
+  coinB,
+}: {
+  pool_id: bigint;
+  coinA: EmerisBase.Amount;
+  coinB: EmerisBase.Amount;
+}) {
   const libStore = useStore();
-  const store = libStore as RootStoreType;
+  const store = libStore as RootStoreTyped;
   const result = {
     steps: [],
     output: {
-      amount: {
-        denom: '',
-        amount: 0,
-      },
+      denom: '',
+      amount: 0,
       chain_name: '',
     },
   };

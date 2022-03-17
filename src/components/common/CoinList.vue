@@ -74,8 +74,9 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
@@ -85,8 +86,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Balance } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -101,14 +101,14 @@ export default defineComponent({
     CircleSymbol,
   },
   props: {
-    data: { type: Object, required: true },
+    data: { type: Array as PropType<EmerisAPI.Balances>, required: true },
     type: { type: String, required: false, default: 'chain' },
     keyword: { type: String, required: false, default: '' },
     showBalance: { type: Boolean, default: false },
   },
   emits: ['select'],
   setup(props) {
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const modifiedData = computed(() => getUniqueCoinList(props.data));
 
     function setWordColorByKeyword(keyword, word) {
@@ -167,7 +167,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    const getUnavailableChains = ({ base_denom, on_chain }: Partial<Balance>) => {
+    const getUnavailableChains = ({ base_denom, on_chain }: Partial<EmerisAPI.Balance>) => {
       const result = [];
       let uniqueChainsList: string[] = [on_chain];
 
@@ -179,7 +179,7 @@ export default defineComponent({
       }
 
       for (const chain of uniqueChainsList) {
-        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
+        const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
         if (!status) {
           result.push({
             chain,

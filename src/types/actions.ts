@@ -1,55 +1,39 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-
-import * as API from './api';
-import * as Base from './base';
+import { EmerisBase } from '@emeris/types';
 
 export type BaseAction = {
-  name:
-    | 'swap'
-    | 'redeem'
-    | 'addliquidity'
-    | 'withdrawliquidity'
-    | 'transfer'
-    | 'move'
-    | 'createpool'
-    | 'memo-transfer'
-    | 'claim'
-    | 'stake'
-    | 'multistake'
-    | 'unstake'
-    | 'switch';
   memo?: string;
 };
 export type SwapParams = {
-  from: Base.ChainAmount;
-  to: Base.ChainAmount;
+  from: EmerisBase.ChainAmount;
+  to: EmerisBase.ChainAmount;
 };
 
 export type TransferParams = {
-  from: Base.ChainAmount;
+  from: EmerisBase.ChainAmount;
   to: {
     chain_name: string;
     address: string;
   };
 };
 export type MoveParams = {
-  from: Base.ChainAmount;
+  from: EmerisBase.ChainAmount;
   to: {
     chain_name: string;
   };
 };
 export type AddLiquidityParams = {
   pool_id: bigint;
-  coinA: Base.ChainAmount;
-  coinB: Base.ChainAmount;
+  coinA: EmerisBase.ChainAmount;
+  coinB: EmerisBase.ChainAmount;
 };
 export type WithdrawLiquidityParams = {
   pool_id: bigint;
-  poolCoin: Base.ChainAmount;
+  poolCoin: EmerisBase.ChainAmount;
 };
 export type CreatePoolParams = {
-  coinA: Base.ChainAmount;
-  coinB: Base.ChainAmount;
+  coinA: EmerisBase.ChainAmount;
+  coinB: EmerisBase.ChainAmount;
 };
 export type ClaimRewardsParams = {
   rewards: { validator_address: string; reward: string }[];
@@ -58,40 +42,41 @@ export type ClaimRewardsParams = {
 };
 export type StakeParams = {
   validatorAddress: string;
-  amount: Base.ChainAmount;
+  amount: EmerisBase.ChainAmount;
 };
 
 export type MultiStakeParams = Array<StakeParams>;
 
 export type UnstakeParams = {
   validatorAddress: string;
-  amount: Base.ChainAmount;
+  amount: EmerisBase.ChainAmount;
 };
 export type RestakeParams = {
   validatorSrcAddress: string;
   validatorDstAddress: string;
-  amount: Base.ChainAmount;
+  amount: EmerisBase.ChainAmount;
 };
-export type RedeemParams = Array<Base.ChainAmount>;
-export type SwapAction = BaseAction & { params: SwapParams };
-export type MoveAction = BaseAction & { params: MoveParams };
-export type RedeemAction = BaseAction & { params: RedeemParams };
-export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
-export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
-export type TransferAction = BaseAction & { params: TransferParams };
-export type MemoTransferAction = BaseAction & { params: TransferParams };
-export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
-export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
-export type MultiStakeAction = BaseAction & { params: MultiStakeParams };
-export type StakeAction = BaseAction & { params: StakeParams };
-export type UnstakeAction = BaseAction & { params: UnstakeParams };
-export type RestakeAction = BaseAction & { params: RestakeParams };
-export type Any =
+export type RedeemParams = Array<EmerisBase.ChainAmount>;
+export type SwapAction = BaseAction & { name: 'swap'; params: SwapParams };
+export type MoveAction = BaseAction & { name: 'move'; params: MoveParams };
+export type RedeemAction = BaseAction & { name: 'redeem'; params: RedeemParams };
+export type AddLiquidityAction = BaseAction & { name: 'addliquidity'; params: AddLiquidityParams };
+export type WithdrawLiquidityAction = BaseAction & { name: 'withdrawliquidity'; params: WithdrawLiquidityParams };
+export type TransferAction = BaseAction & { name: 'transfer'; params: TransferParams };
+export type MemoTransferAction = BaseAction & { name: 'memo-transfer'; params: TransferParams };
+export type CreatePoolAction = BaseAction & { name: 'createpool'; params: CreatePoolParams };
+export type ClaimRewardsAction = BaseAction & { name: 'claim'; params: ClaimRewardsParams };
+export type MultiStakeAction = BaseAction & { name: 'multistake'; params: MultiStakeParams };
+export type StakeAction = BaseAction & { name: 'stake'; params: StakeParams };
+export type UnstakeAction = BaseAction & { name: 'unstake'; params: UnstakeParams };
+export type RestakeAction = BaseAction & { name: 'switch'; params: RestakeParams };
+export type UserAction =
   | SwapAction
   | RedeemAction
   | TransferAction
   | AddLiquidityAction
   | WithdrawLiquidityAction
+  | MemoTransferAction
   | CreatePoolAction
   | MoveAction
   | ClaimRewardsAction
@@ -106,7 +91,7 @@ export type StepTransactionDetails = {
 };
 
 export type IBCBackwardsData = {
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   from_chain: string;
   base_denom?: string;
   to_chain: string;
@@ -114,7 +99,7 @@ export type IBCBackwardsData = {
   through: string;
 };
 export type IBCForwardsData = {
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   from_chain: string;
   to_chain: string;
   chain_fee?: FeeWDenom;
@@ -122,26 +107,26 @@ export type IBCForwardsData = {
   through: string;
 };
 export type TransferData = {
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
   to_address: string;
 };
 export type SwapData = {
-  from: Base.Amount;
-  to: Base.Amount;
+  from: EmerisBase.Amount;
+  to: EmerisBase.Amount;
   pool: Pool;
 };
 export type AddLiquidityData = {
-  coinA: Base.Amount;
-  coinB: Base.Amount;
+  coinA: EmerisBase.Amount;
+  coinB: EmerisBase.Amount;
   pool: Pool;
 };
 export type CreatePoolData = {
-  coinA: Base.Amount;
-  coinB: Base.Amount;
+  coinA: EmerisBase.Amount;
+  coinB: EmerisBase.Amount;
 };
 export type WithdrawLiquidityData = {
-  poolCoin: Base.Amount;
+  poolCoin: EmerisBase.Amount;
   pool: Pool;
 };
 export type ClaimData = {
@@ -151,50 +136,81 @@ export type ClaimData = {
 };
 export type StakeData = {
   validatorAddress: string;
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
 };
 export type UnstakeData = {
   validatorAddress: string;
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
 };
 export type RestakeData = {
   validatorSrcAddress: string;
   validatorDstAddress: string;
-  amount: Base.Amount;
+  amount: EmerisBase.Amount;
   chain_name: string;
 };
-
-export type StepTransaction = {
-  name:
-    | 'ibc_forward'
-    | 'ibc_backward'
-    | 'swap'
-    | 'transfer'
-    | 'addliquidity'
-    | 'withdrawliquidity'
-    | 'createpool'
-    | 'claim'
-    | 'stake'
-    | 'unstake'
-    | 'switch';
+export type BaseStepTx = {
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
   feeToAdd?: FeeWDenom[];
-  data:
-    | IBCBackwardsData
-    | IBCForwardsData
-    | SwapData
-    | TransferData
-    | AddLiquidityData
-    | WithdrawLiquidityData
-    | CreatePoolData
-    | ClaimData
-    | StakeData[]
-    | UnstakeData
-    | RestakeData;
 };
+export type IBCBackwardsStepTx = BaseStepTx & {
+  name: 'ibc_forward';
+  data: IBCBackwardsData;
+};
+export type IBCForwardsStepTx = BaseStepTx & {
+  name: 'ibc_backward';
+  data: IBCForwardsData;
+};
+export type SwapStepTx = BaseStepTx & {
+  name: 'swap';
+  data: SwapData;
+};
+export type TransferStepTx = BaseStepTx & {
+  name: 'transfer';
+  data: TransferData;
+};
+export type AddLiqStepTx = BaseStepTx & {
+  name: 'addliquidity';
+  data: AddLiquidityData;
+};
+export type WithdrawLiqStepTx = BaseStepTx & {
+  name: 'withdrawliquidity';
+  data: WithdrawLiquidityData;
+};
+export type CreatePoolStepTx = BaseStepTx & {
+  name: 'createpool';
+  data: CreatePoolData;
+};
+export type ClaimStepTx = BaseStepTx & {
+  name: 'claim';
+  data: ClaimData;
+};
+export type StakeStepTx = BaseStepTx & {
+  name: 'stake';
+  data: StakeData[];
+};
+export type UnstakeStepTx = BaseStepTx & {
+  name: 'unstake';
+  data: UnstakeData;
+};
+export type RestakeStepTx = BaseStepTx & {
+  name: 'switch';
+  data: RestakeData;
+};
+export type StepTransaction =
+  | IBCBackwardsStepTx
+  | IBCForwardsStepTx
+  | SwapStepTx
+  | TransferStepTx
+  | AddLiqStepTx
+  | WithdrawLiqStepTx
+  | CreatePoolStepTx
+  | ClaimStepTx
+  | StakeStepTx
+  | UnstakeStepTx
+  | RestakeStepTx;
 export type Step = {
   name:
     | 'transfer'
@@ -226,7 +242,7 @@ export type SendAddressForm = {
   chain_name: string;
   memo: string;
   isTermChecked?: boolean;
-  balance: Base.Amount;
+  balance: EmerisBase.Amount;
 };
 export type UnstakeForm = {
   validatorAddress: string;
@@ -246,12 +262,12 @@ export type RestakeForm = {
   chain_name: string;
 };
 export type MoveAssetsForm = {
-  balance: Base.Amount;
+  balance: EmerisBase.Amount;
   on_chain: string;
   to_chain: string;
 };
 export type FeeWDenom = {
-  amount: API.Fee;
+  amount: EmerisBase.GasPrice;
   denom: string;
   chain_name: string;
 };

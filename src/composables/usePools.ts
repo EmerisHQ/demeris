@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
@@ -15,11 +15,11 @@ function usePools() {
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
   });
-  const libStore = useStore();
-  const apistore = libStore as TypedAPIStore;
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
-    return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools];
+    return typedstore.getters[GlobalGetterTypes.API.getAllValidPools];
   });
   /*
      Following reference and watcher ensure that
@@ -51,7 +51,7 @@ function usePools() {
           await Promise.all(
             addedPools.map(async (addedPool) => {
               const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
-              await apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
+              await typedstore.dispatch(GlobalActionTypes.API.GET_POOL_BALANCES, {
                 subscribe: false,
                 params: { address: hashAddress },
               });
@@ -86,7 +86,7 @@ function usePools() {
   const updatePool = async (pool: Pool) => {
     await initPromise;
     const hashAddress = keyHashfromAddress(pool.reserve_account_address);
-    apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
+    typedstore.dispatch(GlobalActionTypes.API.GET_POOL_BALANCES, {
       subscribe: false,
       params: { address: hashAddress },
     });
@@ -98,7 +98,7 @@ function usePools() {
     return (
       await Promise.all(
         pool.reserve_coin_denoms.map(
-          async (item) => await getTicker(item, apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]),
+          async (item) => await getTicker(item, typedstore.getters[GlobalGetterTypes.API.getDexChain]),
         ),
       )
     )
@@ -120,7 +120,7 @@ function usePools() {
     }
     return (
       poolName?.split(' · ')[0] !==
-      (await getTicker(pool.reserve_coin_denoms[0], apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]))
+      (await getTicker(pool.reserve_coin_denoms[0], typedstore.getters[GlobalGetterTypes.API.getDexChain]))
     );
   };
 
@@ -130,7 +130,7 @@ function usePools() {
   };
 
   const getPoolPrice = async (pool: Pool) => {
-    const balances = apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
+    const balances = typedstore.getters[GlobalGetterTypes.API.getBalances]({
       address: keyHashfromAddress(pool.reserve_account_address),
     });
 
@@ -148,7 +148,7 @@ function usePools() {
       return;
     }
 
-    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
     return new BigNumber(poolCoinAmount).dividedBy(totalSupply).multipliedBy(100).toNumber();
@@ -159,11 +159,11 @@ function usePools() {
       return;
     }
 
-    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
     const reserveBalances = (
-      apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
+      typedstore.getters[GlobalGetterTypes.API.getBalances]({
         address: keyHashfromAddress(pool.reserve_account_address),
       }) || []
     ).map((x) => {
@@ -204,10 +204,10 @@ function usePools() {
     return withdrawCoins;
   };
   const getNextPoolId = () => {
-    return libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
+    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
   };
   const getReserveBalances = async (pool: Pool) => {
-    const balances = apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
+    const balances = typedstore.getters[GlobalGetterTypes.API.getBalances]({
       address: keyHashfromAddress(pool.reserve_account_address),
     });
 

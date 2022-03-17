@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -30,8 +31,7 @@ import { useStore } from 'vuex';
 import { actionHandler } from '@/actionhandler';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { UnstakeAction, UnstakeForm } from '@/types/actions';
 import { event } from '@/utils/analytics';
 
@@ -54,7 +54,7 @@ export default defineComponent({
       default: undefined,
     },
     validators: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<EmerisAPI.Validator[]>,
       required: true,
       default: () => {
         return [];
@@ -70,7 +70,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const steps = ref([]);
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
     const propsRef = toRefs(props);
@@ -78,16 +78,16 @@ export default defineComponent({
       return propsRef.validators.value.find((x) => x.operator_address === propsRef.validator.value);
     });
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name });
     });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: UnstakeForm = reactive({
@@ -111,12 +111,10 @@ export default defineComponent({
         params: {
           validatorAddress: validatorObj.value.operator_address,
           amount: {
-            amount: {
-              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
-                .multipliedBy(10 ** precision.value)
-                .toString(),
-              denom: baseDenom,
-            },
+            amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+              .multipliedBy(10 ** precision.value)
+              .toString(),
+            denom: baseDenom,
             chain_name: validatorObj.value.chain_name,
           },
         },

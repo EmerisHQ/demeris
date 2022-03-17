@@ -47,11 +47,11 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { LoadingState } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { LoadingState } from '@/types/util';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -62,9 +62,9 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
-
+    const typedstore = useStore() as RootStoreTyped;
     const airdrops = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
     const onAirdropsPage = computed(() => {
@@ -72,7 +72,7 @@ export default defineComponent({
     });
 
     const airdropsLoading = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
     const showBlinker = computed(() => {

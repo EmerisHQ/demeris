@@ -1,26 +1,26 @@
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useAccount() {
-  const store = useStore() as RootStoreType;
+  const store = useStore() as RootStoreTyped;
   const isDemoAccount = computed(() => {
-    return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+    return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
-  const allbalances = computed<Balances>(() => {
+  const allbalances = computed(() => {
     // TODO: Remove after cloud is fully deployed
     /*
     if (process.env.NODE_ENV === 'production') {
       return TEST_DATA.balances;
     }
     */
-    return store.getters[GlobalDemerisGetterTypes.API.getAllBalances] || [];
+    return store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
   });
 
   const redeemableBalances = ref([]);
@@ -69,14 +69,16 @@ export default function useAccount() {
     return sortedBalances;
   });
   const allLoaded = computed(() => {
-    return !store.getters.getFirstLoad;
+    return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
   });
   const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
 
   const getNativeBalances = (
-    { balances, aggregate }: { balances?: Balances | Ref<Balances>; aggregate?: boolean } = { balances: [] },
+    { balances, aggregate }: { balances?: EmerisAPI.Balances | Ref<EmerisAPI.Balances>; aggregate?: boolean } = {
+      balances: [],
+    },
   ) => {
-    const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+    const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
     const result = [];
 
     for (const verifiedDenom of verifiedDenoms) {
@@ -104,7 +106,7 @@ export default function useAccount() {
         ...asset,
         amount: '' + totalAmount + asset.base_denom,
         displayName: verifiedDenom.display_name,
-        precision: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: asset.base_denom }) ?? 6,
+        precision: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: asset.base_denom }) ?? 6,
       });
     }
 
@@ -125,8 +127,8 @@ export default function useAccount() {
     );
   };
 
-  const stakingBalances = computed<StakingBalances>(() => {
-    return store.getters[GlobalDemerisGetterTypes.API.getAllStakingBalances] || [];
+  const stakingBalances = computed(() => {
+    return store.getters[GlobalGetterTypes.API.getAllStakingBalances] || [];
   });
 
   const stakingBalancesByChain = (chain_name: string) => {
@@ -137,8 +139,8 @@ export default function useAccount() {
     });
   };
 
-  const unbondingDelegations = computed<UnbondingDelegations>(() => {
-    return store.getters[GlobalDemerisGetterTypes.API.getAllUnbondingDelegations] || [];
+  const unbondingDelegations = computed(() => {
+    return store.getters[GlobalGetterTypes.API.getAllUnbondingDelegations] || [];
   });
   const unbondingDelegationsByChain = (chain_name: string) => {
     return unbondingDelegations.value.filter((item) => {
@@ -148,13 +150,13 @@ export default function useAccount() {
     });
   };
 
-  const orderBalancesByPrice = (balances: Balances) => {
+  const orderBalancesByPrice = (balances: EmerisAPI.Balances) => {
     return balances
       .map((item) => {
         const amount = parseCoins(item.amount)[0].amount;
         const denom = item.base_denom;
-        const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
-        const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+        const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+        const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
         const result = new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).toNumber();
         return { ...item, price: result };
       })

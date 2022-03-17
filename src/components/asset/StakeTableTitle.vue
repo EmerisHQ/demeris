@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import { toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed, defineEmits } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -41,7 +41,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
 
 const emit = defineEmits(['selectTab']);
@@ -50,24 +50,24 @@ const router = useRouter();
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
-const store = useStore();
+const store = useStore() as RootStoreTyped;
 const stakingBalances = computed(() => {
   return stakingBalancesByChain(
-    store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
   ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const assetPrecision = computed(() => {
   return (
-    store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
       name: propsRef.denom.value,
-    }) ?? '6'
+    }) ?? 6
   );
 });
 
 const unbondingBalances = computed(() => {
   return unbondingDelegationsByChain(
-    store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
   );
 });
 

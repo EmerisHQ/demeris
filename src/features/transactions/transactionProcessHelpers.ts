@@ -1,8 +1,9 @@
+import { EmerisAPI, EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import {
   CreatePoolData,
   IBCBackwardsData,
@@ -14,7 +15,6 @@ import {
   TransferData,
   WithdrawLiquidityData,
 } from '@/types/actions';
-import { Balance, SwapEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -47,7 +47,7 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
-  const dexChain = useStore().getters[GlobalDemerisGetterTypes.API.getDexChain];
+  const dexChain = useStore().getters[GlobalGetterTypes.API.getDexChain];
 
   switch (transaction.name) {
     case 'transfer':
@@ -79,7 +79,7 @@ export const isProcessingState = (state: TransactionProcessState) => {
   return ['transacting', 'signing'].some(state.matches);
 };
 
-export const formatStepsWithFee = (context: TransactionProcessContext, balances: Balance[]): Step[] => {
+export const formatStepsWithFee = (context: TransactionProcessContext, balances: EmerisAPI.Balances): Step[] => {
   return context.input.steps.map((step) => {
     return {
       ...step,
@@ -95,14 +95,14 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           if (sourceBalance) {
             const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
-            const fee = parseInt(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]);
+            const fee = Math.ceil(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]);
             const txAmount = parseInt((transaction.data as IBCBackwardsData).amount.amount);
             if (txAmount + fee > amount) {
               if (txAmount === amount) {
                 transaction.feeToAdd = [];
                 transaction.addFee = false;
               } else {
-                transaction.feeToAdd[0].amount[context.input.gasPriceLevel] = amount - fee + '';
+                transaction.feeToAdd[0].amount[context.input.gasPriceLevel] = amount - fee;
               }
             }
           }
@@ -114,7 +114,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           if (baseDenomBalance) {
             const amount = parseCoins(baseDenomBalance.amount)[0];
-            if (parseInt(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]) < parseInt(amount.amount)) {
+            if (transaction.feeToAdd[0].amount[context.input.gasPriceLevel] < parseInt(amount.amount)) {
               transaction.feeToAdd = [];
               transaction.addFee = false;
             }
@@ -146,7 +146,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
   });
 };
 
-export const getSwappedPercent = (endBlock: SwapEndBlockResponse) => {
+export const getSwappedPercent = (endBlock: EmerisBase.SwapEndBlockResponse) => {
   return (
     (Number(endBlock.exchanged_offer_coin_amount) /
       (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
@@ -163,8 +163,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
   const stepTx = getCurrentTransaction(context);
 
   const getDisplayPrice = (denom: string, amount: string) => {
-    const price = useStore().getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom });
-    const precision = useStore().getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? '6';
+    const price = useStore().getters[GlobalGetterTypes.API.getPrice]({ denom: denom });
+    const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? '6';
 
     return (price * parseInt(amount)) / Math.pow(10, precision);
   };
@@ -292,8 +292,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
 
       const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
       const displayName =
-        useStore().getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)
-          ?.display_name ?? null;
+        useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)?.display_name ??
+        null;
 
       event('usd_volume', {
         event_label: 'Withdraw Liquidity USD volume',

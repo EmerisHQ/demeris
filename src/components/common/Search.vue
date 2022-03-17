@@ -8,9 +8,9 @@
         :class="[isSearchIconVisible ? 'pl-10' : 'pl-4']"
         :type="inputType"
         :placeholder="placeholder"
-        @input="$emit('update:keyword', $event.target.value)"
-        @focus="$emit('focus:value', $event.target.value)"
-        @blur="$emit('blur:value', $event.target.value)"
+        @input="$emit('update:keyword', ($event.target as HTMLInputElement).value)"
+        @focus="$emit('focus:value', ($event.target as HTMLInputElement).value)"
+        @blur="$emit('blur:value', ($event.target as HTMLInputElement).value)"
       />
       <Icon
         v-if="isSearchIconVisible"

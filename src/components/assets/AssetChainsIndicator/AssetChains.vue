@@ -24,12 +24,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { EmerisAPI } from '@emeris/types';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { Balances } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -39,7 +39,7 @@ export default defineComponent({
   },
   props: {
     balances: {
-      type: Object as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
     denom: {
@@ -53,10 +53,11 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
+    const propsRef = toRefs(props);
     const filteredBalances = computed(() => {
       return (
-        (props.balances as Balances)
+        propsRef.balances.value
           ?.filter((item) => item.base_denom === props.denom)
           .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1)) ?? []
       );
@@ -66,14 +67,14 @@ export default defineComponent({
         parseInt(parseCoins(amount)[0].amount) /
         Math.pow(
           10,
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({
             name: props.denom,
           }),
         )
       );
     };
     const getChainName = (chain_name) => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+      return store.getters[GlobalGetterTypes.API.getDisplayChain]({
         name: chain_name,
       });
     };

@@ -39,6 +39,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -50,9 +51,8 @@ import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import Search from '@/components/common/Search.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { Airdrop } from '@/types/api';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { typedstore } from '@/store/setup';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -85,12 +85,12 @@ export default {
     const router = useRouter();
 
     const airdrops = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
-    const openAirdropPage = (airdrop: Airdrop) => {
+    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
       router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
-      apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
+      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },

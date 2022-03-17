@@ -58,8 +58,8 @@ import { useStore } from 'vuex';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { LoadingState } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { LoadingState } from '@/types/util';
 
 export default defineComponent({
   name: 'AirdropClaimablePanel',
@@ -75,17 +75,17 @@ export default defineComponent({
   },
   setup() {
     const theme = useTheme();
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
     const isDemoAccountBanner = computed(() => {
       return (
-        !apistore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] ||
-        apistore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
       );
     });
 
@@ -94,7 +94,7 @@ export default defineComponent({
     };
 
     const airdropsLoading = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
     return {

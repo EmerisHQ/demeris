@@ -61,9 +61,9 @@
             </td>
 
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               </div>
             </td>
             <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
@@ -111,23 +111,7 @@
             </td>
           </tr>
         </template>
-        <template v-else>
-          <tr :key="index" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
-            <td class="py-5 align-middle group-hover:bg-fg transition">
-              <div class="flex items-center">
-                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
-                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                  <span class="font-medium"><Denom :name="asset.denom" /></span>
-                  <LPAsset :name="asset.denom" />
-                </div>
-              </div>
-            </td>
-
-            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price :amount="{ denom: asset.denom, amount: null }" />
-            </td>
-          </tr>
-        </template>
+        <template v-else> </template>
       </tbody>
     </table>
 
@@ -150,9 +134,10 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -168,8 +153,7 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { Balances } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -221,7 +205,7 @@ export default defineComponent({
       default: undefined,
     },
     balances: {
-      type: Array as PropType<Balances>,
+      type: Array as PropType<EmerisAPI.Balances>,
       required: true,
     },
   },
@@ -229,22 +213,25 @@ export default defineComponent({
   emits: ['row-click'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const currentLimit = ref(props.limitRows);
     const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
-
-    const allBalances = computed<Balances>(() => {
-      let balances = props.balances;
+    const propsRef = toRefs(props);
+    const allBalances = computed(() => {
+      let balances = propsRef.balances.value;
       if (props.showAllAssets) {
         balances = [
-          ...(props.balances as Balances),
+          ...propsRef.balances.value,
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
             on_chain: denom.chain_name,
             amount: '0' + denom.name,
+            verified: true,
+            address: '',
+            ibc: {},
           })),
         ];
       }
@@ -255,7 +242,7 @@ export default defineComponent({
             return balance;
           }
         });
-        return balances as Balances;
+        return balances;
       }
 
       if (props.hideZeroAssets) {
@@ -265,12 +252,12 @@ export default defineComponent({
           }
         });
       }
-      return balances as Balances;
+      return balances;
     });
 
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-      const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+      const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
       const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
@@ -344,7 +331,7 @@ export default defineComponent({
     > = computed(() => {
       let balances = balancesWithValue.value;
       balances.map(async (b) => {
-        let name = await getDisplayName(b.denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
+        let name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
         (b as any).name = name;
       });
       return balances;
@@ -364,7 +351,7 @@ export default defineComponent({
     const getUnavailableChains = (asset) => {
       const result = {};
       const statusMap = asset.chainsNames.reduce((acc, chain) => {
-        acc[chain] = store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
+        acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
         return acc;
       }, {});
 
@@ -401,8 +388,8 @@ export default defineComponent({
     });
 
     const getMarketCap = (denom: string) => {
-      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
-      const supply = store.getters[GlobalDemerisGetterTypes.API.getSupply]({ denom });
+      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+      const supply = store.getters[GlobalGetterTypes.API.getSupply]({ denom });
       let marketCap = price * supply;
       return marketCap;
     };
@@ -411,7 +398,7 @@ export default defineComponent({
       currentLimit.value = undefined;
     };
 
-    const handleClick = (asset: Record<string, string>) => {
+    const handleClick = (asset) => {
       emit('row-click', asset);
     };
 

@@ -1,9 +1,9 @@
+import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { assign, createMachine, Interpreter, State } from 'xstate';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions';
-import { FeeTotals, FeeWarning, GasPriceLevel, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
-import { Balance } from '@/types/api';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { FeeTotals, FeeWarning, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
+import { TxParams, TxResponse } from '@/types/tx';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -27,10 +27,10 @@ import {
 
 interface ContextInputSchema {
   action: string;
-  gasPriceLevel: GasPriceLevel;
+  gasPriceLevel: EmerisFees.GasPriceLevel;
   gasLimit: number;
   steps: Step[];
-  balances: Balance[];
+  balances: EmerisAPI.Balance[];
 }
 
 export interface TransactionProcessContext {
@@ -58,7 +58,7 @@ export interface TransactionProcessContext {
 }
 
 export type TransactionProcessEvents =
-  | ({ type: 'SET_DATA'; balances: Balance[] } & ContextInputSchema)
+  | ({ type: 'SET_DATA'; balances: EmerisAPI.Balance[] } & ContextInputSchema)
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -372,14 +372,14 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const fee = {
           amount: [
             {
-              amount: '' + parseFloat(feeResult[0].amount[context.input.gasPriceLevel]) * context.input.gasLimit,
+              amount: '' + feeResult[0].amount[context.input.gasPriceLevel] * context.input.gasLimit,
               denom: feeResult[0].denom,
             },
           ],
           gas: '' + context.input.gasLimit,
         };
 
-        return useStore().dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
+        return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
           msgs: msgResult.msg,
           chain_name: msgResult.chain_name,
           fee,
@@ -387,10 +387,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           memo: getCurrentStep(context).memo ?? '',
         });
       },
-      broadcastTransaction: async (_, event: DoneEventData<DemerisTxParams>) => {
-        return useStore().dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, event.data);
+      broadcastTransaction: async (_, event: DoneEventData<TxParams>) => {
+        return useStore().dispatch(GlobalActionTypes.TX.BROADCAST_TX, event.data);
       },
-      fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
+      fetchTransactionResponse: (context, event: DoneEventData<TxResponse>) => (callback) => {
         const currentStep = getCurrentStep(context);
         const currentTransaction = getCurrentTransaction(context);
 
@@ -416,7 +416,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentStep.name)) {
             while (retries < 10 && shouldRetry) {
               try {
-                endBlockEvent = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
+                endBlockEvent = await useStore().dispatch(GlobalActionTypes.API.GET_END_BLOCK_EVENTS, {
                   height: height,
                   stepType: currentStep.name,
                 });
@@ -455,7 +455,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ];
 
           while (!breakStatuses.includes(resultData?.status) && shouldRetry) {
-            resultData = await useStore().getters[GlobalDemerisGetterTypes.API.getTxStatus]({
+            resultData = await useStore().getters[GlobalGetterTypes.API.getTxStatus]({
               chain_name: sourceChain,
               ticket: event.data.ticket,
             });
@@ -494,7 +494,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
             while (retriesDestCount < 15 && shouldRetry) {
               try {
-                destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
+                destTx = await useStore().dispatch(GlobalActionTypes.API.GET_TX_DEST_HASH, {
                   from_chain,
                   to_chain,
                   txhash: responseData.txhash,
@@ -528,7 +528,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           const RPCFallback = async () => {
             try {
-              traceResult = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_FROM_RPC, {
+              traceResult = await useStore().dispatch(GlobalActionTypes.API.GET_TX_FROM_RPC, {
                 chain_name: responseData.chain_name,
                 txhash: responseData.txhash,
               });
@@ -541,7 +541,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           };
 
           try {
-            traceResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+            traceResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
             });
@@ -562,7 +562,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         if (featureRunning('WEBSOCKET_RESPONSE')) {
           setTimeout(traceResponse, 0);
         } else {
-          useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+          useStore().dispatch(GlobalActionTypes.API.GET_TX_STATUS, {
             subscribe: true,
             params: { chain_name: sourceChain, ticket: event.data.ticket },
           });
