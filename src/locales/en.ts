@@ -18,8 +18,8 @@ export const messages = {
     },
     components: {
       stakingBanner: {
-        title: 'Stake',
-        text: 'Stake with a validator to receive over',
+        startStaking: 'Start staking',
+        text: 'Learn how to earn staking rewards on your assets using Emeris ',
         textAPR: 'APR',
         cta: 'Start staking',
       },
