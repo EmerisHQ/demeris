@@ -533,8 +533,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 txhash: responseData.txhash,
               });
             } catch (e) {
-              console.error(e);
-              debugger;
               // @ts-ignore
               return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
             }
