@@ -16,9 +16,9 @@
       class="right-0 rounded-2xl absolute top-0 h-full z-10"
     />
     <div class="staking-banner__circles z-50 absolute right-0 top-0">
-      <CircleSymbol :denom="baseDenom" custom-size="50px" />
-      <CircleSymbol :denom="baseDenom" custom-size="26px" />
-      <CircleSymbol :denom="baseDenom" custom-size="16px" />
+      <CircleSymbol :display-status="false" :denom="baseDenom" custom-size="50px" />
+      <CircleSymbol :display-status="false" :denom="baseDenom" custom-size="26px" />
+      <CircleSymbol :display-status="false" :denom="baseDenom" custom-size="16px" />
     </div>
   </a>
 </template>
@@ -30,6 +30,7 @@ import { useStore } from 'vuex';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes } from '@/store';
+
 export default defineComponent({
   name: 'StakingBanner',
   components: {
