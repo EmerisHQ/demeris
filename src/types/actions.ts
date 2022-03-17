@@ -144,6 +144,12 @@ export type UnstakeData = {
   amount: EmerisBase.Amount;
   chain_name: string;
 };
+export type SwitchStakingValidatorData = {
+  validatorAddress: string;
+  validatorSrcAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
 export type RestakeData = {
   validatorSrcAddress: string;
   validatorDstAddress: string;

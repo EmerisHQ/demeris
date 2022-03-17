@@ -98,6 +98,7 @@ const totalStakedAssetDisplayAmount = computed(() => {
       new BigNumber(0),
     ),
   );
+
   if (total.isLessThan(1)) {
     return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
   } else {
