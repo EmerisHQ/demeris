@@ -758,6 +758,20 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms];
   const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
+  const chains =
+    typedstore.getters[GlobalGetterTypes.API.getChains] ??
+    (await typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS, {
+      subscribe: false,
+    }));
+  for (const chain in chains) {
+    if (!chains[chain].primary_channel)
+      chains[chain] = await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+  }
   await Promise.all(
     pools.map(async (pool) => {
       const firstDenom = pool.reserve_coin_denoms[0];
