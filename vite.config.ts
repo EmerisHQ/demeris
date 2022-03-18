@@ -2,9 +2,10 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
-import { defineConfig } from 'vite';
 import { dynamicImport } from 'vite-plugin-dynamic-import';
 import envCompatible from 'vite-plugin-env-compatible';
+// import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -35,5 +36,13 @@ export default defineConfig({
         }),
       ],
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    transformMode: {
+      web: [/\.[jt]sx$/],
+    },
+    exclude: ['**/node_modules/**', '**/dist/**', '**/cypress/**', '**/e2e/**'],
   },
 });

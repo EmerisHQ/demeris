@@ -37,7 +37,7 @@ describe('Notifications', () => {
   test('Mounts with content in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
-        default: 'Main Content 1',
+        default: 'Main Content xxx',
       },
     });
     const wrapper = mount(DropdownMenu, {
@@ -49,11 +49,13 @@ describe('Notifications', () => {
         default: DropdownMenuItem1,
       },
     });
-    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
+    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content xxx');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
     window.requestAnimationFrame(async () => {
-      const menu = wrapper.get('[data-test=mainComponent]');
-      expect(menu.html()).toContain('Main Content 1');
+      window.requestAnimationFrame(async () => {
+        const menu = await wrapper.get('[data-test=mainComponent]');
+        expect(menu.html()).toContain('Main Content xxx');
+      });
     });
   });
 
@@ -85,10 +87,12 @@ describe('Notifications', () => {
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
     window.requestAnimationFrame(async () => {
-      const menu = await wrapper.get('[data-test=mainComponent]');
-      expect(menu.html()).toContain('Main Content 1');
-      expect(menu.html()).toContain('Main Content 2');
-      expect(menu.html()).toContain('Main Content 3');
+      window.requestAnimationFrame(async () => {
+        const menu = await wrapper.get('[data-test=mainComponent]');
+        expect(menu.html()).toContain('Main Content 1');
+        expect(menu.html()).toContain('Main Content 2');
+        expect(menu.html()).toContain('Main Content 3');
+      });
     });
   });
 });
