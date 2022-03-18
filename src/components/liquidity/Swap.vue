@@ -232,7 +232,7 @@ export default defineComponent({
       if (transactionsStore.currentId) {
         const snapshot = transactionsStore.getCurrentService().getSnapshot();
         const cursor = getTransactionOffset(snapshot.context);
-        if (snapshot.matches('transacting') || cursor.total > cursor.offset) {
+        if (snapshot.matches('transacting') || (cursor && cursor.total > cursor.offset)) {
           transactionsStore.setTransactionAsPending();
         }
       }
