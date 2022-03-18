@@ -3,7 +3,7 @@
  */
 // npx vitest src/components/ui/DropdownMenu.spec.ts
 import { mount } from '@vue/test-utils';
-import { test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import DropdownMenu from './DropdownMenu.vue';
 import DropdownMenuItem from './DropdownMenuItem.vue';
@@ -53,7 +53,7 @@ describe('Notifications', () => {
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
     window.requestAnimationFrame(async () => {
       const menu = wrapper.get('[data-test=mainComponent]');
-      expect(menu.html()).toContain('Main Content');
+      expect(menu.html()).toContain('Main Content 1');
     });
   });
 
