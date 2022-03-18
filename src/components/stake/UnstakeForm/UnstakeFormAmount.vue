@@ -92,7 +92,7 @@ export default defineComponent({
     );
 
     const stakingRewards = computed(() => {
-      if (stakingRewardsData.value !== null) {
+      if (stakingRewardsData.value?.rewards) {
         return parseFloat(
           stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
             ?.reward ?? '0',

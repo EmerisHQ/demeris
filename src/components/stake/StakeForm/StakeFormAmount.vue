@@ -6,7 +6,7 @@
           <ChainSelectModal
             v-if="state.isChainsModalOpen"
             class="fixed inset-0 z-30 bg-bg"
-            title="Select chain"
+            :title="$t('components.stakeFormAmount.selectChain')"
             :show-subtitle="true"
             :assets="balances"
             :selected-denom="baseDenom"
@@ -58,23 +58,23 @@
             </button>
           </fieldset>
 
-          <Button
-            v-if="validatorsToStakeWith.length < 3"
-            class="mt-2"
-            name="Add a validator"
-            variant="link"
-            :full-width="false"
-            @click="() => validatorAddHandler()"
-          >
-            <Icon name="PlusIcon" :icon-size="2" />
-          </Button>
           <div class="mt-2 w-full max-w-sm mx-auto">
+            <Button
+              v-if="validatorsToStakeWith.length < 3"
+              class="mt-6 mb-8"
+              :name="$t('components.stakeFormAmount.addValidatorButton')"
+              variant="link"
+              :full-width="false"
+              @click="() => validatorAddHandler()"
+            >
+              <Icon name="PlusIcon" :icon-size="2" />
+            </Button>
             <!-- Stake Info -->
-            <ListItem inset size="md" label="Time to unstake">
+            <ListItem inset size="md" :label="$t('components.stakeFormAmount.timeUnstake')">
               <DaysToUnstake :chain-name="chainName" />
             </ListItem>
 
-            <ListItem inset size="md" label="Total stake">
+            <ListItem inset size="md" :label="$t('components.stakeFormAmount.totalStake')">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
                 <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" :show-dash="false" />
