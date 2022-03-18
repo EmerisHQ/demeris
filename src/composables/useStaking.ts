@@ -35,10 +35,14 @@ export default function useStaking() {
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<StakingRewards> => {
     try {
       const chain_name = await getChainName(base_denom);
-      return await store.dispatch(GlobalActionTypes.API.GET_STAKING_REWARDS, {
+      const rewards = await store.dispatch(GlobalActionTypes.API.GET_STAKING_REWARDS, {
         subscribe: false,
         params: { chain_name },
       });
+      if (rewards.total === '') {
+        return { rewards: [], total: '0' + base_denom };
+      }
+      return rewards;
     } catch (_e) {
       // Apparently rewards endpoint errors out if staking rewards are zero
       // or user is not staking so we catch and return an entry for no rewards

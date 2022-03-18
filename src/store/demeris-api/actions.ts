@@ -721,6 +721,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   },
   async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
     try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
         `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
       );
@@ -737,6 +738,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       value: LoadingState.LOADING,
     });
     try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.Airdrop> = await axios.get(
         `${getters['getRawGitEndpoint']}/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
