@@ -12,7 +12,7 @@
       </div>
     </header>
 
-    <div v-show="isMobile" class="welcome-modal__bg">
+    <div v-if="isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -53,7 +53,7 @@
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
-        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
+        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" @connect="cancelConnectKeplr" />
       </div>
     </div>
 
@@ -146,7 +146,7 @@ export default defineComponent({
     };
 
     const cancelConnectKeplr = () => {
-      connectKeplrRef.value.cancel();
+      connectKeplrRef.value?.cancel();
       isReturnUser.value = true;
       goBackToOrigin();
     };
