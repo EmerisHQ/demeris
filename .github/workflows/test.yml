@@ -46,14 +46,14 @@ jobs:
 
       - name: Test
         run: npm run test:unit -- --runInBand
-
   e2e:
-    runs-on: self-hosted
-
+    
     strategy:
       matrix:
         node-version: [16.x]
-
+    timeout-minutes: 60
+    runs-on: self-hosted
+    
     steps:
       - uses: actions/checkout@v2
         with:
@@ -73,43 +73,22 @@ jobs:
       - name: Install (npm)
         run: npm install
 
-      - name: Update system
-        run: sudo apt update
-
-      - name: Install dependencies
-        run: sudo DEBIAN_FRONTEND=noninteractive apt -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-
       - name: Install Serve
         run: npm install -g serve
-
+      - name: Install Playwright
+        run: npx playwright install --with-deps
       - name: Build
         run: npm run build
-      
-      - name: Cypress run
-        uses: cypress-io/github-action@v2
-        id: cypress
-        with:
-          start: serve -s dist -l 8080
-          wait-on: 'http://localhost:8080'
-          wait-on-timeout: 180
+      - name: Run Playwright tests
+        run: 
+          serve -s dist -l 8080 &
+          npx playwright test
+        env: 
+          PLAYWRIGHT_TEST_BASE_URL: 'http://localhost:8080'
 
-      - name: Upload Screenshots
-        uses: actions/upload-artifact@v2
-        if: failure()
+      - uses: actions/upload-artifact@v2
+        if: always()
         with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-
-      - name: Notify Slack
-        if: |
-          failure() &&
-          github.event.schedule == '0,30 * * * *'
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: emeris-frontend-github
-          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
-          SLACK_ICON: https://github.com/rtCamp.png?size=48
-          SLACK_MESSAGE: 'See results at ${{ steps.cypress.outputs.dashboardUrl }}'
-          SLACK_TITLE: 'Cypress finished with: ${{ steps.cypress.outcome }}'
-          SLACK_USERNAME: E2E test bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
