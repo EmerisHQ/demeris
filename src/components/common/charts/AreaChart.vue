@@ -2,13 +2,13 @@
   <div>
     <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 17}px`" class="mb-8" />
     <div v-if="hasData">
-      <!-- <apexchart
+      <apexchart
         v-if="!showLoading"
         class="w-full chart"
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
-      /> -->
+      />
       <div v-if="variant === 'full'" class="flex justify-between items-center -mt-4">
         <p class="-text-1 text-muted">
           {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}

@@ -49,12 +49,13 @@ describe('Notifications', () => {
         default: DropdownMenuItem1,
       },
     });
+
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    setTimeout(() => {
+    window.requestAnimationFrame(async () => {
       const menu = wrapper.get('[data-test=mainComponent]');
       expect(menu.html()).toContain('Main Content');
-    }, 100);
+    });
   });
 
   test('Mounts with 3 links in slot', async () => {
@@ -84,12 +85,11 @@ describe('Notifications', () => {
     });
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    // TODO: find a synchrounous way for this test to be processed
-    setTimeout(() => {
-      const menu = wrapper.get('[data-test=mainComponent]');
+    window.requestAnimationFrame(async () => {
+      const menu = await wrapper.get('[data-test=mainComponent]');
       expect(menu.html()).toContain('Main Content 1');
       expect(menu.html()).toContain('Main Content 2');
       expect(menu.html()).toContain('Main Content 3');
-    }, 200);
+    });
   });
 });
