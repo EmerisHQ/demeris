@@ -895,6 +895,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
 
     try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
       const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
       return data?.result?.tx_result;
     } catch (e) {
