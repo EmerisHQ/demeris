@@ -37,7 +37,7 @@ describe('Notifications', () => {
   test('Mounts with content in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
-        default: 'Main Content',
+        default: 'Main Content 1',
       },
     });
     const wrapper = mount(DropdownMenu, {
@@ -49,8 +49,7 @@ describe('Notifications', () => {
         default: DropdownMenuItem1,
       },
     });
-
-    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
+    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
     window.requestAnimationFrame(async () => {
       const menu = wrapper.get('[data-test=mainComponent]');
@@ -83,7 +82,7 @@ describe('Notifications', () => {
         default: [DropdownMenuItem1, DropdownMenuItem2, DropdownMenuItem3],
       },
     });
-    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
+    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
     window.requestAnimationFrame(async () => {
       const menu = await wrapper.get('[data-test=mainComponent]');
