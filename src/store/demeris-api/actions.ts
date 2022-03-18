@@ -752,57 +752,55 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     commit(MutationTypes.SET_AIRDROPS_STATUS, {
       value: LoadingState.LOADING,
     });
-    setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-        )
-          .then((res) => res.json())
-          .then(async (data) => {
-            let eligibilityRes = null;
-            if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
-              return { ...data, eligibility: AirdropEligibilityStatus.AUTO_DROP };
-            } else if (data.chainName) {
-              const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
-              const ownAddress = await getOwnAddress({ chain_name });
+    try {
+      const response = await fetch(
+        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+      )
+        .then((res) => res.json())
+        .then(async (data) => {
+          let eligibilityRes = null;
+          if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
+            return { ...data, eligibility: AirdropEligibilityStatus.AUTO_DROP };
+          } else if (data.chainName) {
+            const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
+            const ownAddress = await getOwnAddress({ chain_name });
 
-              if (data.eligibilityCheckEndpoint && ownAddress) {
-                const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
-                eligibilityRes = await fetch(`${eligibilityEndpoint}${ownAddress}`).then((res) => {
-                  return res;
-                });
+            if (data.eligibilityCheckEndpoint && ownAddress) {
+              const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
+              eligibilityRes = await fetch(`${eligibilityEndpoint}${ownAddress}`).then((res) => {
+                return res;
+              });
 
-                if (eligibilityRes.status === 200) {
-                  return { ...data, eligibility: AirdropEligibilityStatus.ELIGIBLE };
-                } else if (eligibilityRes.status === 403) {
-                  return { ...data, eligibility: AirdropEligibilityStatus.NOT_ELIGIBLE };
-                } else {
-                  return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
-                }
+              if (eligibilityRes.status === 200) {
+                return { ...data, eligibility: AirdropEligibilityStatus.ELIGIBLE };
+              } else if (eligibilityRes.status === 403) {
+                return { ...data, eligibility: AirdropEligibilityStatus.NOT_ELIGIBLE };
               } else {
                 return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
               }
             } else {
               return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
             }
-          });
-
-        commit(MutationTypes.SET_AIRDROPS_STATUS, {
-          value: LoadingState.LOADED,
+          } else {
+            return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
+          }
         });
 
-        commit(MutationTypes.SET_AIRDROPS, { value: { ...response } });
+      commit(MutationTypes.SET_AIRDROPS_STATUS, {
+        value: LoadingState.LOADED,
+      });
 
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });
-        }
-      } catch (e) {
-        commit(MutationTypes.SET_AIRDROPS_STATUS, {
-          value: LoadingState.ERROR,
-        });
-        throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
+      commit(MutationTypes.SET_AIRDROPS, { value: { ...response } });
+
+      if (subscribe) {
+        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });
       }
-    }, 4000);
+    } catch (e) {
+      commit(MutationTypes.SET_AIRDROPS_STATUS, {
+        value: LoadingState.ERROR,
+      });
+      throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
+    }
   },
   [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(MutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });

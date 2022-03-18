@@ -1,4 +1,4 @@
-import * as Base from './base';
+import { EmerisBase } from '@emeris/types';
 
 export enum LoadingState {
   INIT = 'INIT',
@@ -426,7 +426,7 @@ export type TransactionDetailResponse = {
       memo: string;
     };
     auth_info: {
-      fee: { amount: Base.Amount[]; gas_limit: string };
+      fee: { amount: EmerisBase.Amount[]; gas_limit: string };
     };
     signatures: string[];
   };
@@ -442,7 +442,7 @@ export type TransactionDetailResponse = {
         memo: string;
       };
       auth_info: {
-        fee: { amount: Base.Amount[]; gas_limit: string };
+        fee: { amount: EmerisBase.Amount[]; gas_limit: string };
       };
       signatures: [];
     };
