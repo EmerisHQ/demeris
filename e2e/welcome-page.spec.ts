@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Welcome page elements location and availibility', () => {
-  test.only('Connect Keplr button', async ({ page }) => {
+  test('Connect Keplr button', async ({ page }) => {
     const keplrBtn = await page.locator('button:has-text("Connect Keplr")');
     await expect(keplrBtn).toBeVisible();
   });
