@@ -41,6 +41,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import useDenoms from '@/composables/useDenoms';
 import { StakingActions } from '@/types/actions';
+import { event } from '@/utils/analytics';
 
 const { useDenom } = useDenoms();
 
@@ -50,6 +51,7 @@ const props = defineProps<{ denom: string }>();
 const { tickerName } = useDenom(props.denom);
 
 const goToStakingPage = () => {
+  event('staking_entry_point', { event_label: 'Asset Page Staking Banner Click', event_category: 'banner' });
   router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
 };
 </script>
