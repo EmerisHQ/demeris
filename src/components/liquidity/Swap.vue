@@ -8,11 +8,12 @@
           amount: payCoinAmount,
         },
         receive: { denom: receiveCoinData?.base_denom, amount: receiveCoinAmount },
-        isReverse: selectedPoolData?.reserves[0] !== payCoinData?.base_denom,
+        isReverse: isReverse,
         poolPrice: selectedPoolData?.poolPrice,
       }"
       @goback="slippageSettingModalToggle"
     />
+    <QuotesList v-if="isQuotesListModalOpen" :quotes="quotes" @goback="quotesListModalToggle" />
     <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
       <template #deactivated>
         <ReviewModal
@@ -54,11 +55,11 @@
         @previous="reviewModalToggle"
       />
     </FeatureRunningConditional>
-
+    <!-- TODO: change the dirty hidden condition -->
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
       :class="[
-        { hidden: !(!isSlippageSettingModalOpen && !isOpen) },
+        { hidden: !(!isSlippageSettingModalOpen && !isOpen && !isQuotesListModalOpen) },
         isChildModalOpen ? 'shadow-none' : 'shadow-panel',
       ]"
     >
@@ -105,6 +106,7 @@
             }"
           />
           <IconButton
+            v-if="!isAmount"
             class="mr-0.5 bg-surface"
             :name="maxButtonText"
             :type="'text'"
@@ -113,6 +115,18 @@
               type: 'custom',
               function: setMax,
               isOver: isOver,
+            }"
+          />
+          <!-- TODO: change hardcoded osmosis -->
+          <IconButton
+            v-else
+            class="mr-0.5 bg-surface"
+            :name="'Osmosis'"
+            :type="'text'"
+            :status="'normal'"
+            :data="{
+              type: 'custom',
+              function: quotesListModalToggle,
             }"
           />
         </div>
@@ -160,6 +174,7 @@
   </div>
 </template>
 <script lang="ts">
+import axios from 'axios';
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -167,6 +182,7 @@ import { useStore } from 'vuex';
 import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import QuotesList from '@/components/common/QuotesList.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
@@ -205,6 +221,7 @@ export default defineComponent({
     TransactionProcessCreator,
     FeatureRunningConditional,
     ReviewModal,
+    QuotesList,
   },
 
   props: {
@@ -213,16 +230,17 @@ export default defineComponent({
       default: undefined,
     },
   },
-
+  // todo: on receive input, api req wrong - on 0 NaN shows - atom to cro, precision wrong - no asset selected and amount and then receuve asset = nothing
   setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
-    const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
+    const { getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools, filterPoolsByDenom, getPoolPrice, getReserveBalances, getReserveBaseDenoms, updatePool } =
-      usePools();
+    const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = useModal();
+
+    const { pools, getPoolPrice, getReserveBalances, getReserveBaseDenoms, updatePool } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
@@ -235,6 +253,8 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
 
+    const isReverse = ref(false);
+
     const dexStatus = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
         chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
@@ -243,6 +263,14 @@ export default defineComponent({
 
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+    });
+
+    const isAmount = computed(() => {
+      if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     onUnmounted(() => {
@@ -627,9 +655,12 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
-          if (!data.selectedPoolData) {
-            return t('components.swap.noPool');
-          } else if (data.isNotEnoughLiquidity) {
+          // if (!data.selectedPoolData) {
+          //   return t('components.swap.noPool');
+          // }
+
+          // else
+          if (data.isNotEnoughLiquidity) {
             return t('components.swap.swapLimit');
           } else if (data.isOver) {
             return t('components.swap.insufficentFunds');
@@ -653,9 +684,10 @@ export default defineComponent({
         if (data.isNotEnoughLiquidity) {
           return t('components.swap.tooltipSwapLimit');
         } else if (data.isBothSelected) {
-          if (!data.selectedPoolData) {
-            return t('components.swap.tooltipNoPool');
-          } else if (!dexStatus.value) {
+          // if (!data.selectedPoolData) {
+          //   return t('components.swap.tooltipNoPool');
+          // } else
+          if (!dexStatus.value) {
             return t('components.swap.tooltipChainDown');
           } else {
             return '';
@@ -744,21 +776,14 @@ export default defineComponent({
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
-      isAmount: computed(() => {
-        if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
-          return true;
-        } else {
-          return false;
-        }
-      }),
       isSwapReady: computed(() => {
         return !(
           data.isOver ||
           !data.isBothSelected ||
-          data.isNotEnoughLiquidity ||
-          !data.isAmount ||
+          // data.isNotEnoughLiquidity ||
+          !isAmount.value ||
           !isSignedIn.value ||
-          data.selectedPoolData === null ||
+          // data.selectedPoolData === null ||
           !dexStatus.value
         );
       }),
@@ -863,70 +888,70 @@ export default defineComponent({
 
     //set selecte pair pool info
     const poolId = ref(null); // for price update
-    watch(
-      () => {
-        return [data.payCoinData?.denom, data.receiveCoinData?.denom];
-      },
-      async (watchValues) => {
-        if (watchValues[0] && watchValues[1]) {
-          let payDenom = data.payCoinData.base_denom;
-          const receiveDenom = data.receiveCoinData.denom;
+    // watch(
+    //   () => {
+    //     return [data.payCoinData?.denom, data.receiveCoinData?.denom];
+    //   },
+    //   async (watchValues) => {
+    //     if (watchValues[0] && watchValues[1]) {
+    //       let payDenom = data.payCoinData.base_denom;
+    //       const receiveDenom = data.receiveCoinData.denom;
 
-          if (
-            !data.payCoinData.denom.startsWith('ibc') &&
-            data.payCoinData.denom !== 'uatom' &&
-            !data.payCoinData.denom.startsWith('pool')
-          ) {
-            // nativeDenomToIBCDenom
-            payDenom = availablePairs.value.find((pair) => {
-              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
-            }).pay.denom;
-          } else if (data.payCoinData.denom.startsWith('ibc')) {
-            const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
-              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
-            })?.pay?.denom;
+    //       if (
+    //         !data.payCoinData.denom.startsWith('ibc') &&
+    //         data.payCoinData.denom !== 'uatom' &&
+    //         !data.payCoinData.denom.startsWith('pool')
+    //       ) {
+    //         // nativeDenomToIBCDenom
+    //         payDenom = availablePairs.value.find((pair) => {
+    //           return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+    //         }).pay.denom;
+    //       } else if (data.payCoinData.denom.startsWith('ibc')) {
+    //         const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
+    //           return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
+    //         })?.pay?.denom;
 
-            if (isPoolReserveIBCCoin) {
-              payDenom = isPoolReserveIBCCoin;
-            }
-          }
-          data.isLoading = true;
-          try {
-            const pool = filterPoolsByDenom(payDenom).find((pool) => {
-              return (
-                pool.reserve_coin_denoms.find((denom) => {
-                  return denom === receiveDenom;
-                })?.length > 0
-              );
-            });
+    //         if (isPoolReserveIBCCoin) {
+    //           payDenom = isPoolReserveIBCCoin;
+    //         }
+    //       }
+    //       data.isLoading = true;
+    //       try {
+    //         const pool = filterPoolsByDenom(payDenom).find((pool) => {
+    //           return (
+    //             pool.reserve_coin_denoms.find((denom) => {
+    //               return denom === receiveDenom;
+    //             })?.length > 0
+    //           );
+    //         });
 
-            if (pool) {
-              poolId.value = pool.id;
-              const reserves = await getReserveBaseDenoms(pool);
-              const reserveBalances = await getReserveBalances(pool);
-              const poolPrice = await getPoolPrice(pool);
+    //         if (pool) {
+    //           poolId.value = pool.id;
+    //           const reserves = await getReserveBaseDenoms(pool);
+    //           const reserveBalances = await getReserveBalances(pool);
+    //           const poolPrice = await getPoolPrice(pool);
 
-              data.selectedPoolData = {
-                pool,
-                poolPrice,
-                reserves,
-                reserveBalances,
-              };
-              setCounterPairCoinAmount('Pay');
-            } else {
-              poolId.value = null;
-              data.selectedPoolData = null;
-            }
+    //           data.selectedPoolData = {
+    //             pool,
+    //             poolPrice,
+    //             reserves,
+    //             reserveBalances,
+    //           };
+    //           // setCounterPairCoinAmount('Pay');
+    //         } else {
+    //           poolId.value = null;
+    //           data.selectedPoolData = null;
+    //         }
 
-            data.isLoading = false;
-          } catch (e) {
-            poolId.value = null;
-            data.selectedPoolData = null;
-            data.isLoading = false;
-          }
-        }
-      },
-    );
+    //         data.isLoading = false;
+    //       } catch (e) {
+    //         poolId.value = null;
+    //         data.selectedPoolData = null;
+    //         data.isLoading = false;
+    //       }
+    //     }
+    //   },
+    // );
 
     //pool price updater
     const setIntervalId = ref(null);
@@ -957,7 +982,7 @@ export default defineComponent({
       },
     );
 
-    //set actionHandlerResult when swapable
+    //set actionHandlerResult when swappable
     watch(
       () => [data.payCoinAmount, data.receiveCoinAmount, data.payCoinData, data.receiveCoinData],
       async () => {
@@ -1031,6 +1056,7 @@ export default defineComponent({
       // reset amount, TODO: apply setCounterPairCoinAmount('');
       data.payCoinAmount = null;
       data.receiveCoinAmount = null;
+      isReverse.value = !isReverse.value;
     }
 
     function setMax() {
@@ -1073,63 +1099,168 @@ export default defineComponent({
       data.isChildModalOpen = payload;
     }
 
-    function setCounterPairCoinAmount(e) {
+    async function getRoutes({ amountIn }) {
+      try {
+        //change url
+        const response = await axios.post('https://dev.demeris.io/v1' + '/daggregation/routing', {
+          denomIn: data.payCoinData?.base_denom,
+          denomOut: data.receiveCoinData?.base_denom,
+          amountIn: amountIn,
+        });
+        return response.data;
+      } catch (e) {
+        const error = e.response?.data?.error || e.message;
+        console.log(error);
+      }
+    }
+    const daggRoutes = ref('');
+    // [
+    //   { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 1, usdAmount: 12322 },
+    //   {
+    //     dex: 'gravity',
+    //     amount: 115.49,
+    //     denom: 'uosmo',
+    //     numberOfTransactions: 1,
+    //     usdAmount: 12322,
+    //     fee: { amount: 0.02, denom: 'uosmo' },
+    //   },
+    //   { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 2, usdAmount: 12322 },
+    // ]
+    const quotes = computed(() => {
+      let routeObj = {} as any;
+      let quotesArr = [] as any;
+      for (let route of daggRoutes.value) {
+        let numberOfSteps = (route as any).steps.length;
+        routeObj.dex = (route as any).steps[0].protocol; //can steps have diff protocols? incorprate if yes
+        routeObj.amount = (route as any).steps[numberOfSteps - 1].data.to.amount / 10 ** 6; //change this 10**6
+        routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
+        routeObj.numberOfTransactions = numberOfSteps;
+        routeObj.usdAmount = (route as any).steps[numberOfSteps - 1].data.to.amount; //get price for denom and multiply
+        //fee token when?
+        quotesArr.push(routeObj);
+      }
+      return quotesArr;
+    });
+
+    async function setCounterPairCoinAmount(e) {
+      // console.log('e', e);
       if (data.isBothSelected) {
-        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData?.reserves[0];
         const fromPrecision =
           store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
         const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: data.receiveCoinData.base_denom,
         });
+        //set in vuex
+        const { routes } = await getRoutes({ amountIn: data.payCoinAmount * 10 ** fromPrecision });
+        daggRoutes.value = routes;
+        const len = routes[0]?.steps.length;
         const precisionDiff = +fromPrecision - +toPrecision;
         let equalizer = 1;
         if (precisionDiff !== 0) {
           equalizer = 10 ** Math.abs(precisionDiff);
         }
 
-        const balanceA = isReverse
-          ? data.selectedPoolData.reserveBalances.balanceA
-          : data.selectedPoolData.reserveBalances.balanceB;
-        const balanceB = isReverse
-          ? data.selectedPoolData.reserveBalances.balanceB
-          : data.selectedPoolData.reserveBalances.balanceA;
-        if (e.includes('Pay')) {
+        if (e.includes('Pay') && !!data.payCoinAmount) {
           const receiveCoinPrecisionDecimalDigits = Math.pow(
             10,
             parseInt(
               store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
             ),
           );
-          data.receiveCoinAmount = parseFloat(
-            String(
-              Math.trunc(
-                (getReceiveCoinAmount(
-                  { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-                  balanceA,
-                  balanceB,
-                ) /
-                  receiveCoinPrecisionDecimalDigits) *
-                  10 ** 4,
-              ) /
-                10 ** 4,
-            ),
-          );
+          data.receiveCoinAmount = (
+            routes[0]?.steps[len - 1].data?.to?.amount / receiveCoinPrecisionDecimalDigits
+          )?.toFixed(4);
+          // data.receiveCoinAmount = parseFloat(
+          //   String(
+          //     Math.trunc(
+          //       (getReceiveCoinAmount(
+          //         { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+          //         balanceA,
+          //         balanceB,
+          //       ) /
+          //         receiveCoinPrecisionDecimalDigits) *
+          //         10 ** 4,
+          //     ) /
+          //       10 ** 4,
+          //   ),
+          // );
 
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = parseFloat(
-            (
-              getPayCoinAmount(
-                { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-                balanceB,
-                balanceA,
-              ) * (isReverse ? equalizer : 1 / equalizer)
-            ).toFixed(4),
-          );
+          data.payCoinAmount = (
+            routes[0]?.steps[len - 1].data?.to?.amount * (isReverse.value ? equalizer : 1 / equalizer)
+          )?.toFixed(4);
+          // data.payCoinAmount = parseFloat(
+          //   (
+          //     getPayCoinAmount(
+          //       { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+          //       balanceB,
+          //       balanceA,
+          //     ) * (isReverse ? equalizer : 1 / equalizer)
+          //   ).toFixed(4),
+          // );
         }
+        console.log('pay amount', data.payCoinAmount);
+        console.log('rec amount', data.receiveCoinAmount);
       }
+      // if (data.isBothSelected) {
+      //   const isReverse = data.payCoinData.base_denom !== data.selectedPoolData?.reserves[0];
+      //   const fromPrecision =
+      //     store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
+      //   const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      //     name: data.receiveCoinData.base_denom,
+      //   });
+      //   const precisionDiff = +fromPrecision - +toPrecision;
+      //   let equalizer = 1;
+      //   if (precisionDiff !== 0) {
+      //     equalizer = 10 ** Math.abs(precisionDiff);
+      //   }
+
+      //   const balanceA = isReverse
+      //     ? data.selectedPoolData.reserveBalances.balanceA
+      //     : data.selectedPoolData.reserveBalances.balanceB;
+      //   const balanceB = isReverse
+      //     ? data.selectedPoolData.reserveBalances.balanceB
+      //     : data.selectedPoolData.reserveBalances.balanceA;
+      //   if (e.includes('Pay')) {
+      //     const receiveCoinPrecisionDecimalDigits = Math.pow(
+      //       10,
+      //       parseInt(
+      //         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
+      //       ),
+      //     );
+      //     data.receiveCoinAmount = parseFloat(
+      //       String(
+      //         Math.trunc(
+      //           (getReceiveCoinAmount(
+      //             { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+      //             balanceA,
+      //             balanceB,
+      //           ) /
+      //             receiveCoinPrecisionDecimalDigits) *
+      //             10 ** 4,
+      //         ) /
+      //           10 ** 4,
+      //       ),
+      //     );
+
+      //     if (data.payCoinAmount + data.receiveCoinAmount === 0) {
+      //       slippage.value = 0;
+      //     }
+      //   } else {
+      //     data.payCoinAmount = parseFloat(
+      //       (
+      //         getPayCoinAmount(
+      //           { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+      //           balanceB,
+      //           balanceA,
+      //         ) * (isReverse ? equalizer : 1 / equalizer)
+      //       ).toFixed(4),
+      //     );
+      //   }
+      // }
     }
 
     async function swap() {
@@ -1173,6 +1304,11 @@ export default defineComponent({
       otherAssetsToReceive,
       dexStatus,
       isFinished,
+      isReverse,
+      isQuotesListModalOpen,
+      quotesListModalToggle,
+      isAmount,
+      quotes,
     };
   },
 });
