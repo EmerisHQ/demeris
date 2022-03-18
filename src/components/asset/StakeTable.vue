@@ -49,7 +49,8 @@ const selectTab = (tabNumber?: number): void => {
 };
 
 const totalRewardsAmount = computed(() => {
-  return parseFloat(stakingRewardsData.value?.total ?? '0');
+  if (!stakingRewardsData.value?.total) return 0;
+  return parseFloat(stakingRewardsData.value.total ?? '0');
 });
 
 watch(
