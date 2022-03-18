@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 // npx vitest src/components/ui/DropdownMenu.spec.ts
-import { mount, shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { test } from 'vitest';
 
 import DropdownMenu from './DropdownMenu.vue';
@@ -10,7 +10,7 @@ import DropdownMenuItem from './DropdownMenuItem.vue';
 
 describe('Notifications', () => {
   test('Mounts with button and only icon', async () => {
-    const wrapper = shallowMount(DropdownMenu, {
+    const wrapper = mount(DropdownMenu, {
       props: {
         icon: 'ThreeDotsIcon',
         placement: 'right-start',
@@ -21,17 +21,17 @@ describe('Notifications', () => {
     expect(wrapper.find('[data-test=openMenuButtonLabel]').exists()).toBe(false);
   });
 
-  test.only('Mounts with button and only text', async () => {
-    const wrapper = shallowMount(DropdownMenu, {
+  test('Mounts with button and only text', async () => {
+    const wrapper = mount(DropdownMenu, {
       props: {
-        label: 'buttonLabel',
+        label: 'buttonLabel2',
         placement: 'right-start',
       },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
     expect(wrapper.find('[data-test=openMenuButtonIcon]').exists()).toBe(false);
     expect(wrapper.find('[data-test=openMenuButtonLabel]').exists()).toBe(true);
-    expect(wrapper.find('[data-test=openMenuButtonLabel]').html()).toContain('buttonLabel');
+    expect(wrapper.find('[data-test=openMenuButtonLabel]').html()).toContain('buttonLabel2');
   });
 
   test('Mounts with content in slot', async () => {
