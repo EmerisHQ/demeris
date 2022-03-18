@@ -179,16 +179,12 @@ const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
 
-const chain_name = computed(() =>
-  store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-);
-
 watch(
-  () => chain_name.value,
+  () => propsRef.denom.value,
   async (newVal, _) => {
     if (newVal) {
-      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
-      validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(newVal);
+      validatorList.value = await getValidatorsByBaseDenom(newVal);
     }
   },
   { immediate: true },
