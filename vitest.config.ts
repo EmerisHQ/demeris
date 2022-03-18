@@ -10,5 +10,6 @@ export default defineConfig({
     transformMode: {
       web: [/\.[jt]sx$/],
     },
+    exclude: ['**/node_modules/**', '**/dist/**', '**/cypress/**', '**/e2e/**'],
   },
 });
