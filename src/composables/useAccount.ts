@@ -36,6 +36,7 @@ export default function useAccount() {
     { immediate: true },
   );
   */
+
   watch(
     () => allbalances.value,
     async (newBalances) => {
@@ -51,7 +52,6 @@ export default function useAccount() {
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
   };
-
   const userAccountBalances = computed(() => {
     const sortedBalances = {
       verified: [],
