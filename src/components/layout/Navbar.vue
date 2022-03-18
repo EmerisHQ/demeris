@@ -37,7 +37,7 @@
           class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
           style="color: white"
         >
-          3
+          {{ noOfClaimableAirdrops }}
         </span>
       </div>
     </router-link>
@@ -74,8 +74,13 @@ export default defineComponent({
       return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
+    const noOfClaimableAirdrops = computed(() => {
+      const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === 'CLAIMABLE');
+      return claimableAirdrops.length;
+    });
+
     const showEligibleAmount = computed(() => {
-      return !onAirdropsPage.value && !airdropsLoading.value;
+      return !onAirdropsPage.value && !airdropsLoading.value && noOfClaimableAirdrops.value > 0;
     });
 
     return {
@@ -84,6 +89,7 @@ export default defineComponent({
       onAirdropsPage,
       airdropsLoading,
       showEligibleAmount,
+      noOfClaimableAirdrops,
     };
   },
 });
