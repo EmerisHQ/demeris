@@ -928,31 +928,57 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
       value: API.LoadingState.LOADING,
     });
+    setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+        )
+          .then((res) => res.json())
+          .then(async (data) => {
+            let eligibilityRes = null;
+            if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
+              return { ...data, eligibility: API.AirdropEligibilityStatus.AUTO_DROP };
+            } else if (data.chainName) {
+              const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
+              const ownAddress = await getOwnAddress({ chain_name });
 
-    try {
-      const response = await fetch(
-        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-      )
-        .then((res) => res.json())
-        .then(async (data) => {
-          return data;
+              if (data.eligibilityCheckEndpoint && ownAddress) {
+                const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
+                eligibilityRes = await fetch(`${eligibilityEndpoint}${ownAddress}`).then((res) => {
+                  return res;
+                });
+
+                if (eligibilityRes.status === 200) {
+                  return { ...data, eligibility: API.AirdropEligibilityStatus.ELIGIBLE };
+                } else if (eligibilityRes.status === 403) {
+                  return { ...data, eligibility: API.AirdropEligibilityStatus.NOT_ELIGIBLE };
+                } else {
+                  return { ...data, eligibility: API.AirdropEligibilityStatus.NOT_AVAILABLE };
+                }
+              } else {
+                return { ...data, eligibility: API.AirdropEligibilityStatus.NOT_AVAILABLE };
+              }
+            } else {
+              return { ...data, eligibility: API.AirdropEligibilityStatus.NOT_AVAILABLE };
+            }
+          });
+
+        commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+          value: API.LoadingState.LOADED,
         });
 
-      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
-        value: API.LoadingState.LOADED,
-      });
+        commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
 
-      commit(DemerisMutationTypes.SET_AIRDROPS, { value: { ...response } });
-
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
+        }
+      } catch (e) {
+        commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
+          value: API.LoadingState.ERROR,
+        });
+        throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
       }
-    } catch (e) {
-      commit(DemerisMutationTypes.SET_AIRDROPS_STATUS, {
-        value: API.LoadingState.ERROR,
-      });
-      throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
-    }
+    }, 4000);
   },
   [DemerisActionTypes.RESET_AIRDROPS]({ commit }) {
     commit(DemerisMutationTypes.RESET_AIRDROPS);

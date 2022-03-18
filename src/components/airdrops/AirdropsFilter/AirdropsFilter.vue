@@ -16,9 +16,10 @@
       </span>
       <span
         v-if="item.value === activeFilterItem && activeFilterItem === 'mine'"
-        class="ml-2 bg-brand py-1 px-2 rounded-full -text-1 font-medium text-text"
+        class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
+        style="color: white"
       >
-        3
+        {{ noOfClaimableAirdrops }}
       </span>
     </a>
   </div>
@@ -44,23 +45,23 @@ export default {
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
-        text: t('context.airdrops.airdropstableFilterItems.all'),
+        text: `${t('context.airdrops.airdropsFilterItems.all')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'all',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.mine'),
+        text: `${t('context.airdrops.airdropsFilterItems.mine')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'mine',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.upcoming'),
+        text: t('context.airdrops.airdropsFilterItems.upcoming'),
         value: 'upcoming',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.live'),
+        text: t('context.airdrops.airdropsFilterItems.live'),
         value: 'live',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.past'),
+        text: t('context.airdrops.airdropsFilterItems.past'),
         value: 'past',
       },
     ];
@@ -74,11 +75,20 @@ export default {
       emit('active-filter', activeFilterItem.value);
     };
 
+    const airdrops = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
+    });
+
     const airdropsLoading = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
-    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading };
+    const noOfClaimableAirdrops = computed(() => {
+      const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === 'CLAIMABLE');
+      return claimableAirdrops.length;
+    });
+
+    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading, noOfClaimableAirdrops };
   },
 };
 </script>

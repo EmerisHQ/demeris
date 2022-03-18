@@ -380,6 +380,15 @@ export enum AirdropDateStatus {
   ENDED = 'ENDED',
 }
 
+export enum AirdropEligibilityStatus {
+  ELIGIBLE = 'ELIGIBLE',
+  NOT_ELIGIBLE = 'NOT_ELIGIBLE',
+  CLAIMABLE = 'CLAIMABLE',
+  CLAIMED = 'CLAIMED',
+  AUTO_DROP = 'AUTO_DROP',
+  NOT_AVAILABLE = 'NOT_AVAILABLE',
+}
+
 export type Airdrop = {
   project: string;
   projectWebsiteUrl: string;
@@ -396,7 +405,7 @@ export type Airdrop = {
   airdropStartDate: Date;
   airdropEndDate: Date;
   airdropStatus: string;
-  eligibility: string;
+  eligibility: AirdropEligibilityStatus;
   dateStatus: AirdropDateStatus;
   snapshotDate: string;
   snapshotBlockHeight: string;

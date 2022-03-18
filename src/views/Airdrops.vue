@@ -17,14 +17,14 @@
       <div class="w-9/12 max-w-3xl mb-16 md:mb-0">
         <header class="flex justify-between items-center">
           <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">
-            {{ $t('context.airdrops.allAirdrops') }}
+            {{ $t(`context.airdrops.airdropsFilterItems.${activeFilter}`) }} {{ $t('context.airdrops.title') }}
           </div>
           <div class="w-1/4">
             <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
           </div>
         </header>
         <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
-        <section class="mt-12">
+        <section class="mt-4">
           <AirdropsTable
             :airdrops="airdrops"
             :active-filter="activeFilter"

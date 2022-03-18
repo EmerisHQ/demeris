@@ -9,8 +9,8 @@
           <div class="items-center">
             <span class="text-muted">
               {{ selectedAirdrop.tokenTicker }}
-              <span class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
-              <span>{{ selectedAirdrop.chainName }} Chain</span>
+              <span v-if="selectedAirdrop.chainName" class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
+              <span v-if="selectedAirdrop.chainName">{{ selectedAirdrop.chainName }} Chain</span>
             </span>
             <span class="live-tag -text-1 ml-2 font-medium">Live</span>
           </div>
@@ -27,11 +27,7 @@
 
             <!-- Description -->
             <div>
-              <p
-                v-for="(item, index) in selectedAirdrop.projectDescription.split('.')"
-                :key="index"
-                class="mb-4 description-text"
-              >
+              <p v-for="(item, index) in selectedAirdrop.projectDescription" :key="index" class="mb-4 description-text">
                 {{ item }}.
               </p>
             </div>
@@ -136,7 +132,17 @@ export default defineComponent({
     };
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      let projectDescription = [];
+      const airdrop = toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      if (airdrop.projectDescription.includes('.')) {
+        projectDescription = airdrop.projectDescription.split('.');
+      } else {
+        projectDescription.push(airdrop.projectDescription);
+      }
+      return {
+        ...airdrop,
+        projectDescription: projectDescription.length > 1 ? projectDescription.slice(0, -1) : projectDescription,
+      };
     });
 
     const goBackToAirdropspage = () => {

@@ -523,18 +523,18 @@ export const messages = {
       },
       airdrops: {
         title: 'Airdrops',
+        allAirdrops: 'All airdrops',
         asset: 'Asset',
         date: 'Date',
         action: 'Action',
         amount: 'Amount',
         viewAll: 'View all',
-        allAirdrops: 'All airdrops',
         airdropContentDisclaimer:
           'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
         featureProjects: 'Feature your project’s airdrop',
-        airdropstableFilterItems: {
-          all: 'All airdrops',
-          mine: 'My airdrops',
+        airdropsFilterItems: {
+          all: 'All',
+          mine: 'My',
           upcoming: 'Upcoming',
           live: 'Live',
           past: 'Past',
