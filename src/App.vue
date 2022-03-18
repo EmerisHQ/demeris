@@ -225,7 +225,6 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      typedstore.dispatch(GlobalActionTypes.API.RESET_AIRDROPS);
       if (featureRunning('AIRDROPS_FEATURE')) {
         getAllAirdrops();
       }
