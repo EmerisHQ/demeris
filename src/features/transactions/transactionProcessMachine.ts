@@ -433,8 +433,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (endBlockEvent.success === 'failure') {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to find block results',
+                data: { ...responseData, endBlock: endBlockEvent },
+              });
             }
           }
 
@@ -526,7 +530,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           let traceResult;
 
-          const RPCFallback = async () => {
+          const rpcFallback = async () => {
             try {
               traceResult = await useStore().dispatch(GlobalActionTypes.API.GET_TX_FROM_RPC, {
                 chain_name: responseData.chain_name,
@@ -544,7 +548,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               txhash: responseData.txhash,
             });
           } catch {
-            RPCFallback();
+            rpcFallback();
           }
 
           if (traceResult) {
