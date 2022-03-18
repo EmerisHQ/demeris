@@ -88,126 +88,78 @@
 
         <!-- table body -->
         <tbody>
-          <tr
-            v-for="validator of filteredAndSortedValidatorList"
-            :key="validator.operator_address"
-            v-tippy
-            :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
-            class="group"
-            :class="{
-              'opacity-50':
-                validator.jailed ||
-                (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address),
-              'cursor-pointer': !(
-                disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-              ),
-            }"
-            @click="
-              () => {
-                if (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
-                  return;
-                detailedValidator = validator;
-              }
-            "
-          >
-            <td
-              class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap"
-              :class="[
-                {
-                  'group-hover:bg-fg transition': !(
-                    disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                  ),
-                },
-                { 'text-negative-text': validator.jailed },
-              ]"
-            >
-              <div class="inline-flex items-center mr-4 align-middle">
-                <!-- TODO: get logo url -->
-                <ValidatorBadge :validator="validator" class="z-1" />
-              </div>
-              <span class="text-left font-medium" :class="{ 'text-inactive': validator.jailed }">
-                {{ validator.moniker }}
-              </span>
-            </td>
-            <td
-              class="py-4 px-2 text-right"
+          <template v-for="validator of filteredAndSortedValidatorList" :key="validator.operator_address">
+            <tr
+              v-if="!disabledList.includes(validator.operator_address)"
+              v-tippy
+              :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
+              class="group cursor-pointer"
               :class="{
-                'group-hover:bg-fg transition': !(
-                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ),
+                'opacity-50': validator.jailed,
               }"
+              @click="
+                () => {
+                  detailedValidator = validator;
+                }
+              "
             >
-              {{ getAmountDisplayValueTruncated(validator.tokens) }} <Ticker :name="baseDenom" />
-              <div class="-text-1 text-muted">
-                {{ getVotingPowerPercDisplayValue(validator.tokens) }}
-              </div>
-            </td>
-            <td
-              class="py-4 px-2 text-right"
-              :class="{
-                'group-hover:bg-fg transition': !(
-                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ),
-              }"
-            >
-              {{ getCommissionDisplayValue(validator.commission_rate) }}
-            </td>
-            <td
-              class="py-4 px-2 text-right"
-              :class="{
-                'group-hover:bg-fg transition': !(
-                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ),
-              }"
-            >
-              <Price
-                :amount="{ denom: baseDenom, amount: validator.stakedAmount }"
-                :show-zero="true"
-                class="font-medium"
-              />
-              <div class="-text-1 text-muted">
-                {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
-              </div>
-            </td>
+              <td
+                class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap group-hover:bg-fg transition"
+                :class="[{ 'text-negative-text': validator.jailed }]"
+              >
+                <div class="inline-flex items-center mr-4 align-middle">
+                  <!-- TODO: get logo url -->
+                  <ValidatorBadge :validator="validator" class="z-1" />
+                </div>
+                <span class="text-left font-medium" :class="{ 'text-inactive': validator.jailed }">
+                  {{ validator.moniker }}
+                </span>
+              </td>
+              <td class="py-4 px-2 text-right group-hover:bg-fg transition">
+                {{ getAmountDisplayValueTruncated(validator.tokens) }} <Ticker :name="baseDenom" />
+                <div class="-text-1 text-muted">
+                  {{ getVotingPowerPercDisplayValue(validator.tokens) }}
+                </div>
+              </td>
+              <td class="py-4 px-2 text-right group-hover:bg-fg transition">
+                {{ getCommissionDisplayValue(validator.commission_rate) }}
+              </td>
+              <td class="py-4 px-2 text-right group-hover:bg-fg transition">
+                <Price
+                  :amount="{ denom: baseDenom, amount: validator.stakedAmount }"
+                  :show-zero="true"
+                  class="font-medium"
+                />
+                <div class="-text-1 text-muted">
+                  {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
+                </div>
+              </td>
 
-            <td
-              class="py-4 pl-2 text-right items-center whitespace-nowrap"
-              :class="{
-                'group-hover:bg-fg transition': !(
-                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ),
-              }"
-            >
-              <Button
-                v-if="hasActions"
-                class="ml-6 mr-5"
-                :full-width="false"
-                :name="$t('components.validatorTable.stake')"
-                :disabled="
-                  validator.jailed ||
-                  (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
-                "
-                data-cy="validator-table-stake"
-                @click.stop="
-                  () => {
-                    if (
-                      (!disabledList.includes(validator.operator_address) ||
-                        currentlyEditing == validator.operator_address) &&
-                      !validator.jailed
-                    ) {
-                      selectValidator(validator);
+              <td class="py-4 pl-2 text-right items-center whitespace-nowrap group-hover:bg-fg transition">
+                <Button
+                  v-if="hasActions"
+                  class="ml-6 mr-5"
+                  :full-width="false"
+                  :name="$t('components.validatorTable.stake')"
+                  :disabled="validator.jailed"
+                  data-cy="validator-table-stake"
+                  @click.stop="
+                    () => {
+                      if (!validator.jailed) {
+                        selectValidator(validator);
+                      }
                     }
-                  }
-                "
-              />
-              <Icon
-                class="text-muted inline-flex"
-                name="CaretRightIcon"
-                :icon-size="1"
-                :class="detailedValidator == validator || hasActions ? 'visible' : 'opacity-0'"
-              />
-            </td>
-          </tr>
+                  "
+                />
+                <Icon
+                  class="text-muted inline-flex"
+                  name="CaretRightIcon"
+                  :icon-size="1"
+                  :class="detailedValidator == validator || hasActions ? 'visible' : 'opacity-0'"
+                />
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -380,6 +332,7 @@ export default defineComponent({
     };
     const selectValidator = (vali) => {
       emit('selectValidator', vali);
+      detailedValidator.value = null;
     };
 
     return {
