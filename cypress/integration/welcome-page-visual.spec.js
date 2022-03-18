@@ -5,10 +5,6 @@ describe('Welcome page elements location and availibility', function () {
     cy.visit(Cypress.config().baseUrl + '/welcome');
   });
 
-  it.only('test', () => {
-    cy.visit('http://localhost:8080');
-  });
-
   it('Connect Keplr button ', function () {
     let welcomePage = new WelcomePage();
     welcomePage.connectKeplrButton().should('be.visible');
