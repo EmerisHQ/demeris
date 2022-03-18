@@ -1,15 +1,15 @@
 <template>
-  <div class="p-4 group hover:bg-text hover:text-inverse rounded-xl cursor-pointer">
+  <div class="p-4 group rounded-xl cursor-pointer" :class="[isSelectedQuoteIndex ? 'text-inverse bg-text' : '']">
     <div v-if="isBestPrice" class="text-positive">Best price</div>
-    <div class="flex">
-      {{ quote.dex?.charAt(0)?.toUpperCase() + quote.dex?.slice(1) }}
+    <div class="flex capitalize">
+      {{ quote.dex }}
       <span class="ml-auto">{{ quote.amount }} {{ ticker }}</span>
     </div>
-    <div class="flex text-muted group-hover:text-inverse group-hover:opacity-70">
+    <div class="flex text-muted" :class="[isSelectedQuoteIndex ? 'text-inverse opacity-70' : '']">
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
-      <span v-else class="hover:opacity-70"
+      <span v-else class="hover:opacity-70" @click="visualizeRoute"
         >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
       >
       <span class="ml-auto">~${{ quote.usdAmount }}</span>
@@ -38,5 +38,16 @@ const props = defineProps({
   isBestPrice: {
     type: Boolean,
   },
+  isSelectedQuoteIndex: {
+    type: Boolean,
+  },
 });
+
+const emit = defineEmits(['visualizeRoute']);
+
+const visualizeRoute = (e) => {
+  emit('visualizeRoute', props.quote);
+  console.log(e);
+  e.preventDefault();
+};
 </script>

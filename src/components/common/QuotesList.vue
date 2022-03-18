@@ -4,23 +4,53 @@
     <div class="text-2 font-bold">Quotes</div>
     <div class="text-0 text-muted">Fees included</div>
   </div> -->
-  <TitleWithGoback :title="'Price'" :func="() => emit('goback')" />
-  <div class="pb-3">
+  <div v-if="!isVisualizeRouteVisible" class="pb-3">
+    <TitleWithGoback
+      :title="'Price'"
+      :func="
+        () => {
+          isVisualizeRouteVisible = false;
+          emit('goback');
+        }
+      "
+    />
     <div v-for="(quote, index) in quotes" :key="quote.toString()" class="mx-2">
       <tippy delay="0" :interactive="false" :arrow="false">
-        <QuotesListItem :quote="quote" :is-best-price="index === 0 ? true : false" />
+        <QuotesListItem
+          :quote="quote"
+          :is-best-price="index === 0 ? true : false"
+          :is-selected-quote-index="selectedQuoteIndex === index"
+          @click="selectQuote(index)"
+          @visualizeRoute="visualizeRoute(quote)"
+        />
         <template v-if="quote && quote.fee" #content>
           <FeeToken :denom="quote.fee?.denom" :amount="quote.fee?.amount" />
         </template>
       </tippy>
     </div>
   </div>
+  <div v-else>
+    <TitleWithGoback
+      :title="'Swap route'"
+      :func="
+        () => {
+          isVisualizeRouteVisible = false;
+          emit('goback');
+        }
+      "
+    />
+    <SwapRoute />
+  </div>
 </template>
 
 <script lang="ts" setup>
+import { ref } from '@vue/reactivity';
+
 import FeeToken from '@/components/common/FeeToken.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import QuotesListItem from '@/components/common/QuotesListItem.vue';
+import SwapRoute from '@/components/common/SwapRoute.vue';
+
 // eslint-disable-next-line
 const props = defineProps({
   quotes: {
@@ -29,5 +59,18 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['goback']);
+const selectedQuoteIndex = ref(0);
+const isVisualizeRouteVisible = ref(false);
+
+const selectQuote = (index) => {
+  selectedQuoteIndex.value = index;
+  emit('selectedQuoteIndex', index);
+};
+
+const visualizeRoute = (quote) => {
+  console.log(quote);
+  isVisualizeRouteVisible.value = true;
+};
+
+const emit = defineEmits(['goback', 'selectedQuoteIndex']);
 </script>
