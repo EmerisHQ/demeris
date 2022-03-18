@@ -103,6 +103,12 @@ export const messages = {
         selectTitle: 'Select a validator',
         title: 'Enter amount to stake',
       },
+      stakeFormAmount: {
+        addValidatorButton: 'Add a validator',
+        selectChain: 'Select chain',
+        timeUnstake: 'Time to unstake',
+        totalStake: 'Total stake',
+      },
       switchForm: {
         selectTitle: 'Select a new validator',
         title: 'Enter amount to restake',

@@ -225,7 +225,7 @@ export default defineComponent({
       },
     );
     const stakingRewards = computed(() => {
-      if (stakingRewardsData.value !== null) {
+      if (stakingRewardsData.value !== null && stakingRewardsData.value?.rewards) {
         return parseFloat(
           stakingRewardsData.value.rewards.find((x) => x.validator_address == form.validatorAddress)?.reward ?? '0',
         ).toString();

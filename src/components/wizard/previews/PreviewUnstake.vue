@@ -24,7 +24,7 @@
     </ListItem>
 
     <!-- Price  -->
-    <ListItem v-if="tx" size="sm" :label="$t('components.previews.unstake.fromLbl')">
+    <ListItem v-if="tx && validator?.moniker" size="sm" :label="$t('components.previews.unstake.fromLbl')">
       <div class="flex justify-end items-center">
         {{ validator.moniker }}
         <ValidatorBadge :validator="validator" class="ml-3" />
@@ -122,10 +122,10 @@ export default defineComponent({
       return validators.value.find((x) => x.operator_address == (tx.data as Actions.UnstakeData).validatorAddress);
     });
     const stakingRewards = computed(() => {
-      if (stakingRewardsData.value !== null) {
+      if (stakingRewardsData.value !== null && stakingRewardsData.value.total) {
         return parseFloat(
           stakingRewardsData.value.rewards.find(
-            (x) => x.validator_address == (tx.data as Actions.UnstakeData).validatorAddress,
+            (x) => x.validator_address === (tx.data as Actions.UnstakeData).validatorAddress,
           )?.reward ?? '0',
         ).toString();
       } else {

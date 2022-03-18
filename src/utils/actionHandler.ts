@@ -640,7 +640,6 @@ export function getUsedFee(
     denom: feeOption.denom,
     chain_name: feeOption.chain_name,
   };
-  console.log(used);
   return used;
 }
 

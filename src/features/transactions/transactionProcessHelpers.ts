@@ -8,11 +8,13 @@ import {
   CreatePoolData,
   IBCBackwardsData,
   IBCForwardsData,
+  RestakeData,
   StakeData,
   Step,
   StepTransaction,
   SwapData,
   TransferData,
+  UnstakeData,
   WithdrawLiquidityData,
 } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
@@ -58,6 +60,10 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
       return (transaction.data as IBCForwardsData).from_chain;
     case 'stake':
       return (transaction.data as StakeData[])[0].chain_name;
+    case 'unstake':
+      return (transaction.data as UnstakeData).chain_name;
+    case 'switch':
+      return (transaction.data as RestakeData).chain_name;
     default:
       return dexChain;
   }
