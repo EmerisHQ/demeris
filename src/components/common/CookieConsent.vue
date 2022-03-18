@@ -33,7 +33,12 @@ export default defineComponent({
     const { setCookie, getCookie } = useCookie();
     const consented = ref(getCookie('cookie-consent-accepted'));
     const acceptCookies = () => {
-      setCookie('cookie-consent-accepted', 'true', { domain: '.emeris.com' });
+      setCookie('cookie-consent-accepted', 'true', {
+        domain:
+          window.location.hostname === 'localhost'
+            ? 'localhost'
+            : `.${window.location.hostname.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, '$1')}`,
+      });
       consented.value = 'true';
     };
     return { consented, acceptCookies };
