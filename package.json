@@ -12,7 +12,6 @@
     "coverage": "vitest run --coverage",
     "test:e2e": "./node_modules/.bin/cypress open",
     "lint": "vue-cli-service lint",
-    "build:production": "vue-cli-service build --mode production",
     "generate:demo-acounts": "node .github/workflows/generate/demo-accounts.js",
     "prepare": "simple-git-hooks",
     "typecheck": "vue-tsc --noEmit"
