@@ -1,11 +1,4 @@
-import { Navbar } from './navbar';
-
 export class Receive {
-  goTo() {
-    const navbar = new Navbar();
-    navbar.receive().click();
-  }
-
   teble() {
     return cy.get('div[class="mx-auto max-w-md mb-20"]');
   }

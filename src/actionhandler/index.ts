@@ -1,4 +1,4 @@
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
 import { getNativeChain } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
@@ -13,17 +13,15 @@ import { swap } from './actions/swap';
 import { transfer } from './actions/transfer';
 import { withdrawLiquidity } from './actions/withdrawLiquidity';
 
-export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
-  const libStore = useStore();
-  const store = libStore as RootStoreType;
+export async function actionHandler(action: Actions.UserAction): Promise<Array<Actions.Step>> {
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
 
   const steps = [];
   try {
-    let params;
     switch (action.name) {
       case 'redeem':
-        params = (action as Actions.RedeemAction).params;
-        params.forEach(async (denom) => {
+        action.params.forEach(async (denom) => {
           const redeemStep = await redeem(denom);
           steps.push({
             name: 'redeem',
@@ -35,14 +33,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'move':
-        params = (action as Actions.MoveAction).params;
         const moveStep = await move({
           amount: {
-            amount: params.from.amount.amount,
-            denom: params.from.amount.denom,
+            amount: action.params.from.amount,
+            denom: action.params.from.denom,
           },
-          chain_name: params.from.chain_name,
-          destination_chain_name: params.to.chain_name,
+          chain_name: action.params.from.chain_name,
+          destination_chain_name: action.params.to.chain_name,
         });
 
         steps.push({
@@ -54,16 +51,14 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
         break;
       case 'transfer':
-        params = (action as Actions.TransferAction).params;
-
         const transferStep = await transfer({
           amount: {
-            amount: params.from.amount.amount,
-            denom: params.from.amount.denom,
+            amount: action.params.from.amount,
+            denom: action.params.from.denom,
           },
-          to_address: params.to.address,
-          chain_name: params.from.chain_name,
-          destination_chain_name: params.to.chain_name,
+          to_address: action.params.to.address,
+          chain_name: action.params.from.chain_name,
+          destination_chain_name: action.params.to.chain_name,
         });
 
         steps.push({
@@ -74,16 +69,14 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }); //TODO
         break;
       case 'memo-transfer':
-        params = (action as Actions.MemoTransferAction).params;
-
         const memoTransferStep = await memoTransfer({
           amount: {
-            amount: params.from.amount.amount,
-            denom: params.from.amount.denom,
+            amount: action.params.from.amount,
+            denom: action.params.from.denom,
           },
-          to_address: params.to.address,
-          chain_name: params.from.chain_name,
-          destination_chain_name: params.to.chain_name,
+          to_address: action.params.to.address,
+          chain_name: action.params.from.chain_name,
+          destination_chain_name: action.params.to.chain_name,
         });
 
         steps.push({
@@ -94,20 +87,18 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }); //TODO
         break;
       case 'swap':
-        params = (action as Actions.SwapAction).params;
-
-        const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+        const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
         const swapFee = {
-          amount: Math.ceil((parseInt(params.from.amount.amount) * parseFloat(swapFeeRate)) / 2) + '',
-          denom: params.from.amount.denom,
+          amount: Math.ceil((parseInt(action.params.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          denom: action.params.from.denom,
         };
         const transferToHubStep = await move({
           amount: {
-            amount: '' + (parseInt(params.from.amount.amount) + parseInt(swapFee.amount)),
-            denom: params.from.amount.denom,
+            amount: '' + (parseInt(action.params.from.amount) + parseInt(swapFee.amount)),
+            denom: action.params.from.denom,
           },
-          chain_name: params.from.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.from.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
         if (transferToHubStep.steps.length > 0) {
           steps.push({
@@ -119,12 +110,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
         const swapStep = await swap({
           from: {
-            amount: params.from.amount.amount,
-            denom: transferToHubStep.output.amount.denom,
+            amount: action.params.from.amount,
+            denom: transferToHubStep.output.denom,
           },
           to: {
-            amount: params.to.amount.amount,
-            denom: params.to.amount.denom,
+            amount: action.params.to.amount,
+            denom: action.params.to.denom,
           },
         });
         steps.push({
@@ -135,14 +126,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }); //TODO
         break;
       case 'createpool':
-        params = (action as Actions.CreatePoolAction).params;
         const transferCoinAtoHubCreate = await move({
           amount: {
-            amount: params.coinA.amount.amount,
-            denom: params.coinA.amount.denom,
+            amount: action.params.coinA.amount,
+            denom: action.params.coinA.denom,
           },
-          chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.coinA.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHubCreate.steps.length) {
@@ -156,11 +146,11 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
         const transferCoinBtoHubCreate = await move({
           amount: {
-            amount: params.coinB.amount.amount,
-            denom: params.coinB.amount.denom,
+            amount: action.params.coinB.amount,
+            denom: action.params.coinB.denom,
           },
-          chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.coinB.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHubCreate.steps.length) {
@@ -173,8 +163,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
 
         const createPoolStep = await createPool({
-          coinA: transferCoinAtoHubCreate.output.amount,
-          coinB: transferCoinBtoHubCreate.output.amount,
+          coinA: { amount: transferCoinAtoHubCreate.output.amount, denom: transferCoinAtoHubCreate.output.denom },
+          coinB: { amount: transferCoinBtoHubCreate.output.amount, denom: transferCoinBtoHubCreate.output.denom },
         });
         steps.push({
           name: 'createpool',
@@ -184,14 +174,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'addliquidity':
-        params = (action as Actions.AddLiquidityAction).params;
         const transferCoinAtoHub = await move({
           amount: {
-            amount: params.coinA.amount.amount,
-            denom: params.coinA.amount.denom,
+            amount: action.params.coinA.amount,
+            denom: action.params.coinA.denom,
           },
-          chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.coinA.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHub.steps.length) {
@@ -205,11 +194,11 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
         const transferCoinBtoHub = await move({
           amount: {
-            amount: params.coinB.amount.amount,
-            denom: params.coinB.amount.denom,
+            amount: action.params.coinB.amount,
+            denom: action.params.coinB.denom,
           },
-          chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.coinB.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHub.steps.length) {
@@ -220,11 +209,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             transactions: [...transferCoinBtoHub.steps],
           });
         }
-
         const addLiquidityStep = await addLiquidity({
-          pool_id: params.pool_id,
-          coinA: transferCoinAtoHub.output.amount,
-          coinB: transferCoinBtoHub.output.amount,
+          pool_id: action.params.pool_id,
+          coinA: { amount: transferCoinAtoHub.output.amount, denom: transferCoinAtoHub.output.denom },
+          coinB: { amount: transferCoinBtoHub.output.amount, denom: transferCoinBtoHub.output.denom },
         });
         steps.push({
           name: 'addliquidity',
@@ -234,14 +222,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'withdrawliquidity':
-        params = (action as Actions.WithdrawLiquidityAction).params;
         const transferPoolCointoHub = await move({
           amount: {
-            amount: params.poolCoin.amount.amount,
-            denom: params.poolCoin.amount.denom,
+            amount: action.params.poolCoin.amount,
+            denom: action.params.poolCoin.denom,
           },
-          chain_name: params.poolCoin.chain_name,
-          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          chain_name: action.params.poolCoin.chain_name,
+          destination_chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
         });
         if (transferPoolCointoHub.steps.length) {
           steps.push({
@@ -252,8 +239,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           });
         }
         const withdrawLiquidityStep = await withdrawLiquidity({
-          pool_id: params.pool_id,
-          poolCoin: transferPoolCointoHub.output.amount,
+          pool_id: action.params.pool_id,
+          poolCoin: { amount: transferPoolCointoHub.output.amount, denom: transferPoolCointoHub.output.denom },
         });
         steps.push({
           name: 'withdrawliquidity',
@@ -263,16 +250,14 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'claim':
-        params = (action as Actions.ClaimRewardsAction).params;
         steps.push({
           name: 'claim',
           description: 'claim rewards',
           memo: '',
-          transactions: [{ name: 'claim', status: 'pending', data: params }],
+          transactions: [{ name: 'claim', status: 'pending', data: action.params }],
         });
         break;
       case 'unstake':
-        params = (action as Actions.UnstakeAction).params;
         steps.push({
           name: 'unstake',
           description: 'Unstake',
@@ -282,16 +267,15 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
               name: 'unstake',
               status: 'pending',
               data: {
-                validatorAddress: params.validatorAddress,
-                amount: { amount: params.amount.amount.amount, denom: params.amount.amount.denom },
-                chain_name: params.amount.chain_name,
+                validatorAddress: action.params.validatorAddress,
+                amount: { amount: action.params.amount.amount, denom: action.params.amount.denom },
+                chain_name: action.params.amount.chain_name,
               },
             },
           ],
         });
         break;
       case 'switch':
-        params = (action as Actions.RestakeAction).params;
         steps.push({
           name: 'switch',
           description: 'Restake',
@@ -301,27 +285,26 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
               name: 'switch',
               status: 'pending',
               data: {
-                validatorSrcAddress: params.validatorSrcAddress,
-                validatorDstAddress: params.validatorDstAddress,
+                validatorSrcAddress: action.params.validatorSrcAddress,
+                validatorDstAddress: action.params.validatorDstAddress,
                 amount: {
-                  amount: (params as Actions.RestakeParams).amount.amount.amount,
-                  denom: params.amount.amount.denom,
+                  amount: action.params.amount.amount,
+                  denom: action.params.amount.denom,
                 },
-                chain_name: params.amount.chain_name,
+                chain_name: action.params.amount.chain_name,
               },
             },
           ],
         });
         break;
       case 'stake':
-        params = (action as Actions.StakeAction).params;
         const transferStakingCoinToNative = await move({
           amount: {
-            amount: params.amount.amount.amount,
-            denom: params.amount.amount.denom,
+            amount: action.params.amount.amount,
+            denom: action.params.amount.denom,
           },
-          chain_name: params.amount.chain_name,
-          destination_chain_name: await getNativeChain(params.amount.amount.denom, params.amount.chain_name),
+          chain_name: action.params.amount.chain_name,
+          destination_chain_name: await getNativeChain(action.params.amount.denom, action.params.amount.chain_name),
         });
         if (transferStakingCoinToNative.steps.length) {
           steps.push({
@@ -333,8 +316,11 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
 
         const stakingStep = await stake({
-          validatorAddress: params.validatorAddress,
-          amount: transferStakingCoinToNative.output.amount,
+          validatorAddress: action.params.validatorAddress,
+          amount: {
+            amount: transferStakingCoinToNative.output.amount,
+            denom: transferStakingCoinToNative.output.denom,
+          },
         });
         steps.push({
           name: 'stake',
@@ -344,10 +330,9 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'multistake':
-        const mdparams = (action as Actions.MultiStakeAction).params;
         let allsteps: Actions.Step[] = [];
-        for (let i = 0; i < mdparams.length; i++) {
-          const mdsteps = await actionHandler({ name: 'stake', memo: action.memo, params: mdparams[i] });
+        for (let i = 0; i < action.params.length; i++) {
+          const mdsteps = await actionHandler({ name: 'stake', memo: action.memo, params: action.params[i] });
 
           allsteps = [...allsteps, ...mdsteps];
         }

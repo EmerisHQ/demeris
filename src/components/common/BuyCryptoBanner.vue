@@ -20,7 +20,7 @@ import { useStore } from 'vuex';
 
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 export default defineComponent({
@@ -60,10 +60,10 @@ export default defineComponent({
         : t('components.moonpayBanner.poweredBy');
     });
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
     });
     const openModal = () => {
       if (isSignedIn.value && !isDemoAccount.value) {

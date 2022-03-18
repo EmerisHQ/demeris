@@ -72,6 +72,7 @@
 import { ref } from '@vue/reactivity';
 import { computed, PropType, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
+import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -86,7 +87,7 @@ import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
-export default {
+export default defineComponent({
   name: 'PoolsTable',
   components: { Search, Icon, Button, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
 
@@ -173,7 +174,7 @@ export default {
       poolsWithTotalLiquidityPrice,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

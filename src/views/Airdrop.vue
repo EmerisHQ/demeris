@@ -81,6 +81,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -94,8 +95,7 @@ import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
 import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Airdrop } from '@/types/api';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 
 export default defineComponent({
@@ -111,7 +111,7 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const { t } = useI18n({ useScope: 'global' });
     pageview({ page_title: 'Airdrops', page_path: '/' });
     useMeta(
@@ -122,9 +122,9 @@ export default defineComponent({
 
     const router = useRouter();
 
-    const openAirdropPage = (airdrop: Airdrop) => {
+    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
       router.push('/airdrop');
-      apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
+      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },
@@ -133,7 +133,7 @@ export default defineComponent({
 
     const selectedAirdrop = computed(() => {
       let projectDescription = [];
-      const airdrop = toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      const airdrop = toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
       if (airdrop.projectDescription.includes('.')) {
         projectDescription = airdrop.projectDescription.split('.');
       } else {

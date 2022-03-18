@@ -77,7 +77,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -119,7 +119,7 @@ export default {
     };
 
     const initialLoadComplete = computed(() => {
-      return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+      return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
     });
     const poolsInvested = computed(() => {
       const poolsCopy = pools.value?.slice() ?? [];

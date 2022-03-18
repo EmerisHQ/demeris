@@ -142,7 +142,7 @@
 
     <!-- warning modal - custom slippage -->
     <Modal
-      v-show="isWarningCustomSlippageOpen"
+      v-if="isWarningCustomSlippageOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen
@@ -180,7 +180,7 @@
 
     <!-- warning modal - view unverified assets -->
     <Modal
-      v-show="isWarningViewUnverifiedOpen"
+      v-if="isWarningViewUnverifiedOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen
@@ -218,7 +218,7 @@
 
     <!-- warning modal - view lp asset pools -->
     <Modal
-      v-show="isWarningViewLPAssetPoolsOpen"
+      v-if="isWarningViewLPAssetPoolsOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen
@@ -267,7 +267,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
 export default defineComponent({
@@ -294,7 +294,7 @@ export default defineComponent({
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
     });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
@@ -303,27 +303,27 @@ export default defineComponent({
       (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
+      store.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
     };
 
     const settings = reactive({
       theme,
       gasLimit: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+        get: () => store.getters[GlobalGetterTypes.USER.getGasLimit],
         set: (value: number) => {
-          store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
+          store.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
         },
       }),
       allowCustomSlippage: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage],
+        get: () => store.getters[GlobalGetterTypes.USER.allowCustomSlippage],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewUnverified],
+        get: () => store.getters[GlobalGetterTypes.USER.viewUnverified],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
+        get: () => store.getters[GlobalGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });
@@ -363,7 +363,7 @@ export default defineComponent({
       } else {
         emit('disconnect');
         window.localStorage.setItem('lastEmerisSession', '');
-        store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+        store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
       }
     };
 

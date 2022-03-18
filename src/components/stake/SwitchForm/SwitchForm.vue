@@ -52,6 +52,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -63,8 +64,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import SwitchValidatorAmount from '@/components/stake/SwitchForm/SwitchValidatorAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { RestakeAction, RestakeForm } from '@/types/actions';
 import { event } from '@/utils/analytics';
 
@@ -87,7 +87,7 @@ export default defineComponent({
       default: undefined,
     },
     validators: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<EmerisAPI.Validator[]>,
       required: true,
       default: () => {
         return [];
@@ -104,21 +104,21 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const steps = ref([]);
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
     const propsRef = toRefs(props);
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+      return store.getters[GlobalGetterTypes.API.getChain]({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
     const isStaking = computed(() => {
       return propsRef.validators.value.some((val) => parseInt(val.stakedAmount) > 0);
     });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: RestakeForm = reactive({
@@ -139,7 +139,7 @@ export default defineComponent({
     };
 
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
@@ -151,12 +151,10 @@ export default defineComponent({
           validatorSrcAddress: form.validatorAddress,
           validatorDstAddress: form.toValidatorAddress,
           amount: {
-            amount: {
-              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
-                .multipliedBy(10 ** precision.value)
-                .toString(),
-              denom: form.denom,
-            },
+            amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+              .multipliedBy(10 ** precision.value)
+              .toString(),
+            denom: form.denom,
             chain_name: form.chain_name,
           },
         },

@@ -30,6 +30,7 @@
   </main>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
@@ -41,8 +42,7 @@ import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes } from '@/store';
 import { Step, UnstakeForm } from '@/types/actions';
 
 import UnstakeFormAmountInput from './UnstakeFormAmountInput.vue';
@@ -60,7 +60,7 @@ export default defineComponent({
   },
   props: {
     validator: {
-      type: Object,
+      type: Object as PropType<EmerisAPI.Validator>,
       required: true,
       default: () => {
         return {};
@@ -81,18 +81,18 @@ export default defineComponent({
     const fees = ref({});
     const stakingRewardsData = ref(null);
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
     const chainName = ref<string>(propsRef.validator.value.chain_name);
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
 
     const stakingRewards = computed(() => {
-      if (stakingRewardsData.value !== null) {
+      if (stakingRewardsData.value?.rewards) {
         return parseFloat(
           stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
             ?.reward ?? '0',

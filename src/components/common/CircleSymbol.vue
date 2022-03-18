@@ -5,7 +5,7 @@
     :class="[customSize === '' && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
     <CircleSymbolStatus
-      v-if="assetConfig?.chain_name"
+      v-if="assetConfig?.chain_name && displayStatus"
       :chain-name="assetConfig.chain_name"
       :denom="denom"
       :size="size"
@@ -84,19 +84,19 @@
 /*
  * when customSize is set glow is forced to false
  */
+import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
-
-type CircleSymbolVariant = 'asset' | 'chain';
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Chains, VerifiedDenoms } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
+
+type CircleSymbolVariant = 'asset' | 'chain';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -116,6 +116,10 @@ export default defineComponent({
   },
 
   props: {
+    displayStatus: {
+      type: Boolean,
+      default: true,
+    },
     denom: {
       type: String,
       default: '',
@@ -133,7 +137,7 @@ export default defineComponent({
       default: 'asset',
     },
     size: {
-      type: String as PropType<CircleSymbolSize>,
+      type: String as PropType<DesignSizes>,
       default: 'md',
     },
     customSize: {
@@ -153,7 +157,7 @@ export default defineComponent({
   setup(props) {
     const { pools, getReserveBaseDenoms } = usePools();
 
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const denoms = ref<string[]>([]);
     const isLoaded = ref(false);
 
@@ -166,8 +170,8 @@ export default defineComponent({
     });
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
-      const chains: Chains = apistore.getters[GlobalDemerisGetterTypes.API.getChains] || [];
+      const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
+      const chains = typedstore.getters[GlobalGetterTypes.API.getChains] || ([] as EmerisAPI.Chain[]);
 
       const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
 

@@ -13,23 +13,7 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
-      <template #deactivated>
-        <ReviewModal
-          :data="actionHandlerResult"
-          action-name="swap"
-          variant="widget"
-          @close="reviewModalToggle"
-          @reset="
-            () => {
-              reviewModalToggle();
-              reset();
-            }
-          "
-          @goback="() => reviewModalToggle()"
-        />
-      </template>
-
+    <template v-if="isOpen && !isSlippageSettingModalOpen">
       <TransactionProcessCreator
         :steps="actionHandlerResult"
         action="swap"
@@ -53,7 +37,7 @@
         "
         @previous="reviewModalToggle"
       />
-    </FeatureRunningConditional>
+    </template>
 
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -160,6 +144,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -167,7 +152,6 @@ import { useStore } from 'vuex';
 import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -182,15 +166,12 @@ import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { SwapAction } from '@/types/actions';
-import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
-
-import FeatureRunningConditional from '../common/FeatureRunningConditional.vue';
 
 export default defineComponent({
   name: 'Swap',
@@ -203,13 +184,11 @@ export default defineComponent({
     SlippageSettingModal,
     FeeLevelSelector,
     TransactionProcessCreator,
-    FeatureRunningConditional,
-    ReviewModal,
   },
 
   props: {
     defaultAsset: {
-      type: Object as PropType<Balance>,
+      type: Object as PropType<EmerisAPI.Balance>,
       default: undefined,
     },
   },
@@ -228,21 +207,21 @@ export default defineComponent({
     const isInit = ref(false);
     const slippage = ref(0);
     const { t } = useI18n({ useScope: 'global' });
-    const store = useStore();
+    const store = useStore() as RootStoreTyped;
     const transactionsStore = useTransactionsStore();
     const isFinished = ref(false); // keep track of txstepsmodal status
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
 
     const dexStatus = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+      return store.getters[GlobalGetterTypes.API.getChainStatus]({
+        chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
       });
     });
 
     const verifiedDenoms = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
 
     onUnmounted(() => {
@@ -253,7 +232,7 @@ export default defineComponent({
       if (transactionsStore.currentId) {
         const snapshot = transactionsStore.getCurrentService().getSnapshot();
         const cursor = getTransactionOffset(snapshot.context);
-        if (snapshot.matches('transacting') || cursor.total > cursor.offset) {
+        if (snapshot.matches('transacting') || (cursor && cursor.total > cursor.offset)) {
           transactionsStore.setTransactionAsPending();
         }
       }
@@ -272,19 +251,19 @@ export default defineComponent({
 
           if (isNative(pool.reserve_coin_denoms[0])) {
             reserveCoinA.base_denom = reserveCoinA.denom;
-            reserveCoinA.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+            reserveCoinA.chain_name = store.getters[GlobalGetterTypes.API.getDexChain];
           } else {
             const verifyTraceA =
-              store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+              store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+                chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                 hash: pool.reserve_coin_denoms[0].split('/')[1],
               }) ??
               (await store.dispatch(
-                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                GlobalActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                     hash: pool.reserve_coin_denoms[0].split('/')[1],
                   },
                 },
@@ -296,19 +275,19 @@ export default defineComponent({
 
           if (isNative(pool.reserve_coin_denoms[1])) {
             reserveCoinB.base_denom = reserveCoinB.denom;
-            reserveCoinB.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+            reserveCoinB.chain_name = store.getters[GlobalGetterTypes.API.getDexChain];
           } else {
             const verifyTraceB =
-              store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+              store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+                chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                 hash: pool.reserve_coin_denoms[1].split('/')[1],
               }) ??
               (await store.dispatch(
-                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                GlobalActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                     hash: pool.reserve_coin_denoms[1].split('/')[1],
                   },
                 },
@@ -362,19 +341,19 @@ export default defineComponent({
 
             if (isNative(pool.reserve_coin_denoms[0])) {
               reserveCoinA.base_denom = reserveCoinA.denom;
-              reserveCoinA.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+              reserveCoinA.chain_name = store.getters[GlobalGetterTypes.API.getDexChain];
             } else {
               const verifyTraceA =
-                store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+                  chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                   hash: pool.reserve_coin_denoms[0].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                  GlobalActionTypes.API.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {
-                      chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                      chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                       hash: pool.reserve_coin_denoms[0].split('/')[1],
                     },
                   },
@@ -386,19 +365,19 @@ export default defineComponent({
 
             if (isNative(pool.reserve_coin_denoms[1])) {
               reserveCoinB.base_denom = reserveCoinB.denom;
-              reserveCoinB.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+              reserveCoinB.chain_name = store.getters[GlobalGetterTypes.API.getDexChain];
             } else {
               const verifyTraceB =
-                store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+                  chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                   hash: pool.reserve_coin_denoms[1].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                  GlobalActionTypes.API.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {
-                      chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                      chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
                       hash: pool.reserve_coin_denoms[1].split('/')[1],
                     },
                   },
@@ -511,7 +490,7 @@ export default defineComponent({
         return {
           denom: x.receive.denom,
           base_denom: denomInfo.pay.base_denom,
-          on_chain: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          on_chain: store.getters[GlobalGetterTypes.API.getDexChain],
         };
       });
       return sortAssetList(assets);
@@ -553,7 +532,7 @@ export default defineComponent({
         return {
           denom: x.pay.denom,
           base_denom: x.pay.base_denom,
-          on_chain: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          on_chain: store.getters[GlobalGetterTypes.API.getDexChain],
         };
       });
       return assets.filter((asset) => {
@@ -587,7 +566,7 @@ export default defineComponent({
             base_denom: 'uatom',
             denom: 'uatom',
             display_name: 'ATOM',
-            on_chain: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+            on_chain: store.getters[GlobalGetterTypes.API.getDexChain],
           };
           data.receiveCoinData = null;
 
@@ -600,7 +579,7 @@ export default defineComponent({
 
             if (props.defaultAsset) {
               const defaultAsset = JSON.parse(JSON.stringify(props.defaultAsset));
-              defaultAsset.on_chain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+              defaultAsset.on_chain = store.getters[GlobalGetterTypes.API.getDexChain];
               assetToReceive =
                 assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
             }
@@ -724,9 +703,8 @@ export default defineComponent({
             parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(
                 10,
-                parseInt(
-                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
-                ),
+
+                store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
               )
             ? true
             : false;
@@ -781,13 +759,14 @@ export default defineComponent({
     });
 
     //tx fee setting
+
     watch(
       () => [
         data.payCoinData?.denom,
-        store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
+        store.getters[GlobalGetterTypes.API.getFeeTokens]({
           chain_name: data.payCoinData?.on_chain,
         }),
-        store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
+        store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
       ],
       async ([denom, feeTokens, gasPriceLevel]) => {
         if (!denom || feeTokens.length === 0 || !gasPriceLevel) {
@@ -796,15 +775,14 @@ export default defineComponent({
 
         if (
           denom.startsWith('pool') ||
-          (denom.startsWith('ibc') &&
-            data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
+          (denom.startsWith('ibc') && data.payCoinData?.on_chain == store.getters[GlobalGetterTypes.API.getDexChain])
         ) {
           txFee.value = 0;
         } else {
           const fees = await getFeeForChain(data.payCoinData?.on_chain);
           txFee.value =
             fees[0].amount[gasPriceLevel] *
-            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+            10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
         }
       },
     );
@@ -816,14 +794,12 @@ export default defineComponent({
         if (data.payCoinData) {
           const amount =
             data.maxAmount /
-            10 **
-              (store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ??
-                6);
+            10 ** (store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6);
 
           if (amount > 0) {
             const ticker = await getTicker(
               data.payCoinData.base_denom,
-              store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+              store.getters[GlobalGetterTypes.API.getDexChain],
             );
             const formattedAmount = Math.trunc(amount * 100) / 100;
             data.maxButtonText = `${formattedAmount} ${ticker} Max`;
@@ -843,9 +819,7 @@ export default defineComponent({
         if (data.selectedPoolData) {
           const minimalDecimal = Math.pow(
             10,
-            parseInt(
-              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }),
-            ),
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }),
           );
 
           const reserveCoin =
@@ -964,30 +938,27 @@ export default defineComponent({
         if (data.isSwapReady) {
           // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
           const fromPrecision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
           const toPrecision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData.base_denom }) ||
-            6;
-          const swapParams = {
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData.base_denom }) || 6;
+          const swapParams: SwapAction = {
             name: 'swap',
             params: {
               from: {
-                amount: {
-                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision)))),
-                  denom: data.payCoinData.denom,
-                },
+                amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision))),
+                denom: data.payCoinData.denom,
+
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
-                amount: {
-                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision)))),
-                  denom: data.receiveCoinData.denom,
-                },
-                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision))),
+                denom: data.receiveCoinData.denom,
+
+                chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
               },
             },
           };
-          data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+          data.actionHandlerResult = await actionHandler(swapParams);
         } else {
           if (!isOpen.value) {
             // do not reset steps while steps modal is open
@@ -1001,7 +972,7 @@ export default defineComponent({
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
       if (originPayCoinData) {
-        originPayCoinData.on_chain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        originPayCoinData.on_chain = store.getters[GlobalGetterTypes.API.getDexChain];
       }
 
       const sortedBalance =
@@ -1036,11 +1007,10 @@ export default defineComponent({
     function setMax() {
       const precisionDecimal = Math.pow(
         10,
-        parseInt(
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-            name: data.payCoinData.base_denom,
-          }) ?? 6,
-        ),
+
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: data.payCoinData.base_denom,
+        }) ?? 6,
       );
 
       if (data.selectedPoolData) {
@@ -1077,8 +1047,8 @@ export default defineComponent({
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData?.reserves[0];
         const fromPrecision =
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
-        const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
+        const toPrecision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: data.receiveCoinData.base_denom,
         });
         const precisionDiff = +fromPrecision - +toPrecision;
@@ -1096,9 +1066,8 @@ export default defineComponent({
         if (e.includes('Pay')) {
           const receiveCoinPrecisionDecimalDigits = Math.pow(
             10,
-            parseInt(
-              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
-            ),
+
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
           );
           data.receiveCoinAmount = parseFloat(
             String(

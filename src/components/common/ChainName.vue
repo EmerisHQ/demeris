@@ -5,7 +5,7 @@
 import { computed, defineComponent, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 export default defineComponent({
   name: 'ChainName',
   props: {
@@ -15,7 +15,7 @@ export default defineComponent({
     const store = useStore();
     const name = toRefs(props).name;
     const displayChain = computed(() => {
-      const displayName = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: name.value });
+      const displayName = store.getters[GlobalGetterTypes.API.getDisplayChain]({ name: name.value });
       return displayName || name.value;
     });
     return { displayChain };

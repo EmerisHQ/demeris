@@ -47,6 +47,7 @@
   </List>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
@@ -57,7 +58,7 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+import { DesignSizes } from '@/types/util';
 export default defineComponent({
   name: 'PreviewSwitch',
   components: {
@@ -75,7 +76,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Record<string, EmerisBase.Amount>>,
       required: true,
     },
     context: {
@@ -111,7 +112,7 @@ export default defineComponent({
     const getValidator = (address) => {
       return validators.value.find((x) => x.operator_address == address);
     };
-    const size = props.context === 'default' ? 'md' : 'sm';
+    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 
     return {
       store,
