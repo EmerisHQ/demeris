@@ -4,6 +4,7 @@
     class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     href="https://support.emeris.com/en/articles/5999925-staking-on-emeris-step-by-step-tutorial"
     target="_blank"
+    @click="onBannerClick"
   >
     <h5 class="font-bold text-1">{{ $t('components.stakingBanner.startStaking') }}</h5>
     <p class="staking-banner__text -text-1 leading-5 text-muted">{{ $t('components.stakingBanner.text') }} &#x2197;</p>
@@ -30,6 +31,7 @@ import { useStore } from 'vuex';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes } from '@/store';
+import { event } from '@/utils/analytics';
 
 export default defineComponent({
   name: 'StakingBanner',
@@ -51,6 +53,10 @@ export default defineComponent({
     const store = useStore();
     let shouldShowBanner = ref<boolean>(false);
 
+    const onBannerClick = () => {
+      event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });
+    };
+
     const propsRef = toRefs(props);
     const apr = ref<string>('');
 
@@ -71,6 +77,7 @@ export default defineComponent({
     return {
       shouldShowBanner,
       apr,
+      onBannerClick,
     };
   },
 });
