@@ -8,8 +8,7 @@ import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
-let useAccountInstance = null;
-function useAccount() {
+export default function useAccount() {
   const store = useStore() as RootStoreTyped;
   const isDemoAccount = computed(() => {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
@@ -179,11 +178,4 @@ function useAccount() {
     unbondingDelegations,
     unbondingDelegationsByChain,
   };
-}
-
-export default function useAccountFactory() {
-  if (!useAccountInstance) {
-    useAccountInstance = useAccount();
-  }
-  return useAccountInstance;
 }
