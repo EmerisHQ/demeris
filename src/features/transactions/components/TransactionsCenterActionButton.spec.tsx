@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-// npx vitest src/features/transactions/components/TransactionsCenterActionButton.spec.ts
+
 import 'regenerator-runtime/runtime';
 
 import { createTestingPinia } from '@pinia/testing';

@@ -1,15 +1,19 @@
-// npx jest -- src/components/ui/DropdownMenu.spec.js
+/**
+ * @vitest-environment jsdom
+ */
+// npx vitest src/components/ui/DropdownMenu.spec.ts
 import { mount, shallowMount } from '@vue/test-utils';
+import { test } from 'vitest';
 
 import DropdownMenu from './DropdownMenu.vue';
 import DropdownMenuItem from './DropdownMenuItem.vue';
 
 describe('Notifications', () => {
-  it('Mounts with button and only icon', async () => {
+  test('Mounts with button and only icon', async () => {
     const wrapper = shallowMount(DropdownMenu, {
       props: {
         icon: 'ThreeDotsIcon',
-        placement: 'right-star',
+        placement: 'right-start',
       },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
@@ -17,11 +21,11 @@ describe('Notifications', () => {
     expect(wrapper.find('[data-test=openMenuButtonLabel]').exists()).toBe(false);
   });
 
-  it('Mounts with button and only text', async () => {
+  test.only('Mounts with button and only text', async () => {
     const wrapper = shallowMount(DropdownMenu, {
       props: {
         label: 'buttonLabel',
-        placement: 'right-star',
+        placement: 'right-start',
       },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
@@ -30,7 +34,7 @@ describe('Notifications', () => {
     expect(wrapper.find('[data-test=openMenuButtonLabel]').html()).toContain('buttonLabel');
   });
 
-  it('Mounts with content in slot', async () => {
+  test('Mounts with content in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
         default: 'Main Content',
@@ -39,7 +43,7 @@ describe('Notifications', () => {
     const wrapper = mount(DropdownMenu, {
       props: {
         label: 'buttonLabel',
-        placement: 'right-star',
+        placement: 'right-start',
       },
       slots: {
         default: DropdownMenuItem1,
@@ -53,7 +57,7 @@ describe('Notifications', () => {
     }, 100);
   });
 
-  it('Mounts with 3 links in slot', async () => {
+  test('Mounts with 3 links in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
         default: 'Main Content 1',
@@ -72,7 +76,7 @@ describe('Notifications', () => {
     const wrapper = mount(DropdownMenu, {
       props: {
         label: 'buttonLabel',
-        placement: 'right-star',
+        placement: 'right-start',
       },
       slots: {
         default: [DropdownMenuItem1, DropdownMenuItem2, DropdownMenuItem3],
