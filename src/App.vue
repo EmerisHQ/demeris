@@ -203,6 +203,9 @@ export default defineComponent({
         }
       });
 
+      if (featureRunning('AIRDROPS_FEATURE')) {
+        getAllAirdrops();
+      }
       if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
         router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
       }
@@ -223,12 +226,6 @@ export default defineComponent({
         });
       });
     };
-
-    onMounted(() => {
-      if (featureRunning('AIRDROPS_FEATURE')) {
-        getAllAirdrops();
-      }
-    });
 
     return { initialized, status, showMaintenanceScreen };
   },
