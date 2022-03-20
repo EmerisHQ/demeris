@@ -19,7 +19,7 @@
         <QuotesListItem
           :quote="quote"
           :is-best-price="index === 0 ? true : false"
-          :is-selected-quote-index="selectedQuoteIndex === index"
+          :is-selected-quote="selectedQuoteIndex === index"
           @click="selectQuote(index)"
           @visualizeRoute="visualizeRoute(quote)"
         />
@@ -39,7 +39,7 @@
         }
       "
     />
-    <SwapRoute />
+    <SwapRoute :quote="quotes[selected]" />
   </div>
 </template>
 

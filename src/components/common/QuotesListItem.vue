@@ -1,11 +1,11 @@
 <template>
-  <div class="p-4 group rounded-xl cursor-pointer" :class="[isSelectedQuoteIndex ? 'text-inverse bg-text' : '']">
+  <div class="p-4 group rounded-xl cursor-pointer" :class="[isSelectedQuote ? 'text-inverse bg-text' : '']">
     <div v-if="isBestPrice" class="text-positive">Best price</div>
     <div class="flex capitalize">
       {{ quote.dex }}
       <span class="ml-auto">{{ quote.amount }} {{ ticker }}</span>
     </div>
-    <div class="flex text-muted" :class="[isSelectedQuoteIndex ? 'text-inverse opacity-70' : '']">
+    <div class="flex text-muted" :class="[isSelectedQuote ? 'text-inverse opacity-70' : '']">
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
@@ -38,7 +38,7 @@ const props = defineProps({
   isBestPrice: {
     type: Boolean,
   },
-  isSelectedQuoteIndex: {
+  isSelectedQuote: {
     type: Boolean,
   },
 });
@@ -47,7 +47,6 @@ const emit = defineEmits(['visualizeRoute']);
 
 const visualizeRoute = (e) => {
   emit('visualizeRoute', props.quote);
-  console.log(e);
   e.preventDefault();
 };
 </script>
