@@ -6,7 +6,7 @@
           <ChainSelectModal
             v-if="state.isChainsModalOpen"
             class="fixed inset-0 z-30 bg-bg"
-            title="Select chain"
+            :title="$t('components.stakeFormAmount.selectChain')"
             :show-subtitle="true"
             :assets="balances"
             :selected-denom="baseDenom"
@@ -58,23 +58,23 @@
             </button>
           </fieldset>
 
-          <Button
-            v-if="validatorsToStakeWith.length < 3"
-            class="mt-2"
-            name="Add a validator"
-            variant="link"
-            :full-width="false"
-            @click="() => validatorAddHandler()"
-          >
-            <Icon name="PlusIcon" :icon-size="2" />
-          </Button>
           <div class="mt-2 w-full max-w-sm mx-auto">
+            <Button
+              v-if="validatorsToStakeWith.length < 3"
+              class="mt-6 mb-8"
+              :name="$t('components.stakeFormAmount.addValidatorButton')"
+              variant="link"
+              :full-width="false"
+              @click="() => validatorAddHandler()"
+            >
+              <Icon name="PlusIcon" :icon-size="2" />
+            </Button>
             <!-- Stake Info -->
-            <ListItem inset size="md" label="Time to unstake">
+            <ListItem inset size="md" :label="$t('components.stakeFormAmount.timeUnstake')">
               <DaysToUnstake :chain-name="chainName" />
             </ListItem>
 
-            <ListItem inset size="md" label="Total stake">
+            <ListItem inset size="md" :label="$t('components.stakeFormAmount.totalStake')">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
                 <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" :show-dash="false" />
@@ -106,6 +106,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, PropType, reactive, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -125,10 +126,9 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { GlobalGetterTypes } from '@/store';
 import { MultiStakeForm, Step } from '@/types/actions';
-import { Balance } from '@/types/api';
+import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'StakeFormAmount',
@@ -146,7 +146,7 @@ export default defineComponent({
     ValidatorSelect,
   },
   props: {
-    validators: { type: Array as PropType<any[]>, required: true, default: () => [] },
+    validators: { type: Array as PropType<EmerisAPI.Validator[]>, required: true, default: () => [] },
     steps: {
       type: Array as PropType<Step[]>,
       default: () => [],
@@ -178,10 +178,10 @@ export default defineComponent({
 
     /* variables */
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
+      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
     });
     const chainName = ref<string>(validators.value[0].chain_name);
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
     const hasIBC = computed(() => {
       const denomTypes = form.stakes.map((x) => {
         return isNative(x.denom) ? 'native' : 'ibc';
@@ -256,7 +256,7 @@ export default defineComponent({
       return false;
     });
     const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
@@ -279,13 +279,17 @@ export default defineComponent({
       emit('unselect', validator);
     };
     const validatorAddHandler = () => {
+      event('multiple_validator_adding', {
+        event_label: 'Staking Form Add Another Validator Button Clicked',
+        event_category: 'button',
+      });
       emit('selectanother', null);
     };
     const goToReview = () => {
       form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
       emit('next');
     };
-    const toggleChainsModal = (asset: Balance, index: number) => {
+    const toggleChainsModal = (asset: EmerisAPI.Balance, index: number) => {
       if (asset) {
         form.stakes[index].from_chain = asset.on_chain;
         form.stakes[index].denom = parseCoins(asset.amount)[0].denom;

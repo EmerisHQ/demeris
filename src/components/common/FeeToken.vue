@@ -8,13 +8,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from '@vue/reactivity';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { VerifiedDenoms } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
+const typedstore = useStore() as RootStoreTyped;
 // eslint-disable-next-line
 const props = defineProps({
   denom: {
@@ -26,7 +26,7 @@ const props = defineProps({
     required: true,
   },
 });
-const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
 const denomConfig = verifiedDenoms.find((item) => item.name === props.denom);
 
 const ticker = computed(() => (denomConfig && denomConfig.ticker ? denomConfig.ticker : props.denom));

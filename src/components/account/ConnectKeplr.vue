@@ -26,7 +26,7 @@
           <a
             v-if="type === 'welcome'"
             class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
-            data-cy="tryTheDemoButton"
+            data-cy="tryTheDemoButtonConnect"
             @click="signInDemo"
           >
             {{ $t('generic_cta.tryTheDemo') }}
@@ -34,7 +34,7 @@
           <a
             v-if="type !== 'welcome'"
             class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
-            data-cy="tryTheDemoButton2"
+            data-cy="tryTheDemoButtonConnect"
             @click="emitCancel"
           >
             {{ $t('generic_cta.cancel') }}
@@ -59,7 +59,7 @@
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
 import Spinner from '../ui/Spinner.vue';
@@ -97,7 +97,7 @@ export default defineComponent({
     };
 
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
 
     const trySignIn = () => {
@@ -109,7 +109,7 @@ export default defineComponent({
     };
 
     const signIn = () => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+      store.dispatch(GlobalActionTypes.USER.SIGN_IN);
       isConnecting.value = true;
     };
 
@@ -119,7 +119,7 @@ export default defineComponent({
     });
 
     const signInDemo = () => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+      store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
       isConnecting.value = true;
     };
     watch(isSignedIn, () => {

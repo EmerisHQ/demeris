@@ -1,11 +1,4 @@
-import { Navbar } from './navbar';
-
 export class Send {
-  goTo() {
-    const navbar = new Navbar();
-    navbar.send().click();
-  }
-
   moveAssets() {
     return this.blockContainingBothOptions().contains('Move assets');
   }

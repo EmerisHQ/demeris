@@ -159,12 +159,13 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
+        <!-- Deliberately commented out - we're placing this back soon with APR
         <StakingBanner
           v-else-if="isStakingRunning"
           :display-denom="nativeAsset.displayName"
           :base-denom="nativeAsset.base_denom"
           class="mt-4"
-        />
+        /> -->
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
@@ -179,7 +180,7 @@ import { useStore } from 'vuex';
 
 import StakeTable from '@/components/asset/StakeTable.vue';
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
-import StakingBanner from '@/components/banners/StakingBanner.vue';
+// import StakingBanner from '@/components/banners/StakingBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
@@ -195,8 +196,8 @@ import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { LoadingState, VerifiedDenoms } from '@/types/api';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { LoadingState } from '@/types/util';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
@@ -206,7 +207,7 @@ export default defineComponent({
   name: 'Asset',
 
   components: {
-    StakingBanner,
+    // StakingBanner,
     AmountDisplay,
     ChainName,
     Denom,
@@ -234,7 +235,7 @@ export default defineComponent({
       return denom.value.startsWith('pool');
     });
     const stakingEnabled = featureRunning('STAKING');
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const route = useRoute();
     const router = useRouter();
     const denom = computed(() => route.params.denom as string);
@@ -244,7 +245,7 @@ export default defineComponent({
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+      const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
     if (!assetConfig.value) {
@@ -259,7 +260,7 @@ export default defineComponent({
     const unavailableChains = computed(() => {
       const result = {};
       for (const asset of assets.value) {
-        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
+        const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
         if (!status) {
           result[asset.on_chain] = {
             chain: asset.on_chain,
@@ -276,26 +277,17 @@ export default defineComponent({
     watch(
       denom,
       async () => {
-        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
             subscribe: false,
             params: { chain_name: dexChain },
           });
-          const invPrimaryChannel =
-            apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-              chain_name: dexChain,
-              destination_chain_name: assetConfig.value.chain_name,
-            }) ??
-            (await apistore.dispatch(
-              GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-              {
-                subscribe: true,
-                params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },
-              },
-              { root: true },
-            ));
+          const invPrimaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+            chain_name: dexChain,
+            destination_chain_name: assetConfig.value.chain_name,
+          });
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
         }
@@ -413,7 +405,7 @@ export default defineComponent({
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
     const dataStream = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
+      return typedstore.getters[GlobalGetterTypes.API.getTokenPrices];
     });
 
     const getTokenPrices = ref(null);
@@ -431,7 +423,7 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
+        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_ID, {
           subscribe: false,
           params: {
             token: displayName.value.toLowerCase(),
@@ -440,7 +432,7 @@ export default defineComponent({
         });
 
         if (chainName) {
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+          await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_PRICES, {
             subscribe: false,
             params: {
               token_id: chainName,
@@ -463,13 +455,13 @@ export default defineComponent({
 
     const showPriceChartLoadingSkeleton = computed(() => {
       return (
-        apistore.getters[GlobalDemerisGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
-        apistore.getters[GlobalDemerisGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+        typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
+        typedstore.getters[GlobalGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
       );
     });
 
     onUnmounted(() => {
-      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
+      typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
     });
 
     const isStakingRunning = featureRunning('STAKING');

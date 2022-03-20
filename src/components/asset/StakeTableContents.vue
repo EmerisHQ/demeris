@@ -29,7 +29,7 @@
             <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
             <td class="text-right font-medium bg-surface">
               <div class="flex justify-end">
-                +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                +<Price :amount="{ denom: denom, amount: totalRewardsAmount + '' }" :show-dash="false" />
               </div>
             </td>
             <td class="text-right rounded-r-xl bg-surface">
@@ -164,31 +164,28 @@ import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
+import { event } from '@/utils/analytics';
 import { chainAddressfromKeyhash, getDisplayAmount, keyHashfromAddress } from '@/utils/basic';
 
 dayjs.extend(relativeTime);
 const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom } = useStaking();
 const router = useRouter();
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
-const store = useStore();
+const store = useStore() as RootStoreTyped;
 /* variables */
 const assetStakingAPY = ref<number | string>('-');
 const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
 
-const chain_name = computed(() =>
-  store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-);
-
 watch(
-  () => chain_name.value,
+  () => propsRef.denom.value,
   async (newVal, _) => {
     if (newVal) {
-      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
-      validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(newVal);
+      validatorList.value = await getValidatorsByBaseDenom(newVal);
     }
   },
   { immediate: true },
@@ -196,14 +193,14 @@ watch(
 
 const assetPrecision = computed(() => {
   return (
-    store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
       name: propsRef.denom.value,
-    }) ?? '6'
+    }) ?? 6
   );
 });
 const stakingBalances = computed(() => {
   return stakingBalancesByChain(
-    store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
   ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 const getTimeToString = (isodate: string) => {
@@ -211,12 +208,12 @@ const getTimeToString = (isodate: string) => {
 };
 const unbondingBalances = computed(() => {
   return unbondingDelegationsByChain(
-    store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
   );
 });
 const operator_prefix = computed(() => {
-  return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-    chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+  return store.getters[GlobalGetterTypes.API.getBech32Config]({
+    chain_name: store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({
       denom: propsRef.denom.value,
     }),
   }).val_addr;
@@ -242,6 +239,12 @@ const getValidatorMoniker = (address: string): string => {
 };
 const goStakeActionPage = (action: string, valAddress = '') => {
   const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
+  if (action === StakingActions.STAKE) {
+    event('staking_entry_point', {
+      event_label: 'Asset Page Staking Table 3 Dot Icon Stake Click',
+      event_category: 'menu',
+    });
+  }
   switch (action) {
     case StakingActions.STAKE:
     case StakingActions.UNSTAKE:

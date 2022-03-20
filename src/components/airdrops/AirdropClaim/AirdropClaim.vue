@@ -90,7 +90,7 @@ import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'AirdropClaim',
@@ -102,7 +102,7 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
 
     const isClaimModalOpen = ref(false);
     const isWalletModalOpen = ref(false);
@@ -112,7 +112,7 @@ export default defineComponent({
     };
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
     const isAutoDropped = computed(() => {
@@ -129,8 +129,8 @@ export default defineComponent({
 
     const isDemoAccount = computed(() => {
       return (
-        !apistore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] ||
-        apistore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
       );
     });
 

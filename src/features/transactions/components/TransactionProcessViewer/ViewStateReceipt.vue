@@ -268,7 +268,7 @@ import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
@@ -370,8 +370,8 @@ const getDepositTotal = () => {
   let total = new BigNumber(0);
   for (const item of amounts) {
     const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
-    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
+    const price = globalStore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenom });
+    const precision = globalStore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();
@@ -384,8 +384,8 @@ const getWithdrawTotal = () => {
   let total = new BigNumber(0);
   for (const item of amounts) {
     const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
-    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
+    const price = globalStore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenom });
+    const precision = globalStore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();

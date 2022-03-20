@@ -94,7 +94,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -118,7 +118,7 @@ export default defineComponent({
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const { getValidatorsByBaseDenom } = useStaking();
-    const { stakingBalances } = useAccount();
+    const { stakingBalancesByChain } = useAccount();
     const actionType = route.params.action as ActionType;
     const validator = route.params.validator as string;
     const baseDenom = route.params.denom as string;
@@ -127,9 +127,12 @@ export default defineComponent({
     const inModal = ref(undefined);
     const store = useStore();
     const chain_name = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
+      store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
     );
 
+    const stakingBalances = computed(() => {
+      return stakingBalancesByChain(chain_name.value);
+    });
     watch(
       () => chain_name.value,
       async (newVal, _) => {

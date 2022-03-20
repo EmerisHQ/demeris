@@ -54,8 +54,8 @@
           :value-formatter="format"
           type="text"
           @update:modelValue="(e) => setCustomSlippage(e)"
-          @focus:value="(e) => onCustomSlippageFocussed(e)"
-          @blur:value="(e) => onCustomSlippageFocusOut(e)"
+          @focus:value="(_e) => onCustomSlippageFocussed()"
+          @blur:value="(_e) => onCustomSlippageFocusOut()"
           @keydown="(e) => onKeyDown(e)"
         >
           <template #end>
@@ -103,7 +103,7 @@ import { useI18n } from 'vue-i18n';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Input from '@/components/ui/Input.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
@@ -139,11 +139,12 @@ export default defineComponent({
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
     const { t } = useI18n({ useScope: 'global' });
+    const typedstore = useStore() as RootStoreTyped;
     const trueSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
+      return typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5;
     });
     const allowCustomSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
+      return typedstore.getters[GlobalGetterTypes.USER.allowCustomSlippage];
     });
 
     const inputWidth = computed(() =>
@@ -200,7 +201,7 @@ export default defineComponent({
             slippage > 100 ||
             (customSlippage.value &&
               isCustomSelected.value &&
-              customSlippage.value.toString()?.replace('%', '') != trueSlippage.value) ||
+              parseFloat(customSlippage.value.toString()?.replace('%', '')) != trueSlippage.value) ||
             (isCustomSelected.value && !customSlippage.value)
           ) {
             return 'error';
@@ -239,7 +240,7 @@ export default defineComponent({
           if (!isCustom) {
             customSlippage.value = 'Custom';
           }
-          (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
+          typedstore.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, {
             data: { slippagePerc: slippage },
           });
         }
@@ -286,11 +287,11 @@ export default defineComponent({
       async () => {
         const payDisplayName = await getDisplayName(
           props.swapData.pay.denom,
-          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+          useStore().getters[GlobalGetterTypes.API.getDexChain],
         );
         const receiveDisplayName = await getDisplayName(
           props.swapData.receive.denom,
-          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+          useStore().getters[GlobalGetterTypes.API.getDexChain],
         );
         const payAmount = props.swapData.pay.amount;
         const receiveAmount = props.swapData.receive.amount;

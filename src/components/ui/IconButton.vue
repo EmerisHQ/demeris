@@ -30,8 +30,8 @@
 import { computed, defineComponent, PropType } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
-import useButton from '@/composables/useButton.vue';
-import { ButtonFunctionData } from '@/types/setups';
+import useButton from '@/composables/useButton';
+import { ButtonFunctionData } from '@/types/util';
 
 export default defineComponent({
   name: 'IconButton',

@@ -1,15 +1,14 @@
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { Denom } from '@/types/api';
-import { AmountWithMeta } from '@/types/base';
+import { EmerisBase } from '@emeris/types';
+
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 import { useStore } from './useStore';
 
 export async function addChain(chain_name: string): Promise<void> {
-  const apistore = useStore() as TypedAPIStore;
-  const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({
+  const typedstore = useStore() as RootStoreTyped;
+  const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({
     chain_name,
-  }) as ChainData;
+  });
   let rpc;
   let rest;
   if (chain.chain_name == 'terra') {
@@ -44,7 +43,7 @@ export async function addChain(chain_name: string): Promise<void> {
       stakeCurrency: {
         coinDenom: chain.denoms.filter((x) => x.stakable)[0].display_name,
         coinMinimalDenom: chain.denoms.filter((x) => x.stakable)[0].name,
-        coinDecimals: parseInt(chain.denoms.filter((x) => x.stakable)[0].precision),
+        coinDecimals: chain.denoms.filter((x) => x.stakable)[0].precision,
       },
       bip44: {
         coinType: parseInt(chain.derivation_path.split('/')[2].slice(0, -1)),
@@ -57,8 +56,8 @@ export async function addChain(chain_name: string): Promise<void> {
         bech32PrefixConsAddr: chain.node_info.bech32_config.cons_addr,
         bech32PrefixConsPub: chain.node_info.bech32_config.cons_pub,
       },
-      currencies: chain.denoms.map((x: Denom) => {
-        const y: AmountWithMeta = {
+      currencies: chain.denoms.map((x) => {
+        const y: EmerisBase.AmountWithMeta = {
           amount: '0',
           denom: '',
           coinDenom: '',
@@ -67,7 +66,7 @@ export async function addChain(chain_name: string): Promise<void> {
         };
         y.coinDenom = x.display_name;
         y.coinMinimalDenom = x.name;
-        y.coinDecimals = parseInt(x.precision);
+        y.coinDecimals = x.precision;
 
         if (isNaN(y.coinDecimals)) {
           y.coinDecimals = 6;
@@ -76,8 +75,8 @@ export async function addChain(chain_name: string): Promise<void> {
       }),
       feeCurrencies: chain.denoms
         .filter((x) => x.fee_token)
-        .map((x: Denom) => {
-          const y: AmountWithMeta = {
+        .map((x) => {
+          const y: EmerisBase.AmountWithMeta = {
             amount: '0',
             denom: '',
             coinDenom: '',
@@ -86,7 +85,7 @@ export async function addChain(chain_name: string): Promise<void> {
           };
           y.coinDenom = x.display_name.toUpperCase();
           y.coinMinimalDenom = x.name;
-          y.coinDecimals = parseInt(x.precision);
+          y.coinDecimals = x.precision;
           if (isNaN(y.coinDecimals)) {
             y.coinDecimals = 6;
           }

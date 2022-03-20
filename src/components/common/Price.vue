@@ -7,13 +7,13 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { Amount } from '@/types/base';
+import { GlobalGetterTypes } from '@/store';
 import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -23,7 +23,7 @@ export default defineComponent({
   },
   props: {
     amount: {
-      type: Object as PropType<Amount>,
+      type: Object as PropType<EmerisBase.Amount>,
       required: true,
     },
     showZero: {
@@ -45,26 +45,24 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const denom = ref((props.amount as Amount).denom);
+    const denom = ref(props.amount.denom);
     const isLoaded = ref(false);
     const theme = useTheme();
     const price = ref();
 
     const priceObserver = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value });
+      return store.getters[GlobalGetterTypes.API.getPrice]({ denom: denom.value });
     });
 
     const displayPrice = computed(() => {
       const precision =
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: denom.value,
         }) ?? '6';
       let value;
 
-      if ((props.amount as Amount).amount) {
-        value = price.value
-          ? (price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision))
-          : 0;
+      if (props.amount.amount) {
+        value = price.value ? (price.value * parseInt(props.amount.amount)) / Math.pow(10, parseInt(precision)) : 0;
       } else if (!props.showZero) {
         value = price.value;
       } else {
@@ -82,9 +80,9 @@ export default defineComponent({
     */
 
     watch(
-      () => props.amount as Amount,
+      () => props.amount,
       async (value) => {
-        denom.value = await getBaseDenom((value as Amount).denom);
+        denom.value = await getBaseDenom(value.denom);
         price.value = priceObserver.value;
       },
       { immediate: true },

@@ -25,12 +25,14 @@
 
 <script lang="ts">
 import { computed, ref, watch } from '@vue/runtime-core';
+import { defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';
 import { event } from '@/utils/analytics';
-export default {
+
+export default defineComponent({
   name: 'SimplexModal',
   components: { Modal },
   setup() {
@@ -127,7 +129,7 @@ export default {
 
     return { isModalOpen, toggleSimplexModal, transactionStatus, transactionCompletedText };
   },
-};
+});
 </script>
 
 <style lang="scss">

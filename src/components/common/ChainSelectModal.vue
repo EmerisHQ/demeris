@@ -36,7 +36,7 @@ import { useStore } from 'vuex';
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelectModal',
@@ -57,11 +57,11 @@ export default defineComponent({
   setup(props, { emit }) {
     const selectedDenomDisplay = ref(props.selectedDenom);
     const chainsNumber = ref(0);
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     onMounted(async () => {
       selectedDenomDisplay.value = await getDisplayName(
         props.selectedDenom,
-        apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+        typedstore.getters[GlobalGetterTypes.API.getDexChain],
       );
     });
     watch(
@@ -69,7 +69,7 @@ export default defineComponent({
       async (newName) => {
         selectedDenomDisplay.value = await getDisplayName(
           newName,
-          apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          typedstore.getters[GlobalGetterTypes.API.getDexChain],
         );
       },
     );

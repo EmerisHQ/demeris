@@ -17,14 +17,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, PropType } from '@vue/runtime-core';
+import { EmerisBase } from '@emeris/types';
+import { computed, PropType } from 'vue';
+import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { PriceQuote, VerifiedDenoms } from '@/types/api';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
-const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+const typedstore = useStore() as RootStoreTyped;
+
+const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
 const denomConfig = verifiedDenoms.find((item) => item.name === props.quote.denom);
 
 const ticker = computed(() => (denomConfig && denomConfig.ticker ? denomConfig.ticker : props.quote.denom));
@@ -32,7 +34,7 @@ const ticker = computed(() => (denomConfig && denomConfig.ticker ? denomConfig.t
 // eslint-disable-next-line
 const props = defineProps({
   quote: {
-    type: Object as PropType<PriceQuote>,
+    type: Object as PropType<EmerisBase.PriceQuote>,
     required: true,
   },
   isBestPrice: {

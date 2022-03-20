@@ -1,55 +1,61 @@
 import { MutationTree } from 'vuex';
 
-import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
-import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData, UserData } from './mutation-types';
-import { getDefaultState, State } from './state';
+import { KeplrKeyData, UserData } from '@/types/user';
 
-export type Mutations<S = State> = {
+import { ActionTypes } from './action-types';
+import { Subscriptions } from './actions';
+import { MutationTypes } from './mutation-types';
+import { getDefaultState, USERState } from './state';
+
+export type Mutations<S = USERState> = {
   [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
+  [MutationTypes.SET_GAS_LIMIT](state: S, payload: { value: number }): void;
+  [MutationTypes.SET_CORRELATION_ID](state: S, payload: string): void;
   [MutationTypes.SET_BALANCES_FIRST_LOAD](state: S, payload: boolean): void;
   [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: S, payload: boolean): void;
+  [MutationTypes.SET_PRICES_FIRST_LOAD](state: S, payload: boolean): void;
   [MutationTypes.SIGN_OUT](state: S): void;
   [MutationTypes.RESET_STATE](state: S): void;
-  [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
-  [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
+  [MutationTypes.SUBSCRIBE](state: S, subscription: Subscriptions): void;
+  [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: Subscriptions): void;
 };
 
-export const mutations: MutationTree<State> & Mutations = {
-  [MutationTypes.ADD_KEPLR_KEYHASH](state: State, payload: string) {
+export const mutations: MutationTree<USERState> & Mutations = {
+  [MutationTypes.ADD_KEPLR_KEYHASH](state: USERState, payload: string) {
     if (state.keplr) state.keplr.keyHashes.push(payload);
   },
-  [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
+  [MutationTypes.SET_SESSION_DATA](state: USERState, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
     if (!state._Session.isDemoAccount) {
       window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
     }
   },
-  [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
+  [MutationTypes.SET_KEPLR](state: USERState, payload: KeplrKeyData) {
     state.keplr = payload;
     state.keplr.keyHashes = [];
   },
-  [MutationTypes.SET_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
+  [MutationTypes.SET_BALANCES_FIRST_LOAD](state: USERState, payload: boolean) {
     state.balancesFirstLoad = payload;
   },
-  [MutationTypes.SET_PRICES_FIRST_LOAD](state: State, payload: boolean) {
+  [MutationTypes.SET_PRICES_FIRST_LOAD](state: USERState, payload: boolean) {
     state.pricesFirstLoad = payload;
   },
-  [MutationTypes.SET_CORRELATION_ID](state: State, payload: string) {
+  [MutationTypes.SET_CORRELATION_ID](state: USERState, payload: string) {
     state.correlationId = payload;
   },
-  [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
+  [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: USERState, payload: boolean) {
     state.stakingBalancesFirstLoad = payload;
   },
-  [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
+  [MutationTypes.SET_GAS_LIMIT](state: USERState, payload) {
     window.localStorage.setItem('gasLimit', (payload.value as number).toString());
     state.gas_limit = payload.value as number;
   },
-  [MutationTypes.SIGN_OUT](state: State) {
+  [MutationTypes.SIGN_OUT](state: USERState) {
     for (const sub of state._Subscriptions.values()) {
       const subObj = JSON.parse(sub);
-      if (subObj.action == DemerisActionTypes.SET_SESSION_DATA) {
+      if (subObj.action == ActionTypes.SET_SESSION_DATA) {
         state._Subscriptions.delete(sub);
       }
     }
@@ -57,13 +63,13 @@ export const mutations: MutationTree<State> & Mutations = {
     state._Session = {};
     window.localStorage.setItem('lastEmerisSession', '');
   },
-  [MutationTypes.RESET_STATE](state: State) {
+  [MutationTypes.RESET_STATE](state: USERState) {
     Object.assign(state, getDefaultState());
   },
-  [MutationTypes.SUBSCRIBE](state: State, subscription) {
+  [MutationTypes.SUBSCRIBE](state: USERState, subscription) {
     state._Subscriptions.add(JSON.stringify(subscription));
   },
-  [MutationTypes.UNSUBSCRIBE](state: State, subscription) {
+  [MutationTypes.UNSUBSCRIBE](state: USERState, subscription) {
     state._Subscriptions.delete(JSON.stringify(subscription));
   },
 };

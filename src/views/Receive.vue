@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAPI } from '@emeris/types';
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
@@ -75,7 +76,6 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
-import { Balance } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
@@ -136,7 +136,7 @@ export default {
       state.selectedAsset = undefined;
     };
 
-    const assetSelectHandler = (asset: Balance) => {
+    const assetSelectHandler = (asset: EmerisAPI.Balance) => {
       state.selectedAsset = asset;
     };
 

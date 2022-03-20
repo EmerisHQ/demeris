@@ -1,101 +1,102 @@
+import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
-import * as API from '@/types/api';
-import { parseCoins } from '@/utils/basic';
-import { keyHashfromAddress } from '@/utils/basic';
+import { ChartPrices, LoadingState, Namespaced } from '@/types/util';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
-import { ChainData, State } from './state';
-type Namespaced<T, N extends string> = {
-  [P in keyof T & string as `${N}/${P}`]: T[P];
-};
+import { APIState } from './state';
+
 export type Getters = {
-  [GetterTypes.getBalances](state: State): { (params: API.APIRequests): API.Balances | null };
-  [GetterTypes.getStakingBalances](state: State): { (params: API.APIRequests): API.StakingBalances | null };
-  [GetterTypes.getUnstakingParam](state: State): { (params: API.UnstakingParamReq): API.UnstakingParam };
-  [GetterTypes.getUnbondingDelegations](state: State): { (params: API.APIRequests): API.UnbondingDelegations | null };
-  [GetterTypes.getNumbers](state: State): { (params: API.APIRequests): API.Numbers | null };
-  [GetterTypes.getNumbersChain](state: State): { (params: API.APIRequests): API.SeqNumber | null };
-  [GetterTypes.getRelayerStatus](state: State): boolean;
-  [GetterTypes.getRelayerBalance](state: State): { (params: API.APIRequests): API.RelayerBalance };
-  [GetterTypes.getRelayerChainStatus](state: State): { (params: API.APIRequests): boolean };
-  [GetterTypes.getAllBalances](state: State, getters, rootState, rootGetters): API.Balances | null;
-  [GetterTypes.getAllStakingBalances](state: State): API.StakingBalances | null;
-  [GetterTypes.getAllUnbondingDelegations](state: State): API.UnbondingDelegations | null;
-  [GetterTypes.getAllNumbers](state: State): API.Numbers | null;
-  [GetterTypes.getFeeAddresses](state: State): API.FeeAddresses | null;
-  [GetterTypes.getVerifiedDenoms](state: State): API.VerifiedDenoms | null;
-  [GetterTypes.getChains](state: State): Record<string, ChainData>;
-  [GetterTypes.getPrices](state: State): API.Prices;
-  [GetterTypes.getExchangeAmountFromATOMPool](state: State, getters): { (base_denom: string): number };
+  [GetterTypes.getBalances](state: APIState): { (params: EmerisAPI.AddrReq): EmerisAPI.Balances | null };
+  [GetterTypes.getStakingBalances](state: APIState): { (params: EmerisAPI.AddrReq): EmerisAPI.StakingBalances | null };
+  [GetterTypes.getUnstakingParam](state: APIState): { (params: EmerisAPI.ChainReq): EmerisAPI.StakingParams };
+  [GetterTypes.getUnbondingDelegations](state: APIState): {
+    (params: EmerisAPI.AddrReq): EmerisAPI.UnbondingDelegations | null;
+  };
+  [GetterTypes.getNumbersChain](state: APIState): { (params: EmerisAPI.ChainAddrReq): EmerisAPI.SeqNumber | null };
+
+  [GetterTypes.getRelayerChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
+  [GetterTypes.getAllBalances](state: APIState, getters, rootState, rootGetters): EmerisAPI.Balances | null;
+  [GetterTypes.getAllStakingBalances](state: APIState): EmerisAPI.StakingBalances | null;
+  [GetterTypes.getAllUnbondingDelegations](state: APIState): EmerisAPI.UnbondingDelegations | null;
+  [GetterTypes.getVerifiedDenoms](state: APIState): EmerisAPI.VerifiedDenoms | null;
+  [GetterTypes.getChains](state: APIState): Record<string, EmerisAPI.Chain>;
+  [GetterTypes.getPrices](state: APIState): EmerisAPI.Prices;
+  [GetterTypes.getExchangeAmountFromATOMPool](state: APIState, getters): { (base_denom: string): number };
   [GetterTypes.getPrice](
-    state: State,
+    state: APIState,
     getters,
   ): {
     (params: { denom: string }): number;
   };
   [GetterTypes.getTicker](
-    state: State,
+    state: APIState,
     getters,
   ): {
     (params: { name: string }): string;
   };
-  [GetterTypes.getChainFromChainId](state: State): {
+  [GetterTypes.getChainFromChainId](state: APIState): {
     (chain_id: string): string;
   };
-  [GetterTypes.getDisplayChain](state: State): {
+  [GetterTypes.getDisplayChain](state: APIState): {
     (params: { name: string }): string;
   };
-  [GetterTypes.getDenomPrecision](state: State): {
-    (params: { name: string }): string;
+  [GetterTypes.getDenomPrecision](state: APIState): {
+    (params: { name: string }): number;
   };
-  [GetterTypes.getWebSocketEndpoint](state: State): string;
-  [GetterTypes.getAllValidPools](state: State): Pool[];
-  [GetterTypes.getEndpoint](state: State): string;
-  [GetterTypes.getGitEndpoint](state: State): string;
-  [GetterTypes.getRawGitEndpoint](state: State): string;
-  [GetterTypes.getSupply](state: State, getters): { (params): number };
-  [GetterTypes.getAllVerifiedTraces](state: State): Record<string, API.VerifyTrace>;
-  [GetterTypes.getDexChain](state: State): string;
-  [GetterTypes.getTxStatus](state: State): { (params: API.APIRequests): Promise<API.Ticket> | null };
-  [GetterTypes.isVerified](state: State): {
+  [GetterTypes.getWebSocketEndpoint](state: APIState): string;
+  [GetterTypes.getAllValidPools](state: APIState): Pool[];
+  [GetterTypes.getEndpoint](state: APIState): string;
+  [GetterTypes.getGitEndpoint](state: APIState): string;
+  [GetterTypes.getRawGitEndpoint](state: APIState): string;
+  [GetterTypes.getSupply](state: APIState, getters): { (params): number };
+  [GetterTypes.getAllVerifiedTraces](state: APIState): Record<string, EmerisAPI.VerifyTrace>;
+  [GetterTypes.getBech32Config](state: APIState): { (params: EmerisAPI.ChainReq): EmerisBase.Bech32Config | null };
+  [GetterTypes.getDexChain](state: APIState): string;
+  [GetterTypes.getTxStatus](state: APIState): {
+    (params: EmerisAPI.TicketReq): Promise<EmerisAPI.TicketResponse> | null;
+  };
+  [GetterTypes.isVerified](state: APIState): {
     (params: { denom: string; chain_name: string }): boolean;
   };
-  [GetterTypes.getVerifyTrace](state: State): { (params: API.APIRequests): API.VerifyTrace | null };
-  [GetterTypes.getFeeAddress](state: State): { (params: API.APIRequests): API.FeeAddress | null };
-  [GetterTypes.getBech32Config](state: State): { (params: API.APIRequests): API.Bech32Config | null };
-  [GetterTypes.getFeeTokens](state: State): { (params: API.APIRequests): API.FeeTokens | null };
-  [GetterTypes.getChain](state: State): { (params: API.APIRequests): ChainData | null };
-  [GetterTypes.getPrimaryChannel](state: State): { (params: API.APIRequests): string | null };
-  [GetterTypes.getPrimaryChannels](state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
-  [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
-  [GetterTypes.getAirdrops](state: State): API.Airdrop[] | null;
-  [GetterTypes.getSelectedAirdrop](state: State): API.Airdrop | null;
-  [GetterTypes.getTokenId](state: State): string | null;
-  [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
-  [GetterTypes.getChainNameByBaseDenom](state: State): { (params: API.APIRequests): string };
+  [GetterTypes.getVerifyTrace](state: APIState): { (params: EmerisAPI.VerifyTraceReq): EmerisAPI.VerifyTrace | null };
+  [GetterTypes.getFeeTokens](state: APIState): { (params: EmerisAPI.ChainReq): EmerisBase.Denom[] | null };
+  [GetterTypes.getChain](state: APIState): { (params: EmerisAPI.ChainReq): EmerisAPI.Chain | null };
+  [GetterTypes.getPrimaryChannel](state: APIState): { (params: EmerisAPI.ChainCounterPartyReq): string | null };
+  [GetterTypes.getTokenPrices](state: APIState): ChartPrices | null;
+  [GetterTypes.getAirdrops](state: APIState): EmerisAirdrops.Airdrop[] | null;
+  [GetterTypes.getAirdropsStatus](state: APIState): LoadingState | null;
+  [GetterTypes.getSelectedAirdrop](state: APIState): EmerisAirdrops.Airdrop | null;
+  [GetterTypes.getTokenId](state: APIState): string | null;
+  [GetterTypes.getChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
+  [GetterTypes.getChainNameByBaseDenom](state: APIState): { (params: EmerisAPI.DenomReq): string };
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisAPI'>;
 
-export const getters: GetterTree<State, RootState> & Getters = {
+export const getters: GetterTree<APIState, RootState> & Getters = {
   [GetterTypes.getBalances]: (state) => (params) => {
-    return state.balances[(params as API.AddrReq).address] ?? null;
+    return state.balances[params.address] ?? null;
   },
   [GetterTypes.getStakingBalances]: (state) => (params) => {
-    return state.stakingBalances[(params as API.AddrReq).address] ?? null;
+    return state.stakingBalances[params.address] ?? null;
   },
   [GetterTypes.getUnstakingParam]: (state) => (params) => {
-    return state.unstakingParams[(params as API.UnstakingParamReq).chain_name] ?? null;
+    return state.unstakingParams[params.chain_name] ?? null;
   },
   [GetterTypes.getUnbondingDelegations]: (state) => (params) => {
-    return state.unbondingDelegations[(params as API.AddrReq).address] ?? null;
+    return state.unbondingDelegations[params.address] ?? null;
   },
-  [GetterTypes.getAllBalances]: (state: State, _getters, _rootState, rootGetters) => {
+
+  [GetterTypes.getRelayerChainStatus]: (_state) => (_params) => {
+    return true;
+  },
+  [GetterTypes.getAllBalances]: (state: APIState, _getters, _rootState, rootGetters) => {
     if (!rootGetters[GlobalUserGetterTypes.getKeplr]) {
       return null;
     }
@@ -122,24 +123,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
       .flat();
     return unbondingDelegations.length > 0 ? unbondingDelegations : null;
   },
-  [GetterTypes.getNumbers]: (state) => (params) => {
-    return state.numbers[(params as API.AddrReq).address] ?? null;
-  },
   [GetterTypes.getNumbersChain]: (state) => (params) => {
-    return state.chainnumbers[(params as API.ChainAddrReq).chain_name][(params as API.ChainAddrReq).address] ?? null;
-  },
-  [GetterTypes.getRelayerStatus]: (state) => {
-    return state.relayer;
-  },
-  [GetterTypes.getRelayerBalance]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
-  },
-  [GetterTypes.getRelayerChainStatus]: (state) => (params) => {
-    return true || (state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer);
-  },
-  [GetterTypes.getAllNumbers]: (state) => {
-    const numbers = Object.values(state.numbers).flat();
-    return numbers.length > 0 ? numbers : null;
+    return state.chainnumbers[params.chain_name][params.address] ?? null;
   },
   [GetterTypes.getFeeAddresses]: (state) => {
     const feeAddresses = [];
@@ -290,8 +275,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
   },
   [GetterTypes.getVerifyTrace]: (state) => (params) => {
-    if (state.traces[(params as API.VerifyTraceReq).chain_name]) {
-      return state.traces[(params as API.VerifyTraceReq).chain_name][(params as API.VerifyTraceReq).hash] ?? null;
+    if (state.traces[params.chain_name]) {
+      return state.traces[params.chain_name][params.hash] ?? null;
     } else {
       return null;
     }
@@ -306,28 +291,21 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
     return result;
   },
-  [GetterTypes.getFeeAddress]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.demeris_addresses[0] ?? null;
-  },
   [GetterTypes.getBech32Config]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
+    return state.chains[params.chain_name]?.node_info.bech32_config ?? null;
   },
   [GetterTypes.getFeeTokens]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
+    return state.chains[params.chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
   },
   [GetterTypes.getChain]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name] ?? null;
+    return state.chains[params.chain_name] ?? null;
   },
   [GetterTypes.getPrimaryChannel]: (state) => (params) => {
-    return (
-      state.chains[(params as API.ChainReq).chain_name]?.primary_channel[
-        (params as API.ChainReq).destination_chain_name
-      ] ?? null
-    );
+    return state.chains?.[params.chain_name]?.primary_channel[params.destination_chain_name] ?? null;
   },
   [GetterTypes.getPrimaryChannels]: (state) => (params) => {
     const channels = [];
-    for (const channel of Object.values(state.chains[(params as API.ChainReq).chain_name].primary_channel)) {
+    for (const channel of Object.values(state.chains[params.chain_name].primary_channel)) {
       channels.push(channel);
     }
     return channels.length != 0 ? channels : null;
@@ -354,11 +332,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.tokenIdLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.status;
+    return state.chains[params.chain_name]?.status;
   },
   [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
     return Object.values(state.chains)?.find((chain) => {
-      return chain.denoms?.find((denom) => denom.name === (params as API.DenomReq).denom);
+      return chain.denoms?.find((denom) => denom.name === params.denom);
     })?.chain_name;
   },
 };

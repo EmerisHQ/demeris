@@ -62,7 +62,7 @@ import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
 import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
@@ -74,7 +74,7 @@ const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
 
-const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]);
+const isDemoAccount = computed(() => store.getters[GlobalGetterTypes.USER.isDemoAccount]);
 
 const previewComponentMap = {
   transfer: PreviewTransfer,

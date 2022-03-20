@@ -68,10 +68,10 @@
 <script lang="ts">
 import { computed, CSSProperties, defineComponent, PropType } from 'vue';
 
+import { ModalVariant } from '@/types/util';
+
 import Button from './Button.vue';
 import Icon from './Icon.vue';
-
-type ModalVariant = 'dialog' | 'center' | 'takeover' | 'bottom';
 
 export default defineComponent({
   name: 'Modal',

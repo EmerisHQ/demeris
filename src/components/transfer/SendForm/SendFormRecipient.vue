@@ -37,7 +37,7 @@ import Address from '@/components/ui/Address.vue';
 import Button from '@/components/ui/Button.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Input from '@/components/ui/Input.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store/index';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store/index';
 import { SendAddressForm } from '@/types/actions';
 
 export default defineComponent({
@@ -54,13 +54,13 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const form = inject<SendAddressForm>('transferForm');
-    const apistore = useStore() as TypedAPIStore;
+    const typedstore = useStore() as RootStoreTyped;
     const isValid = computed(() => {
       return form.isTermChecked && isValidAddress.value;
     });
 
     const isValidAddress = computed(() => {
-      const chains = Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]);
+      const chains = Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]);
 
       try {
         const prefix = bech32.decode(form.recipient).prefix;
