@@ -79,7 +79,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Build
-        run: npm run --max_old_space_size=4096 build
+        run: NODE_OPTIONS=--max_old_space_size=1024 && npm run build:test
 
       - name: Run Playwright tests
         run: 
