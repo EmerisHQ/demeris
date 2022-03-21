@@ -1,8 +1,0 @@
-{
-  "defaultCommandTimeout": 40000,
-  "baseUrl": "http://localhost:8080",
-  "modifyObstructiveCode": true,
-  "experimentalSourceRewriting": true,
-  "video": false,
-  "retries": 2
-}
