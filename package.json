@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:test": "NODE_OPTIONS=--max_old_space_size=1024 && vite build",
+    "build:test": "NODE_OPTIONS=--max_old_space_size=10192 && vite build",
     "build-vite-tsc": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 8080 --host",
     "test:unit": "vitest",
