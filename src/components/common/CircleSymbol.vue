@@ -5,7 +5,7 @@
     :class="[customSize === '' && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
     <CircleSymbolStatus
-      v-if="assetConfig?.chain_name"
+      v-if="assetConfig?.chain_name && displayStatus"
       :chain-name="assetConfig.chain_name"
       :denom="denom"
       :size="size"
@@ -84,12 +84,9 @@
 /*
  * when customSize is set glow is forced to false
  */
+import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
-
-type CircleSymbolVariant = 'asset' | 'chain';
-
-import { EmerisAPI } from '@emeris/types';
 
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
@@ -98,6 +95,8 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
+
+type CircleSymbolVariant = 'asset' | 'chain';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -117,6 +116,10 @@ export default defineComponent({
   },
 
   props: {
+    displayStatus: {
+      type: Boolean,
+      default: true,
+    },
     denom: {
       type: String,
       default: '',

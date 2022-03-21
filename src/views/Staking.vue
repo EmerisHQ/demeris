@@ -118,7 +118,7 @@ export default defineComponent({
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const { getValidatorsByBaseDenom } = useStaking();
-    const { stakingBalances } = useAccount();
+    const { stakingBalancesByChain } = useAccount();
     const actionType = route.params.action as ActionType;
     const validator = route.params.validator as string;
     const baseDenom = route.params.denom as string;
@@ -130,6 +130,9 @@ export default defineComponent({
       store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
     );
 
+    const stakingBalances = computed(() => {
+      return stakingBalancesByChain(chain_name.value);
+    });
     watch(
       () => chain_name.value,
       async (newVal, _) => {
