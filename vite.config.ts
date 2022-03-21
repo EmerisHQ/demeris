@@ -11,6 +11,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1500,
+    sourcemap: false,
   },
   plugins: [vue(), nodeResolve(), envCompatible(), dynamicImport()],
   resolve: {

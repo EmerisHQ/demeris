@@ -77,7 +77,7 @@ jobs:
       - name: Install (npm)
         run: npm install
       
-        - name: Increase node RAM allocation
+      - name: Increase node RAM allocation
         run: export NODE_OPTIONS='--max-old-space-size=4096'
 
       - name: Install Playwright
