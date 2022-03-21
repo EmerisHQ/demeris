@@ -282,7 +282,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_POOL_BALANCES, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
+        throw new SpVuexError('Demeris:GetPoolBalances', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
