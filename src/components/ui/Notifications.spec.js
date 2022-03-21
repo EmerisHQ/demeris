@@ -114,6 +114,6 @@ test('Opens with 0 notifications, loads 6 then dismisses all.', async () => {
 
   await wrapper.find('[data-test="clear-all-notifications-footer"]').trigger('click');
 
-  // TODO: failing test - requires investigation into inner workings of Jest and limitations of JSDOM
+  // TODO: failing test - requires investigation into inner workings of Vitest and limitations of JSDOM
   // expect(wrapper.findAll('[data-test="single-notification-message"]').exists()).toBe(false);
 });

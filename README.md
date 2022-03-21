@@ -64,7 +64,7 @@ npx cypress run
 npx cypress run --spec cypress/integration/welcome-page-visual.spec.js --headed --no-exit
 ```
 
-### Automated testing - Jest (unit testing)
+### Automated testing - Vitest (unit testing)
 
 ```
 # Run all unit tests
