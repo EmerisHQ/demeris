@@ -753,44 +753,43 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       value: LoadingState.LOADING,
     });
     try {
-      const response = await fetch(
+      delete axios.defaults.headers.get['X-Correlation-Id'];
+      const response = await axios.get(
         `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-      )
-        .then((res) => res.json())
-        .then(async (data) => {
-          let eligibilityRes = null;
-          if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
-            return { ...data, eligibility: AirdropEligibilityStatus.AUTO_DROP };
-          } else if (data.chainName) {
-            const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
-            const ownAddress = await getOwnAddress({ chain_name });
+      );
 
-            if (data.eligibilityCheckEndpoint && ownAddress) {
-              const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
-              eligibilityRes = await fetch(`${eligibilityEndpoint}${ownAddress}`).then((res) => {
-                return res;
-              });
+      let eligibility = null;
+      const data = response.data;
+      if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
+        eligibility = AirdropEligibilityStatus.AUTO_DROP;
+      } else if (data.chainName) {
+        const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
+        const ownAddress = await getOwnAddress({ chain_name });
 
-              if (eligibilityRes.status === 200) {
-                return { ...data, eligibility: AirdropEligibilityStatus.ELIGIBLE };
-              } else if (eligibilityRes.status === 403) {
-                return { ...data, eligibility: AirdropEligibilityStatus.NOT_ELIGIBLE };
-              } else {
-                return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
-              }
-            } else {
-              return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
-            }
+        if (data.eligibilityCheckEndpoint && ownAddress) {
+          delete axios.defaults.headers.get['X-Correlation-Id'];
+          const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
+          const eligibilityRes = await axios.get(`${eligibilityEndpoint}${ownAddress}`);
+
+          if (eligibilityRes.status === 200) {
+            eligibility = AirdropEligibilityStatus.ELIGIBLE;
+          } else if (eligibilityRes.status === 403) {
+            eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
           } else {
-            return { ...data, eligibility: AirdropEligibilityStatus.NOT_AVAILABLE };
+            eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
           }
-        });
+        } else {
+          eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
+        }
+      } else {
+        eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
+      }
 
       commit(MutationTypes.SET_AIRDROPS_STATUS, {
         value: LoadingState.LOADED,
       });
 
-      commit(MutationTypes.SET_AIRDROPS, { value: { ...response } });
+      commit(MutationTypes.SET_AIRDROPS, { value: { ...response.data, eligibility } });
 
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });

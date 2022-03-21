@@ -71,6 +71,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useTheme from '@/composables/useTheme';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
 export default defineComponent({
   name: 'AirdropClaimablePanel',
@@ -113,11 +114,13 @@ export default defineComponent({
     });
 
     const noAirdropsToClaim = computed(() => {
-      return airdrops.value.every((item) => item.eligibility !== 'CLAIMABLE');
+      return airdrops.value.every((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
     });
 
     const noOfClaimableAirdrops = computed(() => {
-      const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === 'CLAIMABLE');
+      const claimableAirdrops = airdrops.value.filter(
+        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
+      );
       return claimableAirdrops.length;
     });
 

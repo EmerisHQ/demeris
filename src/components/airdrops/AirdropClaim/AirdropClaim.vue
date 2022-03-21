@@ -103,6 +103,7 @@ import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimMo
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
 export default defineComponent({
   name: 'AirdropClaim',
@@ -128,11 +129,11 @@ export default defineComponent({
     });
 
     const isAutoDropped = computed(() => {
-      return selectedAirdrop.value.eligibility === 'AUTO_DROP';
+      return selectedAirdrop.value.eligibility === AirdropEligibilityStatus.AUTO_DROP;
     });
 
     const isClaimable = computed(() => {
-      return selectedAirdrop.value.eligibility === 'CLAIMABLE';
+      return selectedAirdrop.value.eligibility === AirdropEligibilityStatus.CLAIMABLE;
     });
 
     const goToAirdropWebsite = () => {

@@ -51,6 +51,7 @@ import { useStore } from 'vuex';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -75,7 +76,9 @@ export default defineComponent({
     });
 
     const noOfClaimableAirdrops = computed(() => {
-      const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === 'CLAIMABLE');
+      const claimableAirdrops = airdrops.value.filter(
+        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
+      );
       return claimableAirdrops.length;
     });
 
