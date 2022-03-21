@@ -23,19 +23,19 @@ Ensure you create an `.env.local` file, with the following:
 
 ```
 #This mnemonic is used for automated testing. Right now, our e2e tests expect ATOM to be present in the balance of the accountholder. Uncomment and replace your mnemonic to make the tests pass locally.
-#VUE_APP_EMERIS_MNEMONIC={ your mnemonic }
+#VITE_EMERIS_MNEMONIC={ your mnemonic }
 
 #Uncomment below to enable dev API's
-#VUE_APP_FEATURE_USE_DEV=true
+#VITE_FEATURE_USE_DEV=true
 
 #Uncomment below to enable staging API's
-#VUE_APP_FEATURE_USE_STAGING=true
+#VITE_FEATURE_USE_STAGING=true
 ```
 
 You can also use URL parameters to easily switch evironment, like this:
 
-- https://localhost:8080?VUE_APP_FEATURE_USE_DEV=true
-- https://localhost:8080?VUE_APP_FEATURE_USE_STAGING=true
+- https://localhost:8080?VITE_FEATURE_USE_DEV=true
+- https://localhost:8080?VITE_FEATURE_USE_STAGING=true
 
 ### Shortcomings on development mode
 
