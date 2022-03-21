@@ -1122,7 +1122,6 @@ export default defineComponent({
         const toPrecision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: data.receiveCoinData.base_denom,
         });
-        //set in vuex?
         const { routes } = await getRoutes({ amountIn: data.payCoinAmount * 10 ** fromPrecision });
         //remove
         routes.push({
