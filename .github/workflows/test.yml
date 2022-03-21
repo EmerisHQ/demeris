@@ -78,8 +78,11 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
 
+      - name: Increase node RAM allocation
+        run: node --max_old_space_size=16384 ./node_modules/vite/bin/vite.js
+
       - name: Build
-        run: NODE_OPTIONS=--max_old_space_size=10192 && npm run build:test
+        run: npm run build
 
       - name: Run Playwright tests
         run: 
