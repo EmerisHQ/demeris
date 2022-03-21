@@ -1,11 +1,11 @@
 import { AminoMsg } from '@cosmjs/amino';
-import { Coin } from '@cosmjs/stargate/build/codec/cosmos/base/v1beta1/coin';
 import {
   MsgCreatePool,
   MsgDepositWithinBatch,
   MsgSwapWithinBatch,
   MsgWithdrawWithinBatch,
 } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
+import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import Long from 'long';
 export interface AminoMsgCreatePool extends AminoMsg {
   readonly type: 'liquidity/MsgCreatePool';
