@@ -11,7 +11,9 @@ on:
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
   DEBUG: 'pw:api'
+  
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -74,12 +76,12 @@ jobs:
 
       - name: Install (npm)
         run: npm install
+      
+        - name: Increase node RAM allocation
+        run: export NODE_OPTIONS='--max-old-space-size=4096'
 
       - name: Install Playwright
         run: npx playwright install --with-deps
-
-      - name: Increase node RAM allocation
-        run: node --max_old_space_size=16384 ./node_modules/vite/bin/vite.js
 
       - name: Build
         run: npm run build
