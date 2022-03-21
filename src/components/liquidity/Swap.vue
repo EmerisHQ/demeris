@@ -215,7 +215,8 @@ export default defineComponent({
       default: undefined,
     },
   },
-  // todo: on receive input, api req wrong - on 0 NaN shows - atom to cro, precision wrong - no asset selected and amount and then receuve asset = nothing
+  // todo: on receive input, api req wrong - on 0 NaN shows - atom to cro, precision wrong - no asset selected and amount and then receuve asset = nothing, filter routes with "insufficient funds" in response, filter gravity out?, filter NaN in api response,
+  // resulting end chain should be cosmos hub? or osmosis if fine?
   setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
@@ -1090,28 +1091,23 @@ export default defineComponent({
       }
     }
     const daggRoutes = ref('');
-    // [
-    //   { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 1, usdAmount: 12322 },
-    //   {
-    //     dex: 'gravity',
-    //     amount: 115.49,
-    //     denom: 'uosmo',
-    //     numberOfTransactions: 1,
-    //     usdAmount: 12322,
-    //     fee: { amount: 0.02, denom: 'uosmo' },
-    //   },
-    //   { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 2, usdAmount: 12322 },
-    // ]
     const quotes = computed(() => {
       let quotesArr = [] as any;
       for (let route of daggRoutes.value) {
         let routeObj = {} as any;
         let numberOfSteps = (route as any).steps.length;
         routeObj.dex = (route as any).steps[0].protocol; //can steps have diff protocols? incorprate if yes
-        routeObj.amount = (route as any).steps[numberOfSteps - 1].data.to.amount / 10 ** 6; //change this 10**6
+        routeObj.amount = (
+          (route as any).steps[numberOfSteps - 1].data.to.amount /
+          (10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6)
+        ).toFixed(4);
         routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
         routeObj.numberOfTransactions = numberOfSteps;
-        routeObj.usdAmount = (route as any).steps[numberOfSteps - 1].data.to.amount; //get price for denom and multiply
+        routeObj.usdAmount = getDisplayPrice(
+          (route as any).steps[numberOfSteps - 1].data.to.base_denom,
+          routeObj.amount,
+        ).value;
+        routeObj.route = route;
         //fee token when?
         quotesArr.push(routeObj);
       }
@@ -1200,20 +1196,6 @@ export default defineComponent({
           data.receiveCoinAmount = (
             routes[0]?.steps[len - 1].data?.to?.amount / receiveCoinPrecisionDecimalDigits
           )?.toFixed(4);
-          // data.receiveCoinAmount = parseFloat(
-          //   String(
-          //     Math.trunc(
-          //       (getReceiveCoinAmount(
-          //         { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-          //         balanceA,
-          //         balanceB,
-          //       ) /
-          //         receiveCoinPrecisionDecimalDigits) *
-          //         10 ** 4,
-          //     ) /
-          //       10 ** 4,
-          //   ),
-          // );
 
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
@@ -1222,73 +1204,8 @@ export default defineComponent({
           data.payCoinAmount = (
             routes[0]?.steps[len - 1].data?.to?.amount * (isReverse.value ? equalizer : 1 / equalizer)
           )?.toFixed(4);
-          // data.payCoinAmount = parseFloat(
-          //   (
-          //     getPayCoinAmount(
-          //       { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-          //       balanceB,
-          //       balanceA,
-          //     ) * (isReverse ? equalizer : 1 / equalizer)
-          //   ).toFixed(4),
-          // );
         }
       }
-      // if (data.isBothSelected) {
-      //   const isReverse = data.payCoinData.base_denom !== data.selectedPoolData?.reserves[0];
-      //   const fromPrecision =
-      //     store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
-      //   const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-      //     name: data.receiveCoinData.base_denom,
-      //   });
-      //   const precisionDiff = +fromPrecision - +toPrecision;
-      //   let equalizer = 1;
-      //   if (precisionDiff !== 0) {
-      //     equalizer = 10 ** Math.abs(precisionDiff);
-      //   }
-
-      //   const balanceA = isReverse
-      //     ? data.selectedPoolData.reserveBalances.balanceA
-      //     : data.selectedPoolData.reserveBalances.balanceB;
-      //   const balanceB = isReverse
-      //     ? data.selectedPoolData.reserveBalances.balanceB
-      //     : data.selectedPoolData.reserveBalances.balanceA;
-      //   if (e.includes('Pay')) {
-      //     const receiveCoinPrecisionDecimalDigits = Math.pow(
-      //       10,
-      //       parseInt(
-      //         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
-      //       ),
-      //     );
-      //     data.receiveCoinAmount = parseFloat(
-      //       String(
-      //         Math.trunc(
-      //           (getReceiveCoinAmount(
-      //             { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-      //             balanceA,
-      //             balanceB,
-      //           ) /
-      //             receiveCoinPrecisionDecimalDigits) *
-      //             10 ** 4,
-      //         ) /
-      //           10 ** 4,
-      //       ),
-      //     );
-
-      //     if (data.payCoinAmount + data.receiveCoinAmount === 0) {
-      //       slippage.value = 0;
-      //     }
-      //   } else {
-      //     data.payCoinAmount = parseFloat(
-      //       (
-      //         getPayCoinAmount(
-      //           { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-      //           balanceB,
-      //           balanceA,
-      //         ) * (isReverse ? equalizer : 1 / equalizer)
-      //       ).toFixed(4),
-      //     );
-      //   }
-      // }
     }
 
     async function swap() {

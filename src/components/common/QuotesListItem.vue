@@ -12,7 +12,7 @@
       <span v-else class="hover:opacity-70" @click="visualizeRoute"
         >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
       >
-      <span class="ml-auto">~${{ quote.usdAmount }}</span>
+      <span class="ml-auto">~{{ quote.usdAmount }}</span>
     </div>
   </div>
 </template>
@@ -22,9 +22,9 @@ import { computed, PropType } from 'vue';
 import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
-const typedstore = useStore() as RootStoreTyped;
+const typedstore = useStore();
 
 const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
 const denomConfig = verifiedDenoms.find((item) => item.name === props.quote.denom);
@@ -43,12 +43,16 @@ const props = defineProps({
   isSelectedQuote: {
     type: Boolean,
   },
+  index: {
+    type: Number,
+    required: true,
+  },
 });
 
 const emit = defineEmits(['visualizeRoute']);
 
 const visualizeRoute = (e) => {
-  emit('visualizeRoute', props.quote);
+  emit('visualizeRoute', { quote: props.quote, index: props.index });
   e.preventDefault();
 };
 </script>

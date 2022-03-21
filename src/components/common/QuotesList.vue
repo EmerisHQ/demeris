@@ -18,10 +18,11 @@
       <tippy delay="0" :interactive="false" :arrow="false">
         <QuotesListItem
           :quote="quote"
+          :index="index"
           :is-best-price="index === 0 ? true : false"
           :is-selected-quote="selectedQuoteIndex === index"
           @click="selectQuote(index)"
-          @visualizeRoute="visualizeRoute(quote)"
+          @visualizeRoute="visualizeRoute({ quote, index })"
         />
         <template v-if="quote && quote.fee" #content>
           <FeeToken :denom="quote.fee?.denom" :amount="quote.fee?.amount" />
@@ -39,7 +40,7 @@
         }
       "
     />
-    <SwapRoute :quote="quotes[selected]" />
+    <SwapRoute :quote="quotes[visualizeRouteIndex]" />
   </div>
 </template>
 
@@ -61,15 +62,16 @@ const props = defineProps({
 
 const selectedQuoteIndex = ref(0);
 const isVisualizeRouteVisible = ref(false);
+const visualizeRouteIndex = ref(0);
 
 const selectQuote = (index) => {
   selectedQuoteIndex.value = index;
   emit('selectedQuoteIndex', index);
 };
 
-const visualizeRoute = (quote) => {
-  console.log(quote);
+const visualizeRoute = ({ index }) => {
   isVisualizeRouteVisible.value = true;
+  visualizeRouteIndex.value = index;
 };
 
 const emit = defineEmits(['goback', 'selectedQuoteIndex']);
