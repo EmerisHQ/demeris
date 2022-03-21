@@ -79,8 +79,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Build
-        run: npm run build
-        
+        run: npm run --max_old_space_size=4096 build
+
       - name: Run Playwright tests
         run: 
           serve -s dist -l 8080 &
