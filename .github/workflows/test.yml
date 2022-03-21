@@ -13,6 +13,7 @@ env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
   VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
   DEBUG: 'pw:api'
+  NODE_OPTIONS: '--max-old-space-size=4096'
   
 
 concurrency:
