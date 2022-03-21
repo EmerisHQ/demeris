@@ -142,7 +142,7 @@
 
     <!-- warning modal - custom slippage -->
     <Modal
-      v-show="isWarningCustomSlippageOpen"
+      v-if="isWarningCustomSlippageOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen
@@ -180,7 +180,7 @@
 
     <!-- warning modal - view unverified assets -->
     <Modal
-      v-show="isWarningViewUnverifiedOpen"
+      v-if="isWarningViewUnverifiedOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen
@@ -218,7 +218,7 @@
 
     <!-- warning modal - view lp asset pools -->
     <Modal
-      v-show="isWarningViewLPAssetPoolsOpen"
+      v-if="isWarningViewLPAssetPoolsOpen"
       class="text-center z-40"
       variant="dialog"
       fullscreen

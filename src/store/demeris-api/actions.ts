@@ -248,7 +248,6 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-
       return getters['getBalances'](params);
     }
   },
@@ -296,6 +295,21 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
 
       const balanceLoads = [];
+
+      const chains =
+        getters['getChains'] ??
+        (await dispatch(ActionTypes.GET_CHAINS, {
+          subscribe: false,
+        }));
+      for (const chain in chains) {
+        if (!chains[chain].primary_channel)
+          chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
+            subscribe: true,
+            params: {
+              chain_name: chain,
+            },
+          });
+      }
       for (const keyHash of keyHashes) {
         balanceLoads.push(dispatch(ActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
       }
@@ -721,6 +735,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   },
   async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
     try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
         `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
       );
@@ -737,6 +752,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       value: LoadingState.LOADING,
     });
     try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.Airdrop> = await axios.get(
         `${getters['getRawGitEndpoint']}/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );

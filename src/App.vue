@@ -203,10 +203,13 @@ export default defineComponent({
         }
       });
 
-      initialized.value = true;
+      if (featureRunning('AIRDROPS_FEATURE')) {
+        getAllAirdrops();
+      }
       if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
         router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
       }
+      initialized.value = true;
     });
 
     const getAllAirdrops = async () => {
@@ -223,13 +226,6 @@ export default defineComponent({
         });
       });
     };
-
-    onMounted(() => {
-      typedstore.dispatch(GlobalActionTypes.API.RESET_AIRDROPS);
-      if (featureRunning('AIRDROPS_FEATURE')) {
-        getAllAirdrops();
-      }
-    });
 
     return { initialized, status, showMaintenanceScreen };
   },

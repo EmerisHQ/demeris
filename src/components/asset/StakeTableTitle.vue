@@ -1,9 +1,11 @@
 <template>
-  <div v-if="isStakingAssetExist" class="flex justify-between mt-16">
+  <div class="flex justify-between mt-16">
     <div class="flex">
       <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="emit('selectTab', 1)">
         {{ $t('components.stakeTable.staking') }}
-        <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
+        <div v-if="showTotalStakedAsset" class="text-0 font-normal text-muted">
+          {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+        </div>
       </h2>
       <h2
         v-if="isUnstakingAssetExist"
@@ -19,6 +21,7 @@
     </div>
 
     <Button
+      v-if="showStakingButton"
       data-cy="stake-button"
       :name="$t('components.stakeTable.stake')"
       variant="link"
@@ -43,6 +46,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
+import { event } from '@/utils/analytics';
 
 const emit = defineEmits(['selectTab']);
 
@@ -71,9 +75,14 @@ const unbondingBalances = computed(() => {
   );
 });
 
-const isStakingAssetExist = computed(() => {
+const showStakingButton = computed(() => {
   return stakingBalances.value.length > 0;
 });
+
+const showTotalStakedAsset = computed(() => {
+  return stakingBalances.value.length > 0;
+});
+
 const isUnstakingAssetExist = computed(() => {
   return unbondingBalances.value.length > 0;
 });
@@ -106,6 +115,7 @@ const totalStakedAssetDisplayAmount = computed(() => {
   }
 });
 const goToStakingPage = () => {
+  event('staking_entry_point', { event_label: 'Asset Page Staking Button Click', event_category: 'button' });
   router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
 };
 </script>

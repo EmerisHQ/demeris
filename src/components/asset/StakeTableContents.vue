@@ -166,6 +166,7 @@ import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
+import { event } from '@/utils/analytics';
 import { chainAddressfromKeyhash, getDisplayAmount, keyHashfromAddress } from '@/utils/basic';
 
 dayjs.extend(relativeTime);
@@ -179,16 +180,12 @@ const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
 
-const chain_name = computed(() =>
-  store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-);
-
 watch(
-  () => chain_name.value,
+  () => propsRef.denom.value,
   async (newVal, _) => {
     if (newVal) {
-      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
-      validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(newVal);
+      validatorList.value = await getValidatorsByBaseDenom(newVal);
     }
   },
   { immediate: true },
@@ -242,6 +239,12 @@ const getValidatorMoniker = (address: string): string => {
 };
 const goStakeActionPage = (action: string, valAddress = '') => {
   const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
+  if (action === StakingActions.STAKE) {
+    event('staking_entry_point', {
+      event_label: 'Asset Page Staking Table 3 Dot Icon Stake Click',
+      event_category: 'menu',
+    });
+  }
   switch (action) {
     case StakingActions.STAKE:
     case StakingActions.UNSTAKE:
