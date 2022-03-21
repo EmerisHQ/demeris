@@ -154,24 +154,6 @@ export default defineComponent({
       },
     );
 
-    // const coinImage = computed(() => {
-    //   try {
-    //     const denom = displayName.value;
-    //     let denomIconName = 'empty';
-    //     if (denom.includes('Gravity')) {
-    //       denomIconName = 'pool';
-    //     } else {
-    //       //TODO adjust url
-    //       denomIconName = denom.toLowerCase();
-    //     }
-    //     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    //     const image = import(`../../assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
-    //     return image;
-    //   } catch {
-    //     return emptyImage;
-    //   }
-    // });
-
     const isOpen = ref(false);
 
     function toggleDenomSelectModal() {
@@ -191,7 +173,6 @@ export default defineComponent({
       inputAmount,
       isSelected,
       isOpen,
-      // coinImage,
       hasOptions,
       toggleDenomSelectModal,
       denomSelectHandler,

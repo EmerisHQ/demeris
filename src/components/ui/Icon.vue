@@ -4,7 +4,7 @@
 		  type: string (the icon to display)
 		//-->
   <div class="icon flex items-center justify-center" :style="`font-size:${iconSize}rem;`">
-    <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`"></component>
+    <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`" />
   </div>
 </template>
 <script lang="ts">

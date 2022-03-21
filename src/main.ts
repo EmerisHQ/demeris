@@ -22,7 +22,9 @@ import router from './router';
 import { store } from './store/setup';
 import { featureRunning } from './utils/FeatureManager';
 
-window.Buffer = Buffer;
+if (!window.Buffer) {
+  window.Buffer = Buffer;
+}
 
 const i18n = createI18n({
   globalInjection: true,
