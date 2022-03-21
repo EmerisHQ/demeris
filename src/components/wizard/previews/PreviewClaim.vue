@@ -29,6 +29,13 @@
             <div class="text-text text-0">
               {{ vali.moniker }}
             </div>
+            <span v-if="validators.length > 1">
+              <AmountDisplay
+                class="font-medium"
+                :amount="{ amount: parseInt(vali.reward).toString(), denom: rewardsDenom }"
+              />
+              {{ $t(`components.previews.claim.rewards`) }}
+            </span>
           </div>
         </div>
         <ValidatorBadge :validator="getValidator(vali.validator_address)" class="ml-3" />
