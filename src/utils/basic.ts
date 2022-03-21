@@ -202,3 +202,7 @@ export function checkStringIsKeybase(str: string) {
   if (!str || str.length !== 16) return false;
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
+
+export function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

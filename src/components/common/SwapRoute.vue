@@ -1,13 +1,27 @@
 <template>
   <!-- <div class="ml-6 mt-6"> -->
   <!-- <div class="text-2 font-bold">Swap Route</div> -->
-  <div class="text-muted">X transc across Y chains</div>
+  <!-- <div class="text-muted">X transc across Y chains</div> -->
   <div class="timeline-container flex flex-col timeline-block pl-2 my-6">
     <div v-for="item in route" :key="item" class="flex flex-col">
       <span class="flex items-center">
         <span class="flex items-center -ml-6 rounded-full bg-surface">
-          <CircleSymbol class="relative" variant="chain" :chain-name="item.chain" :glow="false" size="md" />
-          <CircleSymbol :style="{ position: 'absolute' }" class="ml-1" :denom="item.denom" :glow="true" size="sm" />
+          <CircleSymbol
+            class="relative"
+            variant="chain"
+            :display-status="false"
+            :chain-name="item.chain"
+            :glow="false"
+            size="md"
+          />
+          <CircleSymbol
+            :style="{ position: 'absolute' }"
+            class="ml-1"
+            :display-status="false"
+            :denom="item.denom"
+            :glow="true"
+            size="sm"
+          />
         </span>
         <span class="ml-4"
           ><span class="denom"><Denom :name="item.denom" /> </span>
@@ -33,12 +47,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { capitalizeFirstLetter } from '@/utils/basic';
 
 export default defineComponent({
   name: 'SwapRoute',
@@ -68,34 +83,46 @@ export default defineComponent({
     // 2. Add X transaction over Y chains logic
     // 3. add conditional right arrow logic (swap vs transfer icon) (Done)
     // Create type for items if applicable
-    const items = ref([
-      { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'lastcoin', chain: 'lastchain' },
-    ]);
+    // const items = ref([
+    //   { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
+    //   { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
+    //   { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
+    //   { denom: 'lastcoin', chain: 'lastchain' },
+    // ]);
 
     const route = computed(() => {
       const items = [];
-      for (let step of props.quote.route.steps) {
+      let carryOver = null;
+      let lastType = null;
+      let steps = props.quote.route.steps;
+      for (let stepIndex = steps.length - 1; stepIndex >= 0; stepIndex--) {
         let item = { transactions: [] };
-        if (step.type === 'pool') {
-          (item as any).transactions.push(`Swap on ${step.protocol}`);
-          (item as any).denom = step.data.to.base_denom;
+        if (lastType !== steps[stepIndex].type && carryOver) {
+          (item as any).transactions.push(carryOver);
+        }
+        if (steps[stepIndex].type === 'pool') {
+          lastType = 'pool';
+          stepIndex === steps.length - 1
+            ? (carryOver = `Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`)
+            : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
+          (item as any).denom = steps[stepIndex].data.to.base_denom;
           (item as any).chain = 'osmosis'; //chain how. change this.
-        } else if (step.type === 'ibc') {
-          (item as any).transactions.push(`Transfer to ${step.protocol}`); //change step.protocol
-          (item as any).denom = step.data.to.base_denom;
+        } else if (steps[stepIndex].type === 'ibc') {
+          lastType = 'ibc';
+          stepIndex === steps.length - 1
+            ? (carryOver = `Transfer to Osmosis`)
+            : (item as any).transactions.unshift(`Transfer to Osmosis`); //remove hardcoding
+          (item as any).denom = steps[stepIndex].data.to.base_denom;
           (item as any).chain = 'osmosis'; //chain how
         } else {
-          console.log(`which type? :P : ${step.type}`);
+          console.log(`which type? :P : ${steps[stepIndex].type}`);
         }
-        items.push(item);
+        items.unshift(item);
       }
 
       return items;
     });
-    return { items, route };
+    return { route };
   },
 });
 </script>
