@@ -67,11 +67,11 @@
           </td>
 
           <td class="py-5 align-middle text-muted group-hover:bg-fg transition">
-            <p v-if="airdrop.dateStatus === 'NOT_ANNOUNCED'">{{ 'Not Announced' }}</p>
-            <p v-if="airdrop.dateStatus === 'NOT_STARTED'">
+            <p v-if="airdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED">{{ 'Not Announced' }}</p>
+            <p v-if="airdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
               {{ airdrop.airdropStartDate ? `Starts ${airdrop.airdropStartDate}` : 'Not announced' }}
             </p>
-            <p v-else-if="airdrop.dateStatus === 'ONGOING'">
+            <p v-else-if="airdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
               {{ airdrop.airdropEndDate ? `Ends ${airdrop.airdropEndDate}` : 'Not announced' }}
             </p>
             <p v-else>{{ airdrop.airdropEndDate ? `Ended ${airdrop.airdropEndDate}` : 'Not announced' }}</p>
@@ -81,12 +81,17 @@
             <div v-if="airdrop.eligibility === 'AUTO_DROP'" class="flex items-center float-right">
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Auto-drop
             </div>
-            <div v-else-if="airdrop.eligibility === 'NOT_ELIGIBLE'" class="text-muted">Not eligible</div>
-            <div v-else-if="airdrop.eligibility === 'ELIGIBLE'">Eligible</div>
-            <div v-else-if="airdrop.eligibility === 'CLAIMABLE'">
+            <div v-else-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_ELIGIBLE" class="text-muted">
+              Not eligible
+            </div>
+            <div v-else-if="airdrop.eligibility === AirdropEligibilityStatus.ELIGIBLE">Eligible</div>
+            <div v-else-if="airdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE">
               <Button name="Claim" />
             </div>
-            <div v-else-if="airdrop.eligibility === 'CLAIMED'" class="flex items-center float-right">
+            <div
+              v-else-if="airdrop.eligibility === AirdropEligibilityStatus.CLAIMED"
+              class="flex items-center float-right"
+            >
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Claimed
             </div>
             <div v-else class="text-muted">Not available</div>
@@ -106,6 +111,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { AirdropDateStatus } from '@/types/api';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
 export default defineComponent({
   name: 'AirdropsTable',
@@ -200,6 +206,7 @@ export default defineComponent({
       handleClick,
       mappedAirdrops,
       seeAllMappedSection,
+      AirdropEligibilityStatus,
     };
   },
 });

@@ -16,21 +16,21 @@
           </div>
         </div>
 
-        <div v-if="selectedAirdrop.dateStatus === 'ENDED'">
+        <div v-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED">
           <p class="text-1 font-bold">Airdrop ended</p>
         </div>
 
-        <div v-else-if="selectedAirdrop.dateStatus === 'NOT_STARTED'">
+        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
           <p class="-text-1 text-muted mb-2">Airdrop coming soon</p>
           <p class="text-1 font-bold">You could become eligible for this airdrop</p>
         </div>
 
-        <div v-else-if="!isAutoDropped && selectedAirdrop.dateStatus === 'ONGOING'">
+        <div v-else-if="!isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
           <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
           <p class="text-2 font-bold">126.54 LIKE</p>
         </div>
 
-        <div v-else-if="isAutoDropped && selectedAirdrop.dateStatus === 'ONGOING'">
+        <div v-else-if="isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
           <div class="inline-flex items-center mb-2">
             <p class="-text-1 text-positive-text">Auto-drop</p>
             <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
@@ -38,7 +38,7 @@
           <p class="text-2 font-bold">126.54 LIKE</p>
         </div>
 
-        <div v-else-if="selectedAirdrop.dateStatus === 'NOT_ANNOUNCED'">
+        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED">
           <p class="text-2 font-bold">Not announced</p>
         </div>
 
@@ -95,6 +95,7 @@
   </div>
 </template>
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
@@ -166,6 +167,7 @@ export default defineComponent({
       isDemoAccount,
       isMultipleSnapshots,
       toggleConnectWalletModal,
+      EmerisAirdrops,
     };
   },
 });
