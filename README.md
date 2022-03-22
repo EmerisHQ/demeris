@@ -50,7 +50,7 @@ A potential way of solving this in the future would be if we provide 2 ways of r
 
 ## Testing
 
-### Automated testing - Cypress (e2e testing)
+### Automated testing - Playwright (e2e testing)
 
 Before you are able to run our automated tests locally, ensure you configured your `.env.local` file with a mnemonic with ATOM.
 
@@ -58,10 +58,8 @@ Test commands:
 
 ```
 # Run all tests in headless mode
-npx cypress run
+npm run dev && npm run e2e
 
-# Run one specific test in headed mode
-npx cypress run --spec cypress/integration/welcome-page-visual.spec.js --headed --no-exit
 ```
 
 ### Automated testing - Vitest (unit testing)

@@ -49,7 +49,7 @@ export default () => {
       transformMode: {
         web: [/\.[jt]sx$/],
       },
-      exclude: ['**/node_modules/**', '**/dist/**', '**/cypress/**', '**/e2e/**'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     },
   });
 };
