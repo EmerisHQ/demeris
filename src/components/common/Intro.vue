@@ -24,6 +24,6 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .intro-panel {
-  background-image: url('~@/assets/images/intro-panel.jpg');
+  background-image: url('../../assets/images/intro-panel.jpg');
 }
 </style>
