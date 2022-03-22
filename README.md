@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4cf6e90b-b924-4764-9adb-796ee24667f3/deploy-status)](https://app.netlify.com/sites/emeris-app/deploys)
+
 # emeris-web
 
 Web version of Emeris, the Interface to the Internet of Blockchains.
