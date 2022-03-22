@@ -17,6 +17,7 @@ export default () => {
   return defineConfig({
     build: {
       chunkSizeWarningLimit: 1500,
+      sourcemap: process.env.NODE_ENV === 'development',
     },
     plugins: [vue(), nodeResolve(), envCompatible(), dynamicImport()],
     resolve: {
