@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 import { parseCoins } from './basic';
 
 test('should parse coins', () => {

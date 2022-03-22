@@ -759,17 +759,17 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .swapped-image {
-  background-image: url('~@/assets/images/swap-result.png');
+  background-image: url('../assets/images/swap-result.png');
   height: 13rem;
 }
 
 .transferred-image {
-  background-image: url('~@/assets/images/silver-surfer-1-light.png');
+  background-image: url('../assets/images/silver-surfer-1-light.png');
 }
 
 @media (prefers-color-scheme: dark) {
   .transferred-image {
-    background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+    background-image: url('../assets/images/silver-surfer-1-dark.png');
   }
 }
 

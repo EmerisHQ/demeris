@@ -283,8 +283,8 @@ export default defineComponent({
   },
   emits: ['disconnect', 'connect'],
   setup(_, { emit }) {
-    const gitVersion = process.env.VUE_APP_GIT_VERSION;
-    const appVersion = process.env.VUE_APP_VERSION;
+    const gitVersion = import.meta.env.VITE_GIT_VERSION;
+    const appVersion = import.meta.env.VITE_VERSION;
 
     const store = useStore();
     const theme = useTheme();
