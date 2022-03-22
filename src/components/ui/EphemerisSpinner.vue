@@ -1,16 +1,22 @@
 <template>
   <div>
     <div class="ephemeris relative flex items-center justify-center w-full">
-      <img class="absolute ephemeris-1" src="../../assets/images/gold-ephemeris-ring-1.png" alt="Gold ephemeris ring" />
-      <img class="absolute ephemeris-2" src="../../assets/images/gold-ephemeris-ring-2.png" alt="Gold ephemeris ring" />
+      <img class="absolute ephemeris-1" :src="ring1" alt="Gold ephemeris ring" />
+      <img class="absolute ephemeris-2" :src="ring2" alt="Gold ephemeris ring" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import ring1 from '@/assets/images/gold-ephemeris-ring-1.png';
+import ring2 from '@/assets/images/gold-ephemeris-ring-2.png';
+
 export default defineComponent({
   name: 'EphemerisSpinner',
+  setup() {
+    return { ring1, ring2 };
+  },
 });
 </script>
 
