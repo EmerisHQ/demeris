@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"],
-    "types": ["webpack-env", "node", "long", "jest", "vite/client", "vitest/globals"],
+    "types": ["webpack-env", "node", "long", "vite/client", "vitest/globals"],
     "paths": {
       "@/*": ["src/*"]
     },
