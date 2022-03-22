@@ -207,6 +207,7 @@ export default defineComponent({
       mappedAirdrops,
       seeAllMappedSection,
       AirdropEligibilityStatus,
+      EmerisAirdrops,
     };
   },
 });
