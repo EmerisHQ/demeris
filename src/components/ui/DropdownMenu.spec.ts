@@ -3,11 +3,16 @@
  */
 // npx vitest src/components/ui/DropdownMenu.spec.ts
 import { mount } from '@vue/test-utils';
+import { config } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
+import { Tippy } from 'vue-tippy';
 
 import DropdownMenu from './DropdownMenu.vue';
 import DropdownMenuItem from './DropdownMenuItem.vue';
 
+config.global.components = {
+  tippy: Tippy,
+};
 describe('Notifications', () => {
   test('Mounts with button and only icon', async () => {
     const wrapper = mount(DropdownMenu, {
