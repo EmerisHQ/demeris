@@ -3,12 +3,7 @@
     <div class="flex flex-col px-8 text-center" :class="type == 'welcome' ? 'py-8' : 'pb-8'">
       <template v-if="!isConnecting">
         <slot name="title">
-          <img
-            v-if="type !== 'welcome'"
-            src="~@/assets/images/keplr-wallet-logo.png"
-            alt="Keplr logo"
-            class="w-12 mx-auto mb-8"
-          />
+          <img v-if="type !== 'welcome'" :src="keplrWalletLogo" alt="Keplr logo" class="w-12 mx-auto mb-8" />
           <h2 v-if="type === 'welcome'" class="text-3 font-bold">
             {{ $t('generic_cta.connectToEmeris') }}
           </h2>
@@ -58,6 +53,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
+import keplrWalletLogo from '@/assets/images/keplr-wallet-logo.png';
 import Button from '@/components/ui/Button.vue';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
@@ -128,7 +124,7 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, signIn, trySignIn, signInDemo };
+    return { isConnecting, emitCancel, cancel, keplrWalletLogo, signIn, trySignIn, signInDemo };
   },
 });
 </script>

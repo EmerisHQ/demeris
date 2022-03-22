@@ -32,14 +32,13 @@
         <span v-if="airdropsLoading">
           <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
         </span>
-        <span v-if="showBlinker" class="blinking"></span>
-      </div>
-
-      <div v-if="showBlinker" class="airdrop-hover bg-text text-inverse py-2 px-3 mt-3 rounded-lg">
-        <div class="flex items-center">
-          <Icon name="StarsIcon" />
-          <p class="-text-1 ml-1">3 airdrops found</p>
-        </div>
+        <span
+          v-if="showEligibleAmount"
+          class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
+          style="color: white"
+        >
+          {{ noOfClaimableAirdrops }}
+        </span>
       </div>
     </router-link>
   </nav>
@@ -52,6 +51,7 @@ import { useStore } from 'vuex';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -68,15 +68,22 @@ export default defineComponent({
     });
 
     const onAirdropsPage = computed(() => {
-      return route.fullPath.includes('/airdrops');
+      return route.fullPath.includes('/airdrop');
     });
 
     const airdropsLoading = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
-    const showBlinker = computed(() => {
-      return !onAirdropsPage.value && !airdropsLoading.value;
+    const noOfClaimableAirdrops = computed(() => {
+      const claimableAirdrops = airdrops.value.filter(
+        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
+      );
+      return claimableAirdrops.length;
+    });
+
+    const showEligibleAmount = computed(() => {
+      return !onAirdropsPage.value && !airdropsLoading.value && noOfClaimableAirdrops.value > 0;
     });
 
     return {
@@ -84,7 +91,8 @@ export default defineComponent({
       airdrops,
       onAirdropsPage,
       airdropsLoading,
-      showBlinker,
+      showEligibleAmount,
+      noOfClaimableAirdrops,
     };
   },
 });
@@ -93,49 +101,5 @@ export default defineComponent({
 <style scoped lang="scss">
 .router-link-exact-active {
   color: var(--text);
-}
-
-.airdrop-menu-item {
-  .airdrop-hover {
-    display: none;
-  }
-  &:hover {
-    .airdrop-hover {
-      position: relative;
-      left: -25%;
-      display: block;
-      animation: 0.5s zoom-in-zoom-out ease;
-    }
-  }
-}
-
-.blinking {
-  height: 10px;
-  width: 10px;
-  background-color: red;
-  border-radius: 50%;
-  display: inline-block;
-  position: relative;
-  top: -10px;
-  animation: 1.3s blink ease infinite;
-}
-
-@keyframes blink {
-  from,
-  to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes zoom-in-zoom-out {
-  0% {
-    transform: scale(0.7, 0.7);
-  }
-  100% {
-    transform: scale(1, 1);
-  }
 }
 </style>

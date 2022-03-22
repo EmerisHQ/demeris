@@ -1,10 +1,13 @@
 <template>
   <div class="coin-image" :style="ringStyle">
-    <img :src="require(`@/assets/coins/atom.png`)" :alt="coinData.denom" :style="coinImageStyle" />
+    <img :src="atomImg" :alt="coinData.denom" :style="coinImageStyle" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+
+import atomImg from '@/assets/coins/atom.png';
+
 export default defineComponent({
   name: 'CoinImageWithRing',
   props: {
@@ -27,7 +30,7 @@ export default defineComponent({
 
     const ringStyle = ref(outer);
     const coinImageStyle = ref(inner);
-    return { ringStyle, coinImageStyle };
+    return { atomImg, ringStyle, coinImageStyle };
   },
 });
 </script>

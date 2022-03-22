@@ -26,7 +26,7 @@ watch(
   (newValue) => {
     if (!newValue) return;
     const nativeAsset = nativeBalances.value.find((item) => item.base_denom === newValue.denom);
-    asset.value.name = nativeAsset.displayName;
+    asset.value.name = nativeAsset?.displayName;
     asset.value.denom = newValue.denom;
   },
   { immediate: true },

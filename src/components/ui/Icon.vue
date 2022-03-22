@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, shallowRef } from 'vue';
+import { defineAsyncComponent, defineComponent, onMounted, ref, shallowRef } from 'vue';
 
 export default defineComponent({
   name: 'Icon',
@@ -25,8 +25,9 @@ export default defineComponent({
   setup(props) {
     const currentIcon = shallowRef('');
     const isReady = ref(false);
-    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
-      currentIcon.value = val.default;
+    onMounted(async () => {
+      const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
+      currentIcon.value = icon;
       isReady.value = true;
     });
 

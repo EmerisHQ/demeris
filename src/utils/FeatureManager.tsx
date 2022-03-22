@@ -16,20 +16,17 @@ class FeatureManager {
 
   public load() {
     const urlParams = Object.fromEntries(new URLSearchParams(location.search));
-    const appParams = {
-      ...process.env,
-      ...urlParams,
-    };
-
+    const envParams = import.meta.env.VITE_USER_NODE_ENV === 'test' ? process.env : import.meta.env;
+    const appParams = { ...envParams, ...urlParams };
     for (const [key, value] of Object.entries(appParams)) {
-      if (key.indexOf('VUE_APP_FEATURE') === 0) {
-        this.features[key.substring(16)] = value === 'true' || parseInt(value) === 1 ? true : false;
+      if (key.startsWith('VITE_FEATURE_')) {
+        this.features[key.replace('VITE_FEATURE_', '')] = value === 'true' || parseInt(value) === 1 ? true : false;
       }
     }
   }
 }
 
-const instance = FeatureManager.getInstance();
+export const instance = FeatureManager.getInstance();
 export const featureRunning = (name: string) => instance.featureRunning(name);
 // testing helper
 export const loadFeaturesRunning = () => instance.load();

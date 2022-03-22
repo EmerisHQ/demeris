@@ -52,9 +52,6 @@ module.exports = {
   overrides: [
     {
       files: ['**/src/**/*.spec.{j,t}s?(x)'],
-      env: {
-        jest: true,
-      },
     },
   ],
 };

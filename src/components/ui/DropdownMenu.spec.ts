@@ -1,15 +1,19 @@
-// npx jest -- src/components/ui/DropdownMenu.spec.js
-import { mount, shallowMount } from '@vue/test-utils';
+/**
+ * @vitest-environment jsdom
+ */
+// npx vitest src/components/ui/DropdownMenu.spec.ts
+import { mount } from '@vue/test-utils';
+import { describe, expect, test } from 'vitest';
 
 import DropdownMenu from './DropdownMenu.vue';
 import DropdownMenuItem from './DropdownMenuItem.vue';
 
 describe('Notifications', () => {
-  it('Mounts with button and only icon', async () => {
-    const wrapper = shallowMount(DropdownMenu, {
+  test('Mounts with button and only icon', async () => {
+    const wrapper = mount(DropdownMenu, {
       props: {
         icon: 'ThreeDotsIcon',
-        placement: 'right-star',
+        placement: 'right-start',
       },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
@@ -17,43 +21,45 @@ describe('Notifications', () => {
     expect(wrapper.find('[data-test=openMenuButtonLabel]').exists()).toBe(false);
   });
 
-  it('Mounts with button and only text', async () => {
-    const wrapper = shallowMount(DropdownMenu, {
+  test('Mounts with button and only text', async () => {
+    const wrapper = mount(DropdownMenu, {
       props: {
-        label: 'buttonLabel',
-        placement: 'right-star',
+        label: 'buttonLabel2',
+        placement: 'right-start',
       },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
     expect(wrapper.find('[data-test=openMenuButtonIcon]').exists()).toBe(false);
     expect(wrapper.find('[data-test=openMenuButtonLabel]').exists()).toBe(true);
-    expect(wrapper.find('[data-test=openMenuButtonLabel]').html()).toContain('buttonLabel');
+    expect(wrapper.find('[data-test=openMenuButtonLabel]').html()).toContain('buttonLabel2');
   });
 
-  it('Mounts with content in slot', async () => {
+  test('Mounts with content in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
-        default: 'Main Content',
+        default: 'Main Content xxx',
       },
     });
     const wrapper = mount(DropdownMenu, {
       props: {
         label: 'buttonLabel',
-        placement: 'right-star',
+        placement: 'right-start',
       },
       slots: {
         default: DropdownMenuItem1,
       },
     });
-    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
+    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content xxx');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    setTimeout(() => {
-      const menu = wrapper.get('[data-test=mainComponent]');
-      expect(menu.html()).toContain('Main Content');
-    }, 100);
+    window.requestAnimationFrame(async () => {
+      window.requestAnimationFrame(async () => {
+        const menu = await wrapper.get('[data-test=mainComponent]');
+        expect(menu.html()).toContain('Main Content xxx');
+      });
+    });
   });
 
-  it('Mounts with 3 links in slot', async () => {
+  test('Mounts with 3 links in slot', async () => {
     const DropdownMenuItem1 = mount(DropdownMenuItem, {
       slots: {
         default: 'Main Content 1',
@@ -72,19 +78,21 @@ describe('Notifications', () => {
     const wrapper = mount(DropdownMenu, {
       props: {
         label: 'buttonLabel',
-        placement: 'right-star',
+        placement: 'right-start',
       },
       slots: {
         default: [DropdownMenuItem1, DropdownMenuItem2, DropdownMenuItem3],
       },
     });
-    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content');
+    expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    setTimeout(() => {
-      const menu = wrapper.get('[data-test=mainComponent]');
-      expect(menu.html()).toContain('Main Content 1');
-      expect(menu.html()).toContain('Main Content 2');
-      expect(menu.html()).toContain('Main Content 3');
-    }, 100);
+    window.requestAnimationFrame(async () => {
+      window.requestAnimationFrame(async () => {
+        const menu = await wrapper.get('[data-test=mainComponent]');
+        expect(menu.html()).toContain('Main Content 1');
+        expect(menu.html()).toContain('Main Content 2');
+        expect(menu.html()).toContain('Main Content 3');
+      });
+    });
   });
 });
