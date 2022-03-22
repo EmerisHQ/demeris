@@ -26,14 +26,14 @@
     <ConnectWalletModal
       v-if="transactionsStore"
       :open="transactionsStore.isConnectWalletModalOpen"
-      @close="transactionsStore.toggleConnectWalletModal"
+      @close="transactionsStore.closeConnectWalletModal"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, PropType, watch } from 'vue';
+import { computed, onUnmounted, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
@@ -77,6 +77,12 @@ const onReceiptState = () => emits('onReceiptState');
 watch(isPending, (value) => {
   if (value) {
     emits('pending');
+  }
+});
+
+onUnmounted(() => {
+  if (transactionsStore.isConnectWalletModalOpen) {
+    transactionsStore.closeConnectWalletModal();
   }
 });
 </script>

@@ -71,6 +71,10 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
     },
 
+    closeConnectWalletModal() {
+      this.isConnectWalletModalOpen = false;
+    },
+
     toggleConnectWalletModal() {
       this.isConnectWalletModalOpen = !this.isConnectWalletModalOpen;
     },
@@ -166,6 +170,7 @@ export const useTransactionsStore = defineStore('transactions', {
         balances,
         action,
         steps,
+        isDemoAccount: globalStore.getters[GlobalGetterTypes.USER.isDemoAccount],
         gasPriceLevel: globalStore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel],
         gasLimit: globalStore.getters[GlobalGetterTypes.USER.getGasLimit],
       });
