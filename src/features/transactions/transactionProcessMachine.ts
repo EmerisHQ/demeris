@@ -525,7 +525,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         const traceResponse = async () => {
-          await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
+          await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
           await findIBCDestHash();
 
           let traceResult;
@@ -543,11 +543,18 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           };
 
           try {
+            // NOTE: Inluded for testing, timeout to wait for tx in the blockchain
+            if (featureRunning('FORCE_RPC_FALLBACK')) {
+              await new Promise((resolve) => setTimeout(resolve, 30000));
+              throw new Error('Force RPC fallback enabled');
+            }
+
             traceResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
             });
-          } catch {
+          } catch (e) {
+            console.error(e);
             rpcFallback();
           }
 

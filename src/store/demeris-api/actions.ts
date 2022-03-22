@@ -837,7 +837,29 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       return getters['getChainStatus'](params);
     }
   },
+  async [ActionTypes.GET_NEW_BLOCK]({ getters }, { chain_name }) {
+    return new Promise(async (resolve, reject) => {
+      const timeout = 30000;
 
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
+      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
+
+      await wss.connect().catch(reject);
+
+      wss.subscribe(
+        {
+          query: `tm.event = 'NewBlock'`,
+        },
+        (data: Record<string, any>) => {
+          if (data.result.data) {
+            resolve(data.result.data);
+          }
+        },
+      );
+
+      setTimeout(reject, timeout);
+    });
+  },
   async [ActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 60000;
