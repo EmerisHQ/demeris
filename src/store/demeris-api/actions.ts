@@ -1,6 +1,6 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
-import { SpVuexError } from '@starport/vuex';
+import SpVuexError from '@starport/vuex';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 

@@ -2,7 +2,7 @@ import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
-import { SpVuexError } from '@starport/vuex';
+import SpVuexError from '@starport/vuex';
 import { ActionTree, DispatchOptions } from 'vuex';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
@@ -188,7 +188,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         await window.keplr.enable(dexchain.node_info.chain_id);
         keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
       } else {
-        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
+        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
           prefix: dexchain.node_info.bech32_config.main_prefix,
           hdPaths: [stringToPath(dexchain.derivation_path)],
         });
@@ -215,7 +215,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
           const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
           commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {
-          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
+          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
             prefix: chain.node_info.bech32_config.main_prefix,
             hdPaths: [stringToPath(chain.derivation_path)],
           });

@@ -1,6 +1,6 @@
 import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
-import { SpVuexError } from '@starport/vuex';
+import SpVuexError from '@starport/vuex';
 import axios from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -60,7 +60,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       }
 
       const offlineSigner = isCypress
-        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
+        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
             prefix: chain.node_info.bech32_config.main_prefix,
             hdPaths: [stringToPath(chain.derivation_path)],
           })

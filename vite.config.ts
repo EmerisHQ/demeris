@@ -1,13 +1,13 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import vue from '@vitejs/plugin-vue';
-import path from 'path';
-import { dynamicImport } from 'vite-plugin-dynamic-import';
+import * as path from 'path';
+import dynamicImport from 'vite-plugin-dynamic-import';
 import envCompatible from 'vite-plugin-env-compatible';
 import { defineConfig } from 'vitest/config';
 
 import gitVersion from './build/git-version';
-import pkg from './package.json';
+import * as pkg from './package.json';
 
 // https://vitejs.dev/config/
 export default () => {
