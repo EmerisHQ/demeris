@@ -11,6 +11,7 @@ on:
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  DEBUG: 'pw:api'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
