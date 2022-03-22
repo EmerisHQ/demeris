@@ -63,7 +63,7 @@ if (featureRunning('SENTRY')) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: parseFloat(import.meta.env.SENTRY_TRACES_SAMPLE_RATE),
+    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE),
   });
 }
 
