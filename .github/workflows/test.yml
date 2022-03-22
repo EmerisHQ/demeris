@@ -43,7 +43,7 @@ jobs:
           cache: npm
 
       - name: Install (npm)
-        run: npm install
+        run: npm ci
 
       - name: Test
         run: npm run test:unit
@@ -73,7 +73,7 @@ jobs:
           cache: npm
 
       - name: Install (npm)
-        run: npm install
+        run: npm ci
 
       - name: Install Serve
         run: npm install -g serve
