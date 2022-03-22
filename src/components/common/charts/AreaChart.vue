@@ -8,7 +8,7 @@
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
-      ></apexchart>
+      />
       <div v-if="variant === 'full'" class="flex justify-between items-center -mt-4">
         <p class="-text-1 text-muted">
           {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}
