@@ -473,7 +473,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
 
           if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
-            throw new Error(resultData.error || 'error');
+            return callback({
+              // @ts-ignore
+              type: 'GOT_FAILURE',
+              error: resultData.error,
+              data: responseData,
+            });
           }
 
           if (resultData.status === 'IBC_receive_success') {
