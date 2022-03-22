@@ -17,7 +17,7 @@ export default () => {
   process.env.VITE_VERSION = pkg.version;
   return defineConfig({
     build: {
-      chunkSizeWarningLimit: 1500,
+      chunkSizeWarningLimit: 1000,
       sourcemap: true,
     },
     plugins: [vue(), nodeResolve(), dynamicImport(), envCompatible(), eslintPlugin({ fix: true })],
