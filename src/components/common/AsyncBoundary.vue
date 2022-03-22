@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, onErrorCaptured, ref, watch, withDefaults } from 'vue';
+import { onErrorCaptured, ref, watch, withDefaults } from 'vue';
 
 import ErrorDisplay from '@/components/common/ErrorDisplay.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';

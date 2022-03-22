@@ -32,7 +32,7 @@
         { 'relative inline': variant === 'link' },
         { 'bg-brand-to-r': status === 'loading' && variant === 'primary' },
         { 'loading pointer-events-none cursor-default': status === 'loading' },
-        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
+        disabled ? 'text-inactive pointer-events-none cursor-default' : 'cursor-pointer',
       ]"
       :disabled="disabled"
       class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap outline-offset-4"
