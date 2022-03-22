@@ -282,7 +282,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_POOL_BALANCES, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
+        throw new SpVuexError('Demeris:GetPoolBalances', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -933,6 +933,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     try {
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
+
       return data?.result?.tx_result;
     } catch (e) {
       throw new Error('Could not find transaction response from RPC');

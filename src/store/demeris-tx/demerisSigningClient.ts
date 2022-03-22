@@ -2,12 +2,35 @@ import { encodeSecp256k1Pubkey, makeSignDoc as makeSignDocAmino, OfflineAminoSig
 import { fromBase64 } from '@cosmjs/encoding';
 import { Int53 } from '@cosmjs/math';
 import { EncodeObject, encodePubkey, makeAuthInfoBytes, TxBodyEncodeObject } from '@cosmjs/proto-signing';
-import { SignMode } from '@cosmjs/proto-signing/build/codec/cosmos/tx/signing/v1beta1/signing';
-import { AminoTypes } from '@cosmjs/stargate';
+import { AminoConverters, AminoTypes } from '@cosmjs/stargate';
 import { SignerData, SigningStargateClient } from '@cosmjs/stargate';
-import { TxRaw } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+import {
+  createAuthzAminoConverters,
+  createBankAminoConverters,
+  createDistributionAminoConverters,
+  createFreegrantAminoConverters,
+  createGovAminoConverters,
+  createIbcAminoConverters,
+  createStakingAminoConverters,
+} from '@cosmjs/stargate';
+import { bech32 } from 'bech32';
+import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { liquidityTypes } from './liquidityTypes';
+
+function createAminoTypes(prefix: string): AminoConverters {
+  return {
+    ...createAuthzAminoConverters(),
+    ...createBankAminoConverters(),
+    ...createDistributionAminoConverters(),
+    ...createGovAminoConverters(),
+    ...createStakingAminoConverters(prefix),
+    ...createIbcAminoConverters(),
+    ...createFreegrantAminoConverters(),
+    ...liquidityTypes,
+  };
+}
 
 interface DemerisSigning {
   exposedSigner: OfflineAminoSigner;
@@ -39,7 +62,7 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     if (!accountFromSigner) {
       throw new Error('Failed to retrieve account from signer');
     }
-    const aminoTypes = new AminoTypes({ additions: liquidityTypes, prefix: null });
+    const aminoTypes = new AminoTypes({ ...createAminoTypes(bech32.decode(signerAddress).prefix) });
     const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
     const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
     const msgs = messages.map((msg) => aminoTypes.toAmino(msg));
@@ -59,10 +82,14 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
     const signedSequence = Int53.fromString(signed.sequence).toNumber();
     const signedAuthInfoBytes = makeAuthInfoBytes(
-      [pubkey],
+      [
+        {
+          pubkey: pubkey,
+          sequence: signedSequence,
+        },
+      ],
       signed.fee.amount,
       signedGasLimit,
-      signedSequence,
       signMode,
     );
     const txRaw: TxRaw = TxRaw.fromPartial({

@@ -13,7 +13,7 @@
         </p>
       </div>
 
-      <img src="~@/assets/images/demo-account-banner.png" alt="Claimable airdrops header" class="w-1/2" />
+      <img :src="demoAccountBanner" alt="Claimable airdrops header" class="w-1/2" />
     </div>
 
     <div
@@ -28,7 +28,7 @@
         </p>
       </div>
 
-      <img src="~@/assets/images/claimable-airdrops-header.png" alt="Claimable airdrops header" class="w-1/2" />
+      <img :src="claimableAirdropsHeader" alt="Claimable airdrops header" class="w-1/2" />
     </div>
 
     <div
@@ -55,6 +55,8 @@
 import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
+import claimableAirdropsHeader from '@/assets/images/claimable-airdrops-header.png';
+import demoAccountBanner from '@/assets/images/demo-account-banner.png';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useTheme from '@/composables/useTheme';
@@ -100,6 +102,8 @@ export default defineComponent({
     return {
       theme,
       selectedAirdrop,
+      claimableAirdropsHeader,
+      demoAccountBanner,
       isDemoAccountBanner,
       isWalletModalOpen,
       toggleConnectWalletModal,

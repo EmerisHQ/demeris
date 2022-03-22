@@ -4,17 +4,12 @@
     class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     href="https://support.emeris.com/en/articles/5999925-staking-on-emeris-step-by-step-tutorial"
     target="_blank"
+    @click="onBannerClick"
   >
     <h5 class="font-bold text-1">{{ $t('components.stakingBanner.startStaking') }}</h5>
     <p class="staking-banner__text -text-1 leading-5 text-muted">{{ $t('components.stakingBanner.text') }} &#x2197;</p>
-    <img
-      :src="require(`@/assets/images/stake-panel-ephemeris.png`)"
-      class="right-0 rounded-2xl absolute top-0 h-full z-0"
-    />
-    <img
-      :src="require(`@/assets/images/stakie-panel-gradient.png`)"
-      class="right-0 rounded-2xl absolute top-0 h-full z-10"
-    />
+    <img :src="stakePanel" class="right-0 rounded-2xl absolute top-0 h-full z-0" />
+    <img :src="panelGradient" class="right-0 rounded-2xl absolute top-0 h-full z-10" />
     <div class="staking-banner__circles z-50 absolute right-0 top-0">
       <CircleSymbol :display-status="false" :denom="baseDenom" custom-size="50px" />
       <CircleSymbol :display-status="false" :denom="baseDenom" custom-size="26px" />
@@ -27,9 +22,12 @@ import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
+import stakePanel from '@/assets/images/stake-panel-ephemeris.png';
+import panelGradient from '@/assets/images/stakie-panel-gradient.png';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes } from '@/store';
+import { event } from '@/utils/analytics';
 
 export default defineComponent({
   name: 'StakingBanner',
@@ -51,6 +49,10 @@ export default defineComponent({
     const store = useStore();
     let shouldShowBanner = ref<boolean>(false);
 
+    const onBannerClick = () => {
+      event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });
+    };
+
     const propsRef = toRefs(props);
     const apr = ref<string>('');
 
@@ -71,6 +73,9 @@ export default defineComponent({
     return {
       shouldShowBanner,
       apr,
+      onBannerClick,
+      panelGradient,
+      stakePanel,
     };
   },
 });

@@ -1,7 +1,6 @@
 .DS_Store
 node_modules
 /dist
-/cypress/screenshots/
 
 
 # local env files
@@ -24,3 +23,4 @@ pnpm-debug.log*
 *.sw?
 test-results/
 playwright-report/
+coverage/

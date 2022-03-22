@@ -23,6 +23,7 @@ import AsyncBoundary from '@/components/common/AsyncBoundary.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking, { StakingRewards } from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { event } from '@/utils/analytics';
 
 const store = useStore() as RootStoreTyped;
 const stakingRewardsData = ref<StakingRewards>(null);
@@ -45,6 +46,13 @@ const isSignedIn = computed(() => {
 });
 
 const selectTab = (tabNumber?: number): void => {
+  if (tabNumber === 2) {
+    // Unstaking tab clicked
+    event('unstaking_tab_select', {
+      event_label: 'Asset Page Staking Table Unstake Tab Click',
+      event_category: 'click',
+    });
+  }
   selectedTab.value = tabNumber;
 };
 

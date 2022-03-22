@@ -5,11 +5,7 @@
     <div class="flex-1 max-w-xs">
       <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
       <p class="text-muted leading-copy mt-3">
-        <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
-          <template #ticker>
-            <Ticker :name="denom" />
-          </template>
-        </i18n-t>
+        {{ $t('components.stakeTable.lockUpAndEarnRewards') }}
         <a
           href="https://support.emeris.com/en/articles/5999925-staking-on-emeris-step-by-step-tutorial"
           target="_blank"
@@ -41,6 +37,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import useDenoms from '@/composables/useDenoms';
 import { StakingActions } from '@/types/actions';
+import { event } from '@/utils/analytics';
 
 const { useDenom } = useDenoms();
 
@@ -50,6 +47,7 @@ const props = defineProps<{ denom: string }>();
 const { tickerName } = useDenom(props.denom);
 
 const goToStakingPage = () => {
+  event('staking_entry_point', { event_label: 'Asset Page Staking Banner Click', event_category: 'banner' });
   router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
 };
 </script>

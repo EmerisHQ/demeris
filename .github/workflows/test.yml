@@ -11,6 +11,10 @@ on:
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  DEBUG: 'pw:api'
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,7 +49,8 @@ jobs:
         run: npm install
 
       - name: Test
-        run: npm run test:unit -- --runInBand
+        run: npm run test:unit
+
   e2e:
     
     strategy:
@@ -75,10 +80,13 @@ jobs:
 
       - name: Install Serve
         run: npm install -g serve
+      
       - name: Install Playwright
         run: npx playwright install --with-deps
+
       - name: Build
         run: npm run build
+
       - name: Run Playwright tests
         run: 
           serve -s dist -l 8080 &

@@ -545,7 +545,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           try {
             // NOTE: Inluded for testing, timeout to wait for tx in the blockchain
             if (featureRunning('FORCE_RPC_FALLBACK')) {
-              await new Promise((resolve) => setTimeout(resolve, 30000));
+              const timeout = currentTransaction.name.includes('ibc') ? 30000 : 15000;
+              await new Promise((resolve) => setTimeout(resolve, timeout));
               throw new Error('Force RPC fallback enabled');
             }
 
@@ -555,7 +556,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             });
           } catch (e) {
             console.error(e);
-            rpcFallback();
+            await rpcFallback();
           }
 
           if (traceResult) {
