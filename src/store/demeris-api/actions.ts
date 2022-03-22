@@ -1,6 +1,5 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
-import SpVuexError from '@starport/vuex';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -11,6 +10,7 @@ import { UserData } from '@/types/user';
 import { ActionParams, ChartPrices, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
+import EmerisError from '@/utils/EmerisError';
 import TendermintWS from '@/utils/TendermintWS';
 
 import { RootStoreTyped } from '../';
@@ -244,7 +244,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_BALANCES, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetBalances', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -282,7 +282,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_POOL_BALANCES, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetPoolBalances', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetPoolBalances', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -318,7 +318,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         dispatch(GlobalActionTypes.USER.BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetAllBalances', 'Could not perform API query.');
     }
     return getters['getAllBalances'];
   },
@@ -338,7 +338,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         dispatch(GlobalActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
     }
     return getters['getAllStakingBalances'];
   },
@@ -349,7 +349,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         dispatch(ActionTypes.GET_UNBONDING_DELEGATIONS, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
     }
     return getters['getAllUnbondingDelegations'];
   },
@@ -359,7 +359,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       commit(MutationTypes.SET_VALID_POOLS, vp);
     } catch (e) {
       console.error(e);
-      throw new SpVuexError('Demeris:ValidatePools', 'Could not perform pool validation.');
+      throw new EmerisError('Demeris:ValidatePools', 'Could not perform pool validation.');
     }
     return getters['getAllValidPools'];
   },
@@ -374,7 +374,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       commit(MutationTypes.SET_UNSTAKING_PARAM, { params: { chain_name }, value: unstakingParam });
       return getters['getUnstakingParam']({ chain_name });
     } catch {
-      throw new SpVuexError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
+      throw new EmerisError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
     }
   },
   async [ActionTypes.GET_STAKING_BALANCES]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
@@ -407,7 +407,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_STAKING_BALANCES, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetStakingBalances', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetStakingBalances', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -448,7 +448,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetUnbondingDelegations', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetUnbondingDelegations', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -467,7 +467,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_NUMBERS_CHAIN, payload: { params } });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetNumbersChain', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetNumbersChain', 'Could not perform API query.');
     }
     return getters['getNumbersChain'](params);
   },
@@ -482,7 +482,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_VERIFIED_DENOMS, payload: {} });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetVerifiedDenoms', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetVerifiedDenoms', 'Could not perform API query.');
     }
     return getters['getVerifiedDenoms'];
   },
@@ -574,7 +574,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_PRICES, payload: {} });
         }
-        throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetPrices', 'Could not perform API query.');
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
@@ -593,7 +593,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
     } catch (e) {
       console.error(e);
-      throw new SpVuexError('Demeris:GetTXStatus', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetTXStatus', 'Could not perform API query.');
     }
     return getters['getTxStatus'](params);
   },
@@ -615,7 +615,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
       return response.data;
     } catch (e) {
-      throw new SpVuexError('Demeris:GetTXDestHash', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetTXDestHash', 'Could not perform API query.');
     }
   },
 
@@ -628,7 +628,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAINS, payload: {} });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetChains', 'Could not perform API query.');
+      throw new EmerisError('Demeris:GetChains', 'Could not perform API query.');
     }
     return getters['getChains'];
   },
@@ -706,7 +706,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetChain', 'Could not perform API query.');
       }
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
@@ -729,7 +729,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
     } catch (e) {
       commit(MutationTypes.SET_TOKEN_PRICES_STATUS, { value: LoadingState.ERROR });
-      throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
+      throw new EmerisError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
     return getters['getTokenPrices'];
   },
@@ -744,7 +744,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
       return response.data;
     } catch (e) {
-      throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
+      throw new EmerisError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
   async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
@@ -768,7 +768,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       commit(MutationTypes.SET_AIRDROPS_STATUS, {
         value: LoadingState.ERROR,
       });
-      throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
+      throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
   [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
@@ -830,7 +830,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
+        throw new EmerisError('Demeris:GetChainStatus', 'Could not perform API query.');
       }
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
@@ -952,7 +952,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         }
       }
     } catch (e) {
-      throw new SpVuexError('Demeris: GET_END_BLOCK_EVENTS', 'Could not GET_END_BLOCK_EVENTS.' + e.message);
+      throw new EmerisError('Demeris: GET_END_BLOCK_EVENTS', 'Could not GET_END_BLOCK_EVENTS.' + e.message);
     }
   },
 
@@ -964,7 +964,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       );
       return response.data?.validators;
     } catch (e) {
-      throw new SpVuexError('Demeris:GET_VALIDATORS', `Could not get ${chain_name} validators.` + e.message);
+      throw new EmerisError('Demeris:GET_VALIDATORS', `Could not get ${chain_name} validators.` + e.message);
     }
   },
 
@@ -976,7 +976,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       );
       return Number(response.data?.inflation);
     } catch (e) {
-      throw new SpVuexError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
+      throw new EmerisError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
     }
   },
 
@@ -989,7 +989,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       );
       return response.data;
     } catch (e) {
-      throw new SpVuexError('Demeris:GET_REWARDS', `Could not get ${chain_name} rewards.` + e.message);
+      throw new EmerisError('Demeris:GET_REWARDS', `Could not get ${chain_name} rewards.` + e.message);
     }
   },
 

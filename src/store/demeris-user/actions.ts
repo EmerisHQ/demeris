@@ -2,7 +2,6 @@ import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
-import SpVuexError from '@starport/vuex';
 import { ActionTree, DispatchOptions } from 'vuex';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
@@ -11,6 +10,7 @@ import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
 import { hashObject } from '@/utils/basic';
 import { fromHexString, keyHashfromAddress } from '@/utils/basic';
+import EmerisError from '@/utils/EmerisError';
 import { addChain } from '@/utils/keplr';
 
 import { USERStore } from '.';
@@ -273,7 +273,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
     try {
       commit(MutationTypes.SET_GAS_LIMIT, { value: gasLimit });
     } catch (e) {
-      throw new SpVuexError('Demeris:SetGasLimit', 'Could not set Gas Limit');
+      throw new EmerisError('Demeris:SetGasLimit', 'Could not set Gas Limit');
     }
   },
   [ActionTypes.RESET_STATE]({ commit }) {
