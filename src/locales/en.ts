@@ -19,7 +19,7 @@ export const messages = {
     components: {
       stakingBanner: {
         startStaking: 'Start staking',
-        text: 'Learn how to earn staking rewards on your assets using Emeris ',
+        text: 'Learn how to earn staking rewards on your assets ',
         textAPR: 'APR',
         cta: 'Start staking',
       },
@@ -169,7 +169,7 @@ export const messages = {
         staking: 'Staking',
         unstaking: 'Unstaking',
         earnRewards: 'Earn rewards by staking',
-        lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income in just a few steps. ',
+        lockUpAndEarnRewards: 'Learn how to earn staking rewards on your assets. ',
         learnMore: 'Learn more',
         apy: 'APY',
         reward: 'Rewards',

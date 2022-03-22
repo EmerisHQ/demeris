@@ -128,6 +128,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
 import { MultiStakeForm, Step } from '@/types/actions';
+import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'StakeFormAmount',
@@ -278,6 +279,10 @@ export default defineComponent({
       emit('unselect', validator);
     };
     const validatorAddHandler = () => {
+      event('multiple_validator_adding', {
+        event_label: 'Staking Form Add Another Validator Button Clicked',
+        event_category: 'button',
+      });
       emit('selectanother', null);
     };
     const goToReview = () => {
