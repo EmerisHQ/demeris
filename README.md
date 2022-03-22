@@ -1,4 +1,4 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/4cf6e90b-b924-4764-9adb-796ee24667f3/deploy-status)](https://app.netlify.com/sites/emeris-app/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4cf6e90b-b924-4764-9adb-796ee24667f3/deploy-status)](https://app.netlify.com/sites/emeris-app/deploys) [![Unit & E2E](https://github.com/EmerisHQ/demeris/actions/workflows/test.yml/badge.svg)](https://github.com/EmerisHQ/demeris/actions/workflows/test.yml)
 
 # emeris-web
 
