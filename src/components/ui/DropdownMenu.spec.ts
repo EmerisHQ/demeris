@@ -4,6 +4,8 @@
 // npx vitest src/components/ui/DropdownMenu.spec.ts
 import { mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
+import { h } from 'vue';
+import VueTippy from 'vue-tippy';
 
 import DropdownMenu from './DropdownMenu.vue';
 import DropdownMenuItem from './DropdownMenuItem.vue';
@@ -27,6 +29,9 @@ describe('Notifications', () => {
         label: 'buttonLabel2',
         placement: 'right-start',
       },
+      global: {
+        plugins: [VueTippy],
+      },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
     expect(wrapper.find('[data-test=openMenuButtonIcon]').exists()).toBe(false);
@@ -39,6 +44,9 @@ describe('Notifications', () => {
       slots: {
         default: 'Main Content xxx',
       },
+      global: {
+        plugins: [VueTippy],
+      },
     });
     const wrapper = mount(DropdownMenu, {
       props: {
@@ -46,7 +54,10 @@ describe('Notifications', () => {
         placement: 'right-start',
       },
       slots: {
-        default: DropdownMenuItem1,
+        default: h(DropdownMenuItem, {}, 'Main Content xxx'),
+      },
+      global: {
+        plugins: [VueTippy],
       },
     });
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content xxx');
@@ -64,15 +75,8 @@ describe('Notifications', () => {
       slots: {
         default: 'Main Content 1',
       },
-    });
-    const DropdownMenuItem2 = mount(DropdownMenuItem, {
-      slots: {
-        default: 'Main Content 2',
-      },
-    });
-    const DropdownMenuItem3 = mount(DropdownMenuItem, {
-      slots: {
-        default: 'Main Content 3',
+      global: {
+        plugins: [VueTippy],
       },
     });
     const wrapper = mount(DropdownMenu, {
@@ -81,7 +85,14 @@ describe('Notifications', () => {
         placement: 'right-start',
       },
       slots: {
-        default: [DropdownMenuItem1, DropdownMenuItem2, DropdownMenuItem3],
+        default: [
+          h(DropdownMenuItem, {}, 'Main Content 1'),
+          h(DropdownMenuItem, {}, 'Main Content 2'),
+          h(DropdownMenuItem, {}, 'Main Content 3'),
+        ],
+      },
+      global: {
+        plugins: [VueTippy],
       },
     });
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
