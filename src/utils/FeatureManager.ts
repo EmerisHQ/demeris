@@ -1,4 +1,3 @@
-import { URLSearchParams } from 'url';
 class FeatureManager {
   private static _instance: FeatureManager;
   features: { [key: string]: boolean } = {};
