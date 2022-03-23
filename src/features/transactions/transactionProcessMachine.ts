@@ -27,6 +27,7 @@ import {
 
 interface ContextInputSchema {
   action: string;
+  isDemoAccount: boolean;
   gasPriceLevel: EmerisFees.GasPriceLevel;
   gasLimit: number;
   steps: Step[];
@@ -73,6 +74,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     context: {
       input: {
         action: undefined,
+        isDemoAccount: undefined,
         gasPriceLevel: undefined,
         gasLimit: undefined,
         steps: [],
@@ -347,12 +349,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        const validation = await validateStepsFeeBalances(
-          context.formattedSteps,
-          context.input.balances,
-          totals,
-          context.input.gasPriceLevel,
-        );
+        let validation = {};
+        if (!context.input.isDemoAccount) {
+          validation = await validateStepsFeeBalances(
+            context.formattedSteps,
+            context.input.balances,
+            totals,
+            context.input.gasPriceLevel,
+          );
+        }
         return { totals, validation };
       },
       validateChainStatus: async (context) => {
@@ -468,7 +473,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
 
           if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
-            throw new Error(resultData.error || 'error');
+            return callback({
+              // @ts-ignore
+              type: 'GOT_FAILURE',
+              error: resultData.error,
+              data: responseData,
+            });
           }
 
           if (resultData.status === 'IBC_receive_success') {
@@ -557,6 +567,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     actions: {
       setData: assign((_, event: ContextInputSchema & { type: string }) => ({
         input: {
+          isDemoAccount: event.isDemoAccount,
           steps: event.steps,
           action: event.action,
           gasLimit: event.gasLimit,
@@ -662,8 +673,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
         return false;
       },
-
-      hasMissingFees: (context) => context.fees?.validation?.missingFees.length > 0,
+      hasMissingFees: (context) => context.fees?.validation?.missingFees?.length > 0,
       hasIBCFeeWarning: (context) => context.fees?.validation?.ibcWarning === true,
     },
   },

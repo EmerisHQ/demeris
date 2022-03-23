@@ -97,12 +97,15 @@
 </template>
 
 <script lang="ts" setup>
+import { whenever } from '@vueuse/core';
 import { computed, reactive } from 'vue';
+import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import Notifications from '@/components/ui/Notifications.vue';
+import { GlobalGetterTypes } from '@/store';
 
 import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessItem from './TransactionProcessItem.vue';
@@ -110,6 +113,7 @@ import TransactionProcessViewer from './TransactionProcessViewer.vue';
 import TransactionsCenterActionButton from './TransactionsCenterActionButton.vue';
 
 const transactionsStore = useTransactionsStore();
+const globalStore = useStore();
 
 const state = reactive({
   viewAll: false,
@@ -186,4 +190,8 @@ const showDetails = (id: string) => {
 const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit.value));
 const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit.value);
+
+const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
+
+whenever(isSignedIn, () => transactionsStore.$reset());
 </script>
