@@ -68,7 +68,7 @@ describe('Notifications', () => {
     setTimeout(async () => {
       const menu = await wrapper.get('[data-test=mainComponent]');
       expect(menu.html()).toContain('Main Content xxx');
-    }, 300);
+    }, 500);
   });
 
   test('Mounts with 3 links in slot', async () => {
