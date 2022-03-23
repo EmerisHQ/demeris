@@ -1,3 +1,4 @@
+import { URLSearchParams } from 'url';
 class FeatureManager {
   private static _instance: FeatureManager;
   features: { [key: string]: boolean } = {};
@@ -20,7 +21,8 @@ class FeatureManager {
     const appParams = { ...envParams, ...urlParams };
     for (const [key, value] of Object.entries(appParams)) {
       if (key.startsWith('VITE_FEATURE_')) {
-        this.features[key.replace('VITE_FEATURE_', '')] = value === 'true' || parseInt(value) === 1 ? true : false;
+        this.features[key.replace('VITE_FEATURE_', '')] =
+          value === 'true' || parseInt(value as string) === 1 ? true : false;
       }
     }
   }

@@ -17,6 +17,9 @@ describe('Notifications', () => {
         icon: 'ThreeDotsIcon',
         placement: 'right-start',
       },
+      global: {
+        plugins: [VueTippy],
+      },
     });
     expect(wrapper.find('[data-test=openMenuButton]').exists()).toBe(true);
     expect(wrapper.find('[data-test=openMenuButtonIcon]').exists()).toBe(true);
@@ -62,12 +65,10 @@ describe('Notifications', () => {
     });
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content xxx');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    window.requestAnimationFrame(async () => {
-      window.requestAnimationFrame(async () => {
-        const menu = await wrapper.get('[data-test=mainComponent]');
-        expect(menu.html()).toContain('Main Content xxx');
-      });
-    });
+    setTimeout(async () => {
+      const menu = await wrapper.get('[data-test=mainComponent]');
+      expect(menu.html()).toContain('Main Content xxx');
+    }, 100);
   });
 
   test('Mounts with 3 links in slot', async () => {
@@ -97,13 +98,11 @@ describe('Notifications', () => {
     });
     expect(DropdownMenuItem1.find('[data-test=menuItemButton]').html()).toContain('Main Content 1');
     await wrapper.find('[data-test="openMenuButton"]').trigger('click');
-    window.requestAnimationFrame(async () => {
-      window.requestAnimationFrame(async () => {
-        const menu = await wrapper.get('[data-test=mainComponent]');
-        expect(menu.html()).toContain('Main Content 1');
-        expect(menu.html()).toContain('Main Content 2');
-        expect(menu.html()).toContain('Main Content 3');
-      });
-    });
+    setTimeout(async () => {
+      const menu = await wrapper.get('[data-test=mainComponent]');
+      expect(menu.html()).toContain('Main Content 1');
+      expect(menu.html()).toContain('Main Content 2');
+      expect(menu.html()).toContain('Main Content 3');
+    }, 100);
   });
 });

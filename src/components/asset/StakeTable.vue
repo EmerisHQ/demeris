@@ -12,7 +12,7 @@
     <StakeTableBanner v-if="showStakingBanner" :denom="props.denom" />
   </div>
 </template>
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 

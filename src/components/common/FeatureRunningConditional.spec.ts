@@ -1,4 +1,4 @@
-// npx vitest src/components/common/FeatureRunningConditional.spec.tsx
+// npx vitest src/components/common/FeatureRunningConditional.spec.ts
 import { mount } from '@vue/test-utils';
 
 import { loadFeaturesRunning } from '../../utils/FeatureManager';
@@ -9,8 +9,8 @@ const env = process.env;
 afterEach(() => {
   process.env = env;
 });
-
-test('should render with import.meta.env when activated', () => {
+console.log(process.env);
+test('should render with env when activated', () => {
   process.env.VITE_FEATURE_MY_TEST = 'true';
   loadFeaturesRunning();
 
@@ -21,7 +21,7 @@ test('should render with import.meta.env when activated', () => {
   expect(wrapper.html()).toBe('<h1>Enabled</h1>');
 });
 
-test('should render with import.meta.env when deactivated', () => {
+test('should render with env when deactivated', () => {
   process.env.VITE_FEATURE_MY_TEST = 'false';
   loadFeaturesRunning();
 
