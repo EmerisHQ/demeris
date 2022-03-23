@@ -43,7 +43,8 @@ export default defineComponent({
       default: null,
     },
   },
-  setup(props) {
+  emits: ['displayPrice'],
+  setup(props, { emit }) {
     const store = useStore();
     const denom = ref(props.amount.denom);
     const isLoaded = ref(false);
@@ -71,6 +72,14 @@ export default defineComponent({
 
       return value;
     });
+
+    watch(
+      () => displayPrice.value,
+      async (value) => {
+        emit('displayPrice', value);
+      },
+      { immediate: true },
+    );
 
     /*
      There are 2 reasons to update the price. Either amount changed or price changed.
