@@ -933,12 +933,12 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
         if (data.result?.data?.value?.TxResult) {
           done = true;
-          resolve(data.result.data.value.TxResult);
+          resolve(data.result);
         }
 
         if (data?.result?.tx_result) {
           done = true;
-          resolve(data.result.tx_result);
+          resolve(data.result);
         }
       };
 
@@ -964,7 +964,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
 
-      return data?.result?.tx_result;
+      return data?.result;
     } catch (e) {
       throw new Error('Could not find transaction response from RPC');
     }
