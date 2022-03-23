@@ -5,6 +5,7 @@ import { Sender } from 'xstate';
 
 import { GlobalGetterTypes } from '@/store';
 import {
+  ClaimData,
   CreatePoolData,
   IBCBackwardsData,
   IBCForwardsData,
@@ -50,7 +51,6 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
   const dexChain = useStore().getters[GlobalGetterTypes.API.getDexChain];
-
   switch (transaction.name) {
     case 'transfer':
       return (transaction.data as TransferData).chain_name;
@@ -62,6 +62,8 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
       return (transaction.data as StakeData[])[0].chain_name;
     case 'unstake':
       return (transaction.data as UnstakeData).chain_name;
+    case 'claim':
+      return (transaction.data as ClaimData).chain_name;
     case 'switch':
       return (transaction.data as RestakeData).chain_name;
     default:

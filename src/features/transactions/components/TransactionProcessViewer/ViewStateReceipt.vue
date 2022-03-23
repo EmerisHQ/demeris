@@ -396,12 +396,12 @@ const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock);
 
 <style scoped>
 .transferred-image {
-  background-image: url('../assets/images/silver-surfer-1-light.png');
+  background-image: url('@/assets/images/silver-surfer-1-light.png');
 }
 
 @media (prefers-color-scheme: dark) {
   .transferred-image {
-    background-image: url('../assets/images/silver-surfer-1-dark.png');
+    background-image: url('@/assets/images/silver-surfer-1-dark.png');
   }
 }
 </style>
