@@ -13,14 +13,14 @@
     >
       <Icon :name="'CloseIcon'" :icon-size="1" />
     </button>
-    <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow" @click="selectValidator">
+    <div class="self-stretch flex items-center shrink-0 pr-3 cursor-pointer grow" @click="selectValidator">
       <ValidatorBadge :size="size" :validator="validator" class="mr-4" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
-        <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <div class="text-muted text-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
         </div>
       </div>

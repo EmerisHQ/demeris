@@ -103,7 +103,7 @@
           :denom="state.currentAsset.base_denom"
           class="relative mr-4"
         />
-        <div class="flex-grow">
+        <div class="grow">
           <p class="font-medium">
             <Denom :name="state.currentAsset.base_denom" />
           </p>
