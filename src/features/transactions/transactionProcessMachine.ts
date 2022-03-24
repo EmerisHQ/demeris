@@ -230,7 +230,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               SIGN: '#signing.delayed',
             },
           },
-          failure: {},
         },
       },
       transacting: {
