@@ -91,3 +91,7 @@ We are currently using Feature Flags in order to toggle on/off functionality. Th
 Right now, because we don't have a [good feature management system in place](https://github.com/allinbits/demeris/issues/949), we list all the features in the codebase in the `.env` file as a comment.
 
 [Learn more about feature flags](https://www.notion.so/allinbits/Working-with-Feature-Flags-c0bbf36cbb2646de9e6754564394bdc2)
+
+## Maintenance Screen
+
+In case of emergencies, for example the backend API's are down, it's possible for us to show a maintenance screen to the customers of Emeris. To do this, change `VITE_FEATURE_MAINTENANCE_SCREEN` to `true` in the [Netlify environment variables](https://app.netlify.com/sites/emeris-app/settings/deploys#environment), and [trigger a deploy](https://app.netlify.com/sites/emeris-app/deploys).
