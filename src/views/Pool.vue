@@ -9,7 +9,7 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 1 : 0]" size="md" />
               <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 1]" size="md" />
             </div>
-            <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
+            <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
               <template v-if="exchangeAmount">
                 1 <Ticker :name="walletBalances.coinA.denom" /> &asymp; {{ exchangeAmount }}
@@ -50,7 +50,7 @@
                 <td class="py-5 align-middle group-hover:bg-fg transition">
                   <div class="flex items-center">
                     <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
-                    <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                    <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                       <span class="font-medium"><Ticker :name="balance.denom" /></span>
                     </div>
                   </div>
@@ -90,7 +90,7 @@
                 <td class="py-5 align-middle group-hover:bg-fg transition">
                   <div class="flex items-center">
                     <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
-                    <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                    <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                       <span class="font-medium"><Ticker :name="walletBalances.poolCoin.denom" /></span>
                     </div>
                   </div>
@@ -145,13 +145,13 @@
               <ul class="mt-2">
                 <li class="flex w-full py-2 gap-x-1">
                   <CircleSymbol :denom="walletBalances.coinA.denom" size="xs" />
-                  <AmountDisplay :amount="walletBalances.coinA" class="ml-2 font-medium flex-grow" />
+                  <AmountDisplay :amount="walletBalances.coinA" class="ml-2 font-medium grow" />
                   <span v-if="hasPrices.coinA"><Price :amount="walletBalances.coinA" /></span>
                   <span v-else>-</span>
                 </li>
                 <li class="flex w-full py-2 gap-x-1">
                   <CircleSymbol :denom="walletBalances.coinB.denom" size="xs" />
-                  <AmountDisplay :amount="walletBalances.coinB" class="ml-2 font-medium flex-grow" />
+                  <AmountDisplay :amount="walletBalances.coinB" class="ml-2 font-medium grow" />
                   <span v-if="hasPrices.coinB"><Price :amount="walletBalances.coinB" /></span>
                   <span v-else>-</span>
                 </li>

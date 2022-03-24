@@ -15,8 +15,8 @@
         { 'button-sm -text-1 leading-4 rounded-lg': size === 'sm' },
         { 'h-12': variant !== 'link' && size === 'md' },
         { 'h-9': variant !== 'link' && size === 'sm' },
-        { 'w-12': !name && variant !== 'link' && size === 'md' },
-        { 'w-9': !name && variant !== 'link' && size === 'sm' },
+        { 'w-12': !name && variant !== 'link' && size === 'md' && !fullWidth },
+        { 'w-9': !name && variant !== 'link' && size === 'sm' && !fullWidth },
         { 'py-3.5 px-8': name && variant !== 'link' && size === 'md' },
         { 'py-2.5 px-5': name && variant !== 'link' && size === 'sm' },
         { 'w-full': fullWidth },
@@ -32,10 +32,10 @@
         { 'relative inline': variant === 'link' },
         { 'bg-brand-to-r': status === 'loading' && variant === 'primary' },
         { 'loading pointer-events-none cursor-default': status === 'loading' },
-        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
+        disabled ? 'text-inactive pointer-events-none cursor-default' : 'cursor-pointer',
       ]"
       :disabled="disabled"
-      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap outline-offset-4"
+      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none text-ellipsis whitespace-nowrap outline-offset-4"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">

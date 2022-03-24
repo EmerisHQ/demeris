@@ -11,7 +11,7 @@
     >
       <Icon :name="'ArrowLeftIcon'" size="1.5" />
     </Button>
-    <div class="flex-grow text-center text-2 font-bold">{{ title }}</div>
+    <div class="grow text-center text-2 font-bold">{{ title }}</div>
   </div>
 </template>
 <script lang="ts">

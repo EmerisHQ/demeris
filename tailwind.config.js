@@ -1,5 +1,6 @@
 module.exports = {
   purge: false,
+  content: ['./public/index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   // mode: 'jit',
   darkMode: 'class', // or 'media' or 'class'
   theme: {
@@ -121,17 +122,6 @@ module.exports = {
       normal: 400,
       medium: 560,
       bold: 730,
-    },
-  },
-  variants: {
-    extend: {
-      margin: ['last'],
-      borderRadius: ['focus'],
-      opacity: ['active', 'focus', 'group-focus'],
-      placeholderColor: ['hover'],
-      ringWidth: ['focus-visible'],
-      transform: ['active'],
-      zIndex: ['first'],
     },
   },
   corePlugins: {

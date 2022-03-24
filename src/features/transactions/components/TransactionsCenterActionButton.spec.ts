@@ -6,20 +6,17 @@ import 'regenerator-runtime/runtime';
 
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
+import VueTippy from 'vue-tippy';
 
 import TransactionsCenterActionButton from './TransactionsCenterActionButton.vue';
 
 test('should render', async () => {
   const wrapper = mount(TransactionsCenterActionButton, {
     global: {
-      plugins: [createTestingPinia({ createSpy: () => ({ foo: 'bar' }) })],
+      plugins: [VueTippy, createTestingPinia({ createSpy: () => ({ foo: 'bar' }) })],
       stubs: {
         Pinia: {},
         Icon: true,
-        tippy: {
-          name: 'CustomTippy',
-          template: '<p><slot name="content" /></p>',
-        },
       },
     },
   });
