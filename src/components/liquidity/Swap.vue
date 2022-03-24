@@ -132,7 +132,6 @@
             amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',
           })
         "
-        :other-assets="otherAssetsToReceive"
         :selected-denom="receiveCoinData"
         :counter-denom="payCoinData"
         :assets="assetsToReceive"

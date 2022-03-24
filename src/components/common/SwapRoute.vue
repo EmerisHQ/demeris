@@ -105,14 +105,16 @@ export default defineComponent({
           stepIndex === steps.length - 1
             ? (carryOver = `Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`)
             : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
-          (item as any).denom = steps[stepIndex].data.to.base_denom;
+          (item as any).denom =
+            stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
           (item as any).chain = 'osmosis'; //chain how. change this.
         } else if (steps[stepIndex].type === 'ibc') {
           lastType = 'ibc';
           stepIndex === steps.length - 1
             ? (carryOver = `Transfer to Osmosis`)
             : (item as any).transactions.unshift(`Transfer to Osmosis`); //remove hardcoding
-          (item as any).denom = steps[stepIndex].data.to.base_denom;
+          (item as any).denom =
+            stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
           (item as any).chain = 'osmosis'; //chain how
         } else {
           console.log(`which type? :P : ${steps[stepIndex].type}`);

@@ -1,12 +1,17 @@
 <template>
   <!-- add min height and background card. check why card is not there -->
-  <!-- <div class="p-6">
+  <!-- <div class="swap-widget bg-surface dark:bg-fg rounded-2xl p-6">
     <div class="text-2 font-bold">Quotes</div>
     <div class="text-0 text-muted">Fees included</div>
   </div> -->
-  <div v-if="!isVisualizeRouteVisible" class="pb-3">
-    <TitleWithGoback
-      :title="'Price'"
+  <div
+    v-if="!isVisualizeRouteVisible"
+    class="relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl pb-3"
+  >
+    <TitleSubTitleWithClose
+      title="Quotes"
+      sub-title="Fees included"
+      class="py-6 pl-6"
       :func="
         () => {
           isVisualizeRouteVisible = false;
@@ -30,9 +35,11 @@
       </tippy>
     </div>
   </div>
-  <div v-else>
-    <TitleWithGoback
-      :title="'Swap route'"
+  <div v-else class="relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl">
+    <TitleSubTitleWithClose
+      class="ml-6 mt-6"
+      title="Swap route"
+      sub-title="TODO"
       :func="
         () => {
           isVisualizeRouteVisible = false;
@@ -48,7 +55,7 @@
 import { ref } from '@vue/reactivity';
 
 import FeeToken from '@/components/common/FeeToken.vue';
-import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
+import TitleSubTitleWithClose from '@/components/common/headers/TitleSubTitleWithClose.vue';
 import QuotesListItem from '@/components/common/QuotesListItem.vue';
 import SwapRoute from '@/components/common/SwapRoute.vue';
 

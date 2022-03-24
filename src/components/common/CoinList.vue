@@ -44,7 +44,7 @@
           <Denom :name="coin.base_denom" />
         </div>
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
-          <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
+          <Ticker v-if="type === 'receive'" :name="coin.base_denom" />
 
           <template v-else>
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
@@ -85,6 +85,7 @@ import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
@@ -99,6 +100,7 @@ export default defineComponent({
     Icon,
     Denom,
     CircleSymbol,
+    Ticker,
   },
   props: {
     data: { type: Array as PropType<EmerisAPI.Balances>, required: true },
@@ -195,7 +197,6 @@ export default defineComponent({
     const coinsByType = computed(() => {
       return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });
-
     return { setWordColorByKeyword, coinsByType };
   },
 });
