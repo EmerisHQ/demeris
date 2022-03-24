@@ -105,7 +105,7 @@ html.dark {
 }
 
 /* Custom color utilities */
-@variants dark, hover, focus {
+@layer utilities {
   /* Background utilities */
   .bg-app {
     background: var(--bg-image);
@@ -120,7 +120,7 @@ html.dark {
     background: var(--surface-2-image);
   }
 }
-@variants dark, focus {
+@layer utilities {
   /* Background utilities */
   .bg-brand {
     background: center / cover no-repeat url('../images/gradient-primary.jpg'), var(--primary);
@@ -146,7 +146,7 @@ html.dark {
 }
 
 /* Border utilities */
-@variants dark, group-hover, focus-within, hover, focus {
+@layer utilities {
   .border-brand {
     border-color: var(--primary);
     border-image: url('../images/gradient-primary.jpg');

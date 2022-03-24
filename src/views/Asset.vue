@@ -7,10 +7,10 @@
         <header>
           <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
-            <div class="flex-grow flex items-baseline justify-between flex-nowrap">
+            <div class="grow flex items-baseline justify-between flex-nowrap">
               <div class="items-baseline">
                 <h1 class="text-1 sm:text-2 font-bold sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
-                <div class="text-muted text-0 flex-grow"><Ticker :name="denom" /></div>
+                <div class="text-muted text-0 grow"><Ticker :name="denom" /></div>
               </div>
               <Price
                 v-tippy
@@ -18,6 +18,7 @@
                 :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
+                @displayPrice="(value) => (displayPrice = value)"
               />
             </div>
           </div>
@@ -27,6 +28,7 @@
         <AreaChart
           v-if="showPriceChart"
           :data-stream="dataStream"
+          :display-price="displayPrice"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
           @priceDiff="setPriceDifference"
@@ -108,7 +110,7 @@
             >
               <div class="w-1/3 flex items-center min-w-0">
                 <CircleSymbol :denom="denom" :chain-name="asset.on_chain" size="lg" :glow="false" variant="chain" />
-                <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis">
+                <span class="grow ml-4 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                   <ChainName :name="asset.on_chain" />
                 </span>
               </div>
@@ -227,6 +229,7 @@ export default defineComponent({
 
   setup() {
     const displayName = ref('');
+    const displayPrice = ref(0);
     const metaSource = computed(() => {
       return { title: displayName.value };
     });
@@ -488,6 +491,7 @@ export default defineComponent({
       priceDiffObject,
       setPriceDifference,
       isStakingRunning,
+      displayPrice,
     };
   },
 });
