@@ -1090,6 +1090,7 @@ export default defineComponent({
       }
     }
     const daggRoutes = ref('');
+    //replace anys
     const quotes = computed(() => {
       let quotesArr = [] as any;
       for (let route of daggRoutes.value) {
@@ -1114,7 +1115,6 @@ export default defineComponent({
     });
 
     async function setCounterPairCoinAmount(e) {
-      // console.log('e', e);
       if (data.isBothSelected) {
         const fromPrecision =
           store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
@@ -1122,61 +1122,6 @@ export default defineComponent({
           name: data.receiveCoinData.base_denom,
         });
         const { routes } = await getRoutes({ amountIn: data.payCoinAmount * 10 ** fromPrecision });
-        //remove
-        routes.push({
-          steps: [
-            {
-              type: 'pool',
-              protocol: 'osmosis',
-              data: {
-                from: {
-                  denom: 'uosmo',
-                  base_denom: 'uosmo',
-                  amount: '123456789',
-                },
-                to: {
-                  denom: 'ibc/46b44899322f3cd854d2d46deef881958467cdd4b3b10086da49296bbed94bed',
-                  base_denom: 'ujuno',
-                  amount: '29126476.551435143',
-                },
-                poolid: 'osmosis/497',
-              },
-            },
-            {
-              type: 'pool',
-              protocol: 'osmosis',
-              data: {
-                from: {
-                  denom: 'ibc/46b44899322f3cd854d2d46deef881958467cdd4b3b10086da49296bbed94bed',
-                  base_denom: 'ujuno',
-                  amount: '29126476.551435143',
-                },
-                to: {
-                  denom: 'ibc/27394fb092d2eccd56123c74f36e4c1f926001ceada9ca97ea622b25f41e5eb2',
-                  base_denom: 'uatom',
-                  amount: '41219908.49241768',
-                },
-                poolid: 'osmosis/498',
-              },
-            },
-            {
-              type: 'ibc',
-              protocol: 'osmosis',
-              data: {
-                from: {
-                  denom: 'ibc/27394fb092d2eccd56123c74f36e4c1f926001ceada9ca97ea622b25f41e5eb2',
-                  base_denom: 'uatom',
-                  amount: '41219908.49241768',
-                },
-                to: {
-                  denom: 'uatom',
-                  base_denom: 'uatom',
-                  amount: '41178688.58392526',
-                },
-              },
-            },
-          ],
-        });
         daggRoutes.value = routes;
         const len = routes[0]?.steps.length;
         const precisionDiff = +fromPrecision - +toPrecision;
