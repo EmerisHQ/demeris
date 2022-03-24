@@ -103,6 +103,6 @@ describe('Notifications', () => {
       expect(menu.html()).toContain('Main Content 1');
       expect(menu.html()).toContain('Main Content 2');
       expect(menu.html()).toContain('Main Content 3');
-    }, 300);
+    }, 500);
   });
 });
