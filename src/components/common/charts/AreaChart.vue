@@ -230,7 +230,6 @@ export default defineComponent({
       () => [props.dataStream, props.variant, props.displayPrice],
       async () => {
         const rawDataStream = toRaw(props.dataStream);
-        console.log('checking here', rawDataStream[rawDataStream.length - 1]);
         const dataStream = [
           ...rawDataStream,
           {
