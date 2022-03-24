@@ -230,9 +230,13 @@ export default defineComponent({
       () => [props.dataStream, props.variant, props.displayPrice],
       async () => {
         const rawDataStream = toRaw(props.dataStream);
+        console.log('checking here', rawDataStream[rawDataStream.length - 1]);
         const dataStream = [
           ...rawDataStream,
-          { x: rawDataStream[rawDataStream.length - 1].x, y: Number(props.displayPrice.toFixed(6)) },
+          {
+            x: rawDataStream[rawDataStream.length - 1] ? rawDataStream[rawDataStream.length - 1].x : '',
+            y: Number(props.displayPrice.toFixed(6)),
+          },
         ];
         chartData.value.series[0].data = dataStream;
 
