@@ -4,7 +4,7 @@
       {{ title }}
       <Button
         v-if="showCloseButton"
-        class="ml-auto pr-3"
+        class="ml-auto pr-6"
         variant="link"
         :click-function="
           () => {
