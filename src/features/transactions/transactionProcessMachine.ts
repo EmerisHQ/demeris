@@ -209,7 +209,19 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             target: 'transacting',
             actions: { type: 'logEvent', key: 'signed_tx' },
           },
-          onError: 'failed.sign',
+          onError: [
+            {
+              target: 'failed.loadKeplr',
+              cond: (_, event) => event.data === 'Numbers fail',
+            },
+            {
+              target: 'failed.sign',
+              cond: (_, event) => event.data === 'Sign fail',
+            },
+            {
+              target: 'failed.unknown',
+            },
+          ],
         },
         states: {
           active: {},
@@ -218,6 +230,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               SIGN: '#signing.delayed',
             },
           },
+          failure: {},
         },
       },
       transacting: {
@@ -319,6 +332,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               ABORT: '#aborted',
             },
           },
+          loadKeplr: {
+            on: {
+              RETRY: { target: '#signing' },
+              ABORT: '#aborted',
+            },
+          },
           broadcast: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
@@ -383,14 +402,17 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ],
           gas: '' + context.input.gasLimit,
         };
-
-        return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
-          msgs: msgResult.msg,
-          chain_name: msgResult.chain_name,
-          fee,
-          registry: msgResult.registry,
-          memo: getCurrentStep(context).memo ?? '',
-        });
+        try {
+          return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
+            msgs: msgResult.msg,
+            chain_name: msgResult.chain_name,
+            fee,
+            registry: msgResult.registry,
+            memo: getCurrentStep(context).memo ?? '',
+          });
+        } catch (ex) {
+          console.error('Error while signing with KEPLR', ex);
+        }
       },
       broadcastTransaction: async (_, event: DoneEventData<TxParams>) => {
         return useStore().dispatch(GlobalActionTypes.TX.BROADCAST_TX, event.data);

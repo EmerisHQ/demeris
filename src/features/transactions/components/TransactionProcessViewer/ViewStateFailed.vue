@@ -8,13 +8,18 @@
       :class="isSwapComponent ? 'space-y-3' : 'space-y-5'"
     >
       <div>
-        <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+        <Icon
+          v-if="['failed.loadKeplr', 'failed.sign'].some(state.matches)"
+          name="ExclamationIcon"
+          :icon-size="3"
+          class="text-warning"
+        />
         <Icon v-else-if="state.matches('failed.unknown')" name="QuestionIcon" :icon-size="3" class="text-warning" />
         <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
       </div>
 
       <div
-        v-if="!['failed.sign', 'failed.unknown'].some(state.matches)"
+        v-if="!['failed.sign', 'failed.unknown', 'failed.loadKeplr'].some(state.matches)"
         class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8"
       >
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
@@ -127,7 +132,7 @@
       </p>
 
       <a
-        v-if="state.matches('failed.sign')"
+        v-if="['failed.sign', 'failed.loadKeplr'].some(state.matches)"
         href="https://faq.keplr.app"
         target="_blank"
         class="font-medium text-link hover:text-link-hover"
@@ -239,6 +244,10 @@ const title = computed(() => {
 
   if (state.value.matches('failed.sign')) {
     return t('components.txHandlingModal.signError');
+  }
+
+  if (state.value.matches('failed.loadKeplr')) {
+    return t('components.txHandlingModal.loadKeplr');
   }
 
   if (titleMap[transaction.value.name]) {
