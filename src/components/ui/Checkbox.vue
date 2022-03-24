@@ -2,85 +2,43 @@
   <label class="checkbox inline-flex items-start p-4 rounded-xl border border-solid border-border cursor-pointer">
     <input
       v-model="model"
-      :class="checkboxStyle"
-      class="checkbox__control appearance-none border-2 border-solid border-inactive flex-shrink-0 w-6 h-6 rounded-md transition select-none"
+      class="checkbox__control-light dark:checkbox__control-dark appearance-none border-2 border-solid border-inactive flex-shrink-0 w-6 h-6 rounded-md transition select-none"
       type="checkbox"
     />
     <span v-if="label" class="checkbox__label ml-4 text-0 leading-copy">{{ label }}</span>
   </label>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
-
-import useTheme from '@/composables/useTheme';
-
-export default defineComponent({
-  name: 'Checkbox',
-
-  props: {
-    modelValue: {
-      type: Boolean,
-      default: false,
-    },
-    label: {
-      type: String,
-      default: '',
-    },
-    isGradientOnlyTheme: {
-      type: Boolean,
-      default: true,
-    },
-  },
-
-  emits: ['update:modelValue'],
-
-  setup(props, { emit }) {
-    const model = computed({
-      get: () => props.modelValue,
-      set: (value) => emit('update:modelValue', value),
-    });
-
-    const theme = useTheme();
-
-    const checkboxStyle = computed(() => {
-      if (props.isGradientOnlyTheme) {
-        return 'gradient-theme';
-      }
-      if (theme.value === 'dark') {
-        return 'dark-theme';
-      } else if (theme.value === 'light') {
-        return 'light-theme';
-      }
-      return 'gradient-theme';
-    });
-
-    return { checkboxStyle, model };
+<script lang="ts" setup>
+import { computed } from 'vue';
+interface Props {
+  modelValue?: boolean;
+  label?: string;
+  isGradientOnlyTheme?: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  label: '',
+  isGradientOnlyTheme: true,
+});
+const emit = defineEmits(['update:modelValue']);
+const model = computed({
+  get: () => props.modelValue,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.checkbox__control {
+.checkbox__control-light:checked {
   border: none;
-  background: center / contain no-repeat url('@/assets/svg/checkMarkDark.svg') #000;
+  background: center / contain no-repeat url('@/assets/svg/checkMarkBlack.svg'),
+    center / cover no-repeat url('@/assets/images/gradient-primary.jpg');
 }
-.checkbox__control:checked {
+.checkbox__control-dark:checked {
   border: none;
-  background-color: #ff4400;
-
-  // background: var(--primary);
-  .light-theme {
-    background-color: #ff4400;
-    // background: center / contain no-repeat url('@/assets/svg/checkMarkDark.svg') #000;
-  }
-  .dark-theme {
-    background-color: #2b00ff;
-    // background: center / contain no-repeat url('@/assets/svg/checkMarkDark.svg') #fff;
-  }
-  .gradient-theme {
-    background-color: #00ff00;
-    // center / cover no-repeat url('@/assets/images/gradient-primary.jpg')
-  }
+  background: center / contain no-repeat url('@/assets/svg/checkMarkWhite.svg'),
+    center / cover no-repeat url('@/assets/images/gradient-primary.jpg');
 }
 </style>
