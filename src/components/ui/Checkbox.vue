@@ -2,7 +2,7 @@
   <label class="checkbox inline-flex items-start p-4 rounded-xl border border-solid border-border cursor-pointer">
     <input
       v-model="model"
-      class="checkbox__control-light dark:checkbox__control-dark appearance-none border-2 border-solid border-inactive flex-shrink-0 w-6 h-6 rounded-md transition select-none"
+      class="checkbox__control appearance-none border-2 border-solid border-inactive flex-shrink-0 w-6 h-6 rounded-md transition select-none"
       type="checkbox"
     />
     <span v-if="label" class="checkbox__label ml-4 text-0 leading-copy">{{ label }}</span>
@@ -31,14 +31,9 @@ const model = computed({
 </script>
 
 <style lang="scss" scoped>
-.checkbox__control-light:checked {
+.checkbox__control:checked {
   border: none;
-  background: center / contain no-repeat url('@/assets/svg/checkMarkBlack.svg'),
-    center / cover no-repeat url('@/assets/images/gradient-primary.jpg');
-}
-.checkbox__control-dark:checked {
-  border: none;
-  background: center / contain no-repeat url('@/assets/svg/checkMarkWhite.svg'),
+  background: center / contain no-repeat url('@/assets/svg/checkMark.svg'),
     center / cover no-repeat url('@/assets/images/gradient-primary.jpg');
 }
 </style>
