@@ -706,7 +706,6 @@ export default defineComponent({
       if (!value) {
         //when wallet connected/disconnected set again
         if (!isFinished.value) {
-          debugger;
           //Do not reset everything if we're in the finished state (view tx receipt)
           isOpen.value = false;
           isInit.value = false;
