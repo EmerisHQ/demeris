@@ -3,7 +3,7 @@
     <Search
       :keyword="searchValue"
       placeholder="Search exchanges"
-      class="search ml-6 mr-3 flex-grow"
+      class="search ml-6 mr-3 grow"
       @update:keyword="onInput"
     />
     <span class="mr-6">{{ selectedExchangesLength }}/{{ exchanges?.length }}</span>

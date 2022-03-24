@@ -65,23 +65,23 @@
       >
         <template v-if="tx.name == 'addliquidity' || tx.name == 'createpool'">
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
         </template>
 
         <template v-if="tx.name == 'withdrawliquidity'">
           <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
-          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <EphemerisSpinner class="grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
         </template>
 
         <template v-if="tx.name == 'staking'">
-          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <EphemerisSpinner class="grow max-w-xs" />
         </template>
 
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.from_chain" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
             <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" />
           </div>
@@ -89,7 +89,7 @@
         </template>
 
         <template v-if="tx.name == 'transfer'">
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
             <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
           </div>
