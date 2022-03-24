@@ -99,7 +99,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
-      return Promise.reject({ data: 'Sign fail' });
+      return Promise.reject('Sign fail');
     }
   },
 
