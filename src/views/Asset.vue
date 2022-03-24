@@ -18,6 +18,7 @@
                 :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
+                @displayPrice="(value) => (displayPrice = value)"
               />
             </div>
           </div>
@@ -27,6 +28,7 @@
         <AreaChart
           v-if="showPriceChart"
           :data-stream="dataStream"
+          :display-price="displayPrice"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
           @priceDiff="setPriceDifference"
@@ -227,6 +229,7 @@ export default defineComponent({
 
   setup() {
     const displayName = ref('');
+    const displayPrice = ref(0);
     const metaSource = computed(() => {
       return { title: displayName.value };
     });
@@ -488,6 +491,7 @@ export default defineComponent({
       priceDiffObject,
       setPriceDifference,
       isStakingRunning,
+      displayPrice,
     };
   },
 });

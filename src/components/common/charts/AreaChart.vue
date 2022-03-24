@@ -19,7 +19,7 @@
             :key="index"
             class="mx-1 rounded-lg px-4 py-2 -text-1 cursor-pointer"
             :class="item.value === activeFilterItem ? 'bg-fg font-medium' : 'text-muted'"
-            @click="setActiveFilter(item)"
+            @click="() => (activeFilterItem = item.value)"
           >
             {{ item.text }}
           </a>
@@ -32,7 +32,7 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, toRaw, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import useTheme from '@/composables/useTheme';
@@ -58,6 +58,10 @@ export default defineComponent({
     },
     showLoading: {
       type: Boolean,
+    },
+    displayPrice: {
+      type: Number,
+      default: 0,
     },
   },
   emits: ['filterChanged', 'priceDiff'],
@@ -113,9 +117,15 @@ export default defineComponent({
           },
           animations: {
             enabled: true,
-            easing: 'linear',
+            easing: 'easeinout',
+            speed: 1000,
             dynamicAnimation: {
               speed: 250,
+            },
+            animateGradually: {
+              enabled: true,
+              delay: 150,
+              speed: 350,
             },
           },
           zoom: {
@@ -124,7 +134,6 @@ export default defineComponent({
           background: 'transparent',
         },
         stroke: {
-          // curve: 'straight',
           width: 2,
         },
         xaxis: {
@@ -178,13 +187,15 @@ export default defineComponent({
     let priceDiff = ref('');
     let priceDiffPercent = ref('');
 
-    const setActiveFilter = (filterObject): void => {
-      activeFilterItem.value = filterObject.value;
-      emit('filterChanged', activeFilterItem.value, false);
-    };
+    watch(
+      () => activeFilterItem.value,
+      (newFilterItem) => {
+        emit('filterChanged', newFilterItem, false);
+      },
+    );
 
     const hasData = computed(() => {
-      return chartData.value.series[0].data.length > 0;
+      return chartData.value.series[0].data && chartData.value.series[0].data.length > 0;
     });
 
     const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
@@ -216,20 +227,26 @@ export default defineComponent({
     });
 
     watch(
-      () => [props.dataStream, props.variant],
+      () => [props.dataStream, props.variant, props.displayPrice],
       async () => {
-        chartData.value.series[0].data = props.dataStream;
+        const rawDataStream = toRaw(props.dataStream);
+        const dataStream = [
+          ...rawDataStream,
+          {
+            x: rawDataStream[rawDataStream.length - 1] ? rawDataStream[rawDataStream.length - 1].x : '',
+            y: Number(props.displayPrice.toFixed(6)),
+          },
+        ];
+        chartData.value.series[0].data = dataStream;
 
-        const high = (maxBy(props.dataStream, 'y') ? maxBy(props.dataStream, 'y').y : 0).toFixed(2);
+        const high = (maxBy(dataStream, 'y') ? maxBy(dataStream, 'y').y : 0).toFixed(2);
         highestPrice.value = '$' + high.toString();
 
-        const low = (minBy(props.dataStream, 'y') ? minBy(props.dataStream, 'y').y : 0).toFixed(2);
+        const low = (minBy(dataStream, 'y') ? minBy(dataStream, 'y').y : 0).toFixed(2);
         lowestPrice.value = '$' + low.toString();
 
-        openingPrice.value = props.dataStream[0] ? props.dataStream[0].y : 0;
-        closingPrice.value = props.dataStream[props.dataStream.length - 1]
-          ? props.dataStream[props.dataStream.length - 1].y
-          : 0;
+        openingPrice.value = dataStream[0] ? dataStream[0].y : 0;
+        closingPrice.value = dataStream[dataStream.length - 1] ? dataStream[dataStream.length - 1].y : 0;
 
         if (openingPrice.value <= closingPrice.value) {
           chartData.value.options.colors[0] = gainColor.value;
@@ -258,7 +275,6 @@ export default defineComponent({
       activeFilterItem,
       highestPrice,
       lowestPrice,
-      setActiveFilter,
     };
   },
 });
