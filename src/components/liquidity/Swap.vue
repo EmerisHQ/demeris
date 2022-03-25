@@ -15,7 +15,7 @@
     />
     <QuotesList
       v-if="isQuotesListModalOpen"
-      :quotes="quotes"
+      :routes="daggRoutes"
       @selectedQuoteIndex="(e) => selectedQuoteIndexEvent(e)"
       @goback="quotesListModalToggle"
     />
@@ -1075,12 +1075,12 @@ export default defineComponent({
       data.isChildModalOpen = payload;
     }
 
-    async function getRoutes({ amountIn }) {
+    async function getRoutes({ denomIn, denomOut, amountIn }) {
       try {
         //change url
         const response = await axios.post('https://dev.demeris.io/v1' + '/daggregation/routing', {
-          denomIn: data.payCoinData?.base_denom,
-          denomOut: data.receiveCoinData?.base_denom,
+          denomIn: denomIn,
+          denomOut: denomOut,
           amountIn: amountIn,
         });
         return response.data;
@@ -1090,29 +1090,6 @@ export default defineComponent({
       }
     }
     const daggRoutes = ref('');
-    //replace anys
-    const quotes = computed(() => {
-      let quotesArr = [] as any;
-      for (let route of daggRoutes.value) {
-        let routeObj = {} as any;
-        let numberOfSteps = (route as any).steps.length;
-        routeObj.dex = (route as any).steps[0].protocol; //can steps have diff protocols? incorprate if yes
-        routeObj.amount = (
-          (route as any).steps[numberOfSteps - 1].data.to.amount /
-          (10 ** store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6)
-        ).toFixed(4);
-        routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
-        routeObj.numberOfTransactions = numberOfSteps;
-        routeObj.usdAmount = getDisplayPrice(
-          (route as any).steps[numberOfSteps - 1].data.to.base_denom,
-          routeObj.amount,
-        ).value;
-        routeObj.route = route;
-        //fee token when?
-        quotesArr.push(routeObj);
-      }
-      return quotesArr;
-    });
 
     async function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
@@ -1121,7 +1098,19 @@ export default defineComponent({
         const toPrecision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: data.receiveCoinData.base_denom,
         });
-        const { routes } = await getRoutes({ amountIn: data.payCoinAmount * 10 ** fromPrecision });
+        let { routes } = await getRoutes({
+          denomIn: data.payCoinData?.base_denom,
+          denomOut: data.receiveCoinData?.base_denom,
+          amountIn: data.payCoinAmount * 10 ** fromPrecision,
+        });
+        if (data.payCoinData?.on_chain === routes[0].steps[0].data.protocol?.chainId) {
+          //move to types -- enum. may not be needed if chain-id is presient in routing response
+          routes = await getRoutes({
+            denomIn: routes[0].steps[0].data.to.denom,
+            denomOut: data.receiveCoinData?.base_denom,
+            amountIn: data.payCoinAmount * 10 ** fromPrecision,
+          });
+        }
         daggRoutes.value = routes;
         const len = routes[0]?.steps.length;
         const precisionDiff = +fromPrecision - +toPrecision;
@@ -1200,8 +1189,8 @@ export default defineComponent({
       isQuotesListModalOpen,
       quotesListModalToggle,
       isAmount,
-      quotes,
       selectedQuoteIndexEvent,
+      daggRoutes,
     };
   },
 });

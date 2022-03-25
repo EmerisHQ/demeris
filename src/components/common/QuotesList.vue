@@ -1,9 +1,4 @@
 <template>
-  <!-- add min height and background card. check why card is not there -->
-  <!-- <div class="swap-widget bg-surface dark:bg-fg rounded-2xl p-6">
-    <div class="text-2 font-bold">Quotes</div>
-    <div class="text-0 text-muted">Fees included</div>
-  </div> -->
   <div
     v-if="!isVisualizeRouteVisible"
     class="relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl pb-3"
@@ -19,7 +14,7 @@
         }
       "
     />
-    <div v-for="(quote, index) in quotes" :key="quote.toString()" class="mx-2">
+    <div v-for="(quote, index) in routesTransformedToQuotes" :key="quote.toString()" class="mx-2">
       <tippy delay="0" :interactive="false" :arrow="false">
         <QuotesListItem
           :quote="quote"
@@ -47,25 +42,31 @@
         }
       "
     />
-    <SwapRoute :quote="quotes[visualizeRouteIndex]" />
+    <SwapRoute :quote="routes[visualizeRouteIndex]" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
+import { useStore } from 'vuex';
 
 import FeeToken from '@/components/common/FeeToken.vue';
 import TitleSubTitleWithClose from '@/components/common/headers/TitleSubTitleWithClose.vue';
 import QuotesListItem from '@/components/common/QuotesListItem.vue';
 import SwapRoute from '@/components/common/SwapRoute.vue';
+import usePrice from '@/composables/usePrice';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 // eslint-disable-next-line
 const props = defineProps({
-  quotes: {
+  routes: {
     type: Array,
     required: true,
   },
 });
+
+const store = useStore() as RootStoreTyped;
+const { getDisplayPrice } = usePrice();
 
 const selectedQuoteIndex = ref(0);
 const isVisualizeRouteVisible = ref(false);
@@ -80,6 +81,31 @@ const visualizeRoute = ({ index }) => {
   isVisualizeRouteVisible.value = true;
   visualizeRouteIndex.value = index;
 };
+
+const routesTransformedToQuotes = computed(() => {
+  let quotesArr = [] as any;
+  for (let route of props.routes) {
+    let routeObj = {} as any;
+    let numberOfSteps = (route as any).steps.length;
+    routeObj.dex = (route as any).steps[0].protocol; //can steps have diff protocols? incorprate if yes
+    routeObj.amount = (
+      (route as any).steps[numberOfSteps - 1].data.to.amount /
+      (10 **
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: (route as any).steps[0].data.from.base_denom,
+        }) || 6)
+    ).toFixed(4);
+    routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
+    routeObj.numberOfTransactions = numberOfSteps;
+    routeObj.usdAmount = getDisplayPrice(
+      (route as any).steps[numberOfSteps - 1].data.to.base_denom,
+      routeObj.amount,
+    ).value;
+    //fee token when?
+    quotesArr.push(routeObj);
+  }
+  return quotesArr;
+});
 
 const emit = defineEmits(['goback', 'selectedQuoteIndex']);
 </script>

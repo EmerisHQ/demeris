@@ -92,7 +92,7 @@ export default defineComponent({
       const items = [];
       let carryOver = null;
       let lastType = null;
-      let steps = props.quote.route.steps;
+      let steps = props.quote.steps;
       for (let stepIndex = steps.length - 1; stepIndex >= 0; stepIndex--) {
         let item = { transactions: [] };
         if (lastType !== steps[stepIndex].type && carryOver) {
