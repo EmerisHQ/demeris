@@ -1,0 +1,79 @@
+<template>
+  <header class="flex justify-between items-center">
+    <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">
+      {{ $t(`context.airdrops.airdropsFilterItems.${activeFilter}`) }} {{ $t('context.airdrops.title') }}
+    </div>
+    <div class="w-1/4">
+      <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
+    </div>
+  </header>
+  <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
+  <section class="mt-4">
+    <AirdropsTable
+      :airdrops="airdrops"
+      :active-filter="activeFilter"
+      :show-headers="false"
+      :limit-rows="10"
+      @row-click="openAirdropPage"
+    />
+  </section>
+</template>
+
+<script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
+import AirdropsTable from '@/components/airdrops/AirdropsTable';
+import Search from '@/components/common/Search.vue';
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { typedstore } from '@/store/setup';
+
+export default {
+  components: {
+    AirdropClaimablePanel,
+    AirdropsTable,
+    Search,
+  },
+
+  props: {
+    activeFilter: {
+      type: String,
+      default: '',
+    },
+  },
+
+  setup() {
+    const keyword = ref('');
+    const router = useRouter();
+
+    const airdrops = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    });
+
+    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
+      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
+      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
+        params: {
+          airdrop,
+        },
+      });
+    };
+
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
+    return {
+      airdrops,
+      openAirdropPage,
+      keyword,
+      isDemoAccount,
+    };
+  },
+};
+</script>

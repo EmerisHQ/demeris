@@ -15,7 +15,7 @@
         <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
       </span>
       <span
-        v-if="item.value === activeFilterItem && activeFilterItem === 'mine'"
+        v-if="item.value === activeFilterItem && activeFilterItem === 'mine' && !isDemoAccount"
         class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
         style="color: white"
       >
@@ -92,7 +92,14 @@ export default defineComponent({
       return claimableAirdrops.length;
     });
 
-    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading, noOfClaimableAirdrops };
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
+    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading, noOfClaimableAirdrops, isDemoAccount };
   },
 });
 </script>

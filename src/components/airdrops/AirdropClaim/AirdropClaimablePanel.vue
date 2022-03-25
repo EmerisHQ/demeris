@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-if="isDemoAccountBanner && !airdropsLoading"
+      v-if="isDemoAccount && !airdropsLoading && activeFilter !== 'mine'"
       class="mt-8 flex justify-between bg-inverse text-text rounded-2xl shadow-card cursor-pointer border border-border"
       @click="toggleConnectWalletModal"
     >
@@ -17,7 +17,7 @@
     </div>
 
     <div
-      v-if="!isDemoAccountBanner && !airdropsLoading && !noAirdropsToClaim"
+      v-if="!isDemoAccount && !airdropsLoading && !noAirdropsToClaim && activeFilter !== 'mine'"
       class="mt-8 flex justify-between bg-text text-inverse rounded-2xl shadow-card cursor-pointer"
     >
       <div class="w-1/2 p-6">
@@ -44,7 +44,7 @@
     </div>
 
     <div
-      v-if="!isDemoAccountBanner && !airdropsLoading && noAirdropsToClaim"
+      v-if="!isDemoAccount && !airdropsLoading && noAirdropsToClaim"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
     >
       <div class="w-1/2 py-8 px-6">
@@ -100,7 +100,7 @@ export default defineComponent({
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
-    const isDemoAccountBanner = computed(() => {
+    const isDemoAccount = computed(() => {
       return (
         !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
         typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
@@ -131,7 +131,7 @@ export default defineComponent({
       selectedAirdrop,
       claimableAirdropsHeader,
       demoAccountBanner,
-      isDemoAccountBanner,
+      isDemoAccount,
       isWalletModalOpen,
       toggleConnectWalletModal,
       airdropsLoading,

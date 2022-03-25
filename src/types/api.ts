@@ -401,6 +401,10 @@ export type Airdrop = {
   twitterUrl: string;
   discordUrl: string;
   mediumUrl: string;
+  imageExists: boolean;
+  eligibilityStatusCode: number;
+  address: string;
+  eligibilityResponse: any;
   airdropBlogUrl: string;
   airdropStartDate: Date;
   airdropEndDate: Date;

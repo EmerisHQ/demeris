@@ -10,7 +10,6 @@ import { Pool } from '@/types/actions';
 import { UserData } from '@/types/user';
 import { ActionParams, ChartPrices, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
-import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import TendermintWS from '@/utils/TendermintWS';
 
@@ -757,39 +756,22 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       const response = await axios.get(
         `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+      const image_check_response = await fetch(response.data.tokenIcon);
 
-      let eligibility = null;
-      const data = response.data;
-      if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
-        eligibility = AirdropEligibilityStatus.AUTO_DROP;
-      } else if (data.chainName) {
-        const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
-        const ownAddress = await getOwnAddress({ chain_name });
-
-        if (data.eligibilityCheckEndpoint && ownAddress) {
-          delete axios.defaults.headers.get['X-Correlation-Id'];
-          const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
-          const eligibilityRes = await axios.get(`${eligibilityEndpoint}${ownAddress}`);
-
-          if (eligibilityRes.status === 200) {
-            eligibility = AirdropEligibilityStatus.ELIGIBLE;
-          } else if (eligibilityRes.status === 403) {
-            eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
-          } else {
-            eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-          }
-        } else {
-          eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-        }
-      } else {
-        eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-      }
+      commit(MutationTypes.SET_AIRDROPS, {
+        value: {
+          ...response.data,
+          imageExists: image_check_response.status === 200,
+          eligibilityStatusCode: null,
+          eligibility: null,
+          eligibilityResponse: null,
+          address: null,
+        },
+      });
 
       commit(MutationTypes.SET_AIRDROPS_STATUS, {
         value: LoadingState.LOADED,
       });
-
-      commit(MutationTypes.SET_AIRDROPS, { value: { ...response.data, eligibility } });
 
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });

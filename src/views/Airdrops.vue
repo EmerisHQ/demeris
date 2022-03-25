@@ -1,57 +1,62 @@
 <template>
   <AppLayout>
     <div class="md:flex justify-between">
-      <aside class="w-3/12">
-        <AirdropsFilter @active-filter="setActiveFilter" />
-        <AirdropsInfo />
+      <aside class="lg:w-4/12 md:w-3/12 md:mr-10 lg:mr-0 sm:w-full">
+        <div class="lg:w-3/4 sm:w-full">
+          <AirdropsFilter @active-filter="(value) => (activeFilter = value)" />
+          <AirdropsInfo />
 
-        <!-- Quick Info -->
-        <div class="mt-12 text-muted -text-1">
-          <p class="mb-4">
-            {{ $t('context.airdrops.airdropContentDisclaimer') }}
-          </p>
-          <p class="text-text font-medium">{{ $t('context.airdrops.featureProjects') }}</p>
+          <!-- Quick Info -->
+          <div class="mt-12 text-muted -text-1">
+            <p class="mb-4">
+              {{ $t('context.airdrops.airdropContentDisclaimer') }}
+            </p>
+            <p class="text-text font-medium">{{ $t('context.airdrops.featureProjects') }}</p>
+          </div>
         </div>
       </aside>
 
-      <div class="w-9/12 max-w-3xl mb-16 md:mb-0">
-        <header class="flex justify-between items-center">
-          <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">
-            {{ $t(`context.airdrops.airdropsFilterItems.${activeFilter}`) }} {{ $t('context.airdrops.title') }}
+      <div class="lg:w-8/12 md:w-9/12 sm:w-full sm:mt-8 mb-16 md:mb-0">
+        <AirdropsTableSection v-if="activeFilter !== 'mine'" :active-filter="activeFilter" />
+
+        <div v-else>
+          <AirdropsTableSection v-if="!isDemoAccount" :active-filter="activeFilter" />
+          <div v-else class="w-full text-center">
+            <img src="~@/assets/images/my-airdrops-wallet-not-connected.png" alt="Wallet not connected" />
+            <div class="w-3/5 mx-auto">
+              <div class="text-1 sm:text-2 lg:text-3 font-bold">Find out which airdrops you are eligible for</div>
+              <p class="text-muted mt-6">
+                Connect your wallet to check if you have any claimable or upcoming airdrops.
+              </p>
+              <Button
+                :animate="false"
+                name="Connect wallet"
+                variant="primary"
+                class="rounded-lg w-1/2 mx-auto mt-6"
+                @click="toggleConnectWalletModal"
+              />
+            </div>
           </div>
-          <div class="w-1/4">
-            <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
-          </div>
-        </header>
-        <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
-        <section class="mt-4">
-          <AirdropsTable
-            :airdrops="airdrops"
-            :active-filter="activeFilter"
-            :show-headers="false"
-            :limit-rows="10"
-            @row-click="openAirdropPage"
-          />
-        </section>
+        </div>
       </div>
     </div>
+
+    <ConnectWalletModal :open="isWalletModalOpen" @close="toggleConnectWalletModal" />
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { EmerisAirdrops } from '@emeris/types';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
 
-import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
+import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import AirdropsFilter from '@/components/airdrops/AirdropsFilter';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
-import AirdropsTable from '@/components/airdrops/AirdropsTable';
-import Search from '@/components/common/Search.vue';
+import AirdropsTableSection from '@/components/airdrops/AirdropsTableSection';
+import Button from '@/components/ui/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { typedstore } from '@/store/setup';
 import { pageview } from '@/utils/analytics';
 
@@ -59,11 +64,11 @@ export default {
   name: 'Airdrops',
   components: {
     AppLayout,
-    AirdropClaimablePanel,
-    AirdropsTable,
     AirdropsInfo,
     AirdropsFilter,
-    Search,
+    ConnectWalletModal,
+    AirdropsTableSection,
+    Button,
   },
 
   setup() {
@@ -76,28 +81,25 @@ export default {
     );
 
     const activeFilter = ref('');
-    const keyword = ref('');
+    const isWalletModalOpen = ref(false);
 
-    const setActiveFilter = (value: string) => {
-      activeFilter.value = value;
-    };
-
-    const router = useRouter();
-
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
     });
 
-    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
-      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
-      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
-        params: {
-          airdrop,
-        },
-      });
+    const toggleConnectWalletModal = () => {
+      isWalletModalOpen.value = !isWalletModalOpen.value;
     };
 
-    return { airdrops, openAirdropPage, activeFilter, keyword, setActiveFilter };
+    return {
+      activeFilter,
+      isDemoAccount,
+      toggleConnectWalletModal,
+      isWalletModalOpen,
+    };
   },
 };
 </script>
