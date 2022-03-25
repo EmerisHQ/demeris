@@ -25,7 +25,7 @@
           <tr>
             <th class="align-middle sticky top-0 z-20 bg-app text-left" :class="{ 'text-text': sortBy == 'name' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('name');
@@ -39,7 +39,7 @@
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'power' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('power');
@@ -56,7 +56,7 @@
               :class="{ 'text-text': sortBy == 'commission' }"
             >
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('commission');
@@ -70,7 +70,7 @@
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'staked' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('staked');
@@ -104,7 +104,7 @@
               "
             >
               <td
-                class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap group-hover:bg-fg transition"
+                class="py-4 pr-2 items-center overflow-hidden text-ellipsis whitespace-nowrap group-hover:bg-fg transition"
                 :class="[{ 'text-negative-text': validator.jailed }]"
               >
                 <div class="inline-flex items-center mr-4 align-middle">

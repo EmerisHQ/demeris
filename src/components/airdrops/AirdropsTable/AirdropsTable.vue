@@ -57,7 +57,7 @@
                   {{ airdrop.chainName ? airdrop.chainName.slice(0, 1) : '-' }}
                 </div>
               </div>
-              <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+              <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                 <span class="font-medium"><ChainName :name="airdrop.project" /></span>
                 <div class="-text-1 font-normal text-muted mt-0.5">
                   <Ticker :name="airdrop.tokenTicker ? airdrop.tokenTicker : '-'" />

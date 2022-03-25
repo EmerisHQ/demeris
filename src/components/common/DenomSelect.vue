@@ -23,8 +23,8 @@
     when it changed-->
 
     <div
-      class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
-      :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
+      class="self-stretch flex items-center shrink-0 pr-3 cursor-pointer"
+      :class="isSelected ? 'shrink-0' : 'grow'"
       @click="toggleDenomSelectModal"
     >
       <CircleSymbol
@@ -41,13 +41,13 @@
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
             class="tippy-info"
           >
-            <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
+            <div class="max-display-width overflow-hidden text-ellipsis whitespace-nowrap">{{ displayName }}</div>
             <template #content> {{ displayName }} </template>
           </tippy>
           <Denom v-else :name="selectedDenom?.base_denom" />
           <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
-        <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <div v-if="showChain" class="text-muted -text-1 overflow-hidden text-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
         </div>
       </div>

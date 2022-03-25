@@ -1,6 +1,6 @@
 <template>
   <div
-    class="circle-symbol relative flex items-center justify-center flex-shrink-0"
+    class="circle-symbol relative flex items-center justify-center shrink-0"
     :class="[`circle-symbol--${size}`, { 'opacity-40': validator.jailed }]"
   >
     <ValidatorImg :validator="validator" class="bg-text text-bg cursor-default" />

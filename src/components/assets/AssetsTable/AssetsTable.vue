@@ -49,7 +49,7 @@
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
                 <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
-                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
                 </div>
@@ -88,7 +88,7 @@
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
                 <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
-                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
                   <div class="-text-1 font-normal text-muted mt-0.5">

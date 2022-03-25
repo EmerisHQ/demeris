@@ -16,7 +16,7 @@
 
     <div
       v-tippy
-      class="ml-3 flex-grow"
+      class="ml-3 grow"
       :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }"
       :content="isPriceApiAvailable ? '' : $t('components.avatar.priceApiDown')"
     >

@@ -13,7 +13,7 @@
       <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
       <div class="flex justify-between my-4 space-x-2">
         <button
-          class="h-12 flex-grow rounded-xl outline-none text-text"
+          class="h-12 grow rounded-xl outline-none text-text"
           :class="[
             slippage === 0.1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
@@ -22,7 +22,7 @@
           0.1%
         </button>
         <button
-          class="h-12 flex-grow rounded-xl outline-none text-text"
+          class="h-12 grow rounded-xl outline-none text-text"
           :class="[
             slippage === 0.5 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
@@ -31,7 +31,7 @@
           0.5%
         </button>
         <button
-          class="h-12 flex-grow rounded-xl outline-none text-text"
+          class="h-12 grow rounded-xl outline-none text-text"
           :class="[
             slippage === 1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
@@ -76,7 +76,7 @@
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
-        <div class="flex-shrink ml-1 -text-1 font-normal text-right">
+        <div class="shrink ml-1 -text-1 font-normal text-right">
           {{ limitPriceText }}
         </div>
       </div>
@@ -91,7 +91,7 @@
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
-        <div class="flex-shrink ml-1 -text-1 font-normal text-right">{{ minReceivedText }}</div>
+        <div class="shrink ml-1 -text-1 font-normal text-right">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
