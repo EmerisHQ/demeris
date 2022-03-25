@@ -35,7 +35,7 @@
     "@types/long": "^4.0.1",
     "@vueuse/core": "^8.1.2",
     "@xstate/vue": "^1.0.0",
-    "apexcharts": "3.33.2",
+    "apexcharts": "3.31.0",
     "autoprefixer": "^10",
     "axios": "^0.26.1",
     "bech32": "^2.0.0",
