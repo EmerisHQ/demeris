@@ -215,7 +215,9 @@ export default defineComponent({
     },
   },
   // todo: on receive input, api req wrong - on 0 NaN shows - atom to cro, precision wrong - no asset selected and amount and then receuve asset = nothing, filter routes with "insufficient funds" in response, filter gravity out?, filter NaN in api response,
-  // resulting end chain should be cosmos hub? or osmosis if fine?
+  // resulting end chain should be cosmos hub? or osmosis if fine? - dex chain
+
+  //what if quotes list is 0.. what if api returns {error: 'The denom 'uosmo' is not present in any available swap'.. ensure clicking on visualize deosn't select quote.
   setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
@@ -1103,14 +1105,18 @@ export default defineComponent({
           denomOut: data.receiveCoinData?.base_denom,
           amountIn: data.payCoinAmount * 10 ** fromPrecision,
         });
-        if (data.payCoinData?.on_chain === routes[0].steps[0].data.protocol?.chainId) {
-          //move to types -- enum. may not be needed if chain-id is presient in routing response
-          routes = await getRoutes({
-            denomIn: routes[0].steps[0].data.to.denom,
-            denomOut: data.receiveCoinData?.base_denom,
-            amountIn: data.payCoinAmount * 10 ** fromPrecision,
-          });
-        }
+        //something's off.. check if gravity and osmosis have uniform ibc's.. (osmosis first returns an ibc but gravity doesn't so check.. osmosis is unavailable on dexinfo so check when it's there)
+        // if (
+        //   data.payCoinData?.on_chain === routes[0].steps[0].data.protocol?.chainId ||
+        //   data.payCoinData?.on_chain === 'cosmos-hub'
+        // ) {
+        //   //move to types -- enum. may not be needed if chain-id is present in routing response
+        //   routes = await getRoutes({
+        //     denomIn: routes[0].steps[0].data.to.denom,
+        //     denomOut: data.receiveCoinData?.base_denom,
+        //     amountIn: data.payCoinAmount * 10 ** fromPrecision,
+        //   });
+        // }
         daggRoutes.value = routes;
         const len = routes[0]?.steps.length;
         const precisionDiff = +fromPrecision - +toPrecision;
