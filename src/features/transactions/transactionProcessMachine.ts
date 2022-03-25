@@ -211,12 +211,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
           onError: [
             {
-              target: 'failed.loadKeplr',
-              cond: (_, event) => event.data === 'Numbers fail',
+              target: 'failed.genericError',
+              cond: (_, event) => event.data === 'GET_NUMBERS_CHAIN request failed',
             },
             {
               target: 'failed.sign',
-              cond: (_, event) => event.data === 'Sign fail',
+              cond: (_, event) => event.data === 'Failed to sign tx',
             },
             {
               target: 'failed.unknown',
@@ -331,7 +331,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               ABORT: '#aborted',
             },
           },
-          loadKeplr: {
+          genericError: {
             on: {
               RETRY: { target: '#signing' },
               ABORT: '#aborted',

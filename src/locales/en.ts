@@ -245,7 +245,7 @@ export const messages = {
         openKeplr: 'Opening Keplr',
         signTx: 'Sign transaction',
         signError: 'Transaction not signed!',
-        loadKeplr: 'Could not load Keplr!',
+        genericError: 'Something went wrong',
         tryAgain: 'Try again',
         keplrSupport: 'Keplr troubleshooting ↗️',
         ibcTransferSubtitle: 'This may take up to 1 minute',

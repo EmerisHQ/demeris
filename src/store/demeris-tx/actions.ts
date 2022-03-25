@@ -83,7 +83,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
         );
       } catch (ex) {
         console.error(ex);
-        return Promise.reject('Numbers fail');
+        return Promise.reject('GET_NUMBERS_CHAIN request failed');
       }
 
       const signerData = numbers;
@@ -99,7 +99,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
-      return Promise.reject('Sign fail');
+      return Promise.reject('Failed to sign tx');
     }
   },
 

@@ -9,7 +9,7 @@
     >
       <div>
         <Icon
-          v-if="['failed.loadKeplr', 'failed.sign'].some(state.matches)"
+          v-if="['failed.genericError', 'failed.sign'].some(state.matches)"
           name="ExclamationIcon"
           :icon-size="3"
           class="text-warning"
@@ -19,7 +19,7 @@
       </div>
 
       <div
-        v-if="!['failed.sign', 'failed.unknown', 'failed.loadKeplr'].some(state.matches)"
+        v-if="!['failed.sign', 'failed.unknown', 'failed.genericError'].some(state.matches)"
         class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8"
       >
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
@@ -132,7 +132,7 @@
       </p>
 
       <a
-        v-if="['failed.sign', 'failed.loadKeplr'].some(state.matches)"
+        v-if="state.matches('failed.sign')"
         href="https://faq.keplr.app"
         target="_blank"
         class="font-medium text-link hover:text-link-hover"
@@ -246,8 +246,8 @@ const title = computed(() => {
     return t('components.txHandlingModal.signError');
   }
 
-  if (state.value.matches('failed.loadKeplr')) {
-    return t('components.txHandlingModal.loadKeplr');
+  if (state.value.matches('failed.genericError')) {
+    return t('components.txHandlingModal.genericError');
   }
 
   if (titleMap[transaction.value.name]) {
