@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -37,15 +37,16 @@ import {
   isProcessingState,
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
+import { TransactionProcessContext, TransactionProcessState } from '../../transactionProcessMachine';
 import { useTransactionsStore } from '../../transactionsStore';
 
 const emit = defineEmits(['undo']);
 const transactionsStore = useTransactionsStore();
 
 const { actor, removeTransactionAndClose, minimizeModal } = inject(ProvideViewerKey);
-const { state } = actor;
+const state = ref<TransactionProcessState>(actor.state.value);
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transaction = computed(() => getCurrentTransaction(state.value.context as TransactionProcessContext));
 const chainName = computed(() => getSourceChainFromTransaction(transaction.value));
 
 const onUndo = () => {
