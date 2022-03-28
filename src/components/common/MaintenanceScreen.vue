@@ -50,6 +50,7 @@ const footerLinks = ref([
   { label: 'Telegram', url: 'https://t.me/EmerisHQ' },
   { label: 'Medium', url: 'https://medium.com/emeris-blog' },
   { label: 'Twitter', url: 'https://twitter.com/emerisHQ' },
+  { label: 'Support', url: 'https://support.emeris.com' },
 ]);
 function openURL(url) {
   window.open(url, '_blank', 'noopener');

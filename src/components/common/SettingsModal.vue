@@ -100,7 +100,7 @@
           >
             <Icon name="ArrowLeftIcon" :icon-size="1.5" />
           </Button>
-          <div class="flex-grow text-center text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
+          <div class="grow text-center text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
         </div>
         <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>

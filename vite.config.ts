@@ -1,13 +1,14 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import vue from '@vitejs/plugin-vue';
-import path from 'path';
+import * as path from 'path';
 import { dynamicImport } from 'vite-plugin-dynamic-import';
 import envCompatible from 'vite-plugin-env-compatible';
+import eslintPlugin from 'vite-plugin-eslint';
 import { defineConfig } from 'vitest/config';
 
 import gitVersion from './build/git-version';
-import pkg from './package.json';
+import * as pkg from './package.json';
 
 // https://vitejs.dev/config/
 export default () => {
@@ -16,14 +17,16 @@ export default () => {
   process.env.VITE_VERSION = pkg.version;
   return defineConfig({
     build: {
-      chunkSizeWarningLimit: 1500,
-      sourcemap: process.env.NODE_ENV === 'development',
+      chunkSizeWarningLimit: 1000,
+      sourcemap: true,
     },
-    plugins: [vue(), nodeResolve(), envCompatible(), dynamicImport()],
+    plugins: [vue(), nodeResolve(), dynamicImport(), envCompatible(), eslintPlugin({ fix: true })],
     resolve: {
       alias: {
+        '@starport/vuex': path.resolve(__dirname, './src/utils/EmerisError.ts'),
         '@': path.resolve(__dirname, './src'),
       },
+      extensions: ['.ts', '.vue', '.js', '.json', '.tsx'],
     },
     define: {
       'process.env': process.env,
