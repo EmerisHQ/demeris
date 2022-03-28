@@ -4,8 +4,8 @@
     <div class="space-y-2 pt-2 pb-6">
       <ListItem
         :size="size"
-        first-cell-class="flex-shrink"
-        second-cell-class="flex-grow"
+        first-cell-class="shrink"
+        second-cell-class="grow"
         inset
         :label="$t('components.previews.swap.payLbl')"
       >
@@ -25,8 +25,8 @@
       </ListItem>
       <ListItem
         :size="size"
-        first-cell-class="flex-shrink"
-        second-cell-class="flex-grow"
+        first-cell-class="shrink"
+        second-cell-class="grow"
         inset
         :label="$t('components.previews.swap.receiveLbl')"
         :description="$t('components.previews.swap.receiveLblHint')"

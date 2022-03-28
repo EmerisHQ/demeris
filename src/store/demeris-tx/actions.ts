@@ -1,6 +1,5 @@
 import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
-import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -8,6 +7,7 @@ import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from 
 import { SignParams, TxParams, TxResponse } from '@/types/tx';
 import { Namespaced } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
+import EmerisError from '@/utils/EmerisError';
 
 import { TXStore } from '.';
 import { ActionTypes } from './action-types';
@@ -60,7 +60,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       }
 
       const offlineSigner = isCypress
-        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
+        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
             prefix: chain.node_info.bech32_config.main_prefix,
             hdPaths: [stringToPath(chain.derivation_path)],
           })
@@ -68,18 +68,23 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
-
-      const numbers = await dispatch(
-        GlobalActionTypes.API.GET_NUMBERS_CHAIN,
-        {
-          subscribe: false,
-          params: {
-            address: keyHashfromAddress(account.address),
-            chain_name: chain_name,
+      let numbers;
+      try {
+        numbers = await dispatch(
+          GlobalActionTypes.API.GET_NUMBERS_CHAIN,
+          {
+            subscribe: false,
+            params: {
+              address: keyHashfromAddress(account.address),
+              chain_name: chain_name,
+            },
           },
-        },
-        { root: true },
-      );
+          { root: true },
+        );
+      } catch (ex) {
+        console.error(ex);
+        return Promise.reject('GET_NUMBERS_CHAIN request failed');
+      }
 
       const signerData = numbers;
       const cosmjsSignerData = {
@@ -94,7 +99,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
-      throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
+      return Promise.reject('Failed to sign tx');
     }
   },
 
@@ -108,7 +113,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       return response.data;
     } catch (e) {
       const cause = e.response?.data?.cause || e.message;
-      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
+      throw new EmerisError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
     }
   },
 

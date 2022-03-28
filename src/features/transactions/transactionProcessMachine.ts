@@ -209,7 +209,19 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             target: 'transacting',
             actions: { type: 'logEvent', key: 'signed_tx' },
           },
-          onError: 'failed.sign',
+          onError: [
+            {
+              target: 'failed.genericError',
+              cond: (_, event) => event.data === 'GET_NUMBERS_CHAIN request failed',
+            },
+            {
+              target: 'failed.sign',
+              cond: (_, event) => event.data === 'Failed to sign tx',
+            },
+            {
+              target: 'failed.unknown',
+            },
+          ],
         },
         states: {
           active: {},
@@ -319,6 +331,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               ABORT: '#aborted',
             },
           },
+          genericError: {
+            on: {
+              RETRY: { target: '#signing' },
+              ABORT: '#aborted',
+            },
+          },
           broadcast: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
@@ -383,14 +401,17 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ],
           gas: '' + context.input.gasLimit,
         };
-
-        return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
-          msgs: msgResult.msg,
-          chain_name: msgResult.chain_name,
-          fee,
-          registry: msgResult.registry,
-          memo: getCurrentStep(context).memo ?? '',
-        });
+        try {
+          return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
+            msgs: msgResult.msg,
+            chain_name: msgResult.chain_name,
+            fee,
+            registry: msgResult.registry,
+            memo: getCurrentStep(context).memo ?? '',
+          });
+        } catch (ex) {
+          console.error('Error while signing with KEPLR', ex);
+        }
       },
       broadcastTransaction: async (_, event: DoneEventData<TxParams>) => {
         return useStore().dispatch(GlobalActionTypes.TX.BROADCAST_TX, event.data);

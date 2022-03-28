@@ -22,7 +22,7 @@
               <div class="inline-flex items-center ml-6 mr-4">
                 <img src="@/assets/svg/icons/reward.svg" />
               </div>
-              <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+              <span class="text-left overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                 {{ $t('components.stakeTable.claimRewards') }}
               </span>
             </td>
@@ -53,7 +53,7 @@
                   "
                 />
               </div>
-              <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+              <span class="text-left overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                 {{ getValidatorMoniker(validator.validator_address) }}
               </span>
             </td>
@@ -121,7 +121,7 @@
                     class="w-8 h-8 rounded-full bg-fg z-1"
                   />
                 </div>
-                <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                <span class="text-left overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                   {{ getValidatorMoniker(unbondingBalance.validator_address) }}
                 </span>
               </td>

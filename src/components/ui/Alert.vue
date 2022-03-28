@@ -24,7 +24,7 @@
     </span>
 
     <div
-      class="max-w-full flex-grow leading-copy"
+      class="max-w-full grow leading-copy"
       :class="[status === 'info' ? 'text-muted' : 'text-text', { '-text-1': size === 'sm' }]"
     >
       <slot>
