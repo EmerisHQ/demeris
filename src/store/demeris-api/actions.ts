@@ -871,21 +871,18 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     return new Promise(async (resolve, reject) => {
       const timeout = 30000;
 
-      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
 
       await wss.connect().catch(reject);
+      const query = `tm.event = 'NewBlock'`;
 
-      wss.subscribe(
-        {
-          query: `tm.event = 'NewBlock'`,
-        },
-        (data: Record<string, any>) => {
-          if (data.result.data) {
-            resolve(data.result.data);
-          }
-        },
-      );
+      wss.subscribe({ query }, (data: Record<string, any>) => {
+        if (data.result.data) {
+          resolve(data.result.data);
+          wss.unsubscribe({ query }, () => void 0);
+        }
+      });
 
       setTimeout(reject, timeout);
     });
@@ -893,7 +890,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   async [ActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 60000;
-      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
@@ -953,8 +950,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   },
 
   async [ActionTypes.GET_TX_FROM_RPC]({ getters }, { txhash, chain_name }) {
-    const chain = getters['getChain']({ chain_name });
-    const rpcUrl = chain?.public_node_endpoints?.tendermint_rpc?.[0];
+    const rpcUrl = `${getters['getEndpoint']}/chain/${chain_name}/rpc`;
 
     if (!rpcUrl) {
       throw new Error(`${chain_name} RPC endpoint not found`);
