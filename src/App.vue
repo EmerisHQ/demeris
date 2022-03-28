@@ -113,7 +113,7 @@ export default defineComponent({
       } catch (e) {
         console.error('Could not load verified denoms: ' + e);
       }
-      typedstore
+      await typedstore
         .dispatch(GlobalActionTypes.API.GET_CHAINS, {
           subscribe: false,
         })
