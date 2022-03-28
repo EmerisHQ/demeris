@@ -1,24 +1,27 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
 import { useStore } from '@/utils/useStore';
 
 export async function addLiquidity({
   pool_id,
   coinA,
   coinB,
+  chainName,
 }: {
   pool_id: bigint;
-  coinA: EmerisBase.Amount;
-  coinB: EmerisBase.Amount;
+  coinA: AbstractAmount;
+  coinB: AbstractAmount;
+  chainName: string;
 }) {
   const libStore = useStore();
   const store = libStore as RootStoreTyped;
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };
@@ -33,12 +36,13 @@ export async function addLiquidity({
   const pool = liquidityPools.pools.find((item) => item.id == pool_id);
   if (pool) {
     result.steps.push({
-      name: 'addliquidity',
+      type: 'addLiquidity',
       status: 'pending',
       data: {
         coinA,
         coinB,
         pool,
+        chainName,
       },
     });
     return result;

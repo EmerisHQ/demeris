@@ -1,14 +1,15 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
+import { ActionStepResult } from '@/types/actions';
 import { useStore } from '@/utils/useStore';
 
-export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint; poolCoin: EmerisBase.Amount }) {
+export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint; poolCoin: AbstractAmount }) {
   const libStore = useStore();
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };

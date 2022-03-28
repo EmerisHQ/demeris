@@ -1,8 +1,9 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
 import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
-import { generateDenomHash, getChannel, isNative } from '@/utils/basic';
+import { generateDenomHash, getChannel, getOwnAddress, isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export async function memoTransfer({
@@ -11,13 +12,13 @@ export async function memoTransfer({
   destination_chain_name,
   to_address,
 }: {
-  amount: EmerisBase.Amount;
+  amount: AbstractAmount;
   chain_name: string;
   destination_chain_name: string;
   to_address: string;
 }) {
   const typedstore = useStore() as RootStoreTyped;
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     mustAddFee: false,
     output: {
@@ -26,16 +27,18 @@ export async function memoTransfer({
       chain_name: '',
     },
   };
-
+  const fromAddress = await getOwnAddress({ chain_name });
+  const toOwnAddress = await getOwnAddress({ chain_name: destination_chain_name });
   if (isNative(amount.denom)) {
     if (chain_name == destination_chain_name) {
       result.steps.push({
-        name: 'transfer',
+        type: 'transfer',
         status: 'pending',
         data: {
           amount,
-          chain_name,
-          to_address,
+          chainName: chain_name,
+          fromAddress,
+          toAddress: to_address,
         },
       });
       return result;
@@ -47,13 +50,15 @@ export async function memoTransfer({
           destination_chain_name: destination_chain_name,
         });
         result.steps.push({
-          name: 'ibc_forward',
+          type: 'IBCtransfer-forward',
           status: 'pending',
+          chainFee: await getFeeForChain(chain_name),
           data: {
             amount: amount,
-            from_chain: chain_name,
-            chain_fee: await getFeeForChain(chain_name),
-            to_chain: destination_chain_name,
+            chainName: chain_name,
+            fromAddress,
+            toAddress: toOwnAddress,
+            toChain: destination_chain_name,
             through: primaryChannel,
           },
         });
@@ -63,12 +68,13 @@ export async function memoTransfer({
           destination_chain_name: chain_name,
         });
         result.steps.push({
-          name: 'transfer',
+          type: 'transfer',
           status: 'pending',
           data: {
             amount: { amount: amount.amount, denom: generateDenomHash(counterpartyChannel, amount.denom) },
-            chain_name: destination_chain_name,
-            to_address,
+            chainName: destination_chain_name,
+            fromAddress: toOwnAddress,
+            toAddress: to_address,
           },
         });
         return result;
@@ -96,50 +102,56 @@ export async function memoTransfer({
     });
     if (primaryChannel == getChannel(verifyTrace.path, 0)) {
       result.steps.push({
-        name: 'transfer',
+        type: 'transfer',
         status: 'pending',
         data: {
           amount,
-          chain_name,
-          to_address,
+          chainName: chain_name,
+          fromAddress,
+          toAddress: to_address,
         },
       });
       return result;
     } else {
       result.mustAddFee = true;
-
+      const toNativeAddress = await getOwnAddress({ chain_name: verifyTrace.trace[0].counterparty_name });
       result.steps.push({
-        name: 'ibc_backward',
+        type: 'IBCtransfer-backward',
         status: 'pending',
         addFee: true,
         feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
-          from_chain: chain_name,
-          base_denom: await getBaseDenom(amount.denom, chain_name),
-          to_chain: verifyTrace.trace[0].counterparty_name,
+          fromAddress,
+          toAddress: toNativeAddress,
+          chainName: chain_name,
+          // base_denom: await getBaseDenom(amount.denom, chain_name), TODO: add to AbstractAmount
+          toChain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
       });
       result.steps.push({
-        name: 'ibc_forward',
+        type: 'IBCtransfer-forward',
         status: 'pending',
+        chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
-          to_chain: destination_chain_name,
+          chainName: verifyTrace.trace[0].counterparty_name,
+          fromAddress: toNativeAddress,
+          toAddress: toOwnAddress,
+          toChain: destination_chain_name,
           through: primaryChannel,
         },
       });
 
       result.steps.push({
-        name: 'transfer',
+        type: 'transfer',
         status: 'pending',
         data: {
           amount: { amount: amount.amount, denom: generateDenomHash(primaryChannel, verifyTrace.base_denom) },
-          chain_name: destination_chain_name,
-          to_address,
+          chainName: destination_chain_name,
+          fromAddress: toOwnAddress,
+          toAddress: to_address,
         },
       });
       return result;
@@ -150,39 +162,45 @@ export async function memoTransfer({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
+      const toNativeAddress = await getOwnAddress({ chain_name: verifyTrace.trace[0].counterparty_name });
       if (verifyTrace.trace[0].counterparty_name == destination_chain_name) {
         result.steps.push({
-          name: 'ibc_backward',
+          type: 'IBCtransfer-backward',
           status: 'pending',
           data: {
             amount: amount,
-            from_chain: chain_name,
-            base_denom: await getBaseDenom(amount.denom, chain_name),
-            to_chain: verifyTrace.trace[0].counterparty_name,
+            chainName: chain_name,
+            //base_denom: await getBaseDenom(amount.denom, chain_name), add to AbstractAmount
+            toChain: verifyTrace.trace[0].counterparty_name,
+            fromAddress,
+            toAddress: toNativeAddress,
             through: verifyTrace.trace[0].channel,
           },
         });
         result.steps.push({
-          name: 'transfer',
+          type: 'transfer',
           status: 'pending',
           data: {
             amount: { amount: amount.amount, denom: await getBaseDenom(amount.denom, chain_name) },
-            chain_name: verifyTrace.trace[0].counterparty_name,
-            to_address,
+            chainName: verifyTrace.trace[0].counterparty_name,
+            fromAddress,
+            toAddress: to_address,
           },
         });
       } else {
         result.mustAddFee = true;
         result.steps.push({
-          name: 'ibc_backward',
+          type: 'IBCtransfer-backward',
           status: 'pending',
           feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           addFee: true,
           data: {
             amount: amount,
-            from_chain: chain_name,
-            base_denom: await getBaseDenom(amount.denom, chain_name),
-            to_chain: verifyTrace.trace[0].counterparty_name,
+            chainName: chain_name,
+            //base_denom: await getBaseDenom(amount.denom, chain_name),
+            fromAddress,
+            toAddress: toNativeAddress,
+            toChain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
         });
@@ -193,24 +211,27 @@ export async function memoTransfer({
           destination_chain_name: destination_chain_name,
         });
         result.steps.push({
-          name: 'ibc_forward',
+          type: 'IBCtransfer-forward',
           status: 'pending',
+          chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-            from_chain: verifyTrace.trace[0].counterparty_name,
-            chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
-            to_chain: destination_chain_name,
+            chainName: verifyTrace.trace[0].counterparty_name,
+            fromAddress: toNativeAddress,
+            toAddress: toOwnAddress,
+            toChain: destination_chain_name,
             through: primaryChannel,
           },
         });
 
         result.steps.push({
-          name: 'transfer',
+          type: 'transfer',
           status: 'pending',
           data: {
             amount: { amount: amount.amount, denom: generateDenomHash(primaryChannel, verifyTrace.base_denom) },
-            chain_name: destination_chain_name,
-            to_address,
+            chainName: destination_chain_name,
+            fromAddress: toOwnAddress,
+            toAddress: to_address,
           },
         });
       }

@@ -1,5 +1,5 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { EmerisBase } from '@emeris/types';
+import { EmerisBase, EmerisTransactions } from '@emeris/types';
 
 export type BaseAction = {
   memo?: string;
@@ -159,52 +159,20 @@ export type RestakeData = {
 export type BaseStepTx = {
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
+  chainFee?: FeeWDenom[];
   feeToAdd?: FeeWDenom[];
 };
-export type IBCBackwardsStepTx = BaseStepTx & {
-  name: 'ibc_forward';
-  data: IBCBackwardsData;
-};
-export type IBCForwardsStepTx = BaseStepTx & {
-  name: 'ibc_backward';
-  data: IBCForwardsData;
-};
-export type SwapStepTx = BaseStepTx & {
-  name: 'swap';
-  data: SwapData;
-};
-export type TransferStepTx = BaseStepTx & {
-  name: 'transfer';
-  data: TransferData;
-};
-export type AddLiqStepTx = BaseStepTx & {
-  name: 'addliquidity';
-  data: AddLiquidityData;
-};
-export type WithdrawLiqStepTx = BaseStepTx & {
-  name: 'withdrawliquidity';
-  data: WithdrawLiquidityData;
-};
-export type CreatePoolStepTx = BaseStepTx & {
-  name: 'createpool';
-  data: CreatePoolData;
-};
-export type ClaimStepTx = BaseStepTx & {
-  name: 'claim';
-  data: ClaimData;
-};
-export type StakeStepTx = BaseStepTx & {
-  name: 'stake';
-  data: StakeData[];
-};
-export type UnstakeStepTx = BaseStepTx & {
-  name: 'unstake';
-  data: UnstakeData;
-};
-export type RestakeStepTx = BaseStepTx & {
-  name: 'switch';
-  data: RestakeData;
-};
+export type IBCBackwardsStepTx = BaseStepTx & EmerisTransactions.AbstractIBCTransferBackwardTransaction;
+export type IBCForwardsStepTx = BaseStepTx & EmerisTransactions.AbstractIBCTransferForwardTransaction;
+export type SwapStepTx = BaseStepTx & EmerisTransactions.AbstractSwapTransaction;
+export type TransferStepTx = BaseStepTx & EmerisTransactions.AbstractTransferTransaction;
+export type AddLiqStepTx = BaseStepTx & EmerisTransactions.AbstractAddLiquidityTransaction;
+export type WithdrawLiqStepTx = BaseStepTx & EmerisTransactions.AbstractWithdrawLiquidityTransaction;
+export type CreatePoolStepTx = BaseStepTx & EmerisTransactions.AbstractCreatePoolTransaction;
+export type ClaimStepTx = BaseStepTx & EmerisTransactions.AbstractClaimRewardsTransaction;
+export type StakeStepTx = BaseStepTx & EmerisTransactions.AbstractStakeTransaction;
+export type UnstakeStepTx = BaseStepTx & EmerisTransactions.AbstractUnstakeTransaction;
+export type RestakeStepTx = BaseStepTx & EmerisTransactions.AbstractRestakeTransaction;
 export type StepTransaction =
   | IBCBackwardsStepTx
   | IBCForwardsStepTx
@@ -329,3 +297,8 @@ export enum StakingActionSteps {
   TRANSFER = 'Transfer',
   CLAIM = 'Claim',
 }
+export type ActionStepResult = {
+  steps: StepTransaction[];
+  mustAddFee?: boolean;
+  output: EmerisTransactions.AbstractAmount;
+};
