@@ -68,18 +68,23 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
-
-      const numbers = await dispatch(
-        GlobalActionTypes.API.GET_NUMBERS_CHAIN,
-        {
-          subscribe: false,
-          params: {
-            address: keyHashfromAddress(account.address),
-            chain_name: chain_name,
+      let numbers;
+      try {
+        numbers = await dispatch(
+          GlobalActionTypes.API.GET_NUMBERS_CHAIN,
+          {
+            subscribe: false,
+            params: {
+              address: keyHashfromAddress(account.address),
+              chain_name: chain_name,
+            },
           },
-        },
-        { root: true },
-      );
+          { root: true },
+        );
+      } catch (ex) {
+        console.error(ex);
+        return Promise.reject('GET_NUMBERS_CHAIN request failed');
+      }
 
       const signerData = numbers;
       const cosmjsSignerData = {
@@ -94,7 +99,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
-      throw new EmerisError('Demeris:SignWithKeplr', 'Could not sign TX.');
+      return Promise.reject('Failed to sign tx');
     }
   },
 
