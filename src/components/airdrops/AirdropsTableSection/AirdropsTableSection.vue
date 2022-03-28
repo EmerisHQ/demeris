@@ -1,7 +1,8 @@
 <template>
   <header class="flex justify-between items-center">
     <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">
-      {{ $t(`context.airdrops.airdropsFilterItems.${activeFilter}`) }} {{ $t('context.airdrops.title') }}
+      {{ $t(`context.airdrops.filterItems.${activeFilter}`) }}
+      <span class="lowercase">{{ $t('context.airdrops.title') }}</span>
     </div>
     <div class="w-1/4">
       <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />

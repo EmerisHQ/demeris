@@ -9,13 +9,13 @@
       'text-muted hover:text-text': item.value !== activeFilterItem,
     }"
   >
-    <a class="flex items-center" @click="setActiveFilter(item.value)">
+    <a class="flex items-center" @click="() => (activeFilterItem = item.value)">
       {{ item.text }}
-      <span v-if="item.value === activeFilterItem && airdropsLoading">
+      <span v-if="showAirdropsLoading(item.value)">
         <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
       </span>
       <span
-        v-if="item.value === activeFilterItem && activeFilterItem === 'mine' && !isDemoAccount"
+        v-if="showNoOfClaimableAirdrops(item.value)"
         class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
         style="color: white"
       >
@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
@@ -47,35 +47,33 @@ export default defineComponent({
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
-        text: `${t('context.airdrops.airdropsFilterItems.all')} ${t('context.airdrops.title').toLowerCase()}`,
+        text: `${t('context.airdrops.filterItems.all')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'all',
       },
       {
-        text: `${t('context.airdrops.airdropsFilterItems.mine')} ${t('context.airdrops.title').toLowerCase()}`,
+        text: `${t('context.airdrops.filterItems.mine')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'mine',
       },
       {
-        text: t('context.airdrops.airdropsFilterItems.upcoming'),
+        text: t('context.airdrops.filterItems.upcoming'),
         value: 'upcoming',
       },
       {
-        text: t('context.airdrops.airdropsFilterItems.live'),
+        text: t('context.airdrops.filterItems.live'),
         value: 'live',
       },
       {
-        text: t('context.airdrops.airdropsFilterItems.past'),
+        text: t('context.airdrops.filterItems.past'),
         value: 'past',
       },
     ];
 
-    onMounted(() => {
-      setActiveFilter(activeFilterItem.value);
-    });
-
-    const setActiveFilter = (activeItem: string) => {
-      activeFilterItem.value = activeItem;
-      emit('active-filter', activeFilterItem.value);
-    };
+    watch(
+      () => activeFilterItem.value,
+      (newFilterItem) => {
+        emit('active-filter', newFilterItem);
+      },
+    );
 
     const airdrops = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
@@ -99,7 +97,23 @@ export default defineComponent({
       );
     });
 
-    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading, noOfClaimableAirdrops, isDemoAccount };
+    const showAirdropsLoading = (filterItem: string) => {
+      return filterItem === activeFilterItem.value && airdropsLoading.value;
+    };
+
+    const showNoOfClaimableAirdrops = (filterItem: string) => {
+      return filterItem === activeFilterItem.value && activeFilterItem.value === 'mine' && !isDemoAccount.value;
+    };
+
+    return {
+      filtersItems,
+      activeFilterItem,
+      airdropsLoading,
+      noOfClaimableAirdrops,
+      isDemoAccount,
+      showAirdropsLoading,
+      showNoOfClaimableAirdrops,
+    };
   },
 });
 </script>

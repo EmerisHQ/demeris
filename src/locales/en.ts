@@ -531,20 +531,42 @@ export const messages = {
       airdrops: {
         title: 'Airdrops',
         allAirdrops: 'All airdrops',
+        airdrop: 'Airdrop',
+        live: 'Live',
+        chain: 'Chain',
         asset: 'Asset',
         date: 'Date',
+        aboutAirdropTitle: 'About { project }',
+        howToBeEligible: 'How to be eligible',
+        moreDetails: 'More details ↗️',
+        subjectToChange: 'Airdrop criteria is subject to change by project maintainers.',
         action: 'Action',
         amount: 'Amount',
         viewAll: 'View all',
         airdropContentDisclaimer:
           'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
         featureProjects: 'Feature your project’s airdrop',
-        airdropsFilterItems: {
+        filterItems: {
           all: 'All',
           mine: 'My',
           upcoming: 'Upcoming',
           live: 'Live',
           past: 'Past',
+        },
+        claimablepanel: {
+          connectWallet: 'Connect your wallet',
+          findOutEligibleAirdrops: 'Find out which airdrops you are eligible for',
+          claimNow: 'Claim now',
+          congrats: 'Congratulations! You have { noOfAirdrops } Airdrops to claim',
+          connectWalletToCheck: 'Connect your wallet to check if you have any claimable or upcoming airdrops.',
+          checkingAirdrops: 'Checking your airdrops...',
+          searchingAirdrops: 'Searching 12/34 airdrops',
+          noAirdropsToClaim: 'No airdrops to claim',
+          checkOutForEligibility: 'Check out the upcoming airdrops and find out if you’re eligible',
+        },
+        airdropsInfo: {
+          title: 'Introduction',
+          question: 'What is an airdrop?',
         },
       },
       pools: {

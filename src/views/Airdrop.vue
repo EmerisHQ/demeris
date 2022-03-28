@@ -5,14 +5,18 @@
         <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
         <!-- Airdrop Title -->
         <div class="mt-8">
-          <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
+          <div class="text-3 font-bold mt-1 mb-2">
+            {{ selectedAirdrop.project }} {{ $t('context.airdrops.airdrop') }}
+          </div>
           <div class="items-center">
             <span class="text-muted">
               {{ selectedAirdrop.tokenTicker }}
               <span v-if="selectedAirdrop.chainName" class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
-              <span v-if="selectedAirdrop.chainName">{{ selectedAirdrop.chainName }} Chain</span>
+              <span v-if="selectedAirdrop.chainName"
+                >{{ selectedAirdrop.chainName }} {{ $t('context.airdrops.chain') }}</span
+              >
             </span>
-            <span class="live-tag -text-1 ml-2 font-medium">Live</span>
+            <span class="live-tag -text-1 ml-2 font-medium">{{ $t('context.airdrops.live') }}</span>
           </div>
         </div>
       </div>
@@ -23,7 +27,9 @@
         <section class="mt-8">
           <!-- About the Project -->
           <div class="w-3/4">
-            <div class="text-1 font-medium mt-1 mb-6">About {{ selectedAirdrop.project }}</div>
+            <div class="text-1 font-medium mt-1 mb-6">
+              {{ $t('context.airdrops.aboutAirdropTitle', { project: selectedAirdrop.project }) }}
+            </div>
 
             <!-- Description -->
             <div>
@@ -53,7 +59,7 @@
 
           <!-- Eligibility Criteria -->
           <div class="w-3/4 mb-12">
-            <div class="text-1 font-medium mt-1 mb-6">How to be eligible</div>
+            <div class="text-1 font-medium mt-1 mb-6">{{ $t('context.airdrops.howToBeEligible') }}</div>
             <ul class="eligibility-criteria">
               <li v-for="(criteriaItem, index) in selectedAirdrop.eligibilityCriteria" :key="index">
                 {{ criteriaItem.description }}
@@ -63,10 +69,10 @@
 
           <!-- Quick Info -->
           <div>
-            <p class="font-medium mb-4">More details ↗️</p>
+            <p class="font-medium mb-4">{{ $t('context.airdrops.moreDetails') }}</p>
             <div class="w-3/4 flex items-center text-muted bg-fg rounded-xl px-6 py-4">
               <InformationIcon class="mr-4" />
-              <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
+              <p class="-text-1">{{ $t('context.airdrops.subjectToChange') }}</p>
             </div>
           </div>
         </section>

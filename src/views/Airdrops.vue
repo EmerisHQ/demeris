@@ -24,9 +24,11 @@
           <div v-else class="w-full text-center">
             <img src="~@/assets/images/my-airdrops-wallet-not-connected.png" alt="Wallet not connected" />
             <div class="w-3/5 mx-auto">
-              <div class="text-1 sm:text-2 lg:text-3 font-bold">Find out which airdrops you are eligible for</div>
+              <div class="text-1 sm:text-2 lg:text-3 font-bold">
+                {{ $t('context.airdrops.claimablepanel.findOutEligibleAirdrops') }}
+              </div>
               <p class="text-muted mt-6">
-                Connect your wallet to check if you have any claimable or upcoming airdrops.
+                {{ $t('context.airdrops.claimablepanel.connectWalletToCheck') }}
               </p>
               <Button
                 :animate="false"
@@ -80,7 +82,7 @@ export default {
       })),
     );
 
-    const activeFilter = ref('');
+    const activeFilter = ref('all');
     const isWalletModalOpen = ref(false);
 
     const isDemoAccount = computed(() => {
