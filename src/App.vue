@@ -207,7 +207,7 @@ export default defineComponent({
         getAllAirdrops();
       }
       if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
-        router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
+        await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
       }
       initialized.value = true;
     });

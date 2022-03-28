@@ -353,7 +353,7 @@ export default defineComponent({
         border-radius: 1.5rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 0.75rem;
-        flex-shrink: 0;
+        shrink: 0;
       }
 
       &__asset {

@@ -25,19 +25,19 @@
       >
         <template v-if="transaction.name == 'swap'">
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.to.denom)" />
         </template>
 
         <template v-if="transaction.name == 'addliquidity' || transaction.name == 'createpool'">
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinA.denom)" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinB.denom)" />
         </template>
 
         <template v-if="transaction.name == 'withdrawliquidity'">
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[0])" />
-          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <EphemerisSpinner class="grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[1])" />
         </template>
 
@@ -46,7 +46,7 @@
             <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data[0]?.amount.denom)" />
           </div>
           <div class="flex items-center justify-center w-full">
-            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <EphemerisSpinner class="grow max-w-xs" />
           </div>
         </template>
 
@@ -55,7 +55,7 @@
             <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data?.amount?.denom)" />
           </div>
           <div class="flex items-center justify-center w-full">
-            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <EphemerisSpinner class="grow max-w-xs" />
           </div>
         </template>
 
@@ -64,13 +64,13 @@
             <CircleSymbol size="lg" :denom="getBaseDenomSync(alphanumericSplit(transaction.data?.total)?.denom)" />
           </div>
           <div class="flex items-center justify-center w-full">
-            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <EphemerisSpinner class="grow max-w-xs" />
           </div>
         </template>
 
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
           <CircleSymbol size="lg" variant="chain" :chain-name="transaction.data.from_chain" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
             <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.amount.denom)" />
           </div>
@@ -78,7 +78,7 @@
         </template>
 
         <template v-if="transaction.name == 'transfer'">
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <EphemerisSpinner class="-my-6 grow max-w-xs" />
           <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
             <CircleSymbol
               size="lg"

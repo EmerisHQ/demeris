@@ -58,7 +58,7 @@
                 </Transition>
                 <div
                   :style="{ opacity: displayIndex === 0 || !isStacked ? 1 : 0 }"
-                  class="flex flex-grow"
+                  class="flex grow"
                   :data-test="`notification-${displayIndex}`"
                 >
                   <div class="flex-1 text-text">{{ message }}</div>
