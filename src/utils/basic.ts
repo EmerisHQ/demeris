@@ -203,6 +203,11 @@ export function checkStringIsKeybase(str: string) {
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
 
+export function getCleanURL(str: string) {
+  if (!str || str === '') return;
+  return new URL(str).hostname;
+}
+
 // ignores denoms that are not of baseDenom
 export function getSumOfRewards(totalValue: string, baseDenom: string) {
   if (!totalValue) return 0;
