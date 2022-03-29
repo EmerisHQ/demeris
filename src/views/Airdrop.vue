@@ -1,6 +1,6 @@
 <template>
   <NoMarginLayout>
-    <header class="-mt-32 w-full bg-fg">
+    <header class="-mt-32 w-full header-bg">
       <div class="pt-24 pb-12 px-5 md:px-8 max-w-7xl mx-auto">
         <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
         <!-- Airdrop Title -->
@@ -173,5 +173,11 @@ ul {
 }
 .description-text {
   line-height: 1.5;
+}
+.header-bg {
+  background: radial-gradient(100% 100% at 17.19% 0%, rgba(80, 206, 235, 0.08) 0%, rgba(22, 61, 70, 0.08) 100%);
+}
+.dark .header-bg {
+  background: radial-gradient(100% 100% at 17.19% 0%, rgba(80, 206, 235, 0.8) 0%, rgba(22, 61, 70, 0.8) 100%);
 }
 </style>
