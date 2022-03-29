@@ -1,4 +1,5 @@
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { AminoMsg } from '@cosmjs/amino';
+import { Registry } from '@cosmjs/proto-signing';
 import { EmerisBase, EmerisTransactions } from '@emeris/types';
 
 export type BaseAction = {
@@ -260,7 +261,7 @@ export type Pool = {
   pool_coin_denom: string;
 };
 export type MsgMeta = {
-  msg: EncodeObject[];
+  msg: AminoMsg[];
   chain_name: string;
   registry: Registry;
 };

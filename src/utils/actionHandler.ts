@@ -1,7 +1,7 @@
+import { AminoMsg } from '@cosmjs/amino';
+import mapTransaction from '@emeris/mapper';
 import { EmerisAPI, EmerisBase, EmerisFees } from '@emeris/types';
-import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import { bech32 } from 'bech32';
-import Long from 'long';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
@@ -19,221 +19,59 @@ import {
 
 // Action-handler / action composing using the blocks above
 
-export async function msgFromStepTransaction(
-  stepTx: Actions.StepTransaction,
-  gasPriceLevel: EmerisFees.GasPriceLevel,
-): Promise<Actions.MsgMeta> {
+export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.MsgMeta> {
+  const chainName = stepTx.type == 'stake' ? stepTx.data[0].chainName : stepTx.data.chainName;
+  const msg = await (mapTransaction({
+    chainName,
+    signingAddress: await getOwnAddress({ chain_name: chainName }),
+    txs: [stepTx],
+  }) as Promise<AminoMsg[]>);
   const libStore = useStore();
-  const typedstore = useStore() as RootStoreTyped;
-  if (stepTx.name == 'transfer') {
-    const data = stepTx.data as Actions.TransferData;
-    const msg = await libStore.dispatch('cosmos.bank.v1beta1/MsgSend', {
-      value: {
-        amount: [data.amount],
-        toAddress: data.to_address,
-        fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
-      },
-    });
+  if (stepTx.type == 'transfer') {
     const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name: data.chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
 
-  if (stepTx.name == 'ibc_forward') {
-    const data = stepTx.data as Actions.IBCForwardsData;
-    let receiver;
-    if (data.to_address) {
-      receiver = data.to_address;
-    } else {
-      receiver = await getOwnAddress({ chain_name: data.to_chain });
-    }
-    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
-      value: {
-        sourcePort: 'transfer',
-        sourceChannel: data.through,
-        sender: await getOwnAddress({ chain_name: data.from_chain }),
-        receiver,
-        timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        //timeoutHeight: { revisionHeight: "10000000000",revisionNumber:"0"},
-        token: { ...data.amount },
-      },
-    });
+  if (stepTx.type == 'IBCtransferForward') {
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg: [msg], chain_name: data.from_chain, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
 
-  if (stepTx.name == 'ibc_backward') {
-    const data = stepTx.data as Actions.IBCBackwardsData;
-    let receiver;
-    if (data.to_address) {
-      receiver = data.to_address;
-    } else {
-      receiver = await getOwnAddress({ chain_name: data.to_chain });
-    }
-    let fromAmount = data.amount.amount;
-    if (stepTx.addFee) {
-      fromAmount = (
-        parseInt(fromAmount) +
-        Math.ceil(stepTx.feeToAdd[0].amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit])
-      ).toString();
-    }
-    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
-      value: {
-        sourcePort: 'transfer',
-        sourceChannel: data.through,
-        sender: await getOwnAddress({ chain_name: data.from_chain }),
-        receiver,
-        timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        token: { amount: fromAmount, denom: data.amount.denom },
-      },
-    });
+  if (stepTx.type == 'IBCtransferBackward') {
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg: [msg], chain_name: data.from_chain, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'addliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const data = stepTx.data as Actions.AddLiquidityData;
-    let depositCoins;
-    if (data.coinA.denom > data.coinB.denom) {
-      depositCoins = [data.coinB, data.coinA];
-    } else {
-      depositCoins = [data.coinA, data.coinB];
-    }
-    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
-      value: {
-        depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
-        poolId: data.pool.id,
-        depositCoins,
-      },
-    });
+  if (stepTx.type == 'addLiquidity') {
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const data = stepTx.data as Actions.WithdrawLiquidityData;
-    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
-      value: {
-        withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
-        poolId: data.pool.id,
-        poolCoin: { ...data.poolCoin },
-      },
-    });
+  if (stepTx.type == 'withdrawLiquidity') {
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'createpool') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const data = stepTx.data as Actions.CreatePoolData;
-    let depositCoins;
-    if (data.coinA.denom > data.coinB.denom) {
-      depositCoins = [data.coinB, data.coinA];
-    } else {
-      depositCoins = [data.coinA, data.coinB];
-    }
-    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
-      value: {
-        poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
-        poolTypeId: 1,
-        depositCoins: depositCoins,
-      },
-    });
+  if (stepTx.type == 'createPool') {
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'swap') {
-    const data = stepTx.data as Actions.SwapData;
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
-    const swapFeeRate = libStore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
-    let isReverse = false;
-    if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
-      isReverse = true;
-    }
-    const price = [data.from, data.to].sort((a, b) => {
-      if (a.denom < b.denom) return -1;
-      if (a.denom > b.denom) return 1;
-      return 0;
-    });
-    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
-      value: MsgSwapWithinBatch.fromPartial({
-        swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
-        poolId: parseInt(data.pool.id),
-        swapTypeId: data.pool.type_id,
-        offerCoin: { amount: data.from.amount, denom: data.from.denom },
-        demandCoinDenom: data.to.denom,
-        offerCoinFee: { amount: String(Math.ceil(+data.from.amount * (swapFeeRate / 2))), denom: data.from.denom },
-        orderPrice: (
-          (parseInt(price[0].amount) / parseInt(price[1].amount)) *
-          (isReverse ? 1 - slippage : 1 + slippage)
-        )
-          .toFixed(18)
-          .replace('.', '')
-          .replace(/(^0+)/, ''),
-      }),
-    });
+  if (stepTx.type == 'swap') {
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'claim') {
-    const data = stepTx.data as Actions.ClaimData;
-    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
-    const msgs = await Promise.all(
-      data.rewards.map(async (rewardData) => {
-        return await libStore.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
-          value: {
-            delegatorAddress,
-            validatorAddress: rewardData.validator_address,
-          },
-        });
-      }),
-    );
+  if (stepTx.type == 'claim') {
     const registry = libStore.getters['cosmos.distribution.v1beta1/getRegistry'];
-    return { msg: msgs, chain_name: data.chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'stake') {
-    const data = stepTx.data as Actions.StakeData[];
-    const delegatorAddress = await getOwnAddress({ chain_name: data[0].chain_name });
-    const msgs = await Promise.all(
-      data.map(
-        async (x) =>
-          await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
-            value: {
-              delegatorAddress,
-              validatorAddress: x.validatorAddress,
-              amount: x.amount,
-            },
-          }),
-      ),
-    );
+  if (stepTx.type == 'stake') {
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: msgs, chain_name: data[0].chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'unstake') {
-    const data = stepTx.data as Actions.UnstakeData;
-    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
-    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgUndelegate', {
-      value: {
-        delegatorAddress,
-        validatorAddress: data.validatorAddress,
-        amount: data.amount,
-      },
-    });
+  if (stepTx.type == 'unstake') {
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name: data.chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
-  if (stepTx.name == 'switch') {
-    const data = stepTx.data as Actions.RestakeData;
-    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
-    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgBeginRedelegate', {
-      value: {
-        delegatorAddress,
-        validatorSrcAddress: data.validatorSrcAddress,
-        validatorDstAddress: data.validatorDstAddress,
-        amount: data.amount,
-      },
-    });
+  if (stepTx.type == 'switch') {
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name: data.chain_name, registry };
+    return { msg: msg, chain_name: chainName, registry };
   }
 }
 // TODO make getter so it out updates on getFeeTokens getter

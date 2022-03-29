@@ -50,7 +50,7 @@ export async function memoTransfer({
           destination_chain_name: destination_chain_name,
         });
         result.steps.push({
-          type: 'IBCtransfer-forward',
+          type: 'IBCtransferForward',
           status: 'pending',
           chainFee: await getFeeForChain(chain_name),
           data: {
@@ -116,7 +116,7 @@ export async function memoTransfer({
       result.mustAddFee = true;
       const toNativeAddress = await getOwnAddress({ chain_name: verifyTrace.trace[0].counterparty_name });
       result.steps.push({
-        type: 'IBCtransfer-backward',
+        type: 'IBCtransferBackward',
         status: 'pending',
         addFee: true,
         feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
@@ -131,7 +131,7 @@ export async function memoTransfer({
         },
       });
       result.steps.push({
-        type: 'IBCtransfer-forward',
+        type: 'IBCtransferForward',
         status: 'pending',
         chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
@@ -165,7 +165,7 @@ export async function memoTransfer({
       const toNativeAddress = await getOwnAddress({ chain_name: verifyTrace.trace[0].counterparty_name });
       if (verifyTrace.trace[0].counterparty_name == destination_chain_name) {
         result.steps.push({
-          type: 'IBCtransfer-backward',
+          type: 'IBCtransferBackward',
           status: 'pending',
           data: {
             amount: amount,
@@ -190,7 +190,7 @@ export async function memoTransfer({
       } else {
         result.mustAddFee = true;
         result.steps.push({
-          type: 'IBCtransfer-backward',
+          type: 'IBCtransferBackward',
           status: 'pending',
           feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           addFee: true,
@@ -211,7 +211,7 @@ export async function memoTransfer({
           destination_chain_name: destination_chain_name,
         });
         result.steps.push({
-          type: 'IBCtransfer-forward',
+          type: 'IBCtransferForward',
           status: 'pending',
           chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           data: {

@@ -1,7 +1,13 @@
-import { encodeSecp256k1Pubkey, makeSignDoc as makeSignDocAmino, OfflineAminoSigner, StdFee } from '@cosmjs/amino';
+import {
+  AminoMsg,
+  encodeSecp256k1Pubkey,
+  makeSignDoc as makeSignDocAmino,
+  OfflineAminoSigner,
+  StdFee,
+} from '@cosmjs/amino';
 import { fromBase64 } from '@cosmjs/encoding';
 import { Int53 } from '@cosmjs/math';
-import { EncodeObject, encodePubkey, makeAuthInfoBytes, TxBodyEncodeObject } from '@cosmjs/proto-signing';
+import { encodePubkey, makeAuthInfoBytes, TxBodyEncodeObject } from '@cosmjs/proto-signing';
 import { AminoConverters, AminoTypes } from '@cosmjs/stargate';
 import { SignerData, SigningStargateClient } from '@cosmjs/stargate';
 import {
@@ -36,7 +42,7 @@ interface DemerisSigning {
   exposedSigner: OfflineAminoSigner;
   signWMeta: (
     signerAddress: string,
-    messages: readonly EncodeObject[],
+    messages: readonly AminoMsg[],
     fee: StdFee,
     memo: string,
     signerData: SignerData,
@@ -51,7 +57,7 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
   }
   async signWMeta(
     signerAddress: string,
-    messages: readonly EncodeObject[],
+    messages: readonly AminoMsg[],
     fee: StdFee,
     memo = '',
     { accountNumber, sequence, chainId }: SignerData = null,
@@ -65,7 +71,7 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     const aminoTypes = new AminoTypes({ ...createAminoTypes(bech32.decode(signerAddress).prefix) });
     const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
     const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
-    const msgs = messages.map((msg) => aminoTypes.toAmino(msg));
+    const msgs = messages;
 
     const signDoc = makeSignDocAmino(msgs, fee, chainId, memo, accountNumber, sequence);
     const { signature, signed } = await this.exposedSigner.signAmino(signerAddress, signDoc);

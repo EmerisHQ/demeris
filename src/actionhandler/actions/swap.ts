@@ -1,17 +1,18 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
 import { useStore } from '@/utils/useStore';
 
-export async function swap({ from, to }: { from: EmerisBase.Amount; to: EmerisBase.Amount }) {
+export async function swap({ from, to }: { from: AbstractAmount; to: AbstractAmount }) {
   const store = useStore();
   const typedstore = store as RootStoreTyped;
   // Get the list of available pools
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };
@@ -32,17 +33,19 @@ export async function swap({ from, to }: { from: EmerisBase.Amount; to: EmerisBa
   if (pool) {
     //Pool exists, proceed with swap
     result.steps.push({
-      name: 'swap',
+      type: 'swap',
       status: 'pending',
       data: {
         from,
         to,
         pool,
+        chainName: typedstore.getters[GlobalGetterTypes.API.getDexChain],
       },
     });
     result.output = {
-      amount: 0,
+      amount: '0',
       denom: to.denom,
+      base_denom: to.base_denom,
       chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
     };
     return result;

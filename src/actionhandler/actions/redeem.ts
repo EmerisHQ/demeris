@@ -1,13 +1,13 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { getBaseDenom } from '@/utils/actionHandler';
-import { getDenomHash, isNative } from '@/utils/basic';
+import { ActionStepResult } from '@/types/actions';
+import { getDenomHash, getOwnAddress, isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
-export async function redeem({ amount, denom, chain_name }: EmerisBase.ChainAmount) {
+export async function redeem({ amount, denom, chain_name }: AbstractAmount) {
   const typedstore = useStore() as RootStoreTyped;
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
@@ -18,7 +18,7 @@ export async function redeem({ amount, denom, chain_name }: EmerisBase.ChainAmou
 
   if (isNative(denom)) {
     // If NOT an IBC denom, nothing to do
-    result.output = { amount, denom, chain_name };
+    result.output = { amount, denom, chain_name, base_denom: denom };
     return result;
   } else {
     // else we get the trace for this IBC denom
@@ -47,14 +47,17 @@ export async function redeem({ amount, denom, chain_name }: EmerisBase.ChainAmou
     let i = 0;
     while (i < verifyTrace.trace.length - 1) {
       const hop = verifyTrace.trace[i];
+      const fromAddress = await getOwnAddress({ chain_name: hop.chain_name });
+      const toAddress = await getOwnAddress({ chain_name: hop.counterparty_name });
       result.steps.push({
-        name: 'ibc_backward',
+        type: 'IBCtransferBackward',
         status: 'pending',
         data: {
           amount: { amount: amount, denom: getDenomHash(verifyTrace.path, verifyTrace.base_denom, i) },
-          base_denom: await getBaseDenom(getDenomHash(verifyTrace.path, verifyTrace.base_denom, i), hop.chain_name),
-          from_chain: hop.chain_name,
-          to_chain: hop.counterparty_name,
+          fromAddress,
+          toAddress,
+          chainName: hop.chain_name,
+          toChain: hop.counterparty_name,
           through: hop.channel,
         },
       });
@@ -63,6 +66,7 @@ export async function redeem({ amount, denom, chain_name }: EmerisBase.ChainAmou
     result.output = {
       amount: amount,
       denom: verifyTrace.base_denom,
+      base_denom: verifyTrace.base_denom,
       chain_name: verifyTrace.trace[verifyTrace.trace.length - 1].counterparty_name,
     };
 

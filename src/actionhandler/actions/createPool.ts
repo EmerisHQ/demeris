@@ -1,16 +1,12 @@
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { ActionStepResult } from '@/types/actions';
+import { useStore } from '@/utils/useStore';
 
-export async function createPool({
-  coinA,
-  coinB,
-  chainName,
-}: {
-  coinA: AbstractAmount;
-  coinB: AbstractAmount;
-  chainName: string;
-}) {
+export async function createPool({ coinA, coinB }: { coinA: AbstractAmount; coinB: AbstractAmount }) {
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
   const result: ActionStepResult = {
     steps: [],
     output: {
@@ -25,7 +21,7 @@ export async function createPool({
     data: {
       coinA,
       coinB,
-      chainName,
+      chainName: typedstore.getters[GlobalGetterTypes.API.getDexChain],
     },
   });
   return result;

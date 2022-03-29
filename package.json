@@ -29,6 +29,7 @@
     "@cosmjs/stream": "0.28.0",
     "@cosmjs/tendermint-rpc": "0.28.0",
     "@cosmjs/utils": "0.28.0",
+    "@emeris/mapper": "0.0.8",
     "@sentry/tracing": "^6.19.2",
     "@sentry/vue": "^6.19.2",
     "@starport/tendermint-liquidity-js": "^1.4.7",
@@ -73,7 +74,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.16.7",
-    "@emeris/types": "^0.0.30",
+    "@emeris/types": "^0.0.31",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@keplr-wallet/types": "0.8.8",
     "@pinia/testing": "^0.0.10",
