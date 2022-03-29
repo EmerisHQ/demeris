@@ -208,14 +208,9 @@ export function getCleanURL(str: string) {
   return new URL(str).hostname;
 }
 
-export function getCleanURL(str: string) {
-  if (!str || str === '') return;
-  return new URL(str).hostname;
-}
-
 // ignores denoms that are not of baseDenom
 export function getSumOfRewards(totalValue: string, baseDenom: string) {
-  if (!totalValue) return 0;
+  if (!totalValue || !baseDenom) return 0;
   const total = parseCoins(totalValue ?? '0')
     .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
     .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
