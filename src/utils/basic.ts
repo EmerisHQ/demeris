@@ -203,7 +203,7 @@ export function checkStringIsKeybase(str: string) {
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
 
-//  ignores denoms that are not of baseDenom
+// ignores denoms that are not of baseDenom
 export function getSumOfRewards(totalValue: string, baseDenom: string) {
   if (!totalValue) return 0;
   const total = parseCoins(totalValue ?? '0')
