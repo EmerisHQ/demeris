@@ -867,11 +867,30 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       return getters['getChainStatus'](params);
     }
   },
+  async [ActionTypes.GET_NEW_BLOCK]({ getters }, { chain_name }) {
+    return new Promise(async (resolve, reject) => {
+      const timeout = 30000;
 
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
+      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
+
+      await wss.connect().catch(reject);
+      const query = `tm.event = 'NewBlock'`;
+
+      wss.subscribe({ query }, (data: Record<string, any>) => {
+        if (data.result.data) {
+          resolve(data.result.data);
+          wss.unsubscribe({ query }, () => void 0);
+        }
+      });
+
+      setTimeout(reject, timeout);
+    });
+  },
   async [ActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 60000;
-      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
@@ -879,12 +898,12 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
       let done = false;
 
-      const getTxRPC = async () => {
+      const getTx = async () => {
         const result = await wss.call('tx', [txHash64, false]).catch(reject);
         handleMessage(result);
       };
 
-      const subscribeTxRPC = () => {
+      const subscribeTx = () => {
         wss.subscribe(
           {
             query: subscribeQuery,
@@ -894,8 +913,8 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       };
 
       const handleOpen = () => {
-        getTxRPC();
-        subscribeTxRPC();
+        getTx();
+        subscribeTx();
       };
 
       const handleMessage = async (data: Record<string, any>) => {
@@ -911,12 +930,12 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
         if (data.result?.data?.value?.TxResult) {
           done = true;
-          resolve(data.result.data.value.TxResult);
+          resolve(data.result);
         }
 
         if (data?.result?.tx_result) {
           done = true;
-          resolve(data.result.tx_result);
+          resolve(data.result);
         }
       };
 
@@ -928,6 +947,23 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         reject(new Error('Could not find transaction response'));
       }, timeout);
     });
+  },
+
+  async [ActionTypes.GET_TX_FROM_RPC]({ getters }, { txhash, chain_name }) {
+    const rpcUrl = `${getters['getEndpoint']}/chain/${chain_name}/rpc`;
+
+    if (!rpcUrl) {
+      throw new Error(`${chain_name} RPC endpoint not found`);
+    }
+
+    try {
+      delete axios.defaults.headers.get['X-Correlation-Id'];
+      const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
+
+      return data?.result;
+    } catch (e) {
+      throw new Error('Could not find transaction response from RPC');
+    }
   },
 
   async [ActionTypes.GET_END_BLOCK_EVENTS]({ getters, rootGetters }, { height, stepType }: DemerisTxResultParams) {
