@@ -202,3 +202,11 @@ export function checkStringIsKeybase(str: string) {
   if (!str || str.length !== 16) return false;
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
+
+export function getCleanURL(str: string) {
+  if (!str || str === '') return;
+  const url = str.split('://')[1];
+  if (!url || str === '') return str;
+  if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
+  return url;
+}
