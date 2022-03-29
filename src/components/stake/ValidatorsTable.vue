@@ -285,24 +285,36 @@ export default defineComponent({
       return propsRef.validatorList.value
         .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
         .sort((a, b) => {
-          switch (sortBy.value) {
-            case 'power':
-              if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'name':
-              if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
-              if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'commission':
-              if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'staked':
-              if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+          let res = 0;
+          //  if only one of a and b are offline
+          if ((isOffline(a) || isOffline(b)) && !(isOffline(a) && isOffline(b))) {
+            return isOffline(a) ? 1 : -1;
+          } else {
+            switch (sortBy.value) {
+              case 'power':
+                if (Number(a.tokens) < Number(b.tokens)) res = 1;
+                if (Number(a.tokens) > Number(b.tokens)) res = -1;
+                break;
+              case 'name':
+                if (a.moniker < b.moniker) res = 1;
+                if (a.moniker > b.moniker) res = -1;
+                break;
+              case 'commission':
+                if (Number(a.commission_rate) < Number(b.commission_rate)) res = 1;
+                if (Number(a.commission_rate) > Number(b.commission_rate)) res = -1;
+                break;
+              case 'staked':
+                if (Number(a.stakedAmount) < Number(b.stakedAmount)) res = 1;
+                if (Number(a.stakedAmount) > Number(b.stakedAmount)) res = -1;
+                break;
+            }
+            if (res === 0) {
+              if (Number(a.tokens) < Number(b.tokens)) res = 1;
+              if (Number(a.tokens) > Number(b.tokens)) res = -1;
+            }
           }
+          if (sortOrder.value === 'asc') return -res;
+          return res;
         });
     });
     const sort = (by) => {
@@ -350,9 +362,14 @@ export default defineComponent({
       sortBy,
       sortOrder,
       isDisabled,
+      isOffline,
     };
   },
 });
+
+function isOffline(validator: EmerisAPI.Validator) {
+  return validator.status === 1 || validator.status === 2;
+}
 </script>
 
 <style lang="scss" scoped>
