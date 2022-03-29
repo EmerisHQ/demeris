@@ -7,10 +7,10 @@
           <AmountDisplay
             class="font-medium"
             :class="context === 'widget' ? 'text-0' : 'text-1'"
-            :amount="{ amount: rewardsAmount, denom: rewardsDenom }"
+            :amount="{ amount: rewardsAmount, denom: baseDenom }"
           />
           <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
-            <Price :amount="{ denom: rewardsDenom, amount: rewardsAmount }" />
+            <Price :amount="{ denom: baseDenom, amount: rewardsAmount }" />
           </div>
         </div>
         <CircleSymbol :denom="rewardsDenom" size="md" class="ml-3" />
@@ -68,6 +68,7 @@ import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
+import { getSumOfRewards } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewClaim',
@@ -112,11 +113,8 @@ export default defineComponent({
     const baseDenom = route.params.denom as string;
     const validatorList = ref([]);
     const propsRef = toRefs(props);
-    const rewardsDenom = computed(() => {
-      return propsRef.step.value.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
-    });
     const rewardsAmount = computed(() => {
-      return parseInt(propsRef.step.value.transactions[0].data.total).toString();
+      return getSumOfRewards(propsRef.step.value.transactions[0].data.total, baseDenom);
     });
     const validators = computed(() => {
       return propsRef.step.value.transactions[0].data.rewards;
@@ -128,7 +126,7 @@ export default defineComponent({
       return validatorList.value.find((x) => x.operator_address == val_address);
     };
     return {
-      rewardsDenom,
+      baseDenom,
       rewardsAmount,
       validators,
       getValidator,

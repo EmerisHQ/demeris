@@ -702,21 +702,25 @@ export default defineComponent({
       });
     });
 
-    // default pay coin set
-    watch(
-      () => {
-        return [assetsToPay.value, balances.value];
-      },
-      (watchValues, oldWatchValues) => {
+    watch(isSignedIn, (value) => {
+      if (!value) {
         //when wallet connected/disconnected set again
-        if (watchValues[1].length !== oldWatchValues[1].length && !isFinished.value) {
+        if (!isFinished.value) {
           //Do not reset everything if we're in the finished state (view tx receipt)
           isOpen.value = false;
           isInit.value = false;
           data.payCoinAmount = null;
           data.receiveCoinAmount = null;
         }
+      }
+    });
 
+    // default pay coin set
+    watch(
+      () => {
+        return [assetsToPay.value, balances.value];
+      },
+      () => {
         if (!isInit.value) {
           const defaultPayCoin = {
             amount: '0uatom',

@@ -203,10 +203,20 @@ export function checkStringIsKeybase(str: string) {
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
 
+
 export function getCleanURL(str: string) {
   if (!str || str === '') return;
   const url = str.split('://')[1];
   if (!url || str === '') return str;
   if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
   return url;
+}
+
+// ignores denoms that are not of baseDenom
+export function getSumOfRewards(totalValue: string, baseDenom: string) {
+  if (!totalValue) return 0;
+  const total = parseCoins(totalValue ?? '0')
+    .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
+    .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
+  return parseFloat(total ?? '0');
 }
