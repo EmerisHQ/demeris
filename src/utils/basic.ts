@@ -202,3 +202,12 @@ export function checkStringIsKeybase(str: string) {
   if (!str || str.length !== 16) return false;
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
+
+// ignores denoms that are not of baseDenom
+export function getSumOfRewards(totalValue: string, baseDenom: string) {
+  if (!totalValue) return 0;
+  const total = parseCoins(totalValue ?? '0')
+    .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
+    .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
+  return parseFloat(total ?? '0');
+}
