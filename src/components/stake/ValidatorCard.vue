@@ -24,7 +24,9 @@
     <p class="text-muted mt-4 w-full text-left break-words">{{ validator.details }}</p>
     <div v-if="validator?.website && validator.website !== ''" class="mt-4 flex items-center w-full">
       <LinkIcon class="mr-2.5" style="width: 11px; height: 11px" />
-      <a :href="validator.website" class="-text-1 text-link">{{ getCleanURL(validator.website) }} ↗️</a>
+      <a :href="validator.website" class="-text-1 text-link" rel="noopener noreferral" target="_blank"
+        >{{ getCleanURL(validator.website) }} ↗️</a
+      >
     </div>
     <List class="w-full mt-8">
       <ListItem size="sm" direction="col">
@@ -73,7 +75,6 @@ export default defineComponent({
   emits: ['close', 'clicked'],
   setup(props, { emit }) {
     const propsRef = toRefs(props);
-    console.log(propsRef.validator);
     const toPerc = (val) => {
       return Math.trunc(parseFloat(val) * 10000) / 100 + '%';
     };
