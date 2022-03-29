@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper w-full relative">
-    <div class="claim-widget bg-surface dark:bg-fg rounded-2xl px-6 py-8 shadow-panel">
+    <div class="claim-widget bg-surface dark:bg-darkBanner rounded-2xl px-6 py-8 shadow-panel">
       <!-- Claim Header -->
       <!-- Has Airdrop amount -->
       <div class="text-center mb-6">
