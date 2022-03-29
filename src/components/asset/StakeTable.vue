@@ -13,6 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -24,6 +25,7 @@ import useAccount from '@/composables/useAccount';
 import useStaking, { StakingRewards } from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event } from '@/utils/analytics';
+import { parseCoins } from '@/utils/basic';
 
 const store = useStore() as RootStoreTyped;
 const stakingRewardsData = ref<StakingRewards>(null);
@@ -56,9 +58,13 @@ const selectTab = (tabNumber?: number): void => {
   selectedTab.value = tabNumber;
 };
 
+//  ignores denoms that are not from native chain
 const totalRewardsAmount = computed(() => {
   if (!stakingRewardsData.value?.total) return 0;
-  return parseFloat(stakingRewardsData.value.total ?? '0');
+  const total = parseCoins(stakingRewardsData.value?.total ?? '0')
+    .map((value) => (value.denom !== props.denom ? '0' : value.amount))
+    .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
+  return parseFloat(total ?? '0');
 });
 
 watch(
