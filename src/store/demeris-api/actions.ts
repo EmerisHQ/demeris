@@ -620,9 +620,20 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
   },
 
-  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters }, { subscribe = false }) {
+  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters, state }, { subscribe = false }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    const reqHash = hashObject({ action: ActionTypes.GET_CHAINS, payload: {} });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+      return getters['getChains'];
+    }
+    let resolver;
+    const promise: Promise<void> = new Promise((resolve, _) => {
+      resolver = resolve;
+    });
     try {
+      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       const response: AxiosResponse<EmerisAPI.ChainsResponse> = await axios.get(getters['getEndpoint'] + '/chains');
       commit(MutationTypes.SET_CHAINS, { value: response.data.chains });
       if (subscribe) {
@@ -631,6 +642,8 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     } catch (e) {
       throw new EmerisError('Demeris:GetChains', 'Could not perform API query.');
     }
+    resolver();
+    commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
     return getters['getChains'];
   },
 
