@@ -181,8 +181,6 @@ import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
 import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
-import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
@@ -214,10 +212,10 @@ export default defineComponent({
       default: undefined,
     },
   },
-  // todo: on receive input, api req wrong - on 0 NaN shows - atom to cro, precision wrong - no asset selected and amount and then receuve asset = nothing, filter routes with "insufficient funds" in response, filter gravity out?, filter NaN in api response,
-  // resulting end chain should be cosmos hub? or osmosis if fine? - dex chain
+  // todo:  filter routes with "insufficient funds" in response, filter gravity out?, filter NaN in api response,
 
   //what if quotes list is 0.. what if api returns {error: 'The denom 'uosmo' is not present in any available swap'.. ensure clicking on visualize deosn't select quote.
+  //pay denom select on {pay,receive, denom,amount} set messes payamount (needs dagg api change.. accepting amountout)
   setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
@@ -227,7 +225,6 @@ export default defineComponent({
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = useModal();
 
-    const { pools, getPoolPrice, getReserveBalances, getReserveBaseDenoms, updatePool } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
@@ -313,20 +310,28 @@ export default defineComponent({
     });
     const assetsToPay = computed(() => {
       const hasBalance = balances.value.length > 0;
-      let payAssets = allBalances.value.filter((x) => {
-        return verifiedDenoms.value.find(
-          (y) => y.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
+      let payAssets = allBalances.value.filter((balance) => {
+        return (
+          balance.base_denom !== data.receiveCoinData?.base_denom &&
+          verifiedDenoms.value.find(
+            (verifiedDenom) =>
+              verifiedDenom.base_denom == balance.base_denom &&
+              (parseInt(parseCoins(balance.amount)[0].amount) > 0 || !hasBalance),
+          )
         );
       });
       return payAssets;
     });
+
     const assetsToReceive = computed(() => {
       return sortAssetList(
-        verifiedDenoms.value.map((denom) => ({
-          base_denom: denom.name,
-          denom: denom.name,
-          on_chain: denom.chain_name,
-        })),
+        verifiedDenoms.value
+          .map((denom) => ({
+            base_denom: denom.name,
+            denom: denom.name,
+            on_chain: denom.chain_name,
+          }))
+          .filter((receiveAsset) => receiveAsset.base_denom !== data.payCoinData.base_denom),
       );
     });
 
@@ -504,26 +509,11 @@ export default defineComponent({
           return false;
         }
       }),
-      // isNotEnoughLiquidity: computed(() => {
-      //   if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
-      //     return true;
-      //   } else {
-      //     return false;
-      //   }
-      // }),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
       isSwapReady: computed(() => {
-        return !(
-          data.isOver ||
-          !data.isBothSelected ||
-          // data.isNotEnoughLiquidity ||
-          !isAmount.value ||
-          !isSignedIn.value ||
-          // data.selectedPoolData === null ||
-          !dexStatus.value
-        );
+        return !(data.isOver || !data.isBothSelected || !isAmount.value || !isSignedIn.value || !dexStatus.value);
       }),
       isChildModalOpen: false,
       isPriceChanged: false,
@@ -597,124 +587,7 @@ export default defineComponent({
       },
     );
 
-    //calculate slippage and set
-    // watch(
-    //   () => [data.payCoinAmount, data.receiveCoinAmount],
-    //   () => {
-    //     if (data.selectedPoolData) {
-    //       const minimalDecimal = Math.pow(
-    //         10,
-    //         store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }),
-    //       );
-
-    //       const reserveCoin =
-    //         data.selectedPoolData.reserves.findIndex((coin) => coin === data.payCoinData.base_denom) === 0
-    //           ? 'balanceA'
-    //           : 'balanceB';
-
-    //       slippage.value = calculateSlippage(
-    //         data.payCoinAmount * minimalDecimal,
-    //         data.selectedPoolData.reserveBalances[reserveCoin],
-    //       );
-    //     }
-    //   },
-    // );
-
-    //set selecte pair pool info
-    const poolId = ref(null); // for price update
-    // watch(
-    //   () => {
-    //     return [data.payCoinData?.denom, data.receiveCoinData?.denom];
-    //   },
-    //   async (watchValues) => {
-    //     if (watchValues[0] && watchValues[1]) {
-    //       let payDenom = data.payCoinData.base_denom;
-    //       const receiveDenom = data.receiveCoinData.denom;
-
-    //       if (
-    //         !data.payCoinData.denom.startsWith('ibc') &&
-    //         data.payCoinData.denom !== 'uatom' &&
-    //         !data.payCoinData.denom.startsWith('pool')
-    //       ) {
-    //         // nativeDenomToIBCDenom
-    //         payDenom = availablePairs.value.find((pair) => {
-    //           return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
-    //         }).pay.denom;
-    //       } else if (data.payCoinData.denom.startsWith('ibc')) {
-    //         const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
-    //           return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
-    //         })?.pay?.denom;
-
-    //         if (isPoolReserveIBCCoin) {
-    //           payDenom = isPoolReserveIBCCoin;
-    //         }
-    //       }
-    //       data.isLoading = true;
-    //       try {
-    //         const pool = filterPoolsByDenom(payDenom).find((pool) => {
-    //           return (
-    //             pool.reserve_coin_denoms.find((denom) => {
-    //               return denom === receiveDenom;
-    //             })?.length > 0
-    //           );
-    //         });
-
-    //         if (pool) {
-    //           poolId.value = pool.id;
-    //           const reserves = await getReserveBaseDenoms(pool);
-    //           const reserveBalances = await getReserveBalances(pool);
-    //           const poolPrice = await getPoolPrice(pool);
-
-    //           data.selectedPoolData = {
-    //             pool,
-    //             poolPrice,
-    //             reserves,
-    //             reserveBalances,
-    //           };
-    //           // setCounterPairCoinAmount('Pay');
-    //         } else {
-    //           poolId.value = null;
-    //           data.selectedPoolData = null;
-    //         }
-
-    //         data.isLoading = false;
-    //       } catch (e) {
-    //         poolId.value = null;
-    //         data.selectedPoolData = null;
-    //         data.isLoading = false;
-    //       }
-    //     }
-    //   },
-    // );
-
-    //pool price updater
     const setIntervalId = ref(null);
-    // watch(
-    //   () => poolId.value,
-    //   (newValue, oldValue) => {
-    //     if (newValue !== oldValue && poolId.value) {
-    //       clearInterval(setIntervalId.value);
-    //       setIntervalId.value = setInterval(async () => {
-    //         const id = poolId.value;
-
-    //         const { pool, initPromise } = usePool(id);
-    //         await initPromise;
-    //         await updatePool(unref(pool));
-
-    //         const poolPrice = await getPoolPrice(unref(pool));
-    //         const reserves = await getReserveBaseDenoms(unref(pool));
-    //         const reserveBalances = await getReserveBalances(unref(pool));
-    //         data.selectedPoolData = {
-    //           pool,
-    //           poolPrice,
-    //           reserves,
-    //           reserveBalances,
-    //         };
-    //         // setCounterPairCoinAmount('Pay');
-    //       }, priceUpdateTerm * 1000);
-    //     }
-    //   },
-    // );
 
     //set actionHandlerResult when swappable
     watch(
@@ -743,7 +616,7 @@ export default defineComponent({
               },
             },
           };
-          data.actionHandlerResult = await actionHandler(swapParams);
+          // data.actionHandlerResult = await actionHandler(swapParams);
         } else {
           if (!isOpen.value) {
             // do not reset steps while steps modal is open
@@ -784,9 +657,7 @@ export default defineComponent({
           return asset?.base_denom === originPayCoinData?.base_denom;
         }) ?? originPayCoinData;
 
-      // reset amount, TODO: apply setCounterPairCoinAmount('');
-      data.payCoinAmount = null;
-      data.receiveCoinAmount = null;
+      setCounterPairCoinAmount('Pay');
       isReverse.value = !isReverse.value;
     }
 
@@ -804,8 +675,10 @@ export default defineComponent({
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
         data.receiveCoinData = payload;
+        setCounterPairCoinAmount('Pay'); //update receive amount
       } else {
         data.payCoinData = payload;
+        setCounterPairCoinAmount('Receive');
       }
     }
 
@@ -836,6 +709,7 @@ export default defineComponent({
         const toPrecision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: data.receiveCoinData.base_denom,
         });
+        //if receive use amountout
         let { routes } = await getRoutes({
           denomIn: data.payCoinData?.base_denom,
           denomOut: data.receiveCoinData?.base_denom,
@@ -864,20 +738,23 @@ export default defineComponent({
         if (e.includes('Pay') && !!data.payCoinAmount) {
           const receiveCoinPrecisionDecimalDigits = Math.pow(
             10,
-
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
           );
-          data.receiveCoinAmount = (
-            routes[0]?.steps[len - 1].data?.to?.amount / receiveCoinPrecisionDecimalDigits
-          )?.toFixed(4);
+          if (routes[0]?.steps[len - 1]?.data?.to?.amount) {
+            data.receiveCoinAmount = (
+              routes[0]?.steps[len - 1]?.data?.to?.amount / receiveCoinPrecisionDecimalDigits
+            )?.toFixed(4);
+          }
 
           // if (data.payCoinAmount + data.receiveCoinAmount === 0) {
           //   slippage.value = 0;
           // }
         } else {
-          data.payCoinAmount = (
-            routes[0]?.steps[len - 1].data?.to?.amount * (isReverse.value ? equalizer : 1 / equalizer)
-          )?.toFixed(4);
+          if (routes[0]?.steps[len - 1]?.data?.to?.amount) {
+            data.payCoinAmount = (
+              routes[0]?.steps[len - 1]?.data?.to?.amount * (isReverse.value ? equalizer : 1 / equalizer)
+            )?.toFixed(4);
+          }
         }
       }
     }
