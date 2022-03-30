@@ -87,9 +87,10 @@ export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
 }
+const LOGIN_TIMEOUT = 1000 * 60 * 60 * 24 * 30; //  30 days
 export function autoLogin() {
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
+  if (last && last != '' && Date.now() < parseInt(last) + LOGIN_TIMEOUT) {
     return true;
   } else {
     return false;
