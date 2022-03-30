@@ -362,11 +362,6 @@ const getStakedAmount = () => {
   }
   if (transaction.value.name == 'claim') {
     const baseDenom = getStakableBaseDenomFromChainName((transaction.value.data as ClaimData).chain_name);
-    console.log(
-      transaction.value.data.total,
-      baseDenom,
-      getSumOfRewards((transaction.value.data as ClaimData).total, baseDenom),
-    );
     return getSumOfRewards((transaction.value.data as ClaimData).total, baseDenom);
   }
 };
