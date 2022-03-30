@@ -206,7 +206,15 @@ export function checkStringIsKeybase(str: string) {
 
 export function getCleanURL(str: string) {
   if (!str || str === '') return;
-  return new URL(str).hostname;
+  const url = str.split('://')[1];
+  if (!url || str === '') return str;
+  if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
+  return url;
+}
+
+export function getProperUrl(str: string) {
+  if (!/https?:\/\//.test(str)) return `https://${str}`;
+  return str;
 }
 
 // ignores denoms that are not of baseDenom
