@@ -231,21 +231,21 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let denoms = [];
   const chain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
-  switch (transaction.name) {
-    case 'addliquidity':
-      const transferdata = transaction.data as Actions.AddLiquidityData;
+  switch (transaction.type) {
+    case 'addLiquidity':
+      const transferdata = transaction.data;
       denoms = [transferdata.coinA.denom, transferdata.coinB.denom];
       break;
-    case 'createpool':
-      const createdata = transaction.data as Actions.CreatePoolData;
+    case 'createPool':
+      const createdata = transaction.data;
       denoms = [createdata.coinA.denom, createdata.coinB.denom];
       break;
     case 'swap':
-      const swapdata = transaction.data as Actions.SwapData;
+      const swapdata = transaction.data;
       denoms = [swapdata.from.denom, swapdata.to.denom];
       break;
-    case 'withdrawliquidity':
-      const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
+    case 'withdrawLiquidity':
+      const withdrawdata = transaction.data;
       denoms = [withdrawdata.poolCoin.denom];
       break;
     default:
@@ -363,62 +363,14 @@ export async function isLive(chain_name) {
 }
 
 export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
-  const typedstore = useStore() as RootStoreTyped;
-  if (stepTx.name == 'transfer') {
-    const chain_name = (stepTx.data as Actions.TransferData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+  let chainName: string;
+  if (stepTx.type == 'stake') {
+    chainName = stepTx.data[0].chainName;
+  } else {
+    chainName = stepTx.data.chainName;
   }
-  if (stepTx.name == 'ibc_backward') {
-    const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'ibc_forward') {
-    const chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'addliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'createpool') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'swap') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'claim') {
-    const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'stake') {
-    const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'unstake') {
-    const chain_name = (stepTx.data as Actions.UnstakeData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'switch') {
-    const chain_name = (stepTx.data as Actions.RestakeData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
+  const fee = await getFeeForChain(chainName);
+  return fee;
 }
 export async function feeForStep(
   step: Actions.Step,
@@ -644,8 +596,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
   const failedChains = [];
   for (const step of steps) {
     for (const stepTx of step.transactions) {
-      if (stepTx.name == 'transfer') {
-        const chain_name = (stepTx.data as Actions.TransferData).chain_name;
+      if (stepTx.type == 'transfer') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -655,9 +607,9 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'ibc_backward') {
-        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
-        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
+      if (stepTx.type == 'IBCtransferBackward') {
+        const chain_name = stepTx.data.chainName;
+        const dest_chain_name = stepTx.data.toChain;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
@@ -680,9 +632,9 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           relayerStatus = false;
         }
       }
-      if (stepTx.name == 'ibc_forward') {
-        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
-        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
+      if (stepTx.type == 'IBCtransferForward') {
+        const chain_name = stepTx.data.chainName;
+        const dest_chain_name = stepTx.data.toChain;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
@@ -698,8 +650,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'addliquidity') {
-        const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+      if (stepTx.type == 'addLiquidity') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -709,8 +661,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'withdrawliquidity') {
-        const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+      if (stepTx.type == 'withdrawLiquidity') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -720,8 +672,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'createpool') {
-        const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+      if (stepTx.type == 'createPool') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -731,8 +683,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'swap') {
-        const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+      if (stepTx.type == 'swap') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -742,8 +694,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'claim' || stepTx.name == 'unstake' || stepTx.name == 'switch') {
-        const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
+      if (stepTx.type == 'claim' || stepTx.type == 'unstake' || stepTx.type == 'switch') {
+        const chain_name = stepTx.data.chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -753,8 +705,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'stake') {
-        const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
+      if (stepTx.type == 'stake') {
+        const chain_name = stepTx.data[0].chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
