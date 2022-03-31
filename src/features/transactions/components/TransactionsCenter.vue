@@ -33,7 +33,7 @@
       </header>
 
       <ul
-        class="flex flex-col space-y-1 overflow-y-visible"
+        class="flex flex-col space-y-1 overflow-y-auto"
         :style="{ maxHeight: '300px' }"
         :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
       >
