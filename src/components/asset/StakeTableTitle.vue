@@ -18,6 +18,9 @@
           <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
         </div>
       </h2>
+      <div class="ml-2 bg-border rounded-md px-1.5 py-1 flex items-center justify-center">
+        <p class="-text-1">--.--% APR</p>
+      </div>
     </div>
 
     <Button
