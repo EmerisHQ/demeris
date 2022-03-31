@@ -121,7 +121,7 @@ const state = reactive({
 });
 
 const canShownCenter = computed(() => {
-  if (pendingTransactions.value.length || state.notifications.length) {
+  if (pendingTransactions.value.length) {
     if (isModalOpen.value || transactionsStore.isPendingModalOpen) {
       return false;
     }
