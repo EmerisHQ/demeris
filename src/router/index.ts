@@ -3,8 +3,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { featureRunning } from '@/utils/FeatureManager';
 import Portfolio from '@/views/Portfolio.vue';
 
-const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
-
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -39,11 +37,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/pools',
     name: 'Pools',
     component: () => import('@/views/Pools.vue'),
-  },
-  {
-    path: isAirdropsFeatureRunning ? '/airdrops' : '/',
-    name: 'Airdrops',
-    component: () => import('@/views/Airdrops.vue'),
   },
   {
     path: '/airdrop/:airdrop',
@@ -93,6 +86,13 @@ if (featureRunning('STAKING')) {
     path: '/staking/:denom/:action/:validator?',
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
+  });
+}
+if (featureRunning('AIRDROPS_FEATURE')) {
+  routes.push({
+    path: '/airdrops',
+    name: 'Airdrops',
+    component: () => import('@/views/Airdrops.vue'),
   });
 }
 const router = createRouter({
