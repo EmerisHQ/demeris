@@ -170,6 +170,16 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<number>;
+  //  return type inputted directly because of https://github.com/EmerisHQ/demeris/issues/1468#issue-1186999271
+  //  TLDR; this will be refactored when backend team deploys a staking apr endpoint
+  [ActionTypes.GET_POOL](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<{ not_bonded_tokens: string; bonded_tokens: string }>;
+  [ActionTypes.GET_SUPPLY](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<number>;
   [ActionTypes.GET_STAKING_REWARDS](
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
@@ -1038,6 +1048,29 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       return Number(response.data?.inflation);
     } catch (e) {
       throw new EmerisError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
+    }
+  },
+
+  async [ActionTypes.GET_POOL]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    try {
+      const response: AxiosResponse<{ not_bonded_tokens: string; bonded_tokens: string }> = await axios.get(
+        getters['getEndpoint'] + '/chain/' + chain_name + '/lcd/cosmos/staking/v1beta1/pool',
+      );
+      return response.data;
+    } catch (e) {
+      throw new EmerisError('Demeris:GET_POOL', `Could not get ${chain_name} pool info.` + e.message);
+    }
+  },
+  async [ActionTypes.GET_SUPPLY]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    try {
+      const response: AxiosResponse<{ amount: { denom: string; amount: string } }> = await axios.get(
+        getters['getEndpoint'] + '/chain/' + chain_name + '/lcd/cosmos/bank/v1beta1/supply/' + chain_name,
+      );
+      return Number(response.data.amount?.amount);
+    } catch (e) {
+      throw new EmerisError('Demeris:GET_SUPPLY', `Could not get ${chain_name} supply.` + e.message);
     }
   },
 
