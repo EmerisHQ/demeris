@@ -5,8 +5,8 @@
       class="mt-8 flex justify-between bg-inverse text-text rounded-2xl shadow-card cursor-pointer border border-border"
       @click="toggleConnectWalletModal"
     >
-      <div class="lg:w-1/2 sm:w-2/3 p-6">
-        <p class="lg:text-2 sm:text-1 font-bold mb-4">
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 p-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">
           {{ $t('context.airdrops.claimablepanel.findOutEligibleAirdrops') }}
         </p>
         <p class="-text-1 text-text mb-2 flex items-center">
@@ -15,15 +15,15 @@
         </p>
       </div>
 
-      <img :src="demoAccountBanner" alt="Claimable airdrops header" class="lg:w-1/2 sm:w-1/3" />
+      <img :src="demoAccountBanner" alt="Claimable airdrops header" class="lg:w-1/2 md:w-1/2 w-1/2" />
     </div>
 
     <div
       v-if="showClaimNowBanner"
       class="mt-8 flex justify-between bg-text text-inverse rounded-2xl shadow-card cursor-pointer"
     >
-      <div class="lg:w-1/2 sm:w-2/3 p-6">
-        <p class="lg:text-2 sm:text-1 font-bold mb-4">
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 p-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">
           {{ $t('context.airdrops.claimablepanel.congrats', { noOfAirdrops: noOfClaimableAirdrops }) }}
         </p>
         <p class="-text-1 text-inverse mb-2 flex items-center">
@@ -32,15 +32,15 @@
         </p>
       </div>
 
-      <img :src="claimableAirdropsHeader" alt="Claimable airdrops header" class="lg:w-1/2 sm:w-1/3" />
+      <img :src="claimableAirdropsHeader" alt="Claimable airdrops header" class="lg:w-1/2 md:w-1/2 w-1/2" />
     </div>
 
     <div
       v-if="airdropsLoading"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
     >
-      <div class="lg:w-1/2 sm:w-2/3 py-8 px-6">
-        <p class="lg:text-2 sm:text-1 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.checkingAirdrops') }}</p>
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.checkingAirdrops') }}</p>
         <p class="-text-1 text-dark mb-2 flex items-center">
           {{ $t('context.airdrops.claimablepanel.searchingAirdrops') }}
         </p>
@@ -49,7 +49,7 @@
       <img
         src="~@/assets/images/airdrops-loading-banner.png"
         alt="Airdrops loading"
-        class="lg:w-1/2 sm:w-1/3 rounded-2xl"
+        class="lg:w-1/2 md:w-1/2 w-1/2 rounded-2xl"
       />
     </div>
 
@@ -57,8 +57,8 @@
       v-if="showNoAirdropsToClaimBanner"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
     >
-      <div class="lg:w-1/2 sm:w-2/3 py-8 px-6">
-        <p class="lg:text-2 sm:text-1 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
         <p class="-text-1 text-dark mb-1">
           {{ $t('context.airdrops.claimablepanel.checkOutForEligibility')
           }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
@@ -68,7 +68,7 @@
       <img
         src="~@/assets/images/no-airdrops-to-claim.png"
         alt="No airdrops to claim"
-        class="lg:w-1/2 sm:w-1/3 rounded-2xl"
+        class="lg:w-1/2 md:w-1/2 w-1/2 rounded-2xl"
       />
     </div>
 
