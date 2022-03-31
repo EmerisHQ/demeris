@@ -3,6 +3,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { featureRunning } from '@/utils/FeatureManager';
 import Portfolio from '@/views/Portfolio.vue';
 
+const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -39,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Pools.vue'),
   },
   {
-    path: '/airdrops',
+    path: isAirdropsFeatureRunning ? '/airdrops' : '/',
     name: 'Airdrops',
     component: () => import('@/views/Airdrops.vue'),
   },
