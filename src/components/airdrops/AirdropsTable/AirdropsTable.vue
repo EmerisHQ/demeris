@@ -220,7 +220,7 @@ export default defineComponent({
     );
 
     const sectionTitle = (title: string) => {
-      return title.replace(/\_/g, ' ').toLowerCase();
+      return title ? title.replace(/\_/g, ' ').toLowerCase() : '';
     };
 
     return {
