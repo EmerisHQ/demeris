@@ -1,6 +1,7 @@
 import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
@@ -75,6 +76,11 @@ export async function getOwnAddress({ chain_name }) {
     }
   }
 }
+
+export function isValidatorOffline(validator: EmerisAPI.Validator) {
+  return validator.status === 1 || validator.status === 2;
+}
+
 export function isNative(denom: string) {
   if (denom) {
     return denom.indexOf('ibc/') != 0 ? true : false;
