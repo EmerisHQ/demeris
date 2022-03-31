@@ -48,7 +48,14 @@
           >
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
-                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
+                <CircleSymbol
+                  v-if="!asset.denom.includes('pool')"
+                  :key="'' + asset.denom + index"
+                  :denom="asset.denom"
+                />
+                <div v-else class="w-8 h-8 bg-text rounded-full text-center pt-1.5">
+                  <Icon name="GravityIcon" :icon-size="1.2" />
+                </div>
                 <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
