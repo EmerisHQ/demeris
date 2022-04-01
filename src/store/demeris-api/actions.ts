@@ -96,10 +96,6 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
   ): Promise<EmerisAPI.VerifyTrace>;
-  [ActionTypes.GET_TOKEN_ID](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
-  ): Promise<any>;
   [ActionTypes.GET_END_BLOCK_EVENTS](context: APIActionContext, { height }: DemerisTxResultParams): Promise<unknown>;
   [ActionTypes.INIT](context: APIActionContext, config: DemerisConfig): void;
   [ActionTypes.RESET_STATE](context: APIActionContext): void;
@@ -158,6 +154,12 @@ export interface Actions {
     context: APIActionContext,
     payload: SimpleSubscribable,
   ): Promise<Record<string, EmerisAPI.Chain>>;
+
+  //Coingecko Action types
+  [ActionTypes.GET_COINGECKO_ID_BY_NAMES](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
+  ): Promise<any>;
 
   //Prices Action types
   [ActionTypes.GET_PRICES](context: APIActionContext, payload: SimpleSubscribable): Promise<EmerisAPI.Prices>;
@@ -852,26 +854,6 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
   },
-  async [ActionTypes.GET_TOKEN_ID]({ commit, getters, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    commit(MutationTypes.SET_TOKEN_ID_STATUS, {
-      value: params.showSkeleton ? LoadingState.LOADING : LoadingState.LOADED,
-    });
-    try {
-      const response: AxiosResponse<EmerisAPI.TokenIdResponse> = await axios.get(
-        getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`,
-      );
-      commit(MutationTypes.SET_TOKEN_ID, { params, value: response.data });
-      commit(MutationTypes.SET_TOKEN_ID_STATUS, { value: LoadingState.LOADED });
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_TOKEN_ID, payload: { params } });
-      }
-      return getters['getTokenId'];
-    } catch (e) {
-      commit(MutationTypes.SET_TOKEN_ID_STATUS, { value: LoadingState.ERROR });
-      console.error('Demeris:getTokenId: Could not perform API query.');
-    }
-  },
   async [ActionTypes.GET_CHAIN_STATUS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
@@ -1144,5 +1126,24 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   },
   [ActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
     commit(MutationTypes.UNSUBSCRIBE, subscription);
+  },
+
+  // Coingecko Actions
+  async [ActionTypes.GET_COINGECKO_ID_BY_NAMES]({ commit, getters, rootGetters }, { params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    commit(MutationTypes.SET_COINGECKO_ID_STATUS, {
+      value: LoadingState.LOADING,
+    });
+    try {
+      const response: AxiosResponse<EmerisAPI.TokenIdResponse> = await axios.get(
+        getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`,
+      );
+      commit(MutationTypes.SET_COINGECKO_ID, { params: params.token, value: response.data });
+      commit(MutationTypes.SET_COINGECKO_ID_STATUS, { value: LoadingState.LOADED });
+      return getters['getCoinGeckoId'];
+    } catch (e) {
+      commit(MutationTypes.SET_COINGECKO_ID_STATUS, { value: LoadingState.ERROR });
+      console.error('Demeris:getCoinGeckoId: Could not perform API query.');
+    }
   },
 };

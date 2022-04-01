@@ -40,13 +40,14 @@ export enum GetterTypes {
   getPrimaryChannels = 'getPrimaryChannels',
   getTokenPrices = 'getTokenPrices',
   getTokenPricesLoadingStatus = 'getTokenPricesLoadingStatus',
-  getTokenId = 'getTokenId',
   getAirdrops = 'getAirdrops',
   getAirdropsStatus = 'getAirdropsStatus',
   getSelectedAirdrop = 'getSelectedAirdrop',
-  getTokenIdLoadingStatus = 'getTokenIdLoadingStatus',
   getChainStatus = 'getChainStatus',
   getChainNameByBaseDenom = 'getChainNameByBaseDenom',
+  //coingecko
+  getCoinGeckoId = 'getCoinGeckoId',
+  getCoinGeckoIdLoadingStatus = 'getCoinGeckoIdLoadingStatus',
 }
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
@@ -90,11 +91,12 @@ export enum GlobalGetterTypes {
   getPrimaryChannels = 'demerisAPI/getPrimaryChannels',
   getTokenPrices = 'demerisAPI/getTokenPrices',
   getTokenPricesLoadingStatus = 'demerisAPI/getTokenPricesLoadingStatus',
-  getTokenId = 'demerisAPI/getTokenId',
   getAirdrops = 'demerisAPI/getAirdrops',
   getAirdropsStatus = 'demerisAPI/getAirdropsStatus',
   getSelectedAirdrop = 'demerisAPI/getSelectedAirdrop',
-  getTokenIdLoadingStatus = 'demerisAPI/getTokenIdLoadingStatus',
   getChainStatus = 'demerisAPI/getChainStatus',
   getChainNameByBaseDenom = 'demerisAPI/getChainNameByBaseDenom',
+  //coingecko
+  getCoinGeckoId = 'demerisAPI/getCoinGeckoId',
+  getCoinGeckoIdLoadingStatus = 'demerisAPI/getCoinGeckoIdLoadingStatus',
 }

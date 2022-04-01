@@ -45,12 +45,7 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_CHAIN](state: S, payload: { params: EmerisAPI.ChainReq; value: EmerisAPI.Chain }): void;
   [MutationTypes.SET_TOKEN_PRICES](state: S, payload: { value: Array<[number, number]> }): void;
   [MutationTypes.SET_TOKEN_PRICES_STATUS](state: S, payload: { value: LoadingState }): void;
-  [MutationTypes.SET_TOKEN_ID](
-    state: S,
-    payload: { params: EmerisAPI.TokenIdReq; value: EmerisAPI.TokenIdResponse },
-  ): void;
   [MutationTypes.SET_AIRDROPS_STATUS](state: S, payload: { value: LoadingState }): void;
-  [MutationTypes.SET_TOKEN_ID_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
@@ -63,6 +58,10 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SIGN_OUT](state: S, payload: string[]): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: Subscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: Subscriptions): void;
+
+  //Coingecko
+  [MutationTypes.SET_COINGECKO_ID](state: S, payload: { params: string; value: EmerisAPI.TokenIdResponse }): void;
+  [MutationTypes.SET_COINGECKO_ID_STATUS](state: S, payload: { value: LoadingState }): void;
 };
 
 export const mutations: MutationTree<APIState> & Mutations = {
@@ -224,9 +223,8 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_TOKEN_PRICES_STATUS](state, payload) {
     state.tokenPricesLoadingStatus = payload.value;
   },
-  [MutationTypes.SET_TOKEN_ID](state, payload) {
-    state.tokenId = payload.value.data[payload.params.token];
-  },
+
+  //Airdrops Mutations
   [MutationTypes.SET_SELECTED_AIRDROP](state, payload) {
     state.selectedAirdrop = payload.value;
   },
@@ -248,12 +246,18 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
     state.airdropsStatus = payload.value;
   },
-  [MutationTypes.SET_TOKEN_ID_STATUS](state, payload) {
-    state.tokenIdLoadingStatus = payload.value;
-  },
   [MutationTypes.RESET_AIRDROPS](state) {
     state.airdrops = [];
   },
+
+  //Coingecko Mutations
+  [MutationTypes.SET_COINGECKO_ID](state, payload) {
+    state.coinGeckoId = payload.value.data[payload.params];
+  },
+  [MutationTypes.SET_COINGECKO_ID_STATUS](state, payload) {
+    state.coinGeckoIdLoadingStatus = payload.value;
+  },
+
   [MutationTypes.SET_CHAIN_STATUS](state, payload) {
     if (!isEqual(state.chains[payload.params.chain_name].status, payload.value as boolean)) {
       state.chains[payload.params.chain_name].status = payload.value as boolean;
