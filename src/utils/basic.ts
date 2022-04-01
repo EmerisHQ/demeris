@@ -87,9 +87,10 @@ export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
 }
+const LOGIN_TIMEOUT = 1000 * 60 * 60 * 24 * 30; //  30 days
 export function autoLogin() {
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
+  if (last && last != '' && Date.now() < parseInt(last) + LOGIN_TIMEOUT) {
     return true;
   } else {
     return false;
@@ -205,7 +206,15 @@ export function checkStringIsKeybase(str: string) {
 
 export function getCleanURL(str: string) {
   if (!str || str === '') return;
-  return new URL(str).hostname;
+  const url = str.split('://')[1];
+  if (!url || str === '') return str;
+  if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
+  return url;
+}
+
+export function getProperUrl(str: string) {
+  if (!/https?:\/\//.test(str)) return `https://${str}`;
+  return str;
 }
 
 // ignores denoms that are not of baseDenom

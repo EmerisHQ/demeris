@@ -459,8 +459,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (endBlockEvent.success === 'failure') {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to find block results',
+                data: { ...responseData, endBlock: endBlockEvent },
+              });
             }
           }
 
@@ -523,8 +527,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
-            await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
-
             while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalActionTypes.API.GET_TX_DEST_HASH, {
@@ -543,30 +545,58 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (!destTx) {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to fetch destination hash',
+                data: { ...responseData },
+              });
             }
           }
         };
 
         const traceResponse = async () => {
+          await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
           await findIBCDestHash();
 
+          let traceResult;
+
+          const rpcFallback = async () => {
+            try {
+              traceResult = await useStore().dispatch(GlobalActionTypes.API.GET_TX_FROM_RPC, {
+                chain_name: responseData.chain_name,
+                txhash: responseData.txhash,
+              });
+            } catch (e) {
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
+            }
+          };
+
           try {
-            const wsResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
+            // NOTE: Inluded for testing, timeout to wait for tx in the blockchain
+            if (featureRunning('FORCE_RPC_FALLBACK')) {
+              // const timeout = currentTransaction.name.includes('ibc') ? 30000 : 15000;
+              await new Promise((resolve) => setTimeout(resolve, 60000));
+              throw new Error('Force RPC fallback enabled');
+            }
+
+            traceResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
-              stepType: currentStep.name,
             });
-            responseData.websocket = wsResult;
+          } catch (e) {
+            console.error(e);
+            await rpcFallback();
+          }
 
-            await fetchEndBlock(wsResult.height);
+          if (traceResult) {
+            responseData.websocket = traceResult;
+
+            await fetchEndBlock(traceResult.height);
 
             // @ts-ignore
             callback({ type: 'GOT_RESPONSE', data: responseData });
-          } catch {
-            // @ts-ignore
-            return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
           }
         };
 
@@ -603,7 +633,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         formattedSteps: formatStepsWithFee(context, event.balances),
       })),
       setError: assign({
-        error: (_, event: DoneEventData<any>) => event.data,
+        error: (_, event: any) => event.error || event.data,
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
