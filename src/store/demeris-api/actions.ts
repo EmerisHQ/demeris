@@ -882,9 +882,14 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       setTimeout(reject, timeout);
     });
   },
-  async [ActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
+  async [ActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
-      const timeout = 60000;
+      const timeoutMs = 300000;
+      const fallbackIntervalMs = 50000;
+
+      let timeoutId;
+      let intervalId;
+
       const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
@@ -912,6 +917,12 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         subscribeTx();
       };
 
+      const complete = () => {
+        done = true;
+        clearTimeout(timeoutId);
+        clearInterval(intervalId);
+      };
+
       const handleMessage = async (data: Record<string, any>) => {
         if (done) return;
 
@@ -919,28 +930,32 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
           // Not found
           if (data.error.code === -32603) return;
 
-          done = true;
           reject(new Error(data.error));
+          return complete();
         }
 
         if (data.result?.data?.value?.TxResult) {
-          done = true;
           resolve(data.result);
+          return complete();
         }
 
         if (data?.result?.tx_result) {
-          done = true;
           resolve(data.result);
+          return complete();
         }
       };
 
       await wss.connect().catch(reject);
       handleOpen();
 
+      setInterval(() => {
+        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
+      }, fallbackIntervalMs);
+
       setTimeout(() => {
-        done = true;
         reject(new Error('Could not find transaction response'));
-      }, timeout);
+        complete();
+      }, timeoutMs);
     });
   },
 
