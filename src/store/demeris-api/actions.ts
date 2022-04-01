@@ -1,5 +1,5 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
+import { EmerisAPI, EmerisBase } from '@emeris/types';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -16,6 +16,8 @@ import TendermintWS from '@/utils/TendermintWS';
 import { RootStoreTyped } from '../';
 import { APIStore } from '.';
 import { ActionTypes } from './action-types';
+import { AirdropActions, AirdropActionsInterface } from './actions/airdrops';
+import { ChainActions, ChainActionsInterface } from './actions/chain';
 import { MutationTypes } from './mutation-types';
 import { APIState } from './state';
 
@@ -86,25 +88,7 @@ export type Subscription<K extends keyof Actions> = {
 };
 export type Subscriptions = Subscription<keyof Actions>;
 
-export interface Actions {
-  //Chain Action Types
-  [ActionTypes.GET_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.Chain>;
-  [ActionTypes.GET_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<boolean>;
-  [ActionTypes.GET_CHAINS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<Record<string, EmerisAPI.Chain>>;
-  [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<Record<string, EmerisAPI.Chain>>;
-
+export interface Actions extends ChainActionsInterface, AirdropActionsInterface {
   //Transaction Logic Action types
   [ActionTypes.GET_TX_STATUS](
     context: APIActionContext,
@@ -153,21 +137,6 @@ export interface Actions {
   ): Promise<ChartPrices>;
   [ActionTypes.RESET_TOKEN_PRICES](context: APIActionContext): void;
 
-  //Airdrops Action types
-  [ActionTypes.GET_GIT_AIRDROPS_LIST](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<EmerisAirdrops.AirdropList>;
-  [ActionTypes.GET_AIRDROPS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
-  ): Promise<void>;
-  [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
-  [ActionTypes.SET_SELECTED_AIRDROP](
-    context: APIActionContext,
-    payload: ActionParams<EmerisAirdrops.selectedAirdropReq>,
-  ): void;
-
   //Staking Action types
   [ActionTypes.GET_INFLATION](
     context: APIActionContext,
@@ -206,135 +175,8 @@ export interface Actions {
 export type GlobalActions = Namespaced<Actions, 'demerisAPI'>;
 
 export const actions: ActionTree<APIState, RootState> & Actions = {
-  /**
-   * Chain Logic Action types
-   */
-  async [ActionTypes.GET_CHAIN]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const reqHash = hashObject({ action: ActionTypes.GET_CHAIN, payload: { params } });
-
-    if (state._InProgess.get(reqHash)) {
-      await state._InProgess.get(reqHash);
-
-      return getters['getChain'](params);
-    } else {
-      let resolver;
-      let rejecter;
-      const promise: Promise<void> = new Promise((resolve, reject) => {
-        resolver = resolve;
-        rejecter = reject;
-      });
-      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      try {
-        const response: AxiosResponse<EmerisAPI.ChainResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name,
-        );
-        commit(MutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN, payload: { params } });
-        }
-      } catch (e) {
-        commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-        rejecter(e);
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN, payload: { params } });
-        }
-        throw new EmerisError('Demeris:GetChain', 'Could not perform API query.');
-      }
-      resolver();
-      commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChain'](params);
-    }
-  },
-  async [ActionTypes.GET_CHAIN_STATUS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-
-    if (state._InProgess.get(reqHash)) {
-      await state._InProgess.get(reqHash);
-
-      return getters['getChainStatus'](params);
-    } else {
-      let resolver;
-      let rejecter;
-      const promise: Promise<void> = new Promise((resolve, reject) => {
-        resolver = resolve;
-        rejecter = reject;
-      });
-      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      try {
-        const response: AxiosResponse<EmerisAPI.ChainStatusResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name + '/status',
-        );
-        commit(MutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-        }
-      } catch (e) {
-        commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-        rejecter(e);
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-        }
-        throw new EmerisError('Demeris:GetChainStatus', 'Could not perform API query.');
-      }
-      resolver();
-      commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChainStatus'](params);
-    }
-  },
-  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters, state }, { subscribe = false }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const reqHash = hashObject({ action: ActionTypes.GET_CHAINS, payload: {} });
-
-    if (state._InProgess.get(reqHash)) {
-      await state._InProgess.get(reqHash);
-      return getters['getChains'];
-    }
-    let resolver;
-    const promise: Promise<void> = new Promise((resolve, _) => {
-      resolver = resolve;
-    });
-    try {
-      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      const response: AxiosResponse<EmerisAPI.ChainsResponse> = await axios.get(getters['getEndpoint'] + '/chains');
-      commit(MutationTypes.SET_CHAINS, { value: response.data.chains });
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAINS, payload: {} });
-      }
-    } catch (e) {
-      throw new EmerisError('Demeris:GetChains', 'Could not perform API query.');
-    }
-    resolver();
-    commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-    return getters['getChains'];
-  },
-  async [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS]({ dispatch, getters }, { subscribe = false }) {
-    dispatch(ActionTypes.GET_CHAINS, {
-      subscribe: subscribe,
-    })
-      .then((chains) => {
-        for (const chain in chains) {
-          dispatch(ActionTypes.GET_CHAIN, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          }).then((chain) => {
-            dispatch(ActionTypes.GET_CHAIN_STATUS, {
-              subscribe: true,
-              params: {
-                chain_name: chain.chain_name,
-              },
-            });
-          });
-        }
-      })
-      .catch((e) => {
-        console.error('Could not load chain information: ' + e);
-      });
-    return getters['getChains'];
-  },
+  ...ChainActions,
+  ...AirdropActions,
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [ActionTypes.GET_BALANCES]({ commit, dispatch, getters, state, rootGetters }, { subscribe = false, params }) {
@@ -831,62 +673,6 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       throw new EmerisError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
     return getters['getTokenPrices'];
-  },
-  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
-    try {
-      delete axios.defaults.headers.get['X-Correlation-Id'];
-      const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
-        `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
-      );
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_GIT_AIRDROPS_LIST });
-      }
-      return response.data;
-    } catch (e) {
-      throw new EmerisError('Demeris:gitAirdropsList', 'Could not perform API query.');
-    }
-  },
-  async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
-    commit(MutationTypes.SET_AIRDROPS_STATUS, {
-      value: LoadingState.LOADING,
-    });
-    try {
-      delete axios.defaults.headers.get['X-Correlation-Id'];
-      const response = await axios.get(
-        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
-      );
-      const image_check_response = await fetch(response.data.tokenIcon);
-
-      commit(MutationTypes.SET_AIRDROPS, {
-        value: {
-          ...response.data,
-          imageExists: image_check_response.status === 200,
-          eligibilityStatusCode: null,
-          eligibility: null,
-          eligibilityResponse: null,
-          address: null,
-        },
-      });
-
-      commit(MutationTypes.SET_AIRDROPS_STATUS, {
-        value: LoadingState.LOADED,
-      });
-
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });
-      }
-    } catch (e) {
-      commit(MutationTypes.SET_AIRDROPS_STATUS, {
-        value: LoadingState.ERROR,
-      });
-      throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
-    }
-  },
-  [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
-    commit(MutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
-  },
-  [ActionTypes.RESET_AIRDROPS]({ commit }) {
-    commit(MutationTypes.RESET_AIRDROPS);
   },
   [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
