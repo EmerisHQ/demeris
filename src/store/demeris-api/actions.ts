@@ -9,7 +9,6 @@ import { Pool } from '@/types/actions';
 import { UserData } from '@/types/user';
 import { ActionParams, ChartPrices, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
-import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
 import TendermintWS from '@/utils/TendermintWS';
@@ -620,9 +619,20 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
   },
 
-  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters }, { subscribe = false }) {
+  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters, state }, { subscribe = false }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    const reqHash = hashObject({ action: ActionTypes.GET_CHAINS, payload: {} });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+      return getters['getChains'];
+    }
+    let resolver;
+    const promise: Promise<void> = new Promise((resolve, _) => {
+      resolver = resolve;
+    });
     try {
+      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       const response: AxiosResponse<EmerisAPI.ChainsResponse> = await axios.get(getters['getEndpoint'] + '/chains');
       commit(MutationTypes.SET_CHAINS, { value: response.data.chains });
       if (subscribe) {
@@ -631,6 +641,8 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     } catch (e) {
       throw new EmerisError('Demeris:GetChains', 'Could not perform API query.');
     }
+    resolver();
+    commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
     return getters['getChains'];
   },
 
@@ -757,39 +769,22 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       const response = await axios.get(
         `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+      const image_check_response = await fetch(response.data.tokenIcon);
 
-      let eligibility = null;
-      const data = response.data;
-      if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
-        eligibility = AirdropEligibilityStatus.AUTO_DROP;
-      } else if (data.chainName) {
-        const chain_name = data.chainName === 'Lum Network' ? 'lum' : data.chainName.toLowerCase();
-        const ownAddress = await getOwnAddress({ chain_name });
-
-        if (data.eligibilityCheckEndpoint && ownAddress) {
-          delete axios.defaults.headers.get['X-Correlation-Id'];
-          const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
-          const eligibilityRes = await axios.get(`${eligibilityEndpoint}${ownAddress}`);
-
-          if (eligibilityRes.status === 200) {
-            eligibility = AirdropEligibilityStatus.ELIGIBLE;
-          } else if (eligibilityRes.status === 403) {
-            eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
-          } else {
-            eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-          }
-        } else {
-          eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-        }
-      } else {
-        eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
-      }
+      commit(MutationTypes.SET_AIRDROPS, {
+        value: {
+          ...response.data,
+          imageExists: image_check_response.status === 200,
+          eligibilityStatusCode: null,
+          eligibility: null,
+          eligibilityResponse: null,
+          address: null,
+        },
+      });
 
       commit(MutationTypes.SET_AIRDROPS_STATUS, {
         value: LoadingState.LOADED,
       });
-
-      commit(MutationTypes.SET_AIRDROPS, { value: { ...response.data, eligibility } });
 
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_AIRDROPS, payload: { params } });
