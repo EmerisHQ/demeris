@@ -87,7 +87,37 @@ export type Subscription<K extends keyof Actions> = {
 export type Subscriptions = Subscription<keyof Actions>;
 
 export interface Actions {
-  // Cross-chain endpoint actions
+  //Uncategorized Action types
+  [ActionTypes.GET_VERIFIED_DENOMS](
+    context: APIActionContext,
+    payload: SimpleSubscribable,
+  ): Promise<EmerisAPI.VerifiedDenoms>;
+  [ActionTypes.GET_VERIFY_TRACE](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
+  ): Promise<EmerisAPI.VerifyTrace>;
+  [ActionTypes.GET_TOKEN_ID](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
+  ): Promise<any>;
+  [ActionTypes.GET_END_BLOCK_EVENTS](context: APIActionContext, { height }: DemerisTxResultParams): Promise<unknown>;
+  [ActionTypes.INIT](context: APIActionContext, config: DemerisConfig): void;
+  [ActionTypes.RESET_STATE](context: APIActionContext): void;
+  [ActionTypes.SIGN_OUT](context: APIActionContext, keyHashes: string[]): void;
+  [ActionTypes.UNSUBSCRIBE](context: APIActionContext, subscription: Subscriptions): void;
+  [ActionTypes.STORE_UPDATE](context: APIActionContext): void;
+
+  //Transaction Logic Action types
+  [ActionTypes.GET_TX_STATUS](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
+  ): Promise<EmerisAPI.TicketResponse>;
+  [ActionTypes.GET_NUMBERS_CHAIN](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
+  ): Promise<EmerisAPI.SeqNumber>;
+
+  //Balances Action types
   [ActionTypes.GET_BALANCES](
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
@@ -107,38 +137,37 @@ export interface Actions {
   [ActionTypes.GET_ALL_BALANCES](context: APIActionContext): Promise<EmerisAPI.Balances>;
   [ActionTypes.GET_ALL_STAKING_BALANCES](context: APIActionContext): Promise<EmerisAPI.StakingBalances>;
   [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS](context: APIActionContext): Promise<EmerisAPI.UnbondingDelegations>;
-  [ActionTypes.VALIDATE_POOLS](context: APIActionContext, pools: Pool[]): Promise<Pool[]>;
-  [ActionTypes.GET_NUMBERS_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
-  ): Promise<EmerisAPI.SeqNumber>;
 
-  [ActionTypes.GET_VERIFIED_DENOMS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<EmerisAPI.VerifiedDenoms>;
-  [ActionTypes.GET_TX_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
-  ): Promise<EmerisAPI.TicketResponse>;
-  [ActionTypes.GET_CHAINS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<Record<string, EmerisAPI.Chain>>;
-  [ActionTypes.GET_PRICES](context: APIActionContext, payload: SimpleSubscribable): Promise<EmerisAPI.Prices>;
-  [ActionTypes.GET_VERIFY_TRACE](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
-  ): Promise<EmerisAPI.VerifyTrace>;
+  //Pools Action types
+  [ActionTypes.VALIDATE_POOLS](context: APIActionContext, pools: Pool[]): Promise<Pool[]>;
+
+  //Chain Action Types
   [ActionTypes.GET_CHAIN](
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<EmerisAPI.Chain>;
+  [ActionTypes.GET_CHAIN_STATUS](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<boolean>;
+  [ActionTypes.GET_CHAINS](
+    context: APIActionContext,
+    payload: SimpleSubscribable,
+  ): Promise<Record<string, EmerisAPI.Chain>>;
+  [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS](
+    context: APIActionContext,
+    payload: SimpleSubscribable,
+  ): Promise<Record<string, EmerisAPI.Chain>>;
+
+  //Prices Action types
+  [ActionTypes.GET_PRICES](context: APIActionContext, payload: SimpleSubscribable): Promise<EmerisAPI.Prices>;
   [ActionTypes.GET_TOKEN_PRICES](
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.TokenPriceReq>>,
   ): Promise<ChartPrices>;
   [ActionTypes.RESET_TOKEN_PRICES](context: APIActionContext): void;
+
+  //Airdrops Action types
   [ActionTypes.GET_GIT_AIRDROPS_LIST](
     context: APIActionContext,
     payload: SimpleSubscribable,
@@ -147,25 +176,13 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
   ): Promise<void>;
-
   [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
   [ActionTypes.SET_SELECTED_AIRDROP](
     context: APIActionContext,
     payload: ActionParams<EmerisAirdrops.selectedAirdropReq>,
   ): void;
-  [ActionTypes.GET_TOKEN_ID](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
-  ): Promise<any>;
-  [ActionTypes.GET_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<boolean>;
-  [ActionTypes.GET_END_BLOCK_EVENTS](context: APIActionContext, { height }: DemerisTxResultParams): Promise<unknown>;
-  [ActionTypes.GET_VALIDATORS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.Validator[]>;
+
+  //Staking Action types
   [ActionTypes.GET_INFLATION](
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
@@ -178,12 +195,10 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<EmerisAPI.StakingParams>;
-
-  [ActionTypes.INIT](context: APIActionContext, config: DemerisConfig): void;
-  [ActionTypes.RESET_STATE](context: APIActionContext): void;
-  [ActionTypes.SIGN_OUT](context: APIActionContext, keyHashes: string[]): void;
-  [ActionTypes.UNSUBSCRIBE](context: APIActionContext, subscription: Subscriptions): void;
-  [ActionTypes.STORE_UPDATE](context: APIActionContext): void;
+  [ActionTypes.GET_VALIDATORS](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<EmerisAPI.Validator[]>;
 }
 
 export type GlobalActions = Namespaced<Actions, 'demerisAPI'>;
@@ -456,6 +471,11 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       return getters['getUnbondingDelegations'](params);
     }
   },
+  /**
+   * Gets sequence and account number. Used when making a transaction.
+   * @param {string} chain_name - chain name
+   * @param {string} address - address
+   */
   async [ActionTypes.GET_NUMBERS_CHAIN]({ commit, getters, rootGetters }, { subscribe = false, params }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
@@ -643,6 +663,33 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
     resolver();
     commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
+    return getters['getChains'];
+  },
+
+  async [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS]({ dispatch, getters }, { subscribe = false }) {
+    dispatch(ActionTypes.GET_CHAINS, {
+      subscribe: subscribe,
+    })
+      .then((chains) => {
+        for (const chain in chains) {
+          dispatch(ActionTypes.GET_CHAIN, {
+            subscribe: true,
+            params: {
+              chain_name: chain,
+            },
+          }).then((chain) => {
+            dispatch(ActionTypes.GET_CHAIN_STATUS, {
+              subscribe: true,
+              params: {
+                chain_name: chain.chain_name,
+              },
+            });
+          });
+        }
+      })
+      .catch((e) => {
+        console.error('Could not load chain information: ' + e);
+      });
     return getters['getChains'];
   },
 
