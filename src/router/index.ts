@@ -39,11 +39,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Pools.vue'),
   },
   {
-    path: '/airdrops',
-    name: 'Airdrops',
-    component: () => import('@/views/Airdrops.vue'),
-  },
-  {
     path: '/airdrop/:airdrop',
     name: 'Airdrop',
     component: () => import('@/views/Airdrop.vue'),
@@ -91,6 +86,13 @@ if (featureRunning('STAKING')) {
     path: '/staking/:denom/:action/:validator?',
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
+  });
+}
+if (featureRunning('AIRDROPS_FEATURE')) {
+  routes.push({
+    path: '/airdrops',
+    name: 'Airdrops',
+    component: () => import('@/views/Airdrops.vue'),
   });
 }
 const router = createRouter({

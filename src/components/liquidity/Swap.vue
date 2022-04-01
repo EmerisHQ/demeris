@@ -13,7 +13,23 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <template v-if="isOpen && !isSlippageSettingModalOpen">
+    <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
+      <template #deactivated>
+        <ReviewModal
+          :data="actionHandlerResult"
+          action-name="swap"
+          variant="widget"
+          @close="reviewModalToggle"
+          @reset="
+            () => {
+              reviewModalToggle();
+              reset();
+            }
+          "
+          @goback="() => reviewModalToggle()"
+        />
+      </template>
+
       <TransactionProcessCreator
         :steps="actionHandlerResult"
         action="swap"
@@ -37,7 +53,7 @@
         "
         @previous="reviewModalToggle"
       />
-    </template>
+    </FeatureRunningConditional>
 
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -151,7 +167,9 @@ import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -183,7 +201,9 @@ export default defineComponent({
     Alert,
     SlippageSettingModal,
     FeeLevelSelector,
+    FeatureRunningConditional,
     TransactionProcessCreator,
+    ReviewModal,
   },
 
   props: {
