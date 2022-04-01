@@ -530,6 +530,7 @@ export const messages = {
         viewAll: 'View all',
       },
       airdrops: {
+        seeAll: 'See all',
         title: 'Airdrops',
         allAirdrops: 'All airdrops',
         airdrop: 'Airdrop',
@@ -564,6 +565,26 @@ export const messages = {
           searchingAirdrops: 'Searching 12/34 airdrops',
           noAirdropsToClaim: 'No airdrops to claim',
           checkOutForEligibility: 'Check out the upcoming airdrops and find out if you’re eligible',
+        },
+        claimCard: {
+          ended: 'Airdrop ended',
+          comingSoon: 'Airdrop coming soon',
+          becomeEligible: 'You could become eligible for this airdrop',
+          amountTitle: 'Your Airdrop amount',
+          airdropAmount: '126.54 LIKE',
+          autoDrop: 'Auto-drop',
+          notAnnounced: 'Not announced',
+          snapshotDate: 'Snapshot Date',
+          starts: 'Starts',
+          ends: 'Ends',
+          distribution: 'Distribution',
+        },
+        howToClaimModal: {
+          hotToClaim: 'How to claim',
+          unlock: 'Unlock',
+          completed: 'Completed',
+          notFinancialAdvise:
+            'Airdrop is not financial advice. Eligibility, claim action can change based on the project.',
         },
         airdropsInfo: {
           title: 'Introduction',
