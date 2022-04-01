@@ -269,7 +269,7 @@ export default defineComponent({
 
     const symbolImage = computed(() => {
       if (isPoolCoin.value) {
-        return import(`@/assets/svg/symbols/gdex.svg`);
+        return '/assets/svg/symbols/gdex.svg';
       }
 
       return undefined;
