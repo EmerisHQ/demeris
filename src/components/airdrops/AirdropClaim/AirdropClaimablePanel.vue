@@ -1,61 +1,75 @@
 <template>
   <div>
     <div
-      v-if="isDemoAccountBanner && !airdropsLoading"
+      v-if="showConnectWalletBanner"
       class="mt-8 flex justify-between bg-inverse text-text rounded-2xl shadow-card cursor-pointer border border-border"
       @click="toggleConnectWalletModal"
     >
-      <div class="w-1/2 p-6">
-        <p class="text-2 font-bold mb-4">Find out which airdrops you are eligible for</p>
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 p-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">
+          {{ $t('context.airdrops.claimablepanel.findOutEligibleAirdrops') }}
+        </p>
         <p class="-text-1 text-text mb-2 flex items-center">
-          Connect your wallet
+          {{ $t('context.airdrops.claimablepanel.connectWallet') }}
           <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
         </p>
       </div>
 
-      <img :src="demoAccountBanner" alt="Claimable airdrops header" class="w-1/2" />
+      <img :src="demoAccountBanner" alt="Claimable airdrops header" class="lg:w-1/2 md:w-1/2 w-1/2" />
     </div>
 
     <div
-      v-if="!isDemoAccountBanner && !airdropsLoading && !noAirdropsToClaim"
+      v-if="showClaimNowBanner"
       class="mt-8 flex justify-between bg-text text-inverse rounded-2xl shadow-card cursor-pointer"
     >
-      <div class="w-1/2 p-6">
-        <p class="text-2 font-bold mb-4">Congratulations! You have {{ noOfClaimableAirdrops }} Airdrops to claim</p>
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 p-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">
+          {{ $t('context.airdrops.claimablepanel.congrats', { noOfAirdrops: noOfClaimableAirdrops }) }}
+        </p>
         <p class="-text-1 text-inverse mb-2 flex items-center">
-          Claim now
+          {{ $t('context.airdrops.claimablepanel.claimNow') }}
           <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
         </p>
       </div>
 
-      <img :src="claimableAirdropsHeader" alt="Claimable airdrops header" class="w-1/2" />
+      <img :src="claimableAirdropsHeader" alt="Claimable airdrops header" class="lg:w-1/2 md:w-1/2 w-1/2" />
     </div>
 
     <div
       v-if="airdropsLoading"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
     >
-      <div class="w-1/2 py-8 px-6">
-        <p class="text-2 font-bold mb-4">Checking your airdrops...</p>
-        <p class="-text-1 text-dark mb-2 flex items-center">Searching 12/34 airdrops</p>
-      </div>
-
-      <img src="~@/assets/images/airdrops-loading-banner.png" alt="Airdrops loading" class="w-1/2 rounded-2xl" />
-    </div>
-
-    <div
-      v-if="!isDemoAccountBanner && !airdropsLoading && noAirdropsToClaim"
-      class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
-    >
-      <div class="w-1/2 py-8 px-6">
-        <p class="text-2 font-bold mb-4">No airdrops to claim</p>
-        <p class="-text-1 text-dark mb-1">Check out the upcoming airdrops and find out</p>
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.checkingAirdrops') }}</p>
         <p class="-text-1 text-dark mb-2 flex items-center">
-          if you’re eligible<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+          {{ $t('context.airdrops.claimablepanel.searchingAirdrops') }}
         </p>
       </div>
 
-      <img src="~@/assets/images/no-airdrops-to-claim.png" alt="No airdrops to claim" class="w-1/2 rounded-2xl" />
+      <img
+        src="~@/assets/images/airdrops-loading-banner.png"
+        alt="Airdrops loading"
+        class="lg:w-1/2 md:w-1/2 w-1/2 rounded-2xl"
+      />
+    </div>
+
+    <div
+      v-if="showNoAirdropsToClaimBanner"
+      class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
+    >
+      <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
+        <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
+        <p class="-text-1 text-dark mb-1">
+          {{ $t('context.airdrops.claimablepanel.checkOutForEligibility')
+          }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+        </p>
+      </div>
+
+      <img
+        src="~@/assets/images/no-airdrops-to-claim.png"
+        alt="No airdrops to claim"
+        class="lg:w-1/2 md:w-1/2 w-1/2 rounded-2xl"
+      />
     </div>
 
     <ConnectWalletModal :open="isWalletModalOpen" @close="toggleConnectWalletModal" />
@@ -87,7 +101,7 @@ export default defineComponent({
       default: 'all',
     },
   },
-  setup() {
+  setup(props) {
     const theme = useTheme();
     const typedstore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
@@ -100,7 +114,7 @@ export default defineComponent({
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
     });
 
-    const isDemoAccountBanner = computed(() => {
+    const isDemoAccount = computed(() => {
       return (
         !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
         typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
@@ -126,17 +140,34 @@ export default defineComponent({
       return claimableAirdrops.length;
     });
 
+    const showConnectWalletBanner = computed(() => {
+      return isDemoAccount.value && !airdropsLoading.value && props.activeFilter !== 'mine';
+    });
+
+    const showClaimNowBanner = computed(() => {
+      return (
+        !isDemoAccount.value && !airdropsLoading.value && !noAirdropsToClaim.value && props.activeFilter !== 'mine'
+      );
+    });
+
+    const showNoAirdropsToClaimBanner = computed(() => {
+      return !isDemoAccount.value && !airdropsLoading.value && noAirdropsToClaim.value;
+    });
+
     return {
       theme,
       selectedAirdrop,
       claimableAirdropsHeader,
       demoAccountBanner,
-      isDemoAccountBanner,
+      isDemoAccount,
       isWalletModalOpen,
       toggleConnectWalletModal,
       airdropsLoading,
       noAirdropsToClaim,
       noOfClaimableAirdrops,
+      showConnectWalletBanner,
+      showClaimNowBanner,
+      showNoAirdropsToClaimBanner,
     };
   },
 });

@@ -88,6 +88,7 @@ import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
+import gdexSvg from '@/assets/svg/symbols/gdex.svg';
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
@@ -269,7 +270,7 @@ export default defineComponent({
 
     const symbolImage = computed(() => {
       if (isPoolCoin.value) {
-        return import(`@/assets/svg/symbols/gdex.svg`);
+        return gdexSvg;
       }
 
       return undefined;

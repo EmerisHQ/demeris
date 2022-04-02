@@ -23,51 +23,49 @@
         @on-button2-click="showDetails"
       />
 
-      <header class="flex items-center space-between pt-5 pb-4 px-6">
-        <p class="font-bold flex-1 text-1">{{ $t('context.transactions.widget.title') }}</p>
-        <div class="flex items-center space-x-4">
-          <button v-if="pendingTransactions.length" @click="transactionsStore.toggleBottomSheet">
-            <Icon name="CaretDownIcon" :icon-size="1.4" />
-          </button>
-        </div>
-      </header>
+      <template v-if="pendingTransactions.length">
+        <header class="flex items-center space-between pt-5 pb-4 px-6">
+          <p class="font-bold flex-1 text-1">{{ $t('context.transactions.widget.title') }}</p>
+          <div class="flex items-center space-x-4">
+            <button @click="transactionsStore.toggleBottomSheet">
+              <Icon name="CaretDownIcon" :icon-size="1.4" />
+            </button>
+          </div>
+        </header>
 
-      <ul
-        class="flex flex-col space-y-1 overflow-y-auto"
-        :style="{ maxHeight: '300px' }"
-        :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
-      >
-        <li v-if="!pendingTransactions.length" class="px-6 text-muted">
-          {{ $t('context.transactions.widget.emptyMessage') }}
-        </li>
+        <ul
+          class="flex flex-col space-y-1 overflow-y-auto"
+          :style="{ maxHeight: '300px' }"
+          :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
+        >
+          <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
+            <TransactionProcessItem
+              class="py-4 px-6"
+              :service="service"
+              @click="selectItem(id)"
+              @remove="onRemoveTransactionItem(id)"
+            />
+          </li>
+        </ul>
 
-        <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
-          <TransactionProcessItem
-            class="py-4 px-6"
-            :service="service"
-            @click="selectItem(id)"
-            @remove="onRemoveTransactionItem(id)"
-          />
-        </li>
-      </ul>
-
-      <Button
-        v-if="hasMore || state.viewAll"
-        :full-width="false"
-        :name="
-          state.viewAll ? $t('context.transactions.controls.showLess') : $t('context.transactions.controls.showMore')
-        "
-        size="sm"
-        variant="secondary"
-        class="absolute bottom-5 left-0 right-0 items-center justify-center"
-        rounded
-        @click="toggleViewAll"
-      >
-        <template #right>
-          <Icon v-if="state.viewAll" name="CaretUpIcon" :icon-size="1" />
-          <Icon v-else name="CaretDownIcon" :icon-size="1" />
-        </template>
-      </Button>
+        <Button
+          v-if="hasMore || state.viewAll"
+          :full-width="false"
+          :name="
+            state.viewAll ? $t('context.transactions.controls.showLess') : $t('context.transactions.controls.showMore')
+          "
+          size="sm"
+          variant="secondary"
+          class="absolute bottom-5 left-0 right-0 items-center justify-center"
+          rounded
+          @click="toggleViewAll"
+        >
+          <template #right>
+            <Icon v-if="state.viewAll" name="CaretUpIcon" :icon-size="1" />
+            <Icon v-else name="CaretDownIcon" :icon-size="1" />
+          </template>
+        </Button>
+      </template>
     </section>
   </div>
 
