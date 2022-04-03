@@ -9,7 +9,7 @@
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
-      <span v-else class="hover:opacity-70" @click="visualizeRoute"
+      <span v-else class="hover:opacity-70" @click.stop="visualizeRoute"
         >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
       >
       <span class="ml-auto">~{{ quote.usdAmount }}</span>
@@ -48,11 +48,11 @@ const props = defineProps({
     required: true,
   },
 });
-
 const emit = defineEmits(['visualizeRoute']);
 
-const visualizeRoute = (e) => {
+console.log('quote amount', props.quote.amount);
+
+const visualizeRoute = () => {
   emit('visualizeRoute', { quote: props.quote, index: props.index });
-  e.preventDefault();
 };
 </script>

@@ -16,6 +16,7 @@
     <QuotesList
       v-if="isQuotesListModalOpen"
       :routes="daggRoutes"
+      :selected-quote-index="selectedQuoteIndex"
       @selectedQuoteIndex="(e) => selectedQuoteIndexEvent(e)"
       @goback="quotesListModalToggle"
     />
@@ -233,6 +234,7 @@ export default defineComponent({
     const store = useStore();
     const transactionsStore = useTransactionsStore();
     const isFinished = ref(false); // keep track of txstepsmodal status
+    const selectedQuoteIndex = ref(0);
     const isSignedIn = computed(() => {
       return store.getters[GlobalGetterTypes.USER.isSignedIn];
     });
@@ -260,6 +262,13 @@ export default defineComponent({
         return false;
       }
     });
+
+    const fromPrecision = computed(() =>
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data?.payCoinData?.base_denom }),
+    );
+    const toPrecision = computed(() =>
+      store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data?.receiveCoinData?.base_denom }),
+    );
 
     onUnmounted(() => {
       if (setIntervalId.value) {
@@ -312,10 +321,10 @@ export default defineComponent({
       const hasBalance = balances.value.length > 0;
       let payAssets = allBalances.value.filter((balance) => {
         return (
-          balance.base_denom !== data.receiveCoinData?.base_denom &&
+          balance?.base_denom !== data?.receiveCoinData?.base_denom &&
           verifiedDenoms.value.find(
             (verifiedDenom) =>
-              verifiedDenom.base_denom == balance.base_denom &&
+              verifiedDenom?.base_denom == balance?.base_denom &&
               (parseInt(parseCoins(balance.amount)[0].amount) > 0 || !hasBalance),
           )
         );
@@ -331,7 +340,7 @@ export default defineComponent({
             denom: denom.name,
             on_chain: denom.chain_name,
           }))
-          .filter((receiveAsset) => receiveAsset.base_denom !== data.payCoinData.base_denom),
+          .filter((receiveAsset) => receiveAsset?.base_denom !== data.payCoinData?.base_denom),
       );
     });
 
@@ -371,7 +380,8 @@ export default defineComponent({
               const defaultAsset = JSON.parse(JSON.stringify(props.defaultAsset));
               defaultAsset.on_chain = store.getters[GlobalGetterTypes.API.getDexChain];
               assetToReceive =
-                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
+                assetsToReceive.value.find((coin) => coin?.base_denom === props.defaultAsset.base_denom) ||
+                defaultAsset;
             }
 
             if (assetsToPay.value.length > 0) {
@@ -510,7 +520,7 @@ export default defineComponent({
         }
       }),
       isBothSelected: computed(() => {
-        return data.payCoinData && data.receiveCoinData;
+        return data.payCoinData && data?.receiveCoinData;
       }),
       isSwapReady: computed(() => {
         return !(data.isOver || !data.isBothSelected || !isAmount.value || !isSignedIn.value || !dexStatus.value);
@@ -569,11 +579,11 @@ export default defineComponent({
         if (data.payCoinData) {
           const amount =
             data.maxAmount /
-            10 ** (store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6);
+            10 ** (store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }) ?? 6);
 
           if (amount > 0) {
             const ticker = await getTicker(
-              data.payCoinData.base_denom,
+              data?.payCoinData?.base_denom,
               store.getters[GlobalGetterTypes.API.getDexChain],
             );
             const formattedAmount = Math.trunc(amount * 100) / 100;
@@ -595,21 +605,17 @@ export default defineComponent({
       async () => {
         if (data.isSwapReady) {
           // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
-          const fromPrecision =
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
-          const toPrecision =
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData.base_denom }) || 6;
           const swapParams: SwapAction = {
             name: 'swap',
             params: {
               from: {
-                amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision))),
+                amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision.value))),
                 denom: data.payCoinData.denom,
 
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
-                amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision))),
+                amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision.value))),
                 denom: data.receiveCoinData.denom,
 
                 chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
@@ -665,10 +671,10 @@ export default defineComponent({
       const precisionDecimal = Math.pow(
         10,
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: data.payCoinData.base_denom,
+          name: data?.payCoinData?.base_denom,
         }) ?? 6,
       );
-      data.payCoinAmount = data.maxAmount / precisionDecimal;
+      data.payCoinAmount = (data.maxAmount / precisionDecimal).toFixed(4);
       setCounterPairCoinAmount('Pay');
     }
 
@@ -700,20 +706,15 @@ export default defineComponent({
         console.log(error);
       }
     }
-    const daggRoutes = ref('');
+    const daggRoutes = ref(null);
 
     async function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
-        const fromPrecision =
-          store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) || 6;
-        const toPrecision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: data.receiveCoinData.base_denom,
-        });
         //if receive use amountout
         let { routes } = await getRoutes({
           denomIn: data.payCoinData?.base_denom,
-          denomOut: data.receiveCoinData?.base_denom,
-          amountIn: data.payCoinAmount * 10 ** fromPrecision,
+          denomOut: data?.receiveCoinData?.base_denom,
+          amountIn: data.payCoinAmount * 10 ** fromPrecision.value,
         });
         //something's off.. check if gravity and osmosis have uniform ibc's.. (osmosis first returns an ibc but gravity doesn't so check.. osmosis is unavailable on dexinfo so check when it's there)
         // if (
@@ -729,21 +730,24 @@ export default defineComponent({
         // }
         daggRoutes.value = routes;
         const len = routes[0]?.steps.length;
-        const precisionDiff = +fromPrecision - +toPrecision;
+        const precisionDiff = +fromPrecision.value - +toPrecision.value;
         let equalizer = 1;
         if (precisionDiff !== 0) {
           equalizer = 10 ** Math.abs(precisionDiff);
         }
 
         if (e.includes('Pay') && !!data.payCoinAmount) {
-          const receiveCoinPrecisionDecimalDigits = Math.pow(
-            10,
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.receiveCoinData?.base_denom }),
-          );
           if (routes[0]?.steps[len - 1]?.data?.to?.amount) {
-            data.receiveCoinAmount = (
-              routes[0]?.steps[len - 1]?.data?.to?.amount / receiveCoinPrecisionDecimalDigits
-            )?.toFixed(4);
+            console.log(
+              'receive amount',
+              (data.receiveCoinAmount = (
+                routes[0]?.steps[len - 1]?.data?.to?.amount /
+                10 ** toPrecision.value
+              )?.toFixed(4)),
+            );
+            data.receiveCoinAmount = (routes[0]?.steps[len - 1]?.data?.to?.amount / 10 ** toPrecision.value)?.toFixed(
+              4,
+            );
           }
 
           // if (data.payCoinAmount + data.receiveCoinAmount === 0) {
@@ -778,8 +782,16 @@ export default defineComponent({
       return [...coinPairList, ...poolCoinPairList];
     }
 
-    function selectedQuoteIndexEvent(e) {
-      console.log('e', e);
+    function selectedQuoteIndexEvent(index) {
+      selectedQuoteIndex.value = index;
+      isQuotesListModalOpen.value = !isQuotesListModalOpen.value;
+      const len = daggRoutes.value[index]?.steps.length;
+      if (daggRoutes.value[index]?.steps[len - 1]?.data?.to?.amount) {
+        data.receiveCoinAmount = (
+          daggRoutes.value[index]?.steps[len - 1]?.data?.to?.amount /
+          10 ** toPrecision.value
+        )?.toFixed(4);
+      }
     }
 
     return {
@@ -807,6 +819,7 @@ export default defineComponent({
       isAmount,
       selectedQuoteIndexEvent,
       daggRoutes,
+      selectedQuoteIndex,
     };
   },
 });

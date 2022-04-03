@@ -19,7 +19,7 @@
         <QuotesListItem
           :quote="quote"
           :index="index"
-          :is-best-price="index === 0 ? true : false"
+          :is-best-price="index === 0"
           :is-selected-quote="selectedQuoteIndex === index"
           @click="selectQuote(index)"
           @visualizeRoute="visualizeRoute({ quote, index })"
@@ -55,7 +55,7 @@ import TitleSubTitleWithClose from '@/components/common/headers/TitleSubTitleWit
 import QuotesListItem from '@/components/common/QuotesListItem.vue';
 import SwapRoute from '@/components/common/SwapRoute.vue';
 import usePrice from '@/composables/usePrice';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
 // eslint-disable-next-line
 const props = defineProps({
@@ -63,12 +63,16 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  selectedQuoteIndex: {
+    type: Number,
+    required: true,
+  },
 });
 
-const store = useStore() as RootStoreTyped;
+const store = useStore();
 const { getDisplayPrice } = usePrice();
 
-const selectedQuoteIndex = ref(0);
+const selectedQuoteIndex = ref(props.selectedQuoteIndex || 0);
 const isVisualizeRouteVisible = ref(false);
 const visualizeRouteIndex = ref(0);
 
@@ -92,7 +96,7 @@ const routesTransformedToQuotes = computed(() => {
       (route as any).steps[numberOfSteps - 1].data.to.amount /
       (10 **
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: (route as any).steps[0].data.from.base_denom,
+          name: (route as any).steps[0].data.to.base_denom,
         }) || 6)
     ).toFixed(4);
     routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
