@@ -44,7 +44,13 @@
             <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
             <template #content> {{ displayName }} </template>
           </tippy>
-          <Denom v-else :name="selectedDenom?.base_denom" />
+          <Denom
+            v-else
+            :name="selectedDenom?.base_denom"
+            :class="{
+              'font-medium text-1': !isDefaultState,
+            }"
+          />
           <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
@@ -62,10 +68,16 @@
       v-if="isSelected"
       class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text"
     >
-      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
+      <div
+        v-if="isDefaultState"
+        class="denom-select__coin-amount-type select-none"
+        :class="{ '-text-1': size === 'sm' }"
+      >
         {{ inputHeader }}
       </div>
+      <SkeletonLoader v-if="isAmountLoading" width="80%" height="1.3125rem" />
       <AmountInput
+        v-else
         :model-value="amount"
         :readonly="readonly"
         class="denom-select__coin-amount-input text-text w-full p-0 text-right font-bold bg-transparent placeholder-inactive appearance-none border-none"
@@ -74,6 +86,13 @@
         min="0"
         @input="$emit('update:amount', ($event.target as HTMLInputElement).value), $emit('change', inputHeader)"
       />
+      <div
+        v-if="!isDefaultState && !isAmountLoading"
+        class="denom-select__coin-amount-type select-none"
+        :class="{ '-text-1': size === 'sm' }"
+      >
+        {{ displayPrice }}
+      </div>
     </label>
   </div>
   <DenomSelectModal
@@ -99,6 +118,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes } from '@/store';
@@ -108,7 +128,7 @@ import { useStore } from '@/utils/useStore';
 
 export default defineComponent({
   name: 'DenomSelect',
-  components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
+  components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal, SkeletonLoader },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
@@ -125,6 +145,8 @@ export default defineComponent({
     readonly: { type: Boolean, default: false },
     showChain: { type: Boolean, default: false },
     size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
+    isDefaultState: { type: Boolean, default: true },
+    isAmountLoading: { type: Boolean, default: false },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {
@@ -186,6 +208,10 @@ export default defineComponent({
       emit('select', payload);
       toggleDenomSelectModal();
     }
+    //Removes text before $
+    const displayPrice = computed(() =>
+      props.inputHeader.substring(props.inputHeader.indexOf('$'), props.inputHeader.length),
+    );
 
     return {
       inputAmount,
@@ -196,6 +222,7 @@ export default defineComponent({
       toggleDenomSelectModal,
       denomSelectHandler,
       displayName,
+      displayPrice,
     };
   },
 });

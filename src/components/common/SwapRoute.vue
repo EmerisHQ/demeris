@@ -51,7 +51,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { capitalizeFirstLetter } from '@/utils/basic';
+import { capitalizeFirstLetter, getChainFromDex } from '@/utils/basic';
 
 export default defineComponent({
   name: 'SwapRoute',
@@ -105,17 +105,19 @@ export default defineComponent({
             : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
           (item as any).denom =
             stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
-          (item as any).chain = 'osmosis'; //chain how. change this.
+          (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
         } else if (steps[stepIndex].type === 'ibc') {
           lastType = 'ibc';
           stepIndex === steps.length - 1
-            ? (carryOver = `Transfer to Osmosis`)
-            : (item as any).transactions.unshift(`Transfer to Osmosis`); //remove hardcoding
+            ? (carryOver = `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`)
+            : (item as any).transactions.unshift(
+                `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`,
+              );
           (item as any).denom =
             stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
-          (item as any).chain = 'osmosis'; //chain how
+          (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
         } else {
-          console.log(`which type? :P : ${steps[stepIndex].type}`);
+          console.log(`new type : ${steps[stepIndex].type}`);
         }
         items.unshift(item);
       }

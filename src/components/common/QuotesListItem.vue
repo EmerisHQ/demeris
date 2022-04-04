@@ -50,8 +50,6 @@ const props = defineProps({
 });
 const emit = defineEmits(['visualizeRoute']);
 
-console.log('quote amount', props.quote.amount);
-
 const visualizeRoute = () => {
   emit('visualizeRoute', { quote: props.quote, index: props.index });
 };

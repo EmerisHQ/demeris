@@ -1,5 +1,7 @@
 <template>
-  {{ display }}
+  <div>
+    {{ display }}
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref, toRefs, watch } from 'vue';

@@ -206,3 +206,11 @@ export function checkStringIsKeybase(str: string) {
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export function getChainFromDex(dex) {
+  //switch case when dex increase. temp util till API includes this info.
+  if (dex.toLowerCase() === 'osmosis') return 'osmosis';
+  else if (dex.toLowerCase() === 'gravity') {
+    return 'cosmos-hub';
+  } else return null;
+}
