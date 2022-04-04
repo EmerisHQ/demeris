@@ -1,14 +1,17 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
 import axios, { AxiosResponse } from 'axios';
+import { toRaw } from 'vue';
 import { ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
 import { GlobalActionTypes, GlobalGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
+import { Airdrop } from '@/types/api';
 import { UserData } from '@/types/user';
 import { ActionParams, ChartPrices, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
 import TendermintWS from '@/utils/TendermintWS';
@@ -147,8 +150,7 @@ export interface Actions {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
   ): Promise<void>;
-
-  [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
+  [ActionTypes.AIRDROPS_ELIGIBILITY_CHECK](context: APIActionContext): void;
   [ActionTypes.SET_SELECTED_AIRDROP](
     context: APIActionContext,
     payload: ActionParams<EmerisAirdrops.selectedAirdropReq>,
@@ -796,11 +798,81 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
+  async [ActionTypes.AIRDROPS_ELIGIBILITY_CHECK]({ commit, getters }) {
+    try {
+      const airdrops = getters['getAirdrops'];
+      airdrops.forEach((data: Airdrop) => {
+        let eligibility = null;
+        let eligibility_status = null;
+        let eligibility_data = null;
+        if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
+          commit(MutationTypes.SET_AIRDROPS, {
+            value: {
+              ...data,
+              eligibilityStatusCode: 200,
+              eligibility: AirdropEligibilityStatus.AUTO_DROP,
+              eligibilityResponse: null,
+              address: null,
+            },
+          });
+        } else if (data.eligibleTokens && data.eligibleTokens.length > 0) {
+          const verified_denoms = toRaw(getters['getVerifiedDenoms']);
+          const denoms_existing = verified_denoms.filter((denom) => data.eligibleTokens.includes(denom.ticker));
+
+          denoms_existing.forEach(async (denom_existing) => {
+            const own_address = await getOwnAddress({ chain_name: denom_existing.chain_name });
+            if (data.eligibilityCheckEndpoint && own_address) {
+              delete axios.defaults.headers.get['X-Correlation-Id'];
+              const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', '');
+              try {
+                const eligibility_res = await axios.get(`${eligibilityEndpoint}${own_address}`);
+                eligibility_status = eligibility_res.status;
+                eligibility_data = eligibility_res.data;
+                if (eligibility_res.status === 200) {
+                  eligibility = AirdropEligibilityStatus.ELIGIBLE;
+                }
+              } catch (err) {
+                eligibility_status = err.response.status;
+                eligibility_data = err.response.data;
+                if (err.response.status === 403) {
+                  eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
+                } else {
+                  eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
+                }
+              }
+            } else {
+              eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
+            }
+
+            // FURTHER WORK TO BE DONE HERE, COMPARING AND MERGING INDIVIDUAL ADDRESS RESPONSES FOR EACH AIRDROP PROJECT (ISSUE #1423 CREATED FOR THIS)
+            commit(MutationTypes.SET_AIRDROPS, {
+              value: {
+                ...data,
+                eligibilityStatusCode: eligibility_status,
+                eligibility,
+                eligibilityResponse: eligibility_data,
+                address: own_address,
+              },
+            });
+          });
+        } else {
+          commit(MutationTypes.SET_AIRDROPS, {
+            value: {
+              ...data,
+              eligibilityStatusCode: 200,
+              eligibility: AirdropEligibilityStatus.NOT_AVAILABLE,
+              eligibilityResponse: null,
+              address: null,
+            },
+          });
+        }
+      });
+    } catch (e) {
+      console.error('Demeris:airdropEligibilityCheck: Could not perform API query.');
+    }
+  },
   [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(MutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
-  },
-  [ActionTypes.RESET_AIRDROPS]({ commit }) {
-    commit(MutationTypes.RESET_AIRDROPS);
   },
   [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });

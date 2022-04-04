@@ -417,6 +417,7 @@ export type Airdrop = {
   eligibilityCheckEndpoint: string;
   unanimousClaim: boolean;
   claimActions: AirdropClaimAction[];
+  eligibleTokens: string[];
 };
 
 export type selectedAirdropReq = {
