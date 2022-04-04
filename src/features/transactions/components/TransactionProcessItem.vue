@@ -6,192 +6,197 @@
       trigger: isProcessingState(state) || state.done ? 'manual' : 'mouseenter focus',
     }"
     size="none"
-    class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
+    class="ml-3 transactions-center__close-btn transition-all w-6 h-6 z-10 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
     :content="$t('context.transactions.widget.removeItem')"
     rounded
     @click="removeTransactionItem"
   >
     <Icon name="CloseIcon" :icon-size="0.85" />
   </Button>
-
-  <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div class="item-icon w-8">
-      <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
-      <Icon v-else-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
-      <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
-      <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
-      <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
-      <div
-        v-else-if="state.matches('review') || state.matches('receipt')"
-        class="-space-x-3 inline-flex items-center pt-1.5"
-      >
-        <CircleSymbol
-          v-for="asset of getIconAssets()"
-          :key="asset.denom"
-          v-bind="asset"
-          size="sm"
-          class="z-0 first:z-10"
-        />
-      </div>
-      <div
-        v-else-if="['transacting', 'validating', 'signing'].some(state.matches)"
-        style="transform: scale(0.5) translateX(-0.75rem)"
-      >
-        <Spinner :size="2.5" />
-      </div>
-      <Icon v-else name="ExclamationIcon" class="text-warning" />
-    </div>
-
-    <div class="flex-1 text-left flex flex-col">
-      <p class="item-title font-medium truncate">
-        <template
-          v-if="
-            action == 'transfer' &&
-            (transactionAction.name === 'transfer' ||
-              transactionAction.name === 'ibc_backward' ||
-              transactionAction.name === 'ibc_forward')
-          "
+  <div class="ml-3 relative">
+    <button
+      v-bind="$attrs"
+      class="hover:bg-fg flex w-full items-center"
+      :class="hideControls ? 'space-x-3' : 'space-x-4'"
+    >
+      <div class="item-icon w-8">
+        <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
+        <Icon v-else-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
+        <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
+        <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
+        <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
+        <div
+          v-else-if="state.matches('review') || state.matches('receipt')"
+          class="-space-x-3 inline-flex items-center pt-1.5"
         >
-          Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
-        </template>
-        <template
-          v-if="
-            action == 'move' &&
-            (transactionAction.name === 'transfer' ||
-              transactionAction.name === 'ibc_backward' ||
-              transactionAction.name === 'ibc_forward')
-          "
+          <CircleSymbol
+            v-for="asset of getIconAssets()"
+            :key="asset.denom"
+            v-bind="asset"
+            size="sm"
+            class="z-0 first:z-10"
+          />
+        </div>
+        <div
+          v-else-if="['transacting', 'validating', 'signing'].some(state.matches)"
+          style="transform: scale(0.5) translateX(-0.75rem)"
         >
-          Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
-        </template>
-        <template v-if="action == 'swap' && transactionAction.name === 'swap'">
-          Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
-          <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
-        </template>
-        <template v-if="action == 'addliquidity' && transactionAction.name === 'addliquidity'">
-          Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
-          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
-        </template>
-        <template v-if="action === 'withdrawliquidity' && transactionAction.name === 'withdrawliquidity'">
-          Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[0])" /> ·
-          <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[1])" />
-        </template>
-        <template v-if="action === 'createpool' && transactionAction.name === 'createpool'">
-          Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
-          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
-        </template>
-        <template v-if="action === 'claim' && transactionAction.name === 'claim'">
-          Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
-        </template>
-        <template v-if="action === 'stake' && transactionAction.name === 'stake'">
-          Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
-        </template>
-        <template v-if="action === 'unstake' && transactionAction.name === 'unstake'">
-          Unstake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
-        </template>
-        <template v-if="action === 'switch' && transactionAction.name === 'switch'">
-          Restake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
-        </template>
-      </p>
+          <Spinner :size="2.5" />
+        </div>
+        <Icon v-else name="ExclamationIcon" class="text-warning" />
+      </div>
 
-      <p class="item-description -text-1 opacity-75 truncate">
-        <i18n-t
-          v-if="state.matches('validating')"
-          scope="global"
-          keypath="context.transactions.widget.description.validating"
-        />
-        <template v-else-if="state.matches('transacting') && transactionOffset">
-          {{ $t('context.transactions.widget.description.transactingPartial', transactionOffset) }}
-        </template>
-        <i18n-t
-          v-else-if="state.matches('transacting')"
-          scope="global"
-          keypath="context.transactions.widget.description.transacting"
-        />
-        <i18n-t
-          v-else-if="state.matches('signing')"
-          scope="global"
-          keypath="context.transactions.widget.description.signing"
-        />
-        <i18n-t
-          v-else-if="state.matches('waitingPreviousTransaction')"
-          scope="global"
-          keypath="context.transactions.widget.description.waitingPreviousTransaction"
-        />
-        <i18n-t
-          v-else-if="state.matches('success')"
-          scope="global"
-          keypath="context.transactions.widget.description.success"
-        />
-        <i18n-t
-          v-else-if="state.matches('failed.sign')"
-          scope="global"
-          keypath="context.transactions.widget.description.failed.sign"
-          tag="span"
-          class="text-warning"
-        />
-        <i18n-t
-          v-else-if="state.matches('failed.unknown')"
-          scope="global"
-          keypath="context.transactions.widget.description.failed.unknown"
-          tag="span"
-        />
-        <i18n-t
-          v-else-if="state.matches('failed')"
-          scope="global"
-          keypath="context.transactions.widget.description.failed.default"
-          tag="span"
-          class="text-negative"
-        />
-        <template v-else-if="state.matches('review') && transactionOffset">
-          {{ $t('context.transactions.widget.description.reviewPartial', transactionOffset) }}
-        </template>
-        <i18n-t
-          v-else-if="state.matches('review')"
-          scope="global"
-          keypath="context.transactions.widget.description.review"
-        />
-        <template v-else-if="state.matches('receipt')">
-          {{ $t('context.transactions.widget.description.receipt', transactionOffset) }}
-        </template>
-      </p>
-    </div>
+      <div class="flex-1 text-left flex flex-col">
+        <p class="item-title font-medium truncate">
+          <template
+            v-if="
+              action == 'transfer' &&
+              (transactionAction.name === 'transfer' ||
+                transactionAction.name === 'ibc_backward' ||
+                transactionAction.name === 'ibc_forward')
+            "
+          >
+            Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          </template>
+          <template
+            v-if="
+              action == 'move' &&
+              (transactionAction.name === 'transfer' ||
+                transactionAction.name === 'ibc_backward' ||
+                transactionAction.name === 'ibc_forward')
+            "
+          >
+            Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          </template>
+          <template v-if="action == 'swap' && transactionAction.name === 'swap'">
+            Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
+            <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
+          </template>
+          <template v-if="action == 'addliquidity' && transactionAction.name === 'addliquidity'">
+            Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
+            <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+          </template>
+          <template v-if="action === 'withdrawliquidity' && transactionAction.name === 'withdrawliquidity'">
+            Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[0])" /> ·
+            <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[1])" />
+          </template>
+          <template v-if="action === 'createpool' && transactionAction.name === 'createpool'">
+            Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
+            <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+          </template>
+          <template v-if="action === 'claim' && transactionAction.name === 'claim'">
+            Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
+          </template>
+          <template v-if="action === 'stake' && transactionAction.name === 'stake'">
+            Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
+          </template>
+          <template v-if="action === 'unstake' && transactionAction.name === 'unstake'">
+            Unstake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          </template>
+          <template v-if="action === 'switch' && transactionAction.name === 'switch'">
+            Restake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          </template>
+        </p>
 
-    <div>
-      <template v-if="!hideControls">
-        <Button
-          v-if="state.can('RETRY')"
-          :name="$t('context.transactions.controls.tryAgain')"
-          size="sm"
-          @click.stop="send('RETRY')"
-        />
-        <Button
-          v-if="state.can('SIGN')"
-          :name="$t('context.transactions.controls.sign')"
-          size="sm"
-          @click.stop="send('SIGN')"
-        />
-        <Button
-          v-else-if="state.matches('waitingPreviousTransaction')"
-          :name="$t('context.transactions.controls.sign')"
-          size="sm"
-          :tooltip-text="
-            $t('context.transactions.controls.waitingTransactionTooltip', {
-              chain: globalStore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chainName }),
-            })
-          "
-          disabled
-          @click.stop="void 0"
-        />
-        <Button
-          v-else-if="state.matches('receipt')"
-          :name="$t('context.transactions.controls.next')"
-          size="sm"
-          @click.stop="send('CONTINUE')"
-        />
-      </template>
-    </div>
-  </button>
+        <p class="item-description -text-1 opacity-75 truncate">
+          <i18n-t
+            v-if="state.matches('validating')"
+            scope="global"
+            keypath="context.transactions.widget.description.validating"
+          />
+          <template v-else-if="state.matches('transacting') && transactionOffset">
+            {{ $t('context.transactions.widget.description.transactingPartial', transactionOffset) }}
+          </template>
+          <i18n-t
+            v-else-if="state.matches('transacting')"
+            scope="global"
+            keypath="context.transactions.widget.description.transacting"
+          />
+          <i18n-t
+            v-else-if="state.matches('signing')"
+            scope="global"
+            keypath="context.transactions.widget.description.signing"
+          />
+          <i18n-t
+            v-else-if="state.matches('waitingPreviousTransaction')"
+            scope="global"
+            keypath="context.transactions.widget.description.waitingPreviousTransaction"
+          />
+          <i18n-t
+            v-else-if="state.matches('success')"
+            scope="global"
+            keypath="context.transactions.widget.description.success"
+          />
+          <i18n-t
+            v-else-if="state.matches('failed.sign')"
+            scope="global"
+            keypath="context.transactions.widget.description.failed.sign"
+            tag="span"
+            class="text-warning"
+          />
+          <i18n-t
+            v-else-if="state.matches('failed.unknown')"
+            scope="global"
+            keypath="context.transactions.widget.description.failed.unknown"
+            tag="span"
+          />
+          <i18n-t
+            v-else-if="state.matches('failed')"
+            scope="global"
+            keypath="context.transactions.widget.description.failed.default"
+            tag="span"
+            class="text-negative"
+          />
+          <template v-else-if="state.matches('review') && transactionOffset">
+            {{ $t('context.transactions.widget.description.reviewPartial', transactionOffset) }}
+          </template>
+          <i18n-t
+            v-else-if="state.matches('review')"
+            scope="global"
+            keypath="context.transactions.widget.description.review"
+          />
+          <template v-else-if="state.matches('receipt')">
+            {{ $t('context.transactions.widget.description.receipt', transactionOffset) }}
+          </template>
+        </p>
+      </div>
+
+      <div>
+        <template v-if="!hideControls">
+          <Button
+            v-if="state.can('RETRY')"
+            :name="$t('context.transactions.controls.tryAgain')"
+            size="sm"
+            @click.stop="send('RETRY')"
+          />
+          <Button
+            v-if="state.can('SIGN')"
+            :name="$t('context.transactions.controls.sign')"
+            size="sm"
+            @click.stop="send('SIGN')"
+          />
+          <Button
+            v-else-if="state.matches('waitingPreviousTransaction')"
+            :name="$t('context.transactions.controls.sign')"
+            size="sm"
+            :tooltip-text="
+              $t('context.transactions.controls.waitingTransactionTooltip', {
+                chain: globalStore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: chainName }),
+              })
+            "
+            disabled
+            @click.stop="void 0"
+          />
+          <Button
+            v-else-if="state.matches('receipt')"
+            :name="$t('context.transactions.controls.next')"
+            size="sm"
+            @click.stop="send('CONTINUE')"
+          />
+        </template>
+      </div>
+    </button>
+  </div>
 </template>
 
 <script lang="ts">

@@ -10,21 +10,21 @@
             style="padding-right: 0 !important; padding-left: 0 !important"
           >
             <p class="text-2 font-medium capitalize">
-              {{ mappedItem.sectionTitle.replace(/\_/g, ' ').toLowerCase() }}
+              {{ sectionTitle(mappedItem.sectionTitle) }}
             </p>
             <a
               v-if="mappedItem.shouldMinimize"
               class="font-medium flex items-center cursor-pointer"
               @click="seeAllMappedSection({ ...mappedItem, shouldMinimize: false })"
             >
-              See all<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+              {{ $t('context.airdrops.seeAll') }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
             </a>
           </td>
         </tr>
       </tbody>
     </table>
     <p v-if="mappedItem.airdrops.length === 0" class="my-8 text-muted -text-1">
-      No {{ mappedItem.sectionTitle.replace(/\_/g, ' ').toLowerCase() }} airdrops
+      No {{ sectionTitle(mappedItem.sectionTitle) }} airdrops
     </p>
     <table v-else class="assets-table w-full">
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
@@ -51,10 +51,15 @@
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <div class="flex items-center">
               <div>
-                <img v-if="airdrop.tokenIcon" :src="airdrop.tokenIcon" alt="Airdrop Logo" class="w-10 rounded-full" />
+                <img
+                  v-if="airdrop.tokenIcon && airdrop.imageExists"
+                  :src="airdrop.tokenIcon"
+                  alt="Airdrop Logo"
+                  class="w-10 rounded-full"
+                />
 
-                <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
-                  {{ airdrop.chainName ? airdrop.chainName.slice(0, 1) : '-' }}
+                <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-2 text-0">
+                  {{ airdrop.project ? airdrop.project.slice(0, 2) : '-' }}
                 </div>
               </div>
               <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
@@ -78,7 +83,11 @@
           </td>
 
           <td class="py-5 align-middle group-hover:bg-fg transition text-right">
-            <div v-if="airdrop.eligibility === 'AUTO_DROP'" class="flex items-center float-right">
+            <SkeletonLoader v-if="!airdrop.eligibility" width="100px" height="20px" />
+            <div
+              v-if="airdrop.eligibility === AirdropEligibilityStatus.AUTO_DROP"
+              class="flex items-center float-right"
+            >
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Auto-drop
             </div>
             <div v-else-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_ELIGIBLE" class="text-muted">
@@ -94,7 +103,9 @@
             >
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Claimed
             </div>
-            <div v-else class="text-muted">Not available</div>
+            <div v-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_AVAILABLE" class="text-muted">
+              Not available
+            </div>
           </td>
         </tr>
       </tbody>
@@ -107,6 +118,7 @@ import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -118,6 +130,7 @@ export default defineComponent({
 
   components: {
     ChainName,
+    SkeletonLoader,
     Ticker,
     Button,
     Icon,
@@ -151,9 +164,14 @@ export default defineComponent({
       emit('row-click', airdrop);
     };
 
+    const noAirdropsToClaim = computed(() => {
+      return props.airdrops.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
+    });
+
     const sections = computed(() => {
       if (props.activeFilter === 'mine') {
-        return ['CLAIMABLE', 'CLAIMED', 'upcoming'];
+        if (noAirdropsToClaim.value) return ['CLAIMED', 'NOT_STARTED'];
+        else return ['CLAIMABLE', 'CLAIMED', 'NOT_STARTED'];
       } else if (props.activeFilter === 'upcoming') {
         return ['ELIGIBLE', 'NOT_AVAILABLE', 'NOT_ELIGIBLE'];
       } else if (props.activeFilter === 'live') {
@@ -201,6 +219,10 @@ export default defineComponent({
       { immediate: true },
     );
 
+    const sectionTitle = (title: string) => {
+      return title ? title.replace(/\_/g, ' ').toLowerCase() : '';
+    };
+
     return {
       keyword,
       handleClick,
@@ -208,6 +230,7 @@ export default defineComponent({
       seeAllMappedSection,
       AirdropEligibilityStatus,
       EmerisAirdrops,
+      sectionTitle,
     };
   },
 });

@@ -1,73 +1,76 @@
 <template>
-  <div v-if="canShownCenter" class="relative">
+  <div v-if="canShownCenter" class="relative pointer-events-none">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
-      class="fixed bottom-8 right-8 z-50"
+      class="fixed bottom-8 right-8 z-50 pointer-events-auto"
     />
 
     <section
       v-else
-      class="transactions-center w-96 fixed bottom-0 right-8 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg"
+      class="transactions-center w-[396px] fixed bottom-0 right-8"
       :class="{ 'z-50': !transactionsStore.isRemoveModalOpen }"
     >
-      <Notifications
-        :messages="state.notifications"
-        class="absolute -top-3"
-        :button1-label="$t('context.transactions.controls.undo')"
-        :button2-label="$t('context.transactions.controls.details')"
-        :clear-all-label="$t('context.transactions.controls.clearAll')"
-        :show-less-label="$t('context.transactions.controls.showLess')"
-        :auto-dismiss="!transactionsStore.isRemoveModalOpen"
-        @on-update="state.notifications = $event"
-        @on-button1-click="undoRemoval"
-        @on-button2-click="showDetails"
-      />
+      <div class="absolute z-[-1] w-96 h-full top-0 right-0 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg" />
+      <div class="z-1 w-full h-full pointer-events-auto">
+        <Notifications
+          :messages="state.notifications"
+          class="absolute -top-3 pl-3"
+          :button1-label="$t('context.transactions.controls.undo')"
+          :button2-label="$t('context.transactions.controls.details')"
+          :clear-all-label="$t('context.transactions.controls.clearAll')"
+          :show-less-label="$t('context.transactions.controls.showLess')"
+          :auto-dismiss="!transactionsStore.isRemoveModalOpen"
+          @on-update="state.notifications = $event"
+          @on-button1-click="undoRemoval"
+          @on-button2-click="showDetails"
+        />
 
-      <header class="flex items-center space-between pt-5 pb-4 px-6">
-        <p class="font-bold flex-1 text-1">{{ $t('context.transactions.widget.title') }}</p>
-        <div class="flex items-center space-x-4">
-          <button v-if="pendingTransactions.length" @click="transactionsStore.toggleBottomSheet">
-            <Icon name="CaretDownIcon" :icon-size="1.4" />
-          </button>
-        </div>
-      </header>
+        <template v-if="pendingTransactions.length">
+          <header class="flex items-center space-between pt-5 pb-4 px-6 ml-3">
+            <p class="font-bold flex-1 text-1">{{ $t('context.transactions.widget.title') }}</p>
+            <div class="flex items-center space-x-4">
+              <button @click="transactionsStore.toggleBottomSheet">
+                <Icon name="CaretDownIcon" :icon-size="1.4" />
+              </button>
+            </div>
+          </header>
 
-      <ul
-        class="flex flex-col space-y-1 overflow-y-visible"
-        :style="{ maxHeight: '300px' }"
-        :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
-      >
-        <li v-if="!pendingTransactions.length" class="px-6 text-muted">
-          {{ $t('context.transactions.widget.emptyMessage') }}
-        </li>
+          <ul
+            class="flex flex-col space-y-1 overflow-y-auto"
+            :style="{ maxHeight: '300px' }"
+            :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
+          >
+            <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group">
+              <TransactionProcessItem
+                class="py-4 px-6"
+                :service="service"
+                @click="selectItem(id)"
+                @remove="onRemoveTransactionItem(id)"
+              />
+            </li>
+          </ul>
 
-        <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
-          <TransactionProcessItem
-            class="py-4 px-6"
-            :service="service"
-            @click="selectItem(id)"
-            @remove="onRemoveTransactionItem(id)"
-          />
-        </li>
-      </ul>
-
-      <Button
-        v-if="hasMore || state.viewAll"
-        :full-width="false"
-        :name="
-          state.viewAll ? $t('context.transactions.controls.showLess') : $t('context.transactions.controls.showMore')
-        "
-        size="sm"
-        variant="secondary"
-        class="absolute bottom-5 left-0 right-0 items-center justify-center"
-        rounded
-        @click="toggleViewAll"
-      >
-        <template #right>
-          <Icon v-if="state.viewAll" name="CaretUpIcon" :icon-size="1" />
-          <Icon v-else name="CaretDownIcon" :icon-size="1" />
+          <Button
+            v-if="hasMore || state.viewAll"
+            :full-width="false"
+            :name="
+              state.viewAll
+                ? $t('context.transactions.controls.showLess')
+                : $t('context.transactions.controls.showMore')
+            "
+            size="sm"
+            variant="secondary"
+            class="absolute bottom-5 left-0 right-0 items-center justify-center"
+            rounded
+            @click="toggleViewAll"
+          >
+            <template #right>
+              <Icon v-if="state.viewAll" name="CaretUpIcon" :icon-size="1" />
+              <Icon v-else name="CaretDownIcon" :icon-size="1" />
+            </template>
+          </Button>
         </template>
-      </Button>
+      </div>
     </section>
   </div>
 
