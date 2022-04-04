@@ -738,6 +738,7 @@ export const messages = {
     },
     navbar: {
       portfolio: 'Portfolio',
+      markets: 'Markets',
       assets: 'Assets',
       pools: 'Pools',
       airdrops: 'Airdrops',
