@@ -72,9 +72,11 @@ export type Getters = {
   [GetterTypes.getAirdrops](state: APIState): EmerisAirdrops.Airdrop[] | null;
   [GetterTypes.getAirdropsStatus](state: APIState): LoadingState | null;
   [GetterTypes.getSelectedAirdrop](state: APIState): EmerisAirdrops.Airdrop | null;
-  [GetterTypes.getTokenId](state: APIState): string | null;
   [GetterTypes.getChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
   [GetterTypes.getChainNameByBaseDenom](state: APIState): { (params: EmerisAPI.DenomReq): string };
+
+  // Coingecko Getters
+  [GetterTypes.getCoinGeckoId](state: APIState): string | null;
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisAPI'>;
@@ -322,14 +324,8 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   [GetterTypes.getSelectedAirdrop]: (state) => {
     return state.selectedAirdrop;
   },
-  [GetterTypes.getTokenId]: (state) => {
-    return state.tokenId;
-  },
   [GetterTypes.getTokenPricesLoadingStatus]: (state) => {
     return state.tokenPricesLoadingStatus;
-  },
-  [GetterTypes.getTokenIdLoadingStatus]: (state) => {
-    return state.tokenIdLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
     return state.chains[params.chain_name]?.status;
@@ -338,5 +334,13 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return Object.values(state.chains)?.find((chain) => {
       return chain.denoms?.find((denom) => denom.name === params.denom);
     })?.chain_name;
+  },
+
+  // Coingecko Getters
+  [GetterTypes.getCoinGeckoId]: (state) => {
+    return state.coinGeckoId;
+  },
+  [GetterTypes.getCoinGeckoIdLoadingStatus]: (state) => {
+    return state.coinGeckoIdLoadingStatus;
   },
 };

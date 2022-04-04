@@ -32,6 +32,11 @@ Ensure you create an `.env.local` file, with the following:
 
 #Uncomment below to enable staging API's
 #VITE_FEATURE_USE_STAGING=true
+
+#Uncomment below to enable DEBUG mode
+#Debug mode means:
+#- No constant polling of balances (be careful with this, as you see things different than our customers)
+#VITE_FEATURE_DEBUG=true
 ```
 
 You can also use URL parameters to easily switch evironment, like this:

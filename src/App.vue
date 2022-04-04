@@ -114,32 +114,9 @@ export default defineComponent({
       } catch (e) {
         console.error('Could not load verified denoms: ' + e);
       }
-      typedstore
-        .dispatch(GlobalActionTypes.API.GET_CHAINS, {
-          subscribe: false,
-        })
-        .then((chains) => {
-          for (let chain in chains) {
-            typedstore
-              .dispatch(GlobalActionTypes.API.GET_CHAIN, {
-                subscribe: true,
-                params: {
-                  chain_name: chain,
-                },
-              })
-              .then((chain) => {
-                typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
-                  subscribe: true,
-                  params: {
-                    chain_name: chain.chain_name,
-                  },
-                });
-              });
-          }
-        })
-        .catch((e) => {
-          console.error('Could not load chain information: ' + e);
-        });
+      typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS_AND_CHAIN_STATUS, {
+        subscribe: false,
+      });
       store
         .dispatch('common/env/config', {
           apiNode: liquidityEndpoint,
