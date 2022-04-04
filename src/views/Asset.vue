@@ -428,8 +428,10 @@ export default defineComponent({
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
         tokenTicker.value = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
         const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
+          subscribe: false,
           params: {
             token: tokenTicker.value.toLowerCase(),
+            showSkeleton: false,
           },
         });
         if (chainName) {
