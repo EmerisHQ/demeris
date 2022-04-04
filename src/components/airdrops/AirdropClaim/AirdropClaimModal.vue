@@ -9,7 +9,7 @@
     @close="closeClaimModal"
   >
     <template #header>
-      <h1 class="w-full font-medium text-2 text-center">How to claim</h1>
+      <h1 class="w-full font-medium text-2 text-center">{{ $t('context.airdrops.howToClaimModal.hotToClaim') }}</h1>
     </template>
 
     <!-- Content Area -->
@@ -25,8 +25,10 @@
         </p>
         <div class="w-30 flex items-center text-right">
           <div>
-            <p class="-text-1 font-medium">Completed</p>
-            <p v-if="selectedAirdrop.unanimousClaim" class="uppercase -text-2">(Unlock {{ item.unlockPercentage }}%)</p>
+            <p class="-text-1 font-medium">{{ $t('context.airdrops.howToClaimModal.completed') }}</p>
+            <p v-if="selectedAirdrop.unanimousClaim" class="uppercase -text-2">
+              ({{ $t('context.airdrops.howToClaimModal.unlock') }} {{ item.unlockPercentage }}%)
+            </p>
           </div>
         </div>
         <div class="w-6">
@@ -38,7 +40,7 @@
       <div class="flex items-center text-muted border border-border rounded-xl px-6 py-4 mt-12">
         <InformationIcon class="mr-4" />
         <p class="-text-1">
-          Airdrop is not financial advice. Eligibility, claim action can change based on the project.
+          {{ $t('context.airdrops.howToClaimModal.notFinancialAdvise') }}
         </p>
       </div>
     </div>
