@@ -61,7 +61,9 @@
         </Button>
       </div>
       <!-- pay coin header -->
-      <div class="flex">Pay <button>Max 3000 ATOM</button></div>
+      <div v-if="!isDefaultState" class="denom-select-header flex -text-1 font-medium px-6">
+        Pay <button class="ml-auto font-normal text-muted">Max 3000 ATOM</button>
+      </div>
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="data.payCoinAmount"
@@ -125,7 +127,12 @@
         </div>
       </div>
       <!-- pay coin header -->
-      <div class="flex">Receive <span>Best price </span></div>
+      <div v-if="!isDefaultState" class="denom-select-header flex -text-1 font-medium px-6 pt-6">
+        Receive
+        <span v-if="selectedQuoteIndex === 0" class="flex ml-auto font-normal text-muted"
+          >Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875"
+        /></span>
+      </div>
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="data.receiveCoinAmount"
@@ -804,5 +811,9 @@ function selectedQuoteIndexEvent(index) {
 .swap-widget,
 .swap-process {
   min-height: 24rem;
+}
+
+.denom-select-header {
+  margin-bottom: -0.75rem;
 }
 </style>
