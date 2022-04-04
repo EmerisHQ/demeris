@@ -2,7 +2,7 @@
   <div v-if="canShownCenter" class="relative pointer-events-none">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
-      class="fixed bottom-8 right-8 z-50"
+      class="fixed bottom-8 right-8 z-50 pointer-events-auto"
     />
 
     <section
