@@ -14,6 +14,7 @@ import EmerisError from '@/utils/EmerisError';
 import TendermintWS from '@/utils/TendermintWS';
 
 import { RootStoreTyped } from '../';
+import { featureRunning } from './../../utils/FeatureManager';
 import { APIStore } from '.';
 import { ActionTypes } from './action-types';
 import { MutationTypes } from './mutation-types';
@@ -1070,9 +1071,11 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   ) {
     console.log('Vuex nodule: demeris initialized!');
     commit(MutationTypes.INIT, { wsEndpoint, endpoint, gitEndpoint, rawGitEndpoint, hub_chain, gas_limit });
-    setInterval(() => {
-      dispatch(ActionTypes.STORE_UPDATE);
-    }, refreshTime);
+    if (!featureRunning('DEBUG')) {
+      setInterval(() => {
+        dispatch(ActionTypes.STORE_UPDATE);
+      }, refreshTime);
+    }
   },
   [ActionTypes.RESET_STATE]({ commit }) {
     commit(MutationTypes.RESET_STATE);
