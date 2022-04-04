@@ -85,7 +85,7 @@
             <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
           </template>
           <template v-if="action === 'claim' && transactionAction.name === 'claim'">
-            Claim <Ticker :name="getBaseDenomSync(parseCoins(transactionAction.data.total)[0].denom)" />
+            Claim <Ticker :name="getStakableBaseDenomFromChainName(transactionAction.data.chain_name)" />
           </template>
           <template v-if="action === 'stake' && transactionAction.name === 'stake'">
             Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
@@ -215,9 +215,10 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
+import useDenomsFactory from '@/composables/useDenoms';
 import { GlobalGetterTypes } from '@/store';
+import type { ClaimData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
 
 import {
   getCurrentTransaction,
@@ -245,6 +246,7 @@ const removeTransactionItem = () => emit('remove');
 const globalStore = useStore();
 const { service } = toRefs(props);
 const { state, send } = useActor(service);
+const { getStakableBaseDenomFromChainName } = useDenomsFactory();
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 const transactionAction = computed(() => getTransactionFromAction(state.value.context));
@@ -286,7 +288,8 @@ const getIconAssets = () => {
   }
 
   if (name === 'claim') {
-    const denom = parseCoins(transaction.value.data.total)[0].denom;
+    const data = transaction.value.data as ClaimData;
+    const denom = getStakableBaseDenomFromChainName(data.chain_name);
     assets.push({ denom });
   }
 
