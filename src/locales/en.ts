@@ -785,6 +785,9 @@ export const messages = {
         chains: 'Chains',
       },
       portfolio: {},
+      markets: {
+        markets: 'Markets',
+      },
       receive: {
         select: 'Select asset',
         receive: 'Receive',

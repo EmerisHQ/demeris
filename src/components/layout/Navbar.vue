@@ -12,7 +12,7 @@
       exact-active-class="text-text font-medium"
       to="/assets"
     >
-      {{ $t('navbar.assets') }}
+      {{ $t('navbar.markets') }}
     </router-link>
     <router-link
       class="h-12 py-3.5 px-2 md:px-3 leading-5 hover:text-text active:opacity-70"
