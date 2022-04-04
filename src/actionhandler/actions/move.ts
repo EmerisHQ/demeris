@@ -45,6 +45,7 @@ export async function move({
           type: 'IBCtransferForward',
           status: 'pending',
           chainFee: await getFeeForChain(chain_name),
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,
@@ -98,6 +99,7 @@ export async function move({
         status: 'pending',
         addFee: true,
         feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+        own: true,
         data: {
           amount: amount,
           chainName: chain_name,
@@ -113,6 +115,7 @@ export async function move({
         type: 'IBCtransferForward',
         status: 'pending',
         chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+        own: true,
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           chainName: verifyTrace.trace[0].counterparty_name,
@@ -149,6 +152,7 @@ export async function move({
           status: 'pending',
           addFee: true,
           feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,
@@ -166,6 +170,7 @@ export async function move({
           type: 'IBCtransferForward',
           status: 'pending',
           chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+          own: true,
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
             chainName: verifyTrace.trace[0].counterparty_name,
@@ -190,6 +195,7 @@ export async function move({
         result.steps.push({
           type: 'IBCtransferBackward',
           status: 'pending',
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,

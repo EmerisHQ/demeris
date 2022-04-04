@@ -19,57 +19,137 @@ import {
 
 // Action-handler / action composing using the blocks above
 
-export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.MsgMeta> {
+export async function msgFromStepTransaction(
+  stepTx: Actions.StepTransaction,
+  gasPriceLevel: EmerisFees.GasPriceLevel,
+): Promise<Actions.MsgMeta> {
   const chainName = stepTx.type == 'stake' ? stepTx.data[0].chainName : stepTx.data.chainName;
-  const msg = await (mapTransaction({
-    chainName,
-    signingAddress: await getOwnAddress({ chain_name: chainName }),
-    txs: [stepTx],
-  }) as Promise<AminoMsg[]>);
+
   const libStore = useStore();
+  const typedstore = useStore() as RootStoreTyped;
   if (stepTx.type == 'transfer') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
 
   if (stepTx.type == 'IBCtransferForward') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
 
   if (stepTx.type == 'IBCtransferBackward') {
+    let fromAmount = stepTx.data.amount.amount;
+    if (stepTx.addFee) {
+      fromAmount = (
+        parseInt(fromAmount) +
+        Math.ceil(stepTx.feeToAdd[0].amount[gasPriceLevel] * typedstore.getters[GlobalGetterTypes.USER.getGasLimit])
+      ).toString();
+    }
+    stepTx.data.amount.amount = fromAmount;
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'addLiquidity') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'withdrawLiquidity') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'createPool') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'swap') {
+    const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
+    let isReverse = false;
+    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms[0]) {
+      isReverse = true;
+    }
+    const price = [stepTx.data.from, stepTx.data.to].sort((a, b) => {
+      if (a.denom < b.denom) return -1;
+      if (a.denom > b.denom) return 1;
+      return 0;
+    });
+    const orderPrice =
+      (parseInt(price[0].amount) / parseInt(price[1].amount)) * (isReverse ? 1 - slippage : 1 + slippage);
+    const newToAmount =
+      price[0].denom == stepTx.data.from.denom
+        ? parseInt(stepTx.data.from.amount) / orderPrice
+        : parseInt(stepTx.data.from.amount) * orderPrice;
+    stepTx.data.to.amount = newToAmount.toString();
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'claim') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['cosmos.distribution.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'stake') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'unstake') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
   if (stepTx.type == 'switch') {
+    const msg = await (mapTransaction({
+      chainName,
+      signingAddress: await getOwnAddress({ chain_name: chainName }),
+      txs: [stepTx],
+    }) as Promise<AminoMsg[]>);
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
     return { msg: msg, chain_name: chainName, registry };
   }
@@ -738,11 +818,11 @@ export async function validateStepFeeBalances(
     },
   };
   for (const stepTx of step.transactions) {
-    if (stepTx.name == 'addliquidity') {
-      const data = stepTx.data as Actions.AddLiquidityData;
+    if (stepTx.type == 'addLiquidity') {
+      const data = stepTx.data;
       const balanceA = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinA.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == data.coinA.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -761,7 +841,7 @@ export async function validateStepFeeBalances(
       }
       const balanceB = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinB.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == data.coinB.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -778,12 +858,12 @@ export async function validateStepFeeBalances(
         throw new Error('Insufficient balance: ' + data.coinB.denom);
       }
     }
-    if (stepTx.name == 'createpool') {
-      const data = stepTx.data as Actions.CreatePoolData;
+    if (stepTx.type == 'createPool') {
+      const data = stepTx.data;
       const creationFee = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
       const feeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == creationFee.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == creationFee.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -792,7 +872,7 @@ export async function validateStepFeeBalances(
 
       const balanceA = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinA.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == data.coinA.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -811,7 +891,7 @@ export async function validateStepFeeBalances(
       }
       const balanceB = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinB.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == data.coinB.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -835,7 +915,7 @@ export async function validateStepFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
-            chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+            chain_name: data.chainName,
             denom: creationFee.denom,
           });
         }
@@ -843,16 +923,16 @@ export async function validateStepFeeBalances(
         feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + creationFee.amount,
-          chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+          chain_name: data.chainName,
           denom: creationFee.denom,
         });
       }
     }
-    if (stepTx.name == 'ibc_backward') {
-      const data = stepTx.data as Actions.IBCBackwardsData;
+    if (stepTx.type == 'IBCtransferBackward') {
+      const data = stepTx.data;
       const ibcBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+        if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -868,10 +948,10 @@ export async function validateStepFeeBalances(
           } else {
             newDenom = ibcBalance.base_denom;
           }
-          if (!data.to_address) {
+          if (stepTx.own) {
             const rcptBalance = balances.find((x) => {
               const amount = parseCoins(x.amount)[0];
-              if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+              if (amount.denom == newDenom && x.on_chain == data.toChain) {
                 return true;
               } else {
                 return false;
@@ -895,10 +975,10 @@ export async function validateStepFeeBalances(
                 };
               }
               const newIbcBalance: EmerisAPI.Balance = {
-                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.toChain })),
                 base_denom: ibcBalance.base_denom,
                 verified: ibcBalance.verified,
-                on_chain: data.to_chain,
+                on_chain: data.toChain,
                 amount: data.amount.amount + newDenom,
                 ibc: ibcDetails,
               };
@@ -912,11 +992,11 @@ export async function validateStepFeeBalances(
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
     }
-    if (stepTx.name == 'ibc_forward') {
-      const data = stepTx.data as Actions.IBCForwardsData;
+    if (stepTx.type == 'IBCtransferForward') {
+      const data = stepTx.data;
       const ibcBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+        if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -928,10 +1008,10 @@ export async function validateStepFeeBalances(
           ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
           const newDenom = generateDenomHash(data.through, ibcBalance.base_denom);
 
-          if (!data.to_address) {
+          if (stepTx.own) {
             const rcptBalance = balances.find((x) => {
               const amount = parseCoins(x.amount)[0];
-              if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+              if (amount.denom == newDenom && x.on_chain == data.toChain) {
                 return true;
               } else {
                 return false;
@@ -946,10 +1026,10 @@ export async function validateStepFeeBalances(
                 ibcDetails = { path: 'transfer/' + data.through, hash: newDenom.replace('ibc/', '') };
               }
               const newIbcBalance: EmerisAPI.Balance = {
-                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.toChain })),
                 base_denom: ibcBalance.base_denom,
                 verified: ibcBalance.verified,
-                on_chain: data.to_chain,
+                on_chain: data.toChain,
                 amount: data.amount.amount + newDenom,
                 ibc: ibcDetails,
               };
@@ -962,12 +1042,12 @@ export async function validateStepFeeBalances(
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
-      const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name: data.to_chain });
+      const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name: data.toChain });
       const chainFeeDenom = chain.denoms.find((x) => x.fee_token)?.name;
 
       const ibcFeeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == chainFeeDenom && x.on_chain == data.to_chain) {
+        if (amount.denom == chainFeeDenom && x.on_chain == data.toChain) {
           return true;
         } else {
           return false;
@@ -977,19 +1057,19 @@ export async function validateStepFeeBalances(
         feeWarning.feeWarning = false;
         feeWarning.ibcWarning = true;
         feeWarning.ibcDetails.chain_name = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-          name: data.to_chain,
+          name: data.toChain,
         });
         feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
         feeWarning.ibcDetails.denom = typedstore.getters[GlobalGetterTypes.API.getChain]({
-          chain_name: data.to_chain,
+          chain_name: data.toChain,
         }).denoms.find((x) => x.fee_token == true).display_name;
       }
     }
-    if (stepTx.name == 'swap') {
-      const data = stepTx.data as Actions.SwapData;
+    if (stepTx.type == 'swap') {
+      const data = stepTx.data;
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.from.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+        if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -1018,17 +1098,17 @@ export async function validateStepFeeBalances(
         feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + swapFee.amount,
-          chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+          chain_name: data.chainName,
           denom: swapFee.denom,
         });
       }
     }
-    if (stepTx.name == 'transfer') {
-      const data = stepTx.data as Actions.TransferData;
-      if (data.to_address != (await getOwnAddress({ chain_name: data.chain_name }))) {
+    if (stepTx.type == 'transfer') {
+      const data = stepTx.data;
+      if (data.toAddress != (await getOwnAddress({ chain_name: data.chainName }))) {
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+          if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1046,15 +1126,12 @@ export async function validateStepFeeBalances(
         }
       }
     }
-    if (stepTx.name == 'withdrawliquidity') {
-      const data = stepTx.data as Actions.WithdrawLiquidityData;
+    if (stepTx.type == 'withdrawLiquidity') {
+      const data = stepTx.data;
 
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (
-          amount.denom == data.poolCoin.denom &&
-          x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]
-        ) {
+        if (amount.denom == data.poolCoin.denom && x.on_chain == data.chainName) {
           return true;
         } else {
           return false;
@@ -1069,10 +1146,10 @@ export async function validateStepFeeBalances(
         }
       }
     }
-    if (stepTx.name == 'stake') {
-      const alldata = stepTx.data as Actions.StakeData[];
+    if (stepTx.type == 'stake') {
+      const alldata = stepTx.data;
       const data = {
-        chain_name: alldata[0].chain_name,
+        chain_name: alldata[0].chainName,
         amount: {
           amount: alldata
             .reduce((acc, stakedata) => {
@@ -1157,11 +1234,11 @@ export async function validateStepsFeeBalances(
   for (const step of steps) {
     const fees = allFees[i];
     for (const stepTx of step.transactions) {
-      if (stepTx.name == 'addliquidity') {
-        const data = stepTx.data as Actions.AddLiquidityData;
+      if (stepTx.type == 'addLiquidity') {
+        const data = stepTx.data;
         const balanceA = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinA.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+          if (amount.denom == data.coinA.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1180,7 +1257,7 @@ export async function validateStepsFeeBalances(
         }
         const balanceB = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinB.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+          if (amount.denom == data.coinB.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1197,15 +1274,12 @@ export async function validateStepsFeeBalances(
           throw new Error('Insufficient balance: ' + data.coinB.denom);
         }
       }
-      if (stepTx.name == 'createpool') {
-        const data = stepTx.data as Actions.CreatePoolData;
+      if (stepTx.type == 'createPool') {
+        const data = stepTx.data;
         const creationFee = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
         const feeBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (
-            amount.denom == creationFee.denom &&
-            x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]
-          ) {
+          if (amount.denom == creationFee.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1214,7 +1288,7 @@ export async function validateStepsFeeBalances(
 
         const balanceA = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinA.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+          if (amount.denom == data.coinA.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1233,7 +1307,7 @@ export async function validateStepsFeeBalances(
         }
         const balanceB = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinB.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+          if (amount.denom == data.coinB.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1257,7 +1331,7 @@ export async function validateStepsFeeBalances(
             feeWarning.feeWarning = false;
             feeWarning.missingFees.push({
               amount: '' + creationFee.amount,
-              chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+              chain_name: data.chainName,
               denom: creationFee.denom,
             });
           }
@@ -1270,11 +1344,11 @@ export async function validateStepsFeeBalances(
           });
         }
       }
-      if (stepTx.name == 'ibc_backward') {
-        const data = stepTx.data as Actions.IBCBackwardsData;
+      if (stepTx.type == 'IBCtransferBackward') {
+        const data = stepTx.data;
         const ibcBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+          if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1290,10 +1364,10 @@ export async function validateStepsFeeBalances(
             } else {
               newDenom = ibcBalance.base_denom;
             }
-            if (!data.to_address) {
+            if (stepTx.own) {
               const rcptBalance = balances.find((x) => {
                 const amount = parseCoins(x.amount)[0];
-                if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+                if (amount.denom == newDenom && x.on_chain == data.toChain) {
                   return true;
                 } else {
                   return false;
@@ -1318,10 +1392,10 @@ export async function validateStepsFeeBalances(
                   };
                 }
                 const newIbcBalance: EmerisAPI.Balance = {
-                  address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                  address: keyHashfromAddress(await getOwnAddress({ chain_name: data.toChain })),
                   base_denom: ibcBalance.base_denom,
                   verified: ibcBalance.verified,
-                  on_chain: data.to_chain,
+                  on_chain: data.toChain,
                   amount: parseInt(data.amount.amount) + additionalFee + newDenom,
                   ibc: ibcDetails,
                 };
@@ -1335,11 +1409,11 @@ export async function validateStepsFeeBalances(
           throw new Error('Insufficient balance: ' + data.amount.denom);
         }
       }
-      if (stepTx.name == 'ibc_forward') {
-        const data = stepTx.data as Actions.IBCForwardsData;
+      if (stepTx.type == 'IBCtransferForward') {
+        const data = stepTx.data;
         const ibcBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+          if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1351,10 +1425,10 @@ export async function validateStepsFeeBalances(
             ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
             const newDenom = generateDenomHash(data.through, ibcBalance.base_denom);
 
-            if (!data.to_address) {
+            if (stepTx.own) {
               const rcptBalance = balances.find((x) => {
                 const amount = parseCoins(x.amount)[0];
-                if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+                if (amount.denom == newDenom && x.on_chain == data.toChain) {
                   return true;
                 } else {
                   return false;
@@ -1369,10 +1443,10 @@ export async function validateStepsFeeBalances(
                   ibcDetails = { path: 'transfer/' + data.through, hash: newDenom.replace('ibc/', '') };
                 }
                 const newIbcBalance: EmerisAPI.Balance = {
-                  address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                  address: keyHashfromAddress(await getOwnAddress({ chain_name: data.toChain })),
                   base_denom: ibcBalance.base_denom,
                   verified: ibcBalance.verified,
-                  on_chain: data.to_chain,
+                  on_chain: data.toChain,
                   amount: data.amount.amount + newDenom,
                   ibc: ibcDetails,
                 };
@@ -1385,12 +1459,12 @@ export async function validateStepsFeeBalances(
         } else {
           throw new Error('Insufficient balance: ' + data.amount.denom);
         }
-        const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name: data.to_chain });
+        const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name: data.toChain });
         const chainFeeDenom = chain.denoms.find((x) => x.fee_token)?.name;
 
         const ibcFeeBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == chainFeeDenom && x.on_chain == data.to_chain) {
+          if (amount.denom == chainFeeDenom && x.on_chain == data.toChain) {
             return true;
           } else {
             return false;
@@ -1400,19 +1474,19 @@ export async function validateStepsFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.ibcWarning = true;
           feeWarning.ibcDetails.chain_name = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-            name: data.to_chain,
+            name: data.toChain,
           });
           feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
           feeWarning.ibcDetails.denom = typedstore.getters[GlobalGetterTypes.API.getChain]({
-            chain_name: data.to_chain,
+            chain_name: data.toChain,
           }).denoms.find((x) => x.fee_token == true).display_name;
         }
       }
-      if (stepTx.name == 'swap') {
-        const data = stepTx.data as Actions.SwapData;
+      if (stepTx.type == 'swap') {
+        const data = stepTx.data;
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.from.denom && x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]) {
+          if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1441,17 +1515,17 @@ export async function validateStepsFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + swapFee.amount,
-            chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+            chain_name: data.chainName,
             denom: swapFee.denom,
           });
         }
       }
-      if (stepTx.name == 'transfer') {
-        const data = stepTx.data as Actions.TransferData;
-        if (data.to_address != (await getOwnAddress({ chain_name: data.chain_name }))) {
+      if (stepTx.type == 'transfer') {
+        const data = stepTx.data;
+        if (data.toAddress != (await getOwnAddress({ chain_name: data.chainName }))) {
           const balance = balances.find((x) => {
             const amount = parseCoins(x.amount)[0];
-            if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+            if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
               return true;
             } else {
               return false;
@@ -1469,15 +1543,12 @@ export async function validateStepsFeeBalances(
           }
         }
       }
-      if (stepTx.name == 'withdrawliquidity') {
-        const data = stepTx.data as Actions.WithdrawLiquidityData;
+      if (stepTx.type == 'withdrawLiquidity') {
+        const data = stepTx.data;
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (
-            amount.denom == data.poolCoin.denom &&
-            x.on_chain == typedstore.getters[GlobalGetterTypes.API.getDexChain]
-          ) {
+          if (amount.denom == data.poolCoin.denom && x.on_chain == data.chainName) {
             return true;
           } else {
             return false;
@@ -1492,12 +1563,12 @@ export async function validateStepsFeeBalances(
           }
         }
       }
-      if (stepTx.name == 'stake') {
-        const data = stepTx.data as Actions.StakeData[];
+      if (stepTx.type == 'stake') {
+        const data = stepTx.data;
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data[0].amount.denom && x.on_chain == data[0].chain_name) {
+          if (amount.denom == data[0].amount.denom && x.on_chain == data[0].chainName) {
             return true;
           } else {
             return false;

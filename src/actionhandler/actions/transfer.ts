@@ -156,6 +156,7 @@ export async function transfer({
           status: 'pending',
           feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           addFee: true,
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,

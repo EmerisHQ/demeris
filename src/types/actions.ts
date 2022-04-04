@@ -162,6 +162,7 @@ export type BaseStepTx = {
   addFee?: boolean;
   chainFee?: FeeWDenom[];
   feeToAdd?: FeeWDenom[];
+  own?: boolean;
 };
 export type IBCBackwardsStepTx = BaseStepTx & EmerisTransactions.AbstractIBCTransferBackwardTransaction;
 export type IBCForwardsStepTx = BaseStepTx & EmerisTransactions.AbstractIBCTransferForwardTransaction;

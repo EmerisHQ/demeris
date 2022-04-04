@@ -53,6 +53,7 @@ export async function memoTransfer({
           type: 'IBCtransferForward',
           status: 'pending',
           chainFee: await getFeeForChain(chain_name),
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,
@@ -120,6 +121,7 @@ export async function memoTransfer({
         status: 'pending',
         addFee: true,
         feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+        own: true,
         data: {
           amount: amount,
           fromAddress,
@@ -134,6 +136,7 @@ export async function memoTransfer({
         type: 'IBCtransferForward',
         status: 'pending',
         chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+        own: true,
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           chainName: verifyTrace.trace[0].counterparty_name,
@@ -167,6 +170,7 @@ export async function memoTransfer({
         result.steps.push({
           type: 'IBCtransferBackward',
           status: 'pending',
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,
@@ -194,6 +198,7 @@ export async function memoTransfer({
           status: 'pending',
           feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           addFee: true,
+          own: true,
           data: {
             amount: amount,
             chainName: chain_name,
@@ -213,6 +218,7 @@ export async function memoTransfer({
         result.steps.push({
           type: 'IBCtransferForward',
           status: 'pending',
+          own: true,
           chainFee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
