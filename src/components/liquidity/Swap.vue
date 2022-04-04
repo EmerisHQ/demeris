@@ -62,7 +62,14 @@
       </div>
       <!-- pay coin header -->
       <div v-if="!isDefaultState" class="denom-select-header flex -text-1 font-medium px-6">
-        Pay <button class="ml-auto font-normal text-muted">Max 3000 ATOM</button>
+        Pay
+        <button
+          class="ml-auto font-normal text-muted"
+          :class="{ 'text-negative-text': data?.isOver, 'hover:text-link': !data?.isOver }"
+          @click="setMax"
+        >
+          {{ data?.maxButtonText }}
+        </button>
       </div>
       <!-- pay coin selector -->
       <DenomSelect
@@ -505,15 +512,11 @@ const data = reactive({
   // booleans-start(for various status check)
   isOver: computed(() => {
     if (isSignedIn.value && data.payCoinData) {
-      return Number(data.payCoinAmount) + Number(data.fees) >
+      return (
+        Number(data.payCoinAmount) + Number(data.fees) >
         parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
-          Math.pow(
-            10,
-
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
-          )
-        ? true
-        : false;
+          Math.pow(10, store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }))
+      );
     } else {
       return false;
     }
@@ -581,7 +584,7 @@ watch(
       if (amount > 0) {
         const ticker = await getTicker(data?.payCoinData?.base_denom, store.getters[GlobalGetterTypes.API.getDexChain]);
         const formattedAmount = Math.trunc(amount * 100) / 100;
-        data.maxButtonText = `${formattedAmount} ${ticker} Max`;
+        data.maxButtonText = `Max ${formattedAmount} ${ticker}`;
       } else {
         data.maxButtonText = 'Max';
       }
