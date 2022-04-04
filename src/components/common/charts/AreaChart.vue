@@ -199,7 +199,7 @@ export default defineComponent({
     );
 
     const hasData = computed(() => {
-      return chartData.value.series[0].data && chartData.value.series[0].data.length > 0;
+      return chartData.value.series[0].data && chartData.value.series[0].data.length > 1;
     });
 
     const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
