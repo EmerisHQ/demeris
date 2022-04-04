@@ -229,7 +229,6 @@ export default defineComponent({
 
   setup() {
     const displayName = ref('');
-    const tokenTicker = ref('');
     const displayPrice = ref(0);
     const metaSource = computed(() => {
       return { title: displayName.value };
@@ -426,11 +425,11 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        tokenTicker.value = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+        const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
         const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
           subscribe: false,
           params: {
-            token: tokenTicker.value.toLowerCase(),
+            token: tokenTicker.toLowerCase(),
             showSkeleton: false,
           },
         });
