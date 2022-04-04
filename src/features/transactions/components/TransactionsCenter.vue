@@ -1,5 +1,5 @@
 <template>
-  <div v-if="canShownCenter" class="relative">
+  <div v-if="canShownCenter" class="relative pointer-events-none">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
       class="fixed bottom-8 right-8 z-50"
@@ -11,7 +11,7 @@
       :class="{ 'z-50': !transactionsStore.isRemoveModalOpen }"
     >
       <div class="absolute z-[-1] w-96 h-full top-0 right-0 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg" />
-      <div class="z-1 w-full h-full">
+      <div class="z-1 w-full h-full pointer-events-auto">
         <Notifications
           :messages="state.notifications"
           class="absolute -top-3 pl-3"

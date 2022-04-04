@@ -13,8 +13,12 @@
   >
     <Icon name="CloseIcon" :icon-size="0.85" />
   </Button>
-  <div class="ml-3 relative hover:bg-fg">
-    <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
+  <div class="ml-3 relative">
+    <button
+      v-bind="$attrs"
+      class="hover:bg-fg flex w-full items-center"
+      :class="hideControls ? 'space-x-3' : 'space-x-4'"
+    >
       <div class="item-icon w-8">
         <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
         <Icon v-else-if="state.matches('failed.sign')" name="ExclamationIcon" class="text-warning" />
