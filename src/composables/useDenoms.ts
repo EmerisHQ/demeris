@@ -1,8 +1,7 @@
 import { computed, ref, watch } from 'vue';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
-import { getTicker } from '@/utils/actionHandler';
+import { getDisplayName, getTicker } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
 let useDenomsInstance = null;
@@ -35,7 +34,13 @@ function useDenoms() {
     }
     return useDenomInstances[base_denom];
   };
-  return { useDenom, verifiedDenoms };
+  const getStakableBaseDenomFromChainName = (chainName: string): string => {
+    const stakableDenom = verifiedDenoms.value
+      .filter((value) => value.stakable)
+      .find((value) => value.chain_name === chainName);
+    return stakableDenom?.name ?? 'unknown';
+  };
+  return { useDenom, verifiedDenoms, getStakableBaseDenomFromChainName };
 }
 export default function useDenomsFactory() {
   if (!useDenomsInstance) {

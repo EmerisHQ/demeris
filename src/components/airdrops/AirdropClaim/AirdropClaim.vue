@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper w-full relative">
-    <div class="claim-widget bg-surface dark:bg-fg rounded-2xl px-6 py-8 shadow-panel">
+    <div class="claim-widget bg-surface dark:bg-darkBanner rounded-2xl px-6 py-8 shadow-panel">
       <!-- Claim Header -->
       <!-- Has Airdrop amount -->
       <div class="text-center mb-6">
@@ -17,56 +17,56 @@
         </div>
 
         <div v-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED">
-          <p class="text-1 font-bold">Airdrop ended</p>
+          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.ended') }}</p>
         </div>
 
         <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
-          <p class="-text-1 text-muted mb-2">Airdrop coming soon</p>
-          <p class="text-1 font-bold">You could become eligible for this airdrop</p>
+          <p class="-text-1 text-muted mb-2">{{ $t('context.airdrops.claimCard.comingSoon') }}</p>
+          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.becomeEligible') }}</p>
         </div>
 
         <div v-else-if="!isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
-          <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
-          <p class="text-2 font-bold">126.54 LIKE</p>
+          <p class="-text-1 text-muted mb-2">{{ $t('context.airdrops.claimCard.amountTitle') }}</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.airdropAmount') }}</p>
         </div>
 
         <div v-else-if="isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
           <div class="inline-flex items-center mb-2">
-            <p class="-text-1 text-positive-text">Auto-drop</p>
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
             <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
           </div>
-          <p class="text-2 font-bold">126.54 LIKE</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.airdropAmount') }}</p>
         </div>
 
         <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED">
-          <p class="text-2 font-bold">Not announced</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.notAnnounced') }}</p>
         </div>
 
         <div v-else>
-          <p class="text-2 font-bold">Not announced</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.notAnnounced') }}</p>
         </div>
       </div>
 
       <!-- Claim Details -->
       <div class="pb-6">
         <div class="flex justify-between -text-1 text-muted mb-4">
-          <p>Snapshot Date{{ isMultipleSnapshots ? 's' : '' }}</p>
+          <p>{{ $t('context.airdrops.claimCard.snapshotDate') }}{{ isMultipleSnapshots ? 's' : '' }}</p>
           <p v-if="!isMultipleSnapshots">{{ selectedAirdrop.snapshotDate ? selectedAirdrop.snapshotDate : '-' }}</p>
           <div v-else>
             <p v-for="(item, index) in selectedAirdrop.snapshotDate" :key="index" class="mb-2">{{ item }}</p>
           </div>
         </div>
         <div v-if="selectedAirdrop.airdropStartDate" class="flex justify-between -text-1 text-muted mb-4">
-          <p>Starts</p>
+          <p>{{ $t('context.airdrops.claimCard.starts') }}</p>
           <p>{{ selectedAirdrop.airdropStartDate }}</p>
         </div>
         <div v-if="selectedAirdrop.airdropEndDate" class="flex justify-between -text-1 text-muted mb-4">
-          <p>Ends</p>
+          <p>{{ $t('context.airdrops.claimCard.ends') }}</p>
           <p>{{ selectedAirdrop.airdropEndDate }}</p>
         </div>
         <div v-if="isAutoDropped && !isDemoAccount" class="flex justify-between -text-1 text-muted mb-4">
-          <p>Distribution</p>
-          <p>Auto-claim</p>
+          <p>{{ $t('context.airdrops.claimCard.distribution') }}</p>
+          <p>{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
         </div>
       </div>
 

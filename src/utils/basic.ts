@@ -1,6 +1,7 @@
 import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
@@ -75,6 +76,11 @@ export async function getOwnAddress({ chain_name }) {
     }
   }
 }
+
+export function isValidatorOffline(validator: EmerisAPI.Validator) {
+  return validator.status === 1 || validator.status === 2;
+}
+
 export function isNative(denom: string) {
   if (denom) {
     return denom.indexOf('ibc/') != 0 ? true : false;
@@ -87,9 +93,10 @@ export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
 }
+const LOGIN_TIMEOUT = 1000 * 60 * 60 * 24 * 30; //  30 days
 export function autoLogin() {
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
+  if (last && last != '' && Date.now() < parseInt(last) + LOGIN_TIMEOUT) {
     return true;
   } else {
     return false;
@@ -201,4 +208,26 @@ export function getDisplayAmount(rawAmount: string | number, precision = 6): str
 export function checkStringIsKeybase(str: string) {
   if (!str || str.length !== 16) return false;
   return /[0-9A-F]{16}/.test(str.toUpperCase());
+}
+
+export function getCleanURL(str: string) {
+  if (!str || str === '') return;
+  const url = str.split('://')[1];
+  if (!url || str === '') return str;
+  if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
+  return url;
+}
+
+export function getProperUrl(str: string) {
+  if (!/https?:\/\//.test(str)) return `https://${str}`;
+  return str;
+}
+
+// ignores denoms that are not of baseDenom
+export function getSumOfRewards(totalValue: string, baseDenom: string) {
+  if (!totalValue || !baseDenom) return 0;
+  const total = parseCoins(totalValue ?? '0')
+    .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
+    .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
+  return parseFloat(total ?? '0');
 }

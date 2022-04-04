@@ -55,24 +55,25 @@ const handleClick = () => {
 
 const showTippy = async () => {
   await nextTick();
+  if (!state.lastUpdatedService) return;
+
   tippyRef.value.show();
   setTimeout(() => tippyRef.value?.hide(), 5000);
 };
 
 const showNotification = (hash: string, skipTippy = false) => {
   state.notifications[hash] = null;
-  if (skipTippy) {
-    return;
-  }
+  if (skipTippy) return;
+
   showTippy();
 };
 
 const subscribe = (pendingHash: string, skipInitialUpdate = true) => {
-  if (subscriptions.value[pendingHash]) {
-    return;
-  }
+  if (subscriptions.value[pendingHash]) return;
 
   const pendingService = transactionsStore.pending[pendingHash];
+
+  if (pendingService.state.done) return;
 
   const onUpdate = (emitted: TransactionProcessState) => {
     state.updates[pendingHash] = (state.updates[pendingHash] ?? 0) + 1;

@@ -22,6 +22,12 @@
       >Unavailable</span
     >
     <p class="text-muted mt-4 w-full text-left break-words">{{ validator.details }}</p>
+    <div v-if="validator?.website && validator.website !== ''" class="mt-4 flex items-center w-full">
+      <LinkIcon class="mr-2.5" style="width: 11px; height: 11px" />
+      <a :href="getProperUrl(validator.website)" class="-text-1 text-link" rel="noopener noreferral" target="_blank"
+        >{{ getCleanURL(validator.website) }} ↗️</a
+      >
+    </div>
     <List class="w-full mt-8">
       <ListItem size="sm" direction="col">
         <ListItem inset size="xs" :label="$t('components.validatorCard.commissionLabel')">
@@ -41,14 +47,16 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from 'vue';
 
+import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
 import List from '@/components/ui/List/List.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
+import { getCleanURL, getProperUrl } from '@/utils/basic';
 
 export default defineComponent({
   name: 'ValidatorCard',
-  components: { Button, ValidatorBadge, List, ListItem },
+  components: { LinkIcon, Button, ValidatorBadge, List, ListItem },
   props: {
     validator: {
       type: Object,
@@ -91,6 +99,8 @@ export default defineComponent({
       commission,
       maxCommission,
       maxChange,
+      getCleanURL,
+      getProperUrl,
     };
   },
 });
