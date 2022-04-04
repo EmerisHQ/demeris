@@ -426,11 +426,9 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_ID, {
-          subscribe: false,
+        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
           params: {
             token: displayName.value.toLowerCase(),
-            showSkeleton,
           },
         });
 
@@ -459,7 +457,7 @@ export default defineComponent({
     const showPriceChartLoadingSkeleton = computed(() => {
       return (
         typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
-        typedstore.getters[GlobalGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+        typedstore.getters[GlobalGetterTypes.API.getCoinGeckoIdLoadingStatus] === LoadingState.LOADING
       );
     });
 
