@@ -48,6 +48,7 @@ import { computed, inject } from 'vue';
 import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
+import { StepTransaction } from '@/types/actions';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
@@ -56,5 +57,5 @@ const transactionsStore = useTransactionsStore();
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state } = actor;
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transaction = computed<StepTransaction>(() => getCurrentTransaction(state.value.context));
 </script>

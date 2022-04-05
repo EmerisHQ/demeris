@@ -71,15 +71,18 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     const aminoTypes = new AminoTypes({ ...createAminoTypes(bech32.decode(signerAddress).prefix) });
     const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
     const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
-    const msgs = messages;
+    const msgs = messages.map((msg) => aminoTypes.fromAmino(msg)).map((msg) => aminoTypes.toAmino(msg));
 
     const signDoc = makeSignDocAmino(msgs, fee, chainId, memo, accountNumber, sequence);
     const { signature, signed } = await this.exposedSigner.signAmino(signerAddress, signDoc);
     const signedTxBody = {
-      messages: signed.msgs.map((msg) => aminoTypes.fromAmino(msg)),
+      messages: signed.msgs
+        .map((msg) => aminoTypes.fromAmino(msg))
+        .map((msg) => aminoTypes.toAmino(msg))
+        .map((msg) => aminoTypes.fromAmino(msg)),
       memo: signed.memo,
     };
-
+    console.log(signedTxBody);
     const signedTxBodyEncodeObject: TxBodyEncodeObject = {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: signedTxBody,

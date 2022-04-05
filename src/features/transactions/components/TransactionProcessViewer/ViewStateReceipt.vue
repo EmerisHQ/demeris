@@ -24,7 +24,13 @@
       </h1>
 
       <div class="flex flex-col items-center justify-center">
-        <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
+        <template
+          v-if="
+            transaction.type === 'transfer' ||
+            transaction.type === 'IBCtransferBackward' ||
+            transaction.type === 'IBCtransferForward'
+          "
+        >
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
@@ -34,14 +40,14 @@
             />
           </p>
 
-          <template v-if="transaction.name.startsWith('ibc')">
+          <template v-if="transaction.type === 'IBCtransferBackward' || transaction.type === 'IBCtransferForward'">
             <div class="mt-0.5 text-muted">
-              <ChainName :name="transaction.data.from_chain" /> &rarr;
-              <ChainName :name="transaction.data.to_chain" />
+              <ChainName :name="transaction.data.chainName" /> &rarr;
+              <ChainName :name="transaction.data.toChain" />
             </div>
           </template>
         </template>
-        <template v-if="transaction.name === 'stake'">
+        <template v-if="transaction.type === 'stake'">
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
@@ -51,7 +57,7 @@
             />
           </p>
         </template>
-        <template v-if="transaction.name === 'switch'">
+        <template v-if="transaction.type === 'switch'">
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
@@ -61,7 +67,7 @@
             />
           </p>
         </template>
-        <template v-if="transaction.name === 'unstake'">
+        <template v-if="transaction.type === 'unstake'">
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
@@ -71,17 +77,17 @@
             />
           </p>
         </template>
-        <template v-if="transaction.name === 'claim'">
+        <template v-if="transaction.type === 'claim'">
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
                 amount: getStakedAmount(),
-                denom: getStakableBaseDenomFromChainName(transaction.data?.chain_name),
+                denom: getStakableBaseDenomFromChainName(transaction.data?.chainName),
               }"
             />
           </p>
         </template>
-        <template v-if="transaction.name === 'swap'">
+        <template v-if="transaction.type === 'swap'">
           <template v-if="isSwapComponent">
             <i18n-t
               v-if="getSwapPercent() < 100"
@@ -152,14 +158,14 @@
           </template>
         </template>
 
-        <template v-if="transaction.name === 'addliquidity'">
+        <template v-if="transaction.type === 'addLiquidity'">
           <div class="text-center">
             <p class="font-medium text-1"><CurrencyDisplay :value="getDepositTotal()" /></p>
             <span class="text-muted">supplied</span>
           </div>
         </template>
 
-        <template v-if="transaction.name === 'withdrawliquidity'">
+        <template v-if="transaction.type === 'withdrawLiquidity'">
           <div class="text-center">
             <p class="font-medium text-1"><CurrencyDisplay :value="getWithdrawTotal()" /></p>
             <span class="text-muted">withdrawn</span>
@@ -178,7 +184,7 @@
             :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
           >
             <component
-              :is="previewComponentMap[transaction.name]"
+              :is="previewComponentMap[transaction.type]"
               :response="lastResult.endBlock || state.context.formattedSteps[lastResult.stepIndex]"
               :step="state.context.formattedSteps[lastResult.stepIndex]"
               :context="isSwapComponent ? 'widget' : 'default'"
@@ -219,13 +225,19 @@
       <Button v-if="state.matches('receipt')" @click="onNext">{{ $t('context.transactions.controls.next') }}</Button>
 
       <template v-if="state.matches('success')">
-        <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
+        <template
+          v-if="
+            transaction.type === 'transfer' ||
+            transaction.type === 'IBCtransferBackward' ||
+            transaction.type === 'IBCtransferForward'
+          "
+        >
           <Button variant="secondary" @click="goToMove">
             {{ $t('context.transactions.controls.sendAnotherAsset') }} &rarr;
           </Button>
         </template>
 
-        <template v-if="transaction.name === 'swap'">
+        <template v-if="transaction.type === 'swap'">
           <Button variant="secondary" @click="goToSend">
             <i18n-t scope="global" keypath="context.transactions.controls.sendAmount">
               <template #amount>
@@ -270,7 +282,7 @@ import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import useDenomsFactory from '@/composables/useDenoms';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
+import { StepTransaction } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { getSumOfRewards, parseCoins } from '@/utils/basic';
@@ -287,16 +299,16 @@ const router = useRouter();
 const { getStakableBaseDenomFromChainName } = useDenomsFactory();
 
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
-const transaction = computed(() => lastResult.value.transaction);
+const transaction = computed<StepTransaction>(() => lastResult.value.transaction);
 
 const titleMap = {
-  ibc_backward: t('components.txHandlingModal.transferred'),
-  ibc_forward: t('components.txHandlingModal.transferred'),
+  IBCtransferBackward: t('components.txHandlingModal.transferred'),
+  IBCtransferForward: t('components.txHandlingModal.transferred'),
   transfer: t('components.txHandlingModal.transferred'),
   swap: t('components.txHandlingModal.swapActionComplete'),
-  addliquidity: t('components.txHandlingModal.addLiqActionComplete'),
-  withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
-  createpool: t('components.txHandlingModal.createPoolActionComplete'),
+  addLiquidity: t('components.txHandlingModal.addLiqActionComplete'),
+  withdrawLiquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
+  createPool: t('components.txHandlingModal.createPoolActionComplete'),
   claim: t('components.txHandlingModal.claimActionComplete'),
   switch: t('components.txHandlingModal.switchActionComplete'),
   stake: t('components.txHandlingModal.stakeActionComplete'),
@@ -305,8 +317,8 @@ const titleMap = {
 };
 
 const previewComponentMap = {
-  ibc_backward: PreviewTransfer,
-  ibc_forward: PreviewTransfer,
+  IBCtransferBackward: PreviewTransfer,
+  IBCtransferForward: PreviewTransfer,
   transfer: PreviewTransfer,
   swap: PreviewSwap,
   stake: PreviewStake,
@@ -314,20 +326,20 @@ const previewComponentMap = {
   unstake: PreviewUnstake,
   claim: PreviewClaim,
   switch: PreviewSwitch,
-  addliquidity: PreviewAddLiquidity,
-  withdrawliquidity: PreviewWithdrawLiquidity,
-  createpool: PreviewAddLiquidity,
+  addLiquidity: PreviewAddLiquidity,
+  withdrawLiquidity: PreviewWithdrawLiquidity,
+  createPool: PreviewAddLiquidity,
 };
 
 const title = computed(() => {
-  if (transaction.value.name === 'swap') {
+  if (transaction.value.type === 'swap') {
     const swappedPercent = getSwapPercent();
     if (swappedPercent < 100) {
       return t('components.txHandlingModal.swapActionPartiallyComplete');
     }
   }
 
-  return titleMap[transaction.value.name];
+  return titleMap[transaction.value.type];
 });
 
 const onNext = () => {
@@ -347,22 +359,22 @@ const goToSend = () => {
 };
 
 const getStakedAmount = () => {
-  if (transaction.value.name == 'stake') {
-    return (transaction.value.data as StakeData[])
+  if (transaction.value.type == 'stake') {
+    return transaction.value.data
       .reduce((acc, tx) => {
         return acc.plus(new BigNumber(tx.amount.amount));
       }, new BigNumber(0))
       .toString();
   }
-  if (transaction.value.name == 'unstake') {
-    return (transaction.value.data as UnstakeData).amount.amount;
+  if (transaction.value.type == 'unstake') {
+    return transaction.value.data.amount.amount;
   }
-  if (transaction.value.name == 'switch') {
-    return (transaction.value.data as RestakeData).amount.amount;
+  if (transaction.value.type == 'switch') {
+    return transaction.value.data.amount.amount;
   }
-  if (transaction.value.name == 'claim') {
-    const baseDenom = getStakableBaseDenomFromChainName((transaction.value.data as ClaimData).chain_name);
-    return getSumOfRewards((transaction.value.data as ClaimData).total, baseDenom);
+  if (transaction.value.type == 'claim') {
+    const baseDenom = getStakableBaseDenomFromChainName(transaction.value.data.chainName);
+    return getSumOfRewards(transaction.value.data.total, baseDenom).toString();
   }
 };
 
