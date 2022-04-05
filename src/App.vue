@@ -191,7 +191,6 @@ export default defineComponent({
     });
 
     const getAllAirdrops = async () => {
-      console.log('checking here');
       const gitAirdropsList = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {
         subscribe: false,
       });
