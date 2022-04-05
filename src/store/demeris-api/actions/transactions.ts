@@ -139,8 +139,10 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
           return handleError(new Error(data.error));
         }
 
+        if (data.result && !Object.values(data.result).length) return;
+
         if (!data.rpc && featureRunning('FORCE_RPC_FALLBACK')) {
-          console.log('Skipping websocket result, FORCE_RPC fallback enabled');
+          console.log('Skipping websocket result, FORCE_RPC fallback enabled', data);
           return;
         }
 
