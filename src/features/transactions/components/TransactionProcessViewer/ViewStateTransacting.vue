@@ -50,7 +50,7 @@
           </div>
         </template>
 
-        <template v-if="transaction.type === 'unstake' || transaction.name === 'switch'">
+        <template v-if="transaction.type === 'unstake' || transaction.type === 'switch'">
           <div class="absolute w-full flex items-center justify-center">
             <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data?.amount?.denom)" />
           </div>
@@ -192,6 +192,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
+import { StepTransaction } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { alphanumericSplit } from '@/utils/basic';
 
@@ -201,7 +202,7 @@ const { t } = useI18n({ useScope: 'global' });
 const { actor, isSwapComponent, minimizeModal } = inject(ProvideViewerKey);
 const { state } = actor;
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transaction = computed<StepTransaction>(() => getCurrentTransaction(state.value.context));
 const titleMap = {
   transfer: t('components.txHandlingModal.transferAction'),
   IBCtransferForward: t('components.txHandlingModal.transferAction'),
@@ -225,7 +226,7 @@ const getDepositDenoms = () => {
 //console.log('transaction value >>>>> ', transaction.value);
 // console.log('coins >>> ', alphanumericSplit(transaction.value.data?.total));
 const subtitle = computed(() => {
-  if (transaction.value.name.startsWith('ibc')) {
+  if (transaction.value.type.startsWith('IBC')) {
     return t('components.txHandlingModal.ibcTransferSubtitle');
   }
   return t('components.txHandlingModal.txProgress');

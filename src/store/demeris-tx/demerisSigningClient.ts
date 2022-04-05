@@ -82,7 +82,6 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
         .map((msg) => aminoTypes.fromAmino(msg)),
       memo: signed.memo,
     };
-    console.log(signedTxBody);
     const signedTxBodyEncodeObject: TxBodyEncodeObject = {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: signedTxBody,
@@ -101,7 +100,6 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
       signedGasLimit,
       signMode,
     );
-    console.log(signedAuthInfoBytes);
     const txRaw: TxRaw = TxRaw.fromPartial({
       bodyBytes: signedTxBodyBytes,
       authInfoBytes: signedAuthInfoBytes,
