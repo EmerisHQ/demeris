@@ -14,7 +14,7 @@ import { createMetaManager } from 'vue-meta';
 import VueTippy from 'vue-tippy';
 import VueApexCharts from 'vue3-apexcharts';
 
-import { messages } from '@/locales/en';
+import messages from '@/locales/en.json';
 
 import App from './App.vue';
 import router from './router';

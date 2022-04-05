@@ -13,7 +13,7 @@
             <Price :amount="{ denom: baseDenom, amount: rewardsAmount }" />
           </div>
         </div>
-        <CircleSymbol :denom="rewardsDenom" size="md" class="ml-3" />
+        <CircleSymbol :denom="baseDenom" size="md" class="ml-3" />
       </div>
     </ListItem>
 
@@ -32,7 +32,7 @@
             <template v-if="validators.length > 1">
               <AmountDisplay
                 class="font-medium"
-                :amount="{ amount: parseInt(vali.reward).toString(), denom: rewardsDenom }"
+                :amount="{ amount: parseInt(vali.reward).toString(), denom: baseDenom }"
               />
               {{ $t(`components.previews.claim.rewards`) }}
             </template>

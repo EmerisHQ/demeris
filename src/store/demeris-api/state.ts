@@ -29,14 +29,16 @@ export type APIState = {
   transactions: Map<string, TransactionItem>;
   tokenPrices: ChartPrices;
   tokenPricesLoadingStatus: LoadingState;
-  tokenId: string;
-  tokenIdLoadingStatus: LoadingState;
   validPools: Pool[];
   airdrops: EmerisAirdrops.Airdrop[];
   selectedAirdrop: EmerisAirdrops.Airdrop;
   airdropsStatus: LoadingState;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
+
+  //coingecko
+  coinGeckoId: string;
+  coinGeckoIdLoadingStatus: LoadingState;
 };
 export function getDefaultState(): APIState {
   return {
@@ -58,8 +60,6 @@ export function getDefaultState(): APIState {
     },
     tokenPrices: [],
     tokenPricesLoadingStatus: LoadingState.INIT,
-    tokenId: '',
-    tokenIdLoadingStatus: LoadingState.INIT,
     relayer: false,
     chains: {},
     airdrops: [],
@@ -69,5 +69,9 @@ export function getDefaultState(): APIState {
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),
+
+    //coingecko default state
+    coinGeckoId: '',
+    coinGeckoIdLoadingStatus: LoadingState.INIT,
   };
 }

@@ -17,7 +17,7 @@
               class="font-medium flex items-center cursor-pointer"
               @click="seeAllMappedSection({ ...mappedItem, shouldMinimize: false })"
             >
-              See all<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+              {{ $t('context.airdrops.seeAll') }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
             </a>
           </td>
         </tr>

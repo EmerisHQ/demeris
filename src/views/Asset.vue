@@ -200,7 +200,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getDisplayName, getTicker } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -294,7 +294,6 @@ export default defineComponent({
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
         }
-
         displayName.value = await getDisplayName(denom.value, dexChain);
       },
       { immediate: true },
@@ -426,14 +425,14 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_ID, {
+        const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
           subscribe: false,
           params: {
-            token: displayName.value.toLowerCase(),
-            showSkeleton,
+            token: tokenTicker.toLowerCase(),
+            showSkeleton: false,
           },
         });
-
         if (chainName) {
           await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_PRICES, {
             subscribe: false,
@@ -459,7 +458,7 @@ export default defineComponent({
     const showPriceChartLoadingSkeleton = computed(() => {
       return (
         typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
-        typedstore.getters[GlobalGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+        typedstore.getters[GlobalGetterTypes.API.getCoinGeckoIdLoadingStatus] === LoadingState.LOADING
       );
     });
 

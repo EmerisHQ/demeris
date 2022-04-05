@@ -1,6 +1,7 @@
 import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
@@ -75,6 +76,11 @@ export async function getOwnAddress({ chain_name }) {
     }
   }
 }
+
+export function isValidatorOffline(validator: EmerisAPI.Validator) {
+  return validator.status === 1 || validator.status === 2;
+}
+
 export function isNative(denom: string) {
   if (denom) {
     return denom.indexOf('ibc/') != 0 ? true : false;
@@ -219,7 +225,7 @@ export function getProperUrl(str: string) {
 
 // ignores denoms that are not of baseDenom
 export function getSumOfRewards(totalValue: string, baseDenom: string) {
-  if (!totalValue) return 0;
+  if (!totalValue || !baseDenom) return 0;
   const total = parseCoins(totalValue ?? '0')
     .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
     .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
