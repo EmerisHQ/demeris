@@ -50,6 +50,9 @@ export default () => {
     test: {
       globals: true,
       environment: 'jsdom',
+      deps: {
+        inline: ['@vespaiach/axios-fetch-adapter'],
+      },
       transformMode: {
         web: [/\.[jt]sx$/],
       },
