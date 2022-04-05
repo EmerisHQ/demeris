@@ -5,6 +5,7 @@ import { ActionTree } from 'vuex';
 import { GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, Subscribable } from '@/types/util';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 import TendermintWS from '@/utils/TendermintWS';
 
 import { ActionTypes } from '../action-types';
@@ -117,6 +118,11 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         subscribeTx();
       };
 
+      const handleError = (err: Error) => {
+        complete();
+        return reject(err);
+      };
+
       const complete = () => {
         done = true;
         clearTimeout(timeoutId);
@@ -130,8 +136,12 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
           // Not found
           if (data.error.code === -32603) return;
 
-          complete();
-          return reject(new Error(data.error));
+          return handleError(new Error(data.error));
+        }
+
+        if (!data.rpc && featureRunning('FORCE_RPC_FALLBACK')) {
+          console.log('Skipping websocket result, FORCE_RPC fallback enabled');
+          return;
         }
 
         if (data.result?.data?.value?.TxResult) {
@@ -145,16 +155,15 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
       };
 
-      await wss.connect().catch(reject);
+      await wss.connect().catch(handleError);
       handleOpen();
 
       intervalId = setInterval(() => {
-        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
+        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage).catch(handleError);
       }, fallbackIntervalMs);
 
       timeoutId = setTimeout(() => {
-        reject(new Error('Could not find transaction response'));
-        complete();
+        return handleError(new Error('Could not find transaction response'));
       }, timeoutMs);
     });
   },
@@ -170,7 +179,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
 
-      return data?.result;
+      return { rpc: true, ...data };
     } catch (e) {
       throw new Error('Could not find transaction response from RPC');
     }
