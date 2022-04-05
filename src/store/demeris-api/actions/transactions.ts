@@ -87,8 +87,8 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       const timeoutMs = 300000;
       const fallbackIntervalMs = 50000;
 
-      let timeoutId;
-      let intervalId;
+      let timeoutId = undefined;
+      let intervalId = undefined;
 
       const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
@@ -130,29 +130,29 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
           // Not found
           if (data.error.code === -32603) return;
 
-          reject(new Error(data.error));
-          return complete();
+          complete();
+          return reject(new Error(data.error));
         }
 
         if (data.result?.data?.value?.TxResult) {
-          resolve(data.result);
-          return complete();
+          complete();
+          return resolve({ ...data.result, height: data.result.data.value.TxResult.height });
         }
 
         if (data?.result?.tx_result) {
-          resolve(data.result);
-          return complete();
+          complete();
+          return resolve({ ...data.result, height: data.result.height });
         }
       };
 
       await wss.connect().catch(reject);
       handleOpen();
 
-      setInterval(() => {
+      intervalId = setInterval(() => {
         dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
       }, fallbackIntervalMs);
 
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         reject(new Error('Could not find transaction response'));
         complete();
       }, timeoutMs);
