@@ -104,7 +104,7 @@ export default defineComponent({
       });
       const action = {
         name: 'claim',
-        params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chain_name: chainName },
+        params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chainName },
       } as ClaimRewardsAction;
       event('review_tx', { event_label: 'Reviewing claim tx', event_category: 'transactions' });
       steps.value = await actionHandler(action);

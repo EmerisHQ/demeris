@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -27,6 +28,7 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
     result.steps.push({
       type: 'withdrawLiquidity',
       status: 'pending',
+      protocol: EmerisDEXInfo.DEX.Gravity,
       data: {
         poolCoin,
         pool,

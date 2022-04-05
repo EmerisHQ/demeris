@@ -39,7 +39,7 @@ export type CreatePoolParams = {
 export type ClaimRewardsParams = {
   rewards: { validator_address: string; reward: string }[];
   total: string;
-  chain_name: string;
+  chainName: string;
 };
 export type StakeParams = {
   validatorAddress: string;

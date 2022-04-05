@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -18,6 +19,7 @@ export async function createPool({ coinA, coinB }: { coinA: AbstractAmount; coin
   result.steps.push({
     type: 'createPool',
     status: 'pending',
+    protocol: EmerisDEXInfo.DEX.Gravity,
     data: {
       coinA,
       coinB,

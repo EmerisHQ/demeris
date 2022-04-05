@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -36,6 +37,7 @@ export async function addLiquidity({
     result.steps.push({
       type: 'addLiquidity',
       status: 'pending',
+      protocol: EmerisDEXInfo.DEX.Gravity,
       data: {
         coinA,
         coinB,
