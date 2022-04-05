@@ -123,6 +123,11 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         return reject(err);
       };
 
+      const handleSuccess = (data: Record<string, any>) => {
+        complete();
+        return resolve(data);
+      };
+
       const complete = () => {
         done = true;
         clearTimeout(timeoutId);
@@ -147,13 +152,11 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
 
         if (data.result?.data?.value?.TxResult) {
-          complete();
-          return resolve({ ...data.result, height: data.result.data.value.TxResult.height });
+          return handleSuccess({ ...data.result, height: data.result.data.value.TxResult.height });
         }
 
         if (data?.result?.tx_result) {
-          complete();
-          return resolve({ ...data.result, height: data.result.height });
+          return handleSuccess({ ...data.result, height: data.result.height });
         }
       };
 
@@ -165,7 +168,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       }, fallbackIntervalMs);
 
       timeoutId = setTimeout(() => {
-        return handleError(new Error('Could not find transaction response'));
+        handleError(new Error('Could not find transaction response'));
       }, timeoutMs);
     });
   },
