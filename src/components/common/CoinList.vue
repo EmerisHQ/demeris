@@ -44,8 +44,12 @@
           <Denom :name="coin.base_denom" />
         </div>
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
-          <Ticker v-if="type === 'receive'" :name="coin.base_denom" />
-
+          <FeatureRunningConditional v-if="type === 'receive'" name="DEX_AGG">
+            <template #deactivated>
+              <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
+            </template>
+            <Ticker v-if="type === 'receive'" :name="coin.base_denom" />
+          </FeatureRunningConditional>
           <template v-else>
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
@@ -85,6 +89,7 @@ import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -101,6 +106,7 @@ export default defineComponent({
     Denom,
     CircleSymbol,
     Ticker,
+    FeatureRunningConditional,
   },
   props: {
     data: { type: Array as PropType<EmerisAPI.Balances>, required: true },
