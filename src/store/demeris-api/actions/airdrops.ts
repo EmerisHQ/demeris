@@ -135,7 +135,7 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
               delete axios.defaults.headers.get['X-Correlation-Id'];
               const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', own_address);
               try {
-                const eligibility_res = await axios.get(`${eligibilityEndpoint}${own_address}`);
+                const eligibility_res = await axios.get(eligibilityEndpoint);
                 eligibility_status = eligibility_res.status;
                 eligibility_data = eligibility_res.data;
                 if (eligibility_res.status === 200) {
