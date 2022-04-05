@@ -186,14 +186,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-/* eslint-disable */
 import { EmerisAPI } from '@emeris/types';
 import axios from 'axios';
-import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
+import { computed, onUnmounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
-import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import QuotesList from '@/components/common/QuotesList.vue';
@@ -208,8 +206,7 @@ import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
-import { SwapAction } from '@/types/actions';
+import { GlobalGetterTypes } from '@/store';
 import { getTicker } from '@/utils/actionHandler';
 import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
@@ -235,7 +232,7 @@ const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = us
 const { getDisplayPrice } = usePrice();
 const { balances, orderBalancesByPrice } = useAccount();
 const isInit = ref(false);
-const slippage = ref(0);
+// const slippage = ref(0);
 const { t } = useI18n({ useScope: 'global' });
 const store = useStore();
 const transactionsStore = useTransactionsStore();
@@ -602,24 +599,22 @@ watch(
   async () => {
     if (data.isSwapReady) {
       // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
-      const swapParams: SwapAction = {
-        name: 'swap',
-        params: {
-          from: {
-            amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision.value))),
-            denom: data.payCoinData.denom,
-
-            chain_name: data.payCoinData.on_chain,
-          },
-          to: {
-            amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision.value))),
-            denom: data.receiveCoinData.denom,
-
-            chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
-          },
-        },
-      };
-      // data.actionHandlerResult = await actionHandler(swapParams);
+      //   const swapParams: SwapAction = {
+      //     name: 'swap',
+      //     params: {
+      //       from: {
+      //         amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, fromPrecision.value))),
+      //         denom: data.payCoinData.denom,
+      //         chain_name: data.payCoinData.on_chain,
+      //       },
+      //       to: {
+      //         amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, toPrecision.value))),
+      //         denom: data.receiveCoinData.denom,
+      //         chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
+      //       },
+      //     },
+      //   };
+      //   data.actionHandlerResult = await actionHandler(swapParams);
     } else {
       if (!isOpen.value) {
         // do not reset steps while steps modal is open
@@ -709,23 +704,10 @@ const daggRoutes = ref(null);
 async function setCounterPairCoinAmount(e) {
   if (data.isBothSelected && (!!data.payCoinAmount || !!data.receiveCoinAmount)) {
     //if receive use amountout
-    const precisionDiff = +fromPrecision.value - +toPrecision.value;
-    let equalizer = 1;
-    if (precisionDiff !== 0) {
-      equalizer = 10 ** Math.abs(precisionDiff);
-    }
-
-    //something's off.. check if gravity and osmosis have uniform ibc's.. (osmosis first returns an ibc but gravity doesn't so check.. osmosis is unavailable on dexinfo so check when it's there)
-    // if (
-    //   data.payCoinData?.on_chain === routes[0].steps[0].data.protocol?.chainId ||
-    //   data.payCoinData?.on_chain === 'cosmos-hub'
-    // ) {
-    //   //move to types -- enum. may not be needed if chain-id is present in routing response
-    //   routes = await getRoutes({
-    //     denomIn: routes[0].steps[0].data.to.denom,
-    //     denomOut: data.receiveCoinData?.base_denom,
-    //     amountIn: data.payCoinAmount * 10 ** fromPrecision,
-    //   });
+    // const precisionDiff = +fromPrecision.value - +toPrecision.value;
+    // let equalizer = 1;
+    // if (precisionDiff !== 0) {
+    //   equalizer = 10 ** Math.abs(precisionDiff);
     // }
 
     if (e.includes('Pay') && !!data.payCoinAmount) {
