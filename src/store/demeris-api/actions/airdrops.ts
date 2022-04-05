@@ -70,7 +70,6 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
         value: {
           ...response.data,
           imageExists: image_check_response.status === 200,
-          eligibilityStatusCode: null,
           eligibility: null,
           eligibilityResponse: null,
           address: null,
@@ -113,13 +112,11 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
       const airdrops = getters['getAirdrops'];
       airdrops.forEach((data: Airdrop) => {
         let eligibility = null;
-        let eligibility_status = null;
         let eligibility_data = null;
         if (data.claimActions && data.claimActions.length === 1 && data.claimActions[0].actionType === 'autodrop') {
           commit(MutationTypes.SET_AIRDROPS, {
             value: {
               ...data,
-              eligibilityStatusCode: 200,
               eligibility: AirdropEligibilityStatus.AUTO_DROP,
               eligibilityResponse: null,
               address: null,
@@ -136,13 +133,11 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
               const eligibilityEndpoint = data.eligibilityCheckEndpoint.replace('<address>', own_address);
               try {
                 const eligibility_res = await axios.get(eligibilityEndpoint);
-                eligibility_status = eligibility_res.status;
                 eligibility_data = eligibility_res.data;
                 if (eligibility_res.status === 200) {
                   eligibility = AirdropEligibilityStatus.ELIGIBLE;
                 }
               } catch (err) {
-                eligibility_status = err.response.status;
                 eligibility_data = err.response.data;
                 if (err.response.status === 403) {
                   eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
@@ -158,7 +153,6 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
             commit(MutationTypes.SET_AIRDROPS, {
               value: {
                 ...data,
-                eligibilityStatusCode: eligibility_status,
                 eligibility,
                 eligibilityResponse: eligibility_data,
                 address: own_address,
@@ -169,7 +163,6 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
           commit(MutationTypes.SET_AIRDROPS, {
             value: {
               ...data,
-              eligibilityStatusCode: 200,
               eligibility: AirdropEligibilityStatus.NOT_AVAILABLE,
               eligibilityResponse: null,
               address: null,

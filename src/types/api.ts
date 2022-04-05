@@ -401,7 +401,6 @@ export type Airdrop = {
   discordUrl: string;
   mediumUrl: string;
   imageExists: boolean;
-  eligibilityStatusCode: number;
   address: string;
   eligibilityResponse: any;
   airdropBlogUrl: string;
