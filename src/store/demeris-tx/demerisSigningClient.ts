@@ -98,6 +98,7 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
       signedGasLimit,
       signMode,
     );
+    console.log(signedAuthInfoBytes);
     const txRaw: TxRaw = TxRaw.fromPartial({
       bodyBytes: signedTxBodyBytes,
       authInfoBytes: signedAuthInfoBytes,
