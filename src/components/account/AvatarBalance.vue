@@ -16,7 +16,7 @@
 
     <div
       v-tippy
-      class="ml-3 flex-grow"
+      class="ml-3 grow"
       :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }"
       :content="isPriceApiAvailable ? '' : $t('components.avatar.priceApiDown')"
     >
@@ -24,7 +24,7 @@
         {{ keplrAccountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
-        <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" :balances="balances" />
+        <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" />
         <SkeletonLoader v-else width="100%">
           <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
         </SkeletonLoader>
@@ -41,7 +41,6 @@ import { useStore } from 'vuex';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
-import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
 
 export default defineComponent({
@@ -58,8 +57,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { balances } = useAccount();
-
     const keplrAccountName = computed(() => {
       return store.getters[GlobalGetterTypes.USER.getKeplrAccountName];
     });
@@ -74,7 +71,6 @@ export default defineComponent({
       return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
     });
     return {
-      balances,
       keplrAddress,
       initialLoadComplete,
       keplrAccountName,

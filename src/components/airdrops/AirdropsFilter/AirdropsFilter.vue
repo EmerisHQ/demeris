@@ -9,29 +9,31 @@
       'text-muted hover:text-text': item.value !== activeFilterItem,
     }"
   >
-    <a class="flex items-center" @click="setActiveFilter(item.value)">
+    <a class="flex items-center" @click="() => (activeFilterItem = item.value)">
       {{ item.text }}
-      <span v-if="item.value === activeFilterItem && airdropsLoading">
+      <span v-if="showAirdropsLoading(item.value)">
         <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
       </span>
       <span
-        v-if="item.value === activeFilterItem && activeFilterItem === 'mine'"
-        class="ml-2 bg-brand py-1 px-2 rounded-full -text-1 font-medium text-text"
+        v-if="showNoOfClaimableAirdrops(item.value)"
+        class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
+        style="color: white"
       >
-        3
+        {{ noOfClaimableAirdrops }}
       </span>
     </a>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
 export default defineComponent({
   name: 'AirdropsFilter',
@@ -45,41 +47,73 @@ export default defineComponent({
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
-        text: t('context.airdrops.airdropstableFilterItems.all'),
+        text: `${t('context.airdrops.filterItems.all')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'all',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.mine'),
+        text: `${t('context.airdrops.filterItems.mine')} ${t('context.airdrops.title').toLowerCase()}`,
         value: 'mine',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.upcoming'),
+        text: t('context.airdrops.filterItems.upcoming'),
         value: 'upcoming',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.live'),
+        text: t('context.airdrops.filterItems.live'),
         value: 'live',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.past'),
+        text: t('context.airdrops.filterItems.past'),
         value: 'past',
       },
     ];
 
-    onMounted(() => {
-      setActiveFilter(activeFilterItem.value);
-    });
+    watch(
+      () => activeFilterItem.value,
+      (newFilterItem) => {
+        emit('active-filter', newFilterItem);
+      },
+    );
 
-    const setActiveFilter = (activeItem: string) => {
-      activeFilterItem.value = activeItem;
-      emit('active-filter', activeFilterItem.value);
-    };
+    const airdrops = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    });
 
     const airdropsLoading = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
     });
 
-    return { filtersItems, setActiveFilter, activeFilterItem, airdropsLoading };
+    const noOfClaimableAirdrops = computed(() => {
+      const claimableAirdrops = airdrops.value.filter(
+        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
+      );
+      return claimableAirdrops.length;
+    });
+
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
+    const showAirdropsLoading = (filterItem: string) => {
+      return filterItem === activeFilterItem.value && airdropsLoading.value;
+    };
+
+    const showNoOfClaimableAirdrops = (filterItem: string) => {
+      return filterItem === activeFilterItem.value && activeFilterItem.value === 'mine' && !isDemoAccount.value;
+    };
+
+    return {
+      filtersItems,
+      activeFilterItem,
+      airdropsLoading,
+      noOfClaimableAirdrops,
+      isDemoAccount,
+      showAirdropsLoading,
+      showNoOfClaimableAirdrops,
+    };
   },
 });
 </script>

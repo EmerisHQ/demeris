@@ -6,16 +6,13 @@
       'py-6 px-5': size === 'md',
     }"
   >
-    <div class="self-stretch flex items-center flex-shrink-0 pr-3 flex-grow">
+    <div class="self-stretch flex items-center shrink-0 pr-3 grow">
       <ValidatorBadge :validator="validator" :size="size" :class="'mr-4'" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
         </div>
-        <div
-          class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap cursor-pointer"
-          @click="setMax"
-        >
+        <div class="text-muted text-0 overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer" @click="setMax">
           <AmountDisplay v-if="stakingDenom" :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" />
           staked
         </div>

@@ -103,7 +103,7 @@
           :denom="state.currentAsset.base_denom"
           class="relative mr-4"
         />
-        <div class="flex-grow">
+        <div class="grow">
           <p class="font-medium">
             <Denom :name="state.currentAsset.base_denom" />
           </p>
@@ -446,7 +446,7 @@ export default defineComponent({
   }
 }
 .get-asset-cta {
-  background-image: url('~@/assets/images/gold-rings-2.png');
+  background-image: url('@/assets/images/gold-rings-2.png');
   background-position: 121% 70%;
   background-repeat: no-repeat;
   background-size: 52%;

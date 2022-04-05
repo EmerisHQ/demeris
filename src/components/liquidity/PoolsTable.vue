@@ -53,7 +53,7 @@
                 class="w-8 h-8 rounded-full bg-fg z-0 -ml-1.5"
               />
             </div>
-            <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+            <span class="text-left overflow-hidden text-ellipsis whitespace-nowrap font-medium">
               {{ pool.displayName }}
             </span>
           </td>

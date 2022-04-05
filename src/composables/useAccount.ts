@@ -16,7 +16,7 @@ export default function useAccount() {
   const allbalances = computed(() => {
     // TODO: Remove after cloud is fully deployed
     /*
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.NODE_ENV === 'production') {
       return TEST_DATA.balances;
     }
     */

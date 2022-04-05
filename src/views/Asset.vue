@@ -7,10 +7,10 @@
         <header>
           <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
-            <div class="flex-grow flex items-baseline justify-between flex-nowrap">
+            <div class="grow flex items-baseline justify-between flex-nowrap">
               <div class="items-baseline">
                 <h1 class="text-1 sm:text-2 font-bold sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
-                <div class="text-muted text-0 flex-grow"><Ticker :name="denom" /></div>
+                <div class="text-muted text-0 grow"><Ticker :name="denom" /></div>
               </div>
               <Price
                 v-tippy
@@ -18,6 +18,7 @@
                 :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
+                @displayPrice="(value) => (displayPrice = value)"
               />
             </div>
           </div>
@@ -27,6 +28,7 @@
         <AreaChart
           v-if="showPriceChart"
           :data-stream="dataStream"
+          :display-price="displayPrice"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
           @priceDiff="setPriceDifference"
@@ -108,7 +110,7 @@
             >
               <div class="w-1/3 flex items-center min-w-0">
                 <CircleSymbol :denom="denom" :chain-name="asset.on_chain" size="lg" :glow="false" variant="chain" />
-                <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis">
+                <span class="grow ml-4 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                   <ChainName :name="asset.on_chain" />
                 </span>
               </div>
@@ -204,7 +206,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getDisplayName, getTicker } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -234,6 +236,7 @@ export default defineComponent({
 
   setup() {
     const displayName = ref('');
+    const displayPrice = ref(0);
     const metaSource = computed(() => {
       return { title: displayName.value };
     });
@@ -298,7 +301,6 @@ export default defineComponent({
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
         }
-
         displayName.value = await getDisplayName(denom.value, dexChain);
       },
       { immediate: true },
@@ -430,14 +432,14 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_ID, {
+        const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
           subscribe: false,
           params: {
-            token: displayName.value.toLowerCase(),
-            showSkeleton,
+            token: tokenTicker.toLowerCase(),
+            showSkeleton: false,
           },
         });
-
         if (chainName) {
           await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_PRICES, {
             subscribe: false,
@@ -463,7 +465,7 @@ export default defineComponent({
     const showPriceChartLoadingSkeleton = computed(() => {
       return (
         typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
-        typedstore.getters[GlobalGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+        typedstore.getters[GlobalGetterTypes.API.getCoinGeckoIdLoadingStatus] === LoadingState.LOADING
       );
     });
 
@@ -495,6 +497,7 @@ export default defineComponent({
       priceDiffObject,
       setPriceDifference,
       isStakingRunning,
+      displayPrice,
     };
   },
 });

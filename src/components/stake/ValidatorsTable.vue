@@ -13,11 +13,11 @@
       <!-- validator table -->
       <table class="validators-table table-fixed -ml-6 h-px">
         <colgroup>
+          <col class="w-[30%]" />
           <col class="w-1/5" />
-          <col class="w-1/5" />
-          <col class="w-1/6" />
-          <col class="w-1/4" />
-          <col :class="hasActions ? 'w-auto' : 'w-1/12'" />
+          <col class="w-[10%]" />
+          <col class="md:w-[25%] w-[15%]" />
+          <col :class="hasActions ? 'w-auto' : 'w-1/8'" />
         </colgroup>
 
         <!-- table header -->
@@ -25,7 +25,7 @@
           <tr>
             <th class="align-middle sticky top-0 z-20 bg-app text-left" :class="{ 'text-text': sortBy == 'name' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('name');
@@ -39,7 +39,7 @@
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'power' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('power');
@@ -56,7 +56,7 @@
               :class="{ 'text-text': sortBy == 'commission' }"
             >
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('commission');
@@ -70,7 +70,7 @@
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'staked' }">
               <button
-                class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
+                class="thead-button pl-2 pr-4 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none text-ellipsis whitespace-nowrap"
                 @click="
                   () => {
                     sort('staked');
@@ -94,9 +94,6 @@
               v-tippy
               :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
               class="group cursor-pointer"
-              :class="{
-                'opacity-50': validator.jailed,
-              }"
               @click="
                 () => {
                   detailedValidator = validator;
@@ -104,7 +101,7 @@
               "
             >
               <td
-                class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap group-hover:bg-fg transition"
+                class="h-full py-4 pr-2 flex items-center overflow-hidden text-ellipsis whitespace-nowrap group-hover:bg-fg transition"
                 :class="[{ 'text-negative-text': validator.jailed }]"
               >
                 <div class="inline-flex items-center mr-4 align-middle">
@@ -114,6 +111,7 @@
                 <span class="text-left font-medium" :class="{ 'text-inactive': validator.jailed }">
                   {{ validator.moniker }}
                 </span>
+                <ValidatorTag :validator="validator" />
               </td>
               <td class="py-4 px-2 text-right group-hover:bg-fg transition">
                 {{ getAmountDisplayValueTruncated(validator.tokens) }} <Ticker :name="baseDenom" />
@@ -124,7 +122,7 @@
               <td class="py-4 px-2 text-right group-hover:bg-fg transition">
                 {{ getCommissionDisplayValue(validator.commission_rate) }}
               </td>
-              <td class="py-4 px-2 text-right group-hover:bg-fg transition">
+              <td class="py-4 pl-2 pr-4 text-right group-hover:bg-fg transition">
                 <Price
                   :amount="{ denom: baseDenom, amount: validator.stakedAmount }"
                   :show-zero="true"
@@ -136,27 +134,28 @@
               </td>
 
               <td class="py-4 pl-2 text-right items-center whitespace-nowrap group-hover:bg-fg transition">
-                <Button
-                  v-if="hasActions"
-                  class="ml-6 mr-5"
-                  :full-width="false"
-                  :name="$t('components.validatorTable.stake')"
-                  :disabled="validator.jailed"
-                  data-cy="validator-table-stake"
-                  @click.stop="
-                    () => {
-                      if (!validator.jailed) {
-                        selectValidator(validator);
+                <div v-if="hasActions" class="flex items-center">
+                  <Button
+                    :class="{ 'opacity-50': validator.jailed }"
+                    :full-width="false"
+                    :name="$t('components.validatorTable.stake')"
+                    :disabled="validator.jailed"
+                    data-cy="validator-table-stake"
+                    @click.stop="
+                      () => {
+                        if (!validator.jailed) {
+                          selectValidator(validator);
+                        }
                       }
-                    }
-                  "
-                />
-                <Icon
-                  class="text-muted inline-flex"
-                  name="CaretRightIcon"
-                  :icon-size="1"
-                  :class="detailedValidator == validator || hasActions ? 'visible' : 'opacity-0'"
-                />
+                    "
+                  />
+                  <Icon
+                    class="text-muted inline-flex ml-6"
+                    name="CaretRightIcon"
+                    :icon-size="1"
+                    :class="detailedValidator == validator || hasActions ? 'visible' : 'opacity-0'"
+                  />
+                </div>
               </td>
             </tr>
           </template>
@@ -204,9 +203,11 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import ValidatorCard from '@/components/stake/ValidatorCard.vue';
+import ValidatorTag from '@/components/stake/ValidatorTag.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { isValidatorOffline } from '@/utils/basic';
 
 enum ValStyle {
   LIST = 'list',
@@ -216,7 +217,7 @@ type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
 export default defineComponent({
   name: 'ValidatorsTable',
-  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
+  components: { ValidatorTag, Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
   props: {
     tableTitle: {
       type: String as PropType<string>,
@@ -285,24 +286,36 @@ export default defineComponent({
       return propsRef.validatorList.value
         .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
         .sort((a, b) => {
-          switch (sortBy.value) {
-            case 'power':
-              if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'name':
-              if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
-              if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'commission':
-              if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
-            case 'staked':
-              if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+          let res = 0;
+          //  if only one of a and b are offline
+          if ((isValidatorOffline(a) || isValidatorOffline(b)) && !(isValidatorOffline(a) && isValidatorOffline(b))) {
+            return isValidatorOffline(a) ? 1 : -1;
+          } else {
+            switch (sortBy.value) {
+              case 'power':
+                if (Number(a.tokens) < Number(b.tokens)) res = 1;
+                if (Number(a.tokens) > Number(b.tokens)) res = -1;
+                break;
+              case 'name':
+                if (a.moniker < b.moniker) res = 1;
+                if (a.moniker > b.moniker) res = -1;
+                break;
+              case 'commission':
+                if (Number(a.commission_rate) < Number(b.commission_rate)) res = 1;
+                if (Number(a.commission_rate) > Number(b.commission_rate)) res = -1;
+                break;
+              case 'staked':
+                if (Number(a.stakedAmount) < Number(b.stakedAmount)) res = 1;
+                if (Number(a.stakedAmount) > Number(b.stakedAmount)) res = -1;
+                break;
+            }
+            if (res === 0) {
+              if (Number(a.tokens) < Number(b.tokens)) res = 1;
+              if (Number(a.tokens) > Number(b.tokens)) res = -1;
+            }
           }
+          if (sortOrder.value === 'asc') return -res;
+          return res;
         });
     });
     const sort = (by) => {
@@ -350,6 +363,7 @@ export default defineComponent({
       sortBy,
       sortOrder,
       isDisabled,
+      isValidatorOffline,
     };
   },
 });

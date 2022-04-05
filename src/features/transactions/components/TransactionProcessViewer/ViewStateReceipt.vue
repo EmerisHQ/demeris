@@ -76,7 +76,7 @@
             <AmountDisplay
               :amount="{
                 amount: getStakedAmount(),
-                denom: getBaseDenomSync(parseCoins(transaction.data.total)[0].denom),
+                denom: getStakableBaseDenomFromChainName(transaction.data?.chain_name),
               }"
             />
           </p>
@@ -268,11 +268,12 @@ import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { GlobalGetterTypes } from '@/store';
+import useDenomsFactory from '@/composables/useDenoms';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import { getSumOfRewards, parseCoins } from '@/utils/basic';
 
 import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
 
@@ -280,9 +281,10 @@ const { actor, isSwapComponent, minimizeModal, removeTransactionAndClose } = inj
 
 const { state, send } = actor;
 
-const globalStore = useStore();
+const globalStore = useStore() as RootStoreTyped;
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
+const { getStakableBaseDenomFromChainName } = useDenomsFactory();
 
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
@@ -359,7 +361,8 @@ const getStakedAmount = () => {
     return (transaction.value.data as RestakeData).amount.amount;
   }
   if (transaction.value.name == 'claim') {
-    return parseCoins((transaction.value.data as ClaimData).total)[0].amount;
+    const baseDenom = getStakableBaseDenomFromChainName((transaction.value.data as ClaimData).chain_name);
+    return getSumOfRewards((transaction.value.data as ClaimData).total, baseDenom);
   }
 };
 
@@ -396,12 +399,12 @@ const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock);
 
 <style scoped>
 .transferred-image {
-  background-image: url('~@/assets/images/silver-surfer-1-light.png');
+  background-image: url('@/assets/images/silver-surfer-1-light.png');
 }
 
 @media (prefers-color-scheme: dark) {
   .transferred-image {
-    background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+    background-image: url('@/assets/images/silver-surfer-1-dark.png');
   }
 }
 </style>

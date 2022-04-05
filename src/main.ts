@@ -3,7 +3,7 @@ import 'tippy.js/dist/tippy.css';
 
 import { BrowserTracing } from '@sentry/tracing';
 import * as Sentry from '@sentry/vue';
-import vueLib from '@starport/vue';
+import { Buffer } from 'buffer';
 import mitt from 'mitt';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
@@ -14,12 +14,16 @@ import { createMetaManager } from 'vue-meta';
 import VueTippy from 'vue-tippy';
 import VueApexCharts from 'vue3-apexcharts';
 
-import { messages } from '@/locales/en';
+import messages from '@/locales/en.json';
 
 import App from './App.vue';
 import router from './router';
 import { store } from './store/setup';
 import { featureRunning } from './utils/FeatureManager';
+
+if (!window.Buffer) {
+  window.Buffer = Buffer;
+}
 
 const i18n = createI18n({
   globalInjection: true,
@@ -58,7 +62,7 @@ if (featureRunning('SENTRY')) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: parseFloat(process.env.VUE_APP_SENTRY_TRACES_SAMPLE_RATE),
+    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE as string),
   });
 }
 
@@ -66,7 +70,6 @@ app
   .use(i18n)
   .use(store)
   .use(router)
-  .use(vueLib)
   .use(VueTippy)
   .use(VueCookieNext)
   .use(createMetaManager())

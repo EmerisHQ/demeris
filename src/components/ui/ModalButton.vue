@@ -1,6 +1,6 @@
 <template>
   <Button
-    :class="[status, 'btn flex-grow', { squared: squared }]"
+    :class="[status, 'btn grow', { squared: squared }]"
     :name="name"
     :status="status"
     variant="secondary"

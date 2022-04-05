@@ -64,21 +64,21 @@ export default defineComponent({
       };
     }
     const store = useStore();
-    let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
-    let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
-    let githubEndpoint = process.env.VUE_APP_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
-    let rawGithubEndpoint = process.env.VUE_APP_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
-    let wsEndpoint = process.env.VUE_APP_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
-
+    let liquidityEndpoint =
+      import.meta.env.VITE_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
+    let emerisEndpoint = import.meta.env.VITE_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
+    let githubEndpoint = import.meta.env.VITE_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
+    let rawGithubEndpoint = import.meta.env.VITE_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
+    let wsEndpoint = import.meta.env.VITE_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
     if (featureRunning('USE_STAGING')) {
-      liquidityEndpoint = process.env.VUE_APP_EMERIS_STAGING_LIQUIDITY_ENDPOINT;
-      emerisEndpoint = process.env.VUE_APP_EMERIS_STAGING_ENDPOINT;
-      wsEndpoint = process.env.VUE_APP_EMERIS_STAGING_WEBSOCKET_ENDPOINT;
+      liquidityEndpoint = import.meta.env.VITE_EMERIS_STAGING_LIQUIDITY_ENDPOINT;
+      emerisEndpoint = import.meta.env.VITE_EMERIS_STAGING_ENDPOINT;
+      wsEndpoint = import.meta.env.VITE_EMERIS_STAGING_WEBSOCKET_ENDPOINT;
     }
     if (featureRunning('USE_DEV')) {
-      liquidityEndpoint = process.env.VUE_APP_EMERIS_DEV_LIQUIDITY_ENDPOINT;
-      emerisEndpoint = process.env.VUE_APP_EMERIS_DEV_ENDPOINT;
-      wsEndpoint = process.env.VUE_APP_EMERIS_DEV_WEBSOCKET_ENDPOINT;
+      liquidityEndpoint = import.meta.env.VITE_EMERIS_DEV_LIQUIDITY_ENDPOINT;
+      emerisEndpoint = import.meta.env.VITE_EMERIS_DEV_ENDPOINT;
+      wsEndpoint = import.meta.env.VITE_EMERIS_DEV_WEBSOCKET_ENDPOINT;
     }
     setStore(store); // make store availabe in some composition functions used in the store itself
     const typedstore = store as RootStoreTyped;
@@ -113,32 +113,9 @@ export default defineComponent({
       } catch (e) {
         console.error('Could not load verified denoms: ' + e);
       }
-      typedstore
-        .dispatch(GlobalActionTypes.API.GET_CHAINS, {
-          subscribe: false,
-        })
-        .then((chains) => {
-          for (let chain in chains) {
-            typedstore
-              .dispatch(GlobalActionTypes.API.GET_CHAIN, {
-                subscribe: true,
-                params: {
-                  chain_name: chain,
-                },
-              })
-              .then((chain) => {
-                typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN_STATUS, {
-                  subscribe: true,
-                  params: {
-                    chain_name: chain.chain_name,
-                  },
-                });
-              });
-          }
-        })
-        .catch((e) => {
-          console.error('Could not load chain information: ' + e);
-        });
+      typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS_AND_CHAIN_STATUS, {
+        subscribe: false,
+      });
       store
         .dispatch('common/env/config', {
           apiNode: liquidityEndpoint,
@@ -207,7 +184,7 @@ export default defineComponent({
         getAllAirdrops();
       }
       if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
-        router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
+        await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
       }
       initialized.value = true;
     });

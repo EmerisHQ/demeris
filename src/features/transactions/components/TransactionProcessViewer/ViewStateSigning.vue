@@ -9,7 +9,9 @@
     >
       <Spinner :size="2.5" />
 
-      <p class="text-muted">{{ $t('components.txHandlingModal.openKeplr') }}</p>
+      <p v-if="!state.matches('signing.delayed')" class="text-muted">
+        {{ $t('components.txHandlingModal.openKeplr') }}
+      </p>
 
       <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">
         {{ $t('components.txHandlingModal.signTx') }}
@@ -33,9 +35,6 @@
     </div>
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
-      <Button v-if="state.matches('signing.delayed')" @click="() => send('SIGN')">
-        {{ $t('context.transactions.controls.tryAgain') }}
-      </Button>
       <Button variant="link" @click="transactionsStore.toggleCancelModal">
         {{ $t('context.transactions.controls.cancel') }}
       </Button>
@@ -55,7 +54,7 @@ import { useTransactionsStore } from '../../transactionsStore';
 
 const transactionsStore = useTransactionsStore();
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
-const { state, send } = actor;
+const { state } = actor;
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 </script>

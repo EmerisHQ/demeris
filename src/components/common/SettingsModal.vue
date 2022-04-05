@@ -100,7 +100,7 @@
           >
             <Icon name="ArrowLeftIcon" :icon-size="1.5" />
           </Button>
-          <div class="flex-grow text-center text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
+          <div class="grow text-center text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
         </div>
         <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>
@@ -283,8 +283,8 @@ export default defineComponent({
   },
   emits: ['disconnect', 'connect'],
   setup(_, { emit }) {
-    const gitVersion = process.env.VUE_APP_GIT_VERSION;
-    const appVersion = process.env.VUE_APP_VERSION;
+    const gitVersion = import.meta.env.VITE_GIT_VERSION;
+    const appVersion = import.meta.env.VITE_VERSION;
 
     const store = useStore();
     const theme = useTheme();

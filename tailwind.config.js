@@ -1,6 +1,7 @@
 module.exports = {
   purge: false,
-  // mode: 'jit',
+  content: ['./public/index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  mode: 'jit',
   darkMode: 'class', // or 'media' or 'class'
   theme: {
     extend: {
@@ -13,7 +14,7 @@ module.exports = {
       },
     },
     backgroundImage: {
-      grain: 'url(~@/assets/images/texture-grain.png)',
+      grain: 'url(../../assets/images/texture-grain.png)',
     },
     boxShadow: {
       button: '3px 9px 32px -4px rgba(0, 0, 0, 0.07)',
@@ -121,17 +122,6 @@ module.exports = {
       normal: 400,
       medium: 560,
       bold: 730,
-    },
-  },
-  variants: {
-    extend: {
-      margin: ['last'],
-      borderRadius: ['focus'],
-      opacity: ['active', 'focus', 'group-focus'],
-      placeholderColor: ['hover'],
-      ringWidth: ['focus-visible'],
-      transform: ['active'],
-      zIndex: ['first'],
     },
   },
   corePlugins: {

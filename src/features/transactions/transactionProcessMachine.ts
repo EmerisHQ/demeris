@@ -27,6 +27,7 @@ import {
 
 interface ContextInputSchema {
   action: string;
+  isDemoAccount: boolean;
   gasPriceLevel: EmerisFees.GasPriceLevel;
   gasLimit: number;
   steps: Step[];
@@ -73,6 +74,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     context: {
       input: {
         action: undefined,
+        isDemoAccount: undefined,
         gasPriceLevel: undefined,
         gasLimit: undefined,
         steps: [],
@@ -207,7 +209,19 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             target: 'transacting',
             actions: { type: 'logEvent', key: 'signed_tx' },
           },
-          onError: 'failed.sign',
+          onError: [
+            {
+              target: 'failed.genericError',
+              cond: (_, event) => event.data === 'GET_NUMBERS_CHAIN request failed',
+            },
+            {
+              target: 'failed.sign',
+              cond: (_, event) => event.data === 'Failed to sign tx',
+            },
+            {
+              target: 'failed.unknown',
+            },
+          ],
         },
         states: {
           active: {},
@@ -317,6 +331,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               ABORT: '#aborted',
             },
           },
+          genericError: {
+            on: {
+              RETRY: { target: '#signing' },
+              ABORT: '#aborted',
+            },
+          },
           broadcast: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
@@ -347,12 +367,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        const validation = await validateStepsFeeBalances(
-          context.formattedSteps,
-          context.input.balances,
-          totals,
-          context.input.gasPriceLevel,
-        );
+        let validation = {};
+        if (!context.input.isDemoAccount) {
+          validation = await validateStepsFeeBalances(
+            context.formattedSteps,
+            context.input.balances,
+            totals,
+            context.input.gasPriceLevel,
+          );
+        }
         return { totals, validation };
       },
       validateChainStatus: async (context) => {
@@ -378,14 +401,17 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ],
           gas: '' + context.input.gasLimit,
         };
-
-        return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
-          msgs: msgResult.msg,
-          chain_name: msgResult.chain_name,
-          fee,
-          registry: msgResult.registry,
-          memo: getCurrentStep(context).memo ?? '',
-        });
+        try {
+          return useStore().dispatch(GlobalActionTypes.TX.SIGN_WITH_KEPLR, {
+            msgs: msgResult.msg,
+            chain_name: msgResult.chain_name,
+            fee,
+            registry: msgResult.registry,
+            memo: getCurrentStep(context).memo ?? '',
+          });
+        } catch (ex) {
+          console.error('Error while signing with KEPLR', ex);
+        }
       },
       broadcastTransaction: async (_, event: DoneEventData<TxParams>) => {
         return useStore().dispatch(GlobalActionTypes.TX.BROADCAST_TX, event.data);
@@ -433,8 +459,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (endBlockEvent.success === 'failure') {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to find block results',
+                data: { ...responseData, endBlock: endBlockEvent },
+              });
             }
           }
 
@@ -468,7 +498,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
 
           if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
-            throw new Error(resultData.error || 'error');
+            return callback({
+              // @ts-ignore
+              type: 'GOT_FAILURE',
+              error: resultData.error,
+              data: responseData,
+            });
           }
 
           if (resultData.status === 'IBC_receive_success') {
@@ -492,8 +527,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
-            await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
-
             while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalActionTypes.API.GET_TX_DEST_HASH, {
@@ -512,30 +545,58 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
 
             if (!destTx) {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to fetch destination hash',
+                data: { ...responseData },
+              });
             }
           }
         };
 
         const traceResponse = async () => {
+          await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
           await findIBCDestHash();
 
+          let traceResult;
+
+          const rpcFallback = async () => {
+            try {
+              traceResult = await useStore().dispatch(GlobalActionTypes.API.GET_TX_FROM_RPC, {
+                chain_name: responseData.chain_name,
+                txhash: responseData.txhash,
+              });
+            } catch (e) {
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
+            }
+          };
+
           try {
-            const wsResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
+            // NOTE: Inluded for testing, timeout to wait for tx in the blockchain
+            if (featureRunning('FORCE_RPC_FALLBACK')) {
+              // const timeout = currentTransaction.name.includes('ibc') ? 30000 : 15000;
+              await new Promise((resolve) => setTimeout(resolve, 60000));
+              throw new Error('Force RPC fallback enabled');
+            }
+
+            traceResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
-              stepType: currentStep.name,
             });
-            responseData.websocket = wsResult;
+          } catch (e) {
+            console.error(e);
+            await rpcFallback();
+          }
 
-            await fetchEndBlock(wsResult.height);
+          if (traceResult) {
+            responseData.websocket = traceResult;
+
+            await fetchEndBlock(traceResult.height);
 
             // @ts-ignore
             callback({ type: 'GOT_RESPONSE', data: responseData });
-          } catch {
-            // @ts-ignore
-            return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
           }
         };
 
@@ -557,6 +618,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     actions: {
       setData: assign((_, event: ContextInputSchema & { type: string }) => ({
         input: {
+          isDemoAccount: event.isDemoAccount,
           steps: event.steps,
           action: event.action,
           gasLimit: event.gasLimit,
@@ -571,7 +633,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         formattedSteps: formatStepsWithFee(context, event.balances),
       })),
       setError: assign({
-        error: (_, event: DoneEventData<any>) => event.data,
+        error: (_, event: any) => event.error || event.data,
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
@@ -662,8 +724,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
         return false;
       },
-
-      hasMissingFees: (context) => context.fees?.validation?.missingFees.length > 0,
+      hasMissingFees: (context) => context.fees?.validation?.missingFees?.length > 0,
       hasIBCFeeWarning: (context) => context.fees?.validation?.ibcWarning === true,
     },
   },

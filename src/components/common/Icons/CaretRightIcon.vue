@@ -1,8 +1,12 @@
 <template>
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M5.99961 13.4L4.59961 12L8.59961 7.99998L4.59961 3.99998L5.99961 2.59998L11.3996 7.99998L5.99961 13.4Z"
-      fill="currentColor"
+      d="M0.999998 13.001L7 7.00098L0.999999 1.00098"
+      :stroke="isDark ? 'white' : 'black'"
+      stroke-opacity="0.667"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
     />
   </svg>
 </template>
@@ -10,8 +14,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import useTheme from '@/composables/useTheme';
+
 export default defineComponent({
   name: 'CaretRightIcon',
+  computed: {
+    isDark() {
+      const theme = useTheme();
+      return theme.value === 'dark';
+    },
+  },
 });
 </script>
 

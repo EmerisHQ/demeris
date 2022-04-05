@@ -1,6 +1,6 @@
 <template>
   <div
-    class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
+    class="circle-symbol relative flex items-center justify-center shrink-0 rounded-full"
     :style="[customSize && `height:${customSize};width:${customSize}`]"
     :class="[customSize === '' && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
@@ -12,7 +12,7 @@
     />
     <template v-if="variant === 'chain'">
       <div
-        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 shrink-0 shadow-none"
         :style="ringStyle"
       />
     </template>
@@ -38,7 +38,7 @@
       />
       <div
         v-if="!isNativeChain"
-        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 shrink-0 shadow-none"
         :style="ringStyle"
       />
       <img
@@ -52,7 +52,7 @@
     <template v-else>
       <div
         v-if="!isNativeChain"
-        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 shrink-0 shadow-none"
         :style="ringStyle"
       />
       <div
@@ -88,6 +88,7 @@ import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
+import gdexSvg from '@/assets/svg/symbols/gdex.svg';
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
@@ -269,7 +270,7 @@ export default defineComponent({
 
     const symbolImage = computed(() => {
       if (isPoolCoin.value) {
-        return require(`@/assets/svg/symbols/gdex.svg`);
+        return gdexSvg;
       }
 
       return undefined;

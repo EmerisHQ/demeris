@@ -12,7 +12,7 @@
     <StakeTableBanner v-if="showStakingBanner" :denom="props.denom" />
   </div>
 </template>
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -24,6 +24,7 @@ import useAccount from '@/composables/useAccount';
 import useStaking, { StakingRewards } from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event } from '@/utils/analytics';
+import { getSumOfRewards } from '@/utils/basic';
 
 const store = useStore() as RootStoreTyped;
 const stakingRewardsData = ref<StakingRewards>(null);
@@ -56,9 +57,9 @@ const selectTab = (tabNumber?: number): void => {
   selectedTab.value = tabNumber;
 };
 
+//  ignores denoms that are not from native chain
 const totalRewardsAmount = computed(() => {
-  if (!stakingRewardsData.value?.total) return 0;
-  return parseFloat(stakingRewardsData.value.total ?? '0');
+  return getSumOfRewards(stakingRewardsData.value?.total, props.denom);
 });
 
 watch(

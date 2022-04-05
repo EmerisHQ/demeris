@@ -59,7 +59,7 @@ export default defineComponent({
     border-radius: 0.75rem;
     background: var(--fg);
     cursor: pointer;
-    flex-shrink: 0;
+    shrink: 0;
     padding: 0.1875rem;
   }
 

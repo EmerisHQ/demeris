@@ -568,7 +568,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .get-asset-cta {
-  background-image: url('~@/assets/images/gold-rings-2.png');
+  background-image: url('@/assets/images/gold-rings-2.png');
   background-position: 121% 70%;
   background-repeat: no-repeat;
   background-size: 52%;

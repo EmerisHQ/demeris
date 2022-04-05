@@ -1136,7 +1136,11 @@ export async function validateStepFeeBalances(
         const newAmount = parseInt(parseCoins(ibcBalance.amount)[0].amount) - parseInt(data.amount.amount);
         if (newAmount >= 0) {
           ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
-          const newDenom = generateDenomHash(data.through, ibcBalance.base_denom);
+          const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+            chain_name: data.to_chain,
+            destination_chain_name: data.from_chain,
+          });
+          const newDenom = generateDenomHash(primaryChannel, ibcBalance.base_denom);
 
           if (!data.to_address) {
             const rcptBalance = balances.find((x) => {
@@ -1559,7 +1563,11 @@ export async function validateStepsFeeBalances(
           const newAmount = parseInt(parseCoins(ibcBalance.amount)[0].amount) - parseInt(data.amount.amount);
           if (newAmount >= 0) {
             ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
-            const newDenom = generateDenomHash(data.through, ibcBalance.base_denom);
+            const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+              chain_name: data.to_chain,
+              destination_chain_name: data.from_chain,
+            });
+            const newDenom = generateDenomHash(primaryChannel, ibcBalance.base_denom);
 
             if (!data.to_address) {
               const rcptBalance = balances.find((x) => {

@@ -23,8 +23,8 @@
     when it changed-->
 
     <div
-      class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
-      :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
+      class="self-stretch flex items-center shrink-0 pr-3 cursor-pointer"
+      :class="isSelected ? 'shrink-0' : 'grow'"
       @click="toggleDenomSelectModal"
     >
       <CircleSymbol
@@ -41,7 +41,7 @@
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
             class="tippy-info"
           >
-            <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
+            <div class="max-display-width overflow-hidden text-ellipsis whitespace-nowrap">{{ displayName }}</div>
             <template #content> {{ displayName }} </template>
           </tippy>
           <Denom
@@ -53,7 +53,7 @@
           />
           <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
-        <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <div v-if="showChain" class="text-muted -text-1 overflow-hidden text-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
         </div>
       </div>
@@ -176,24 +176,6 @@ export default defineComponent({
       },
     );
 
-    const coinImage = computed(() => {
-      try {
-        const denom = displayName.value;
-        let denomIconName = 'empty';
-        if (denom.includes('Gravity')) {
-          denomIconName = 'pool';
-        } else {
-          //TODO adjust url
-          denomIconName = denom.toLowerCase();
-        }
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
-        return image;
-      } catch {
-        return require(`@/assets/coins/empty.png`);
-      }
-    });
-
     const isOpen = ref(false);
 
     function toggleDenomSelectModal() {
@@ -217,7 +199,6 @@ export default defineComponent({
       inputAmount,
       isSelected,
       isOpen,
-      coinImage,
       hasOptions,
       toggleDenomSelectModal,
       denomSelectHandler,

@@ -1,6 +1,6 @@
 <template>
   <a
-    href="https://medium.com/emeris-blog"
+    href="https://support.emeris.com/en/articles/6007062-how-to-use-emeris-step-by-step-guide"
     target="_blank"
     rel="noopener noreferrer"
     class="intro-panel w-full flex flex-col items-stretch p-6 relative rounded-2xl dark:theme-inverse bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
@@ -24,6 +24,6 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .intro-panel {
-  background-image: url('~@/assets/images/intro-panel.jpg');
+  background-image: url('../../assets/images/intro-panel.jpg');
 }
 </style>

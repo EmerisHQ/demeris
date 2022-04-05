@@ -5,7 +5,7 @@
         <header>
           <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
           <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
-            <TotalPrice v-if="initialLoadComplete" :balances="balances" small-decimals />
+            <TotalPrice v-if="initialLoadComplete" small-decimals />
             <SkeletonLoader v-else width="100%" />
           </div>
         </header>

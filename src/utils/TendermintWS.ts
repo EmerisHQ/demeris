@@ -12,7 +12,7 @@ export type Call = {
   reject: (reason?: Error) => void;
 };
 export interface IRequest {
-  type: 'Subscription' | 'Call';
+  type: 'Subscription' | 'Unsubscription' | 'Call';
 }
 export type Request = (Subscription | Call) & IRequest;
 export interface IConfig {
@@ -147,6 +147,19 @@ export default class TendermintWS extends EventEmitter {
     this.requests.set(this.callId, { type: 'Subscription', callback });
     this.socket.send(JSON.stringify(subscriptionQuery));
   }
+
+  unsubscribe(params: Record<string, any>, callback: (data) => void): void {
+    this.callId++;
+    const query = {
+      jsonrpc: '2.0',
+      method: 'unsubscribe',
+      id: this.callId,
+      params,
+    };
+    this.requests.set(this.callId, { type: 'Unsubscription', callback });
+    this.socket.send(JSON.stringify(query));
+  }
+
   async call(method: string, params: unknown[]): Promise<unknown> {
     this.callId++;
     const callQuery = {

@@ -1,18 +1,22 @@
 <template>
   <NoMarginLayout>
-    <header class="-mt-32 w-full bg-fg">
+    <header class="-mt-32 w-full header-bg">
       <div class="pt-24 pb-12 px-5 md:px-8 max-w-7xl mx-auto">
         <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
         <!-- Airdrop Title -->
         <div class="mt-8">
-          <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
+          <div class="text-3 font-bold mt-1 mb-2">
+            {{ selectedAirdrop.project }} {{ $t('context.airdrops.airdrop') }}
+          </div>
           <div class="items-center">
             <span class="text-muted">
               {{ selectedAirdrop.tokenTicker }}
-              <span class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
-              <span>{{ selectedAirdrop.chainName }} Chain</span>
+              <span v-if="selectedAirdrop.chainName" class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
+              <span v-if="selectedAirdrop.chainName"
+                >{{ selectedAirdrop.chainName }} {{ $t('context.airdrops.chain') }}</span
+              >
             </span>
-            <span class="live-tag -text-1 ml-2 font-medium">Live</span>
+            <span class="live-tag -text-1 ml-2 font-medium">{{ $t('context.airdrops.live') }}</span>
           </div>
         </div>
       </div>
@@ -23,15 +27,13 @@
         <section class="mt-8">
           <!-- About the Project -->
           <div class="w-3/4">
-            <div class="text-1 font-medium mt-1 mb-6">About {{ selectedAirdrop.project }}</div>
+            <div class="text-1 font-medium mt-1 mb-6">
+              {{ $t('context.airdrops.aboutAirdropTitle', { project: selectedAirdrop.project }) }}
+            </div>
 
             <!-- Description -->
             <div>
-              <p
-                v-for="(item, index) in selectedAirdrop.projectDescription.split('.')"
-                :key="index"
-                class="mb-4 description-text"
-              >
+              <p v-for="(item, index) in selectedAirdrop.projectDescription" :key="index" class="mb-4 description-text">
                 {{ item }}.
               </p>
             </div>
@@ -57,7 +59,7 @@
 
           <!-- Eligibility Criteria -->
           <div class="w-3/4 mb-12">
-            <div class="text-1 font-medium mt-1 mb-6">How to be eligible</div>
+            <div class="text-1 font-medium mt-1 mb-6">{{ $t('context.airdrops.howToBeEligible') }}</div>
             <ul class="eligibility-criteria">
               <li v-for="(criteriaItem, index) in selectedAirdrop.eligibilityCriteria" :key="index">
                 {{ criteriaItem.description }}
@@ -67,10 +69,10 @@
 
           <!-- Quick Info -->
           <div>
-            <p class="font-medium mb-4">More details ↗️</p>
+            <p class="font-medium mb-4">{{ $t('context.airdrops.moreDetails') }}</p>
             <div class="w-3/4 flex items-center text-muted bg-fg rounded-xl px-6 py-4">
               <InformationIcon class="mr-4" />
-              <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
+              <p class="-text-1">{{ $t('context.airdrops.subjectToChange') }}</p>
             </div>
           </div>
         </section>
@@ -136,7 +138,17 @@ export default defineComponent({
     };
 
     const selectedAirdrop = computed(() => {
-      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
+      let projectDescription = [];
+      const airdrop = toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
+      if (airdrop.projectDescription.includes('.')) {
+        projectDescription = airdrop.projectDescription.split('.');
+      } else {
+        projectDescription.push(airdrop.projectDescription);
+      }
+      return {
+        ...airdrop,
+        projectDescription: projectDescription.length > 1 ? projectDescription.slice(0, -1) : projectDescription,
+      };
     });
 
     const goBackToAirdropspage = () => {
@@ -167,5 +179,11 @@ ul {
 }
 .description-text {
   line-height: 1.5;
+}
+.header-bg {
+  background: radial-gradient(100% 100% at 17.19% 0%, rgba(80, 206, 235, 0.08) 0%, rgba(22, 61, 70, 0.08) 100%);
+}
+.dark .header-bg {
+  background: radial-gradient(100% 100% at 17.19% 0%, rgba(80, 206, 235, 0.8) 0%, rgba(22, 61, 70, 0.8) 100%);
 }
 </style>

@@ -1,6 +1,7 @@
 import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
@@ -55,7 +56,7 @@ export async function getOwnAddress({ chain_name }) {
     await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, { subscribe: true, params: { chain_name } });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
-      const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+      const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
         prefix: chain.node_info.bech32_config.main_prefix,
         hdPaths: [stringToPath(chain.derivation_path)],
       });
@@ -75,6 +76,11 @@ export async function getOwnAddress({ chain_name }) {
     }
   }
 }
+
+export function isValidatorOffline(validator: EmerisAPI.Validator) {
+  return validator.status === 1 || validator.status === 2;
+}
+
 export function isNative(denom: string) {
   if (denom) {
     return denom.indexOf('ibc/') != 0 ? true : false;
@@ -87,9 +93,10 @@ export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
 }
+const LOGIN_TIMEOUT = 1000 * 60 * 60 * 24 * 30; //  30 days
 export function autoLogin() {
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
+  if (last && last != '' && Date.now() < parseInt(last) + LOGIN_TIMEOUT) {
     return true;
   } else {
     return false;
@@ -213,4 +220,26 @@ export function getChainFromDex(dex) {
   else if (dex.toLowerCase() === 'gravity') {
     return 'cosmos-hub';
   } else return null;
+}
+
+export function getCleanURL(str: string) {
+  if (!str || str === '') return;
+  const url = str.split('://')[1];
+  if (!url || str === '') return str;
+  if (url[url.length - 1] === '/') return url.slice(0, url.length - 2);
+  return url;
+}
+
+export function getProperUrl(str: string) {
+  if (!/https?:\/\//.test(str)) return `https://${str}`;
+  return str;
+}
+
+// ignores denoms that are not of baseDenom
+export function getSumOfRewards(totalValue: string, baseDenom: string) {
+  if (!totalValue || !baseDenom) return 0;
+  const total = parseCoins(totalValue ?? '0')
+    .map((value) => (value.denom !== baseDenom ? '0' : value.amount))
+    .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
+  return parseFloat(total ?? '0');
 }

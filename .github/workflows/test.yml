@@ -10,8 +10,9 @@ on:
     - cron: '0,30 * * * *'
 
 env:
-  VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
-
+  VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -42,10 +43,11 @@ jobs:
           cache: npm
 
       - name: Install (npm)
-        run: npm install
+        run: npm ci
 
       - name: Test
-        run: npm run test:unit -- --runInBand
+        run: npm run test:unit
+
   e2e:
     
     strategy:
@@ -71,14 +73,17 @@ jobs:
           cache: npm
 
       - name: Install (npm)
-        run: npm install
+        run: npm ci
 
       - name: Install Serve
         run: npm install -g serve
+      
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium --with-deps
+
       - name: Build
-        run: npm run build
+        run: npm run build:production
+
       - name: Run Playwright tests
         run: 
           serve -s dist -l 8080 &

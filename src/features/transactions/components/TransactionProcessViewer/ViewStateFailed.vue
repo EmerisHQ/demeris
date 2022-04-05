@@ -8,13 +8,18 @@
       :class="isSwapComponent ? 'space-y-3' : 'space-y-5'"
     >
       <div>
-        <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+        <Icon
+          v-if="['failed.genericError', 'failed.sign'].some(state.matches)"
+          name="ExclamationIcon"
+          :icon-size="3"
+          class="text-warning"
+        />
         <Icon v-else-if="state.matches('failed.unknown')" name="QuestionIcon" :icon-size="3" class="text-warning" />
         <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
       </div>
 
       <div
-        v-if="!['failed.sign', 'failed.unknown'].some(state.matches)"
+        v-if="!['failed.sign', 'failed.unknown', 'failed.genericError'].some(state.matches)"
         class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8"
       >
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
@@ -144,17 +149,17 @@
       >
         <Alert status="info" :show-icon="false">
           <ul class="space-y-3">
-            <li v-if="lastResult?.status.status">
+            <li v-if="state.context.error">
+              <h5 class="font-medium text-text">{{ $t('context.transactions.error') }}</h5>
+              <p class="mt-0.5">{{ state.context.error?.message || state.context.error }}</p>
+            </li>
+            <li v-if="lastResult?.status?.status">
               <h5 class="font-medium text-text">{{ $t('context.transactions.status') }}</h5>
               <p class="mt-0.5">{{ lastResult.status.status }}</p>
             </li>
             <li v-if="lastResult?.txhash">
               <h5 class="font-medium text-text">{{ $t('context.transactions.ticket') }}</h5>
               <p class="mt-0.5">{{ lastResult.txhash }}</p>
-            </li>
-            <li v-if="state.context.error">
-              <h5 class="font-medium text-text">{{ $t('context.transactions.error') }}</h5>
-              <p class="mt-0.5">{{ state.context.error?.message || state.context.error }}</p>
             </li>
           </ul>
         </Alert>
@@ -239,6 +244,10 @@ const title = computed(() => {
 
   if (state.value.matches('failed.sign')) {
     return t('components.txHandlingModal.signError');
+  }
+
+  if (state.value.matches('failed.genericError')) {
+    return t('components.txHandlingModal.genericError');
   }
 
   if (titleMap[transaction.value.name]) {
