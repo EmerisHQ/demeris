@@ -17,10 +17,10 @@
         {{ $t('components.txHandlingModal.signTx') }}
       </h1>
 
-      <template v-if="transaction.name.startsWith('ibc')">
+      <template v-if="transaction.type == 'IBCtransferBackward' || transaction.type == 'IBCtransferForward'">
         <div class="mt-0.5 text-muted">
-          <ChainName :name="transaction.data.from_chain" /> &rarr;&nbsp;
-          <ChainName :name="transaction.data.to_chain" />
+          <ChainName :name="transaction.data.chainName" /> &rarr;&nbsp;
+          <ChainName :name="transaction.data.toChain" />
         </div>
       </template>
 

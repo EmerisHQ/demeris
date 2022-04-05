@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -35,6 +36,7 @@ export async function swap({ from, to }: { from: AbstractAmount; to: AbstractAmo
     result.steps.push({
       type: 'swap',
       status: 'pending',
+      protocol: EmerisDEXInfo.DEX.Gravity,
       data: {
         from,
         to,
