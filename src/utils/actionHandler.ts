@@ -1007,8 +1007,8 @@ export async function validateStepFeeBalances(
         if (newAmount >= 0) {
           ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
           const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
-            chain_name: data.to_chain,
-            destination_chain_name: data.from_chain,
+            chain_name: data.toChain,
+            destination_chain_name: data.chainName,
           });
           const newDenom = generateDenomHash(primaryChannel, ibcBalance.base_denom);
 
@@ -1428,8 +1428,8 @@ export async function validateStepsFeeBalances(
           if (newAmount >= 0) {
             ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
             const primaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
-              chain_name: data.to_chain,
-              destination_chain_name: data.from_chain,
+              chain_name: data.toChain,
+              destination_chain_name: data.chainName,
             });
             const newDenom = generateDenomHash(primaryChannel, ibcBalance.base_denom);
 
