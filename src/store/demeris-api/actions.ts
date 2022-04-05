@@ -6,7 +6,7 @@ import { ActionTree } from 'vuex';
 import { GlobalGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import { UserData } from '@/types/user';
-import { ActionParams, ChartPrices, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
+import { ActionParams, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
@@ -111,19 +111,6 @@ export interface Actions
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
   ): Promise<EmerisAPI.VerifyTrace>;
-  [ActionTypes.GET_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.Chain>;
-  [ActionTypes.GET_TOKEN_PRICES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TokenPriceReq>>,
-  ): Promise<ChartPrices>;
-  [ActionTypes.RESET_TOKEN_PRICES](context: APIActionContext): void;
-  [ActionTypes.GET_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<boolean>;
   [ActionTypes.GET_END_BLOCK_EVENTS](context: APIActionContext, { height }: DemerisTxResultParams): Promise<unknown>;
   [ActionTypes.INIT](context: APIActionContext, config: DemerisConfig): void;
   [ActionTypes.RESET_STATE](context: APIActionContext): void;
@@ -209,103 +196,6 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       return getters['getVerifyTrace'](params);
-    }
-  },
-  async [ActionTypes.GET_CHAIN]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const reqHash = hashObject({ action: ActionTypes.GET_CHAIN, payload: { params } });
-
-    if (state._InProgess.get(reqHash)) {
-      await state._InProgess.get(reqHash);
-
-      return getters['getChain'](params);
-    } else {
-      let resolver;
-      let rejecter;
-      const promise: Promise<void> = new Promise((resolve, reject) => {
-        resolver = resolve;
-        rejecter = reject;
-      });
-      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      try {
-        const response: AxiosResponse<EmerisAPI.ChainResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name,
-        );
-        commit(MutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN, payload: { params } });
-        }
-      } catch (e) {
-        commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-        rejecter(e);
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN, payload: { params } });
-        }
-        throw new EmerisError('Demeris:GetChain', 'Could not perform API query.');
-      }
-      resolver();
-      commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChain'](params);
-    }
-  },
-  async [ActionTypes.GET_TOKEN_PRICES]({ commit, getters, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    commit(MutationTypes.SET_TOKEN_PRICES_STATUS, {
-      value: params.showSkeleton ? LoadingState.LOADING : LoadingState.LOADED,
-    });
-    try {
-      const response: AxiosResponse<EmerisAPI.TokenPriceResponse> = await axios.get(
-        getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
-      );
-      commit(MutationTypes.SET_TOKEN_PRICES, { value: response.data.data.prices });
-      commit(MutationTypes.SET_TOKEN_PRICES_STATUS, { value: LoadingState.LOADED });
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_TOKEN_PRICES, payload: { params } });
-      }
-    } catch (e) {
-      commit(MutationTypes.SET_TOKEN_PRICES_STATUS, { value: LoadingState.ERROR });
-      throw new EmerisError('Demeris:getTokenPrices', 'Could not perform API query.');
-    }
-    return getters['getTokenPrices'];
-  },
-  [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
-    commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
-  },
-  async [ActionTypes.GET_CHAIN_STATUS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
-    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-
-    if (state._InProgess.get(reqHash)) {
-      await state._InProgess.get(reqHash);
-
-      return getters['getChainStatus'](params);
-    } else {
-      let resolver;
-      let rejecter;
-      const promise: Promise<void> = new Promise((resolve, reject) => {
-        resolver = resolve;
-        rejecter = reject;
-      });
-      commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      try {
-        const response: AxiosResponse<EmerisAPI.ChainStatusResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name + '/status',
-        );
-        commit(MutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-        }
-      } catch (e) {
-        commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-        rejecter(e);
-        if (subscribe) {
-          commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
-        }
-        throw new EmerisError('Demeris:GetChainStatus', 'Could not perform API query.');
-      }
-      resolver();
-      commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChainStatus'](params);
     }
   },
   async [ActionTypes.GET_NEW_BLOCK]({ getters }, { chain_name }) {
