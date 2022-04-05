@@ -4,13 +4,13 @@
     <div class="flex justify-between items-center">
       <div class="w-10 h-10 mr-4">
         <img
-          v-if="selectedAirdrop.tokenIcon"
+          v-if="selectedAirdrop.tokenIcon && selectedAirdrop.imageExists"
           :src="selectedAirdrop.tokenIcon"
           alt="Airdrop Logo"
           class="rounded-full"
         />
         <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
-          {{ selectedAirdrop.chainName.slice(0, 1) }}
+          {{ selectedAirdrop.project.slice(0, 2) }}
         </div>
       </div>
       <div class="w-10/12">
