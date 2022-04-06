@@ -6,13 +6,13 @@
       <div class="text-center mb-6">
         <div class="w-1/4 mx-auto mb-6">
           <img
-            v-if="selectedAirdrop.tokenIcon"
+            v-if="selectedAirdrop.tokenIcon && selectedAirdrop.imageExists"
             :src="selectedAirdrop.tokenIcon"
             alt="Airdrop Logo"
             class="w-full rounded-full"
           />
           <div v-else class="w-20 h-20 bg-text text-inverse rounded-full text-center pt-4 text-3 font-bold">
-            {{ selectedAirdrop.chainName.slice(0, 1) }}
+            {{ selectedAirdrop.project.slice(0, 2) }}
           </div>
         </div>
 

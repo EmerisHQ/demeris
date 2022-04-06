@@ -273,10 +273,8 @@
         "withdrawLiqAction": "Withdrawing liquidity",
         "withdrawing": "Withdrawing",
         "transferred": "Transferred",
-
         "reset": "Send another",
         "next": "Next transaction",
-
         "sendAfterSwap": "Send {displayName} \u2192",
         "genericActionComplete": "Transaction complete",
         "transferActionComplete": "Assets transferred",
@@ -547,6 +545,19 @@
           "searchingAirdrops": "Searching 12/34 airdrops",
           "noAirdropsToClaim": "No airdrops to claim",
           "checkOutForEligibility": "Check out the upcoming airdrops and find out if you’re eligible"
+        },
+        "claimCard": {
+          "ended": "Airdrop ended",
+          "comingSoon": "Airdrop coming soon",
+          "becomeEligible": "You could become eligible for this airdrop",
+          "amountTitle": "Your Airdrop amount",
+          "airdropAmount": "126.54 LIKE",
+          "autoDrop": "Auto-drop",
+          "notAnnounced": "Not announced",
+          "snapshotDate": "Snapshot Date",
+          "starts": "Starts",
+          "ends": "Ends",
+          "distribution": "Distribution"
         },
         "airdropsInfo": {
           "title": "Introduction",
