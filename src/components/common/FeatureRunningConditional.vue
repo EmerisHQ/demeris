@@ -17,7 +17,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const isActivated = computed(() => {
   const isRunning = featureRunning(props.name);
-  console.log('isRunning?', isRunning);
   if (isRunning === undefined) {
     return false;
   }
