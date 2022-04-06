@@ -19,7 +19,6 @@ export type TokenPriceReq = {
 };
 export type TokenIdReq = {
   token: string;
-  showSkeleton: boolean;
 };
 export type GitAirdropsListReq = {
   airdropFileName: string;
@@ -402,7 +401,6 @@ export type Airdrop = {
   discordUrl: string;
   mediumUrl: string;
   imageExists: boolean;
-  eligibilityStatusCode: number;
   address: string;
   eligibilityResponse: any;
   airdropBlogUrl: string;
@@ -417,6 +415,7 @@ export type Airdrop = {
   eligibilityCheckEndpoint: string;
   unanimousClaim: boolean;
   claimActions: AirdropClaimAction[];
+  eligibleTokens: string[];
 };
 
 export type selectedAirdropReq = {
