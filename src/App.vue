@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -39,6 +39,7 @@ import { setStore } from '@/utils/useStore';
 
 import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import usePoolsFactory from './composables/usePools';
+import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
@@ -203,6 +204,31 @@ export default defineComponent({
         });
       });
     };
+
+    const airdrops = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    });
+
+    const airdropsLoading = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+    });
+
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
+    watch(
+      () => isDemoAccount.value,
+      async (value) => {
+        if (!value && !airdropsLoading.value && airdrops.value.length > 0) {
+          typedstore.dispatch(GlobalActionTypes.API.AIRDROPS_ELIGIBILITY_CHECK);
+        }
+      },
+      { immediate: true },
+    );
 
     return { initialized, status, showMaintenanceScreen };
   },

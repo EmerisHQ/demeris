@@ -401,7 +401,6 @@ export type Airdrop = {
   discordUrl: string;
   mediumUrl: string;
   imageExists: boolean;
-  eligibilityStatusCode: number;
   address: string;
   eligibilityResponse: any;
   airdropBlogUrl: string;
@@ -416,6 +415,7 @@ export type Airdrop = {
   eligibilityCheckEndpoint: string;
   unanimousClaim: boolean;
   claimActions: AirdropClaimAction[];
+  eligibleTokens: string[];
 };
 
 export type selectedAirdropReq = {
