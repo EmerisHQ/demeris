@@ -218,10 +218,6 @@ const props = defineProps({
     default: undefined,
   },
 });
-//todo
-//pay denom select on {pay,receive, denom,amount} set messes payamount - need lowest pay amount first.. values dont align (pay/receive)
-//keep route selected when amount is changed (dont always take first route).. needs confirmation if amount change will return same order of routes..
-//receive coin chain
 const isInit = ref(false);
 const isReverse = ref(false);
 const isPayAmountLoading = ref(false);
