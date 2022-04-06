@@ -41,21 +41,20 @@
         </tr>
       </thead>
 
-      <tbody>
-        <tr
-          v-for="(airdrop, index) in mappedItem.shouldMinimize ? mappedItem.airdrops.slice(0, 3) : mappedItem.airdrops"
-          :key="index"
-          class="assets-table__row group cursor-pointer"
-          @click="handleClick(airdrop)"
-        >
+      <tbody
+        v-for="(airdrop, index) in mappedItem.shouldMinimize ? mappedItem.airdrops.slice(0, 3) : mappedItem.airdrops"
+        :key="index"
+      >
+        <tr v-if="airdrop.project" class="assets-table__row group cursor-pointer" @click="handleClick(airdrop)">
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <div class="flex items-center">
               <div>
                 <img
-                  v-if="airdrop.tokenIcon && airdrop.imageExists"
+                  v-if="!imageFailIndexes.includes(index)"
                   :src="airdrop.tokenIcon"
                   alt="Airdrop Logo"
                   class="w-10 rounded-full"
+                  @error="imageLoadError(index)"
                 />
 
                 <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-2 text-0">
@@ -63,7 +62,7 @@
                 </div>
               </div>
               <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
-                <span class="font-medium"><ChainName :name="airdrop.project" /></span>
+                <span class="font-medium"><ChainName :name="airdrop.project ? airdrop.project : '-'" /></span>
                 <div class="-text-1 font-normal text-muted mt-0.5">
                   <Ticker :name="airdrop.tokenTicker ? airdrop.tokenTicker : '-'" />
                 </div>
@@ -157,15 +156,17 @@ export default defineComponent({
   emits: ['row-click'],
   setup(props, { emit }) {
     const keyword = ref<string>('');
+    let watchedAirdrops = ref([]);
     let mappedAirdrops = ref([]);
     let tempMappedAirdrops = ref([]);
+    let imageFailIndexes = ref([]);
 
     const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
       emit('row-click', airdrop);
     };
 
     const noAirdropsToClaim = computed(() => {
-      return props.airdrops.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
+      return watchedAirdrops.value.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
     });
 
     const sections = computed(() => {
@@ -183,18 +184,18 @@ export default defineComponent({
     const setAirdropsTable = (activeFilter: string) => {
       mappedAirdrops.value = [];
       if (activeFilter === 'all') {
-        const mappedAirdropsObj = { sectionTitle: null, airdrops: props.airdrops, shouldMinimize: false };
+        const mappedAirdropsObj = { sectionTitle: null, airdrops: watchedAirdrops.value, shouldMinimize: false };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else if (activeFilter === 'past') {
         const mappedAirdropsObj = {
           sectionTitle: null,
-          airdrops: props.airdrops.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
+          airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
           shouldMinimize: false,
         };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else {
         sections.value.forEach((item) => {
-          const airdrops = props.airdrops.filter((airdropItem) => airdropItem.eligibility === item);
+          const airdrops = watchedAirdrops.value.filter((airdropItem) => airdropItem.eligibility === item);
           const mappedAirdropsObj = {
             sectionTitle: item,
             airdrops,
@@ -211,10 +212,15 @@ export default defineComponent({
       mappedAirdrops.value.push(mappedItem);
     };
 
+    const imageLoadError = (airdropIndex: number) => {
+      imageFailIndexes.value.push(airdropIndex);
+    };
+
     watch(
-      () => [props.activeFilter],
-      async () => {
-        setAirdropsTable(props.activeFilter);
+      () => [props.activeFilter, props.airdrops],
+      async (props: any) => {
+        watchedAirdrops.value = props[1];
+        setAirdropsTable(props[0]);
       },
       { immediate: true },
     );
@@ -231,6 +237,8 @@ export default defineComponent({
       AirdropEligibilityStatus,
       EmerisAirdrops,
       sectionTitle,
+      imageLoadError,
+      imageFailIndexes,
     };
   },
 });

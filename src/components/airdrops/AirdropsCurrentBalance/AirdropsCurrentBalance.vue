@@ -4,10 +4,11 @@
     <div class="flex justify-between items-center">
       <div class="w-10 h-10 mr-4">
         <img
-          v-if="selectedAirdrop.tokenIcon && selectedAirdrop.imageExists"
+          v-if="!imageLoadFail"
           :src="selectedAirdrop.tokenIcon"
           alt="Airdrop Logo"
           class="rounded-full"
+          @error="() => (imageLoadFail = true)"
         />
         <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
           {{ selectedAirdrop.project.slice(0, 2) }}
@@ -23,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRaw } from 'vue';
+import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
@@ -38,11 +39,13 @@ export default defineComponent({
   setup() {
     const typedstore = useStore() as RootStoreTyped;
 
+    let imageLoadFail = ref(false);
+
     const selectedAirdrop = computed(() => {
       return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
     });
 
-    return { selectedAirdrop };
+    return { selectedAirdrop, imageLoadFail };
   },
 });
 </script>

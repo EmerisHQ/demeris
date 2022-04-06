@@ -6,10 +6,11 @@
       <div class="text-center mb-6">
         <div class="w-1/4 mx-auto mb-6">
           <img
-            v-if="selectedAirdrop.tokenIcon && selectedAirdrop.imageExists"
+            v-if="!imageLoadFail"
             :src="selectedAirdrop.tokenIcon"
             alt="Airdrop Logo"
             class="w-full rounded-full"
+            @error="() => (imageLoadFail = true)"
           />
           <div v-else class="w-20 h-20 bg-text text-inverse rounded-full text-center pt-4 text-3 font-bold">
             {{ selectedAirdrop.project.slice(0, 2) }}
@@ -120,6 +121,7 @@ export default defineComponent({
 
     const isClaimModalOpen = ref(false);
     const isWalletModalOpen = ref(false);
+    let imageLoadFail = ref(false);
 
     const toggleClaimModal = () => {
       isClaimModalOpen.value = !isClaimModalOpen.value;
@@ -168,6 +170,7 @@ export default defineComponent({
       isMultipleSnapshots,
       toggleConnectWalletModal,
       EmerisAirdrops,
+      imageLoadFail,
     };
   },
 });
