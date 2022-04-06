@@ -218,13 +218,10 @@ const props = defineProps({
     default: undefined,
   },
 });
-// todo:  filter routes with "insufficient funds" in response, filter gravity out?, filter NaN in api response,
-
-//what if quotes list is 0.. what if api returns {error: 'The denom 'uosmo' is not present in any available swap'.. ensure clicking on visualize deosn't select quote.
+//todo
 //pay denom select on {pay,receive, denom,amount} set messes payamount - need lowest pay amount first.. values dont align (pay/receive)
 //keep route selected when amount is changed (dont always take first route).. needs confirmation if amount change will return same order of routes..
-//receive coin chain hardcode
-//check payamountloading when api is working again
+//receive coin chain
 const isInit = ref(false);
 const isReverse = ref(false);
 const isPayAmountLoading = ref(false);
@@ -250,7 +247,7 @@ const data = reactive({
     if (data.isBothSelected) {
       if (data.isOver) {
         return t('components.swap.insufficentFunds');
-      } else if (!dexStatus.value) {
+      } else if ((!!data.payCoinAmount || !!data.receiveCoinAmount) && !(daggRoutes.value && daggRoutes.value.length)) {
         return t('components.swap.unAvailable');
       } else {
         if (data.isPriceChanged) {
@@ -267,15 +264,7 @@ const data = reactive({
     }
   }),
   buttonTooltipText: computed(() => {
-    if (data.isBothSelected) {
-      if (!dexStatus.value) {
-        return t('components.swap.tooltipChainDown');
-      } else {
-        return '';
-      }
-    } else {
-      return '';
-    }
+    return '';
   }),
   buttonStatus: computed(() => {
     if (!isInit.value || data.isLoading) {
@@ -344,7 +333,14 @@ const data = reactive({
     return data.payCoinData && data?.receiveCoinData;
   }),
   isSwapReady: computed(() => {
-    return !(data.isOver || !data.isBothSelected || !isAmount.value || !isSignedIn.value || !dexStatus.value);
+    return !(
+      data.isOver ||
+      !data.isBothSelected ||
+      !isAmount.value ||
+      !isSignedIn.value ||
+      !daggRoutes.value ||
+      !daggRoutes.value.length
+    );
   }),
   isChildModalOpen: false,
   isPriceChanged: false,
@@ -363,12 +359,6 @@ const data = reactive({
 
 const isSignedIn = computed(() => {
   return store.getters[GlobalGetterTypes.USER.isSignedIn];
-});
-
-const dexStatus = computed(() => {
-  return store.getters[GlobalGetterTypes.API.getChainStatus]({
-    chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
-  });
 });
 
 const verifiedDenoms = computed(() => {
@@ -394,7 +384,10 @@ const toPrecision = computed(() =>
   store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data?.receiveCoinData?.base_denom }),
 );
 
-const isDefaultState = computed(() => !(data.payCoinAmount && data.payCoinData && data.receiveCoinData));
+const isDefaultState = computed(
+  () =>
+    !(data.payCoinAmount && data.payCoinData && data.receiveCoinData && daggRoutes.value && daggRoutes.value.length),
+);
 
 onUnmounted(() => {
   if (setIntervalId.value) {
@@ -667,7 +660,7 @@ function setChildModalOpenStatus(payload) {
 
 async function getRoutes({ denomIn, denomOut, amountIn, amountOut }) {
   try {
-    //change url
+    //TODO: change url
     const response = await axios.post('https://dev.demeris.io/v1' + '/daggregation/routing', {
       denomIn: denomIn,
       denomOut: denomOut,
@@ -678,6 +671,7 @@ async function getRoutes({ denomIn, denomOut, amountIn, amountOut }) {
   } catch (e) {
     const error = e.response?.data?.error || e.message;
     console.log(error);
+    return { routes: [] };
   }
 }
 
@@ -691,20 +685,21 @@ async function setCounterPairCoinAmount(e) {
         amountIn: data.payCoinAmount * 10 ** fromPrecision.value,
         amountOut: null,
       });
+      //filters NaN (comes as a string) and Insufficient funds and other text
+      routes = routes?.filter((route) => {
+        return !isNaN(route?.steps[route?.steps?.length - 1]?.data?.to?.amount);
+      });
       daggRoutes.value = routes;
-      const len = routes[0]?.steps.length;
+      if (routes && routes.length) {
+        const len = routes[0]?.steps.length;
 
-      if (routes[0]?.steps[len - 1]?.data?.to?.amount) {
-        console.log(
-          'receive amount',
-          (data.receiveCoinAmount = (routes[0]?.steps[len - 1]?.data?.to?.amount / 10 ** toPrecision.value)?.toFixed(
-            4,
-          )),
-        );
-        data.receiveCoinAmount = (routes[0]?.steps[len - 1]?.data?.to?.amount / 10 ** toPrecision.value)?.toFixed(4);
+        if (routes[0]?.steps[len - 1]?.data?.to?.amount) {
+          data.receiveCoinAmount = (routes[0]?.steps[len - 1]?.data?.to?.amount / 10 ** toPrecision.value)?.toFixed(4);
+        }
+      } else {
+        data.receiveCoinAmount = 0;
       }
       isReceiveAmountLoading.value = false;
-
       // if (data.payCoinAmount + data.receiveCoinAmount === 0) {
       //   slippage.value = 0;
       // }
@@ -716,10 +711,17 @@ async function setCounterPairCoinAmount(e) {
         amountIn: null,
         amountOut: data.receiveCoinAmount * 10 ** toPrecision.value,
       });
+      routes = routes?.filter((route) => {
+        return !isNaN(route?.steps[0]?.data?.from?.amount);
+      });
       daggRoutes.value = routes;
-      const len = routes[0]?.steps.length; //comes out in reverse order.. so check needed after confirming that amountout works fine API wise..
-      if (routes[0]?.steps[len - 1]?.data?.from?.amount) {
-        data.payCoinAmount = (routes[0]?.steps[len - 1]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(4);
+      if (routes && routes.length) {
+        const len = routes[0]?.steps.length; //comes out in reverse order.. so check needed after confirming that amountout works fine API wise..
+        if (routes[0]?.steps[len - 1]?.data?.from?.amount) {
+          data.payCoinAmount = (routes[0]?.steps[len - 1]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(4);
+        }
+      } else {
+        data.payCoinAmount = 0;
       }
       isPayAmountLoading.value = false;
     }
