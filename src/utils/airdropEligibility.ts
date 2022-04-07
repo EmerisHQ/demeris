@@ -1,3 +1,4 @@
+import { Airdrop } from '@emeris/types/lib/EmerisAirdrops';
 import axios from 'axios';
 
 import { GlobalGetterTypes } from '@/store';
@@ -14,7 +15,7 @@ export enum AirdropEligibilityStatus {
   NOT_AVAILABLE = 'NOT_AVAILABLE',
 }
 
-export function getAirdropEligibility(airdrop: any) {
+export function getAirdropEligibility(airdrop: Airdrop) {
   if (airdrop.claimActions && airdrop.claimActions.length === 1 && airdrop.claimActions[0].actionType === 'autodrop') {
     return AirdropEligibilityStatus.AUTO_DROP;
   } else if (airdrop.eligibleTokens && airdrop.eligibleTokens.length > 0) {
