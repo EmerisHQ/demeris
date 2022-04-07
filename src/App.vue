@@ -8,9 +8,7 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
-    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-      <TransactionsCenter />
-    </FeatureRunningConditional>
+    <TransactionsCenter />
     <SimplexModal />
     <MoonpayModal />
   </div>
@@ -37,7 +35,6 @@ import TransactionsCenter from '@/features/transactions/components/TransactionsC
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { setStore } from '@/utils/useStore';
 
-import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import usePoolsFactory from './composables/usePools';
 import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
@@ -51,7 +48,6 @@ export default defineComponent({
     ChainDownWrapper,
     CookieConsent,
     TransactionsCenter,
-    FeatureRunningConditional,
     SimplexModal,
     MoonpayModal,
     MaintenanceScreen,
