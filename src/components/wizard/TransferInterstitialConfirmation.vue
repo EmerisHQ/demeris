@@ -134,7 +134,11 @@ export default defineComponent({
         });
         let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.toChain });
 
-        if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].type.startsWith('IBC')) {
+        if (
+          props.steps[0].transactions.length > 1 &&
+          (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+            props.steps[0].transactions[1].type == 'IBCtransferForward')
+        ) {
           const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
           toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: forwardData.toChain });
         }
@@ -174,7 +178,11 @@ export default defineComponent({
           });
           break;
         case 'transfer':
-          if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].type.startsWith('IBC')) {
+          if (
+            props.steps[0].transactions.length > 1 &&
+            (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+              props.steps[0].transactions[1].type == 'IBCtransferForward')
+          ) {
             const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
             const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
 
@@ -224,7 +232,7 @@ export default defineComponent({
         stepDenoms = props.steps
           .map((step) => {
             const transaction = step.transactions[0];
-            if (!transaction.type.startsWith('IBC')) {
+            if (!(transaction.type == 'IBCtransferBackward' || transaction.type == 'IBCtransferForward')) {
               return;
             }
             const chain = (transaction.data as AbstractIBCTransferTransactionData).chainName || dexChain;

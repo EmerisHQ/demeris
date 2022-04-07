@@ -710,7 +710,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
 
         if (context.input.action === 'transfer') {
-          if (getCurrentStep(context).transactions[0].type.startsWith('IBC')) {
+          if (
+            getCurrentStep(context).transactions[0].type == 'IBCtransferBackward' ||
+            getCurrentStep(context).transactions[0].type == 'IBCtransferForward'
+          ) {
             return true;
           }
         }
