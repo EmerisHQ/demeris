@@ -19,7 +19,8 @@
         >
           {{ buttonName?.split('Max')[0] }}
         </div>
-        <span> &nbsp;Max</span>
+        <span v-if="buttonName.includes('Max')"> &nbsp;Max</span>
+        <span v-else>{{ buttonName }}</span>
       </div>
     </div>
     <div v-if="showBadge" class="icon-button__badge" />
