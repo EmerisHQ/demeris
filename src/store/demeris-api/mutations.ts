@@ -184,7 +184,7 @@ export const mutations: MutationTree<APIState> & Mutations = {
   },
   [MutationTypes.SET_CHAIN](state, payload) {
     const { status, ...toUpdate } = payload.value;
-    if (!state.chains[payload.params.chain_name].status) {
+    if (state.chains[payload.params.chain_name].status == undefined) {
       (toUpdate as EmerisAPI.Chain).status = status;
     }
     if (
