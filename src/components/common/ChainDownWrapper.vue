@@ -22,31 +22,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from '@vue/runtime-core';
+<script setup lang="ts">
+import { computed } from '@vue/runtime-core';
 import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
-export default defineComponent({
-  components: {
-    ChainName,
-    Icon,
-  },
+const typedstore = useStore() as RootStoreTyped;
 
-  setup() {
-    const typedstore = useStore() as RootStoreTyped;
+const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
-    const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-
-    const isHubDown = computed(() => {
-      const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: dexChain });
-      return status === false;
-    });
-
-    return { dexChain, isHubDown };
-  },
+const isHubDown = computed(() => {
+  const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: dexChain });
+  return status === false;
 });
 </script>
