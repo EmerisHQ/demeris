@@ -164,7 +164,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       handleOpen();
 
       intervalId = setInterval(() => {
-        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage).catch(handleError);
+        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
       }, fallbackIntervalMs);
 
       timeoutId = setTimeout(() => {
