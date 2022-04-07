@@ -105,6 +105,7 @@
             <div v-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_AVAILABLE" class="text-muted">
               Not available
             </div>
+            <div v-if="airdrop.eligibility === AirdropEligibilityStatus.ENDED" class="text-muted">-</div>
           </td>
         </tr>
       </tbody>

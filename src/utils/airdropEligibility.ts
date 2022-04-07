@@ -1,3 +1,4 @@
+import { EmerisAirdrops } from '@emeris/types';
 import { Airdrop } from '@emeris/types/lib/EmerisAirdrops';
 import axios from 'axios';
 
@@ -13,11 +14,14 @@ export enum AirdropEligibilityStatus {
   CLAIMED = 'CLAIMED',
   AUTO_DROP = 'AUTO_DROP',
   NOT_AVAILABLE = 'NOT_AVAILABLE',
+  ENDED = 'ENDED',
 }
 
 export function getAirdropEligibility(airdrop: Airdrop) {
   if (airdrop.claimActions && airdrop.claimActions.length === 1 && airdrop.claimActions[0].actionType === 'autodrop') {
     return AirdropEligibilityStatus.AUTO_DROP;
+  } else if (airdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED) {
+    return AirdropEligibilityStatus.ENDED;
   } else if (airdrop.eligibleTokens && airdrop.eligibleTokens.length > 0) {
     const denoms_existing = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.filter((x) =>
       airdrop.eligibleTokens.includes(x.ticker),
