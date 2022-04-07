@@ -96,15 +96,12 @@ const routesTransformedToQuotes = computed(() => {
       (route as any).steps[numberOfSteps - 1].data.to.amount /
       (10 **
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: (route as any).steps[0].data.to.base_denom,
+          name: (route as any).steps[numberOfSteps - 1].data.to.denom,
         }) || 6)
     ).toFixed(4);
-    routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.base_denom;
+    routeObj.denom = (route as any).steps[numberOfSteps - 1].data.to.denom;
     routeObj.numberOfTransactions = numberOfSteps;
-    routeObj.usdAmount = getDisplayPrice(
-      (route as any).steps[numberOfSteps - 1].data.to.base_denom,
-      routeObj.amount,
-    ).value;
+    routeObj.usdAmount = getDisplayPrice((route as any).steps[numberOfSteps - 1].data.to.denom, routeObj.amount).value;
     //fee token when?
     quotesArr.push(routeObj);
   }

@@ -123,7 +123,7 @@
           <IconButton
             v-else
             class="mr-0.5 bg-surface"
-            :name="'Osmosis'"
+            :name="dex"
             :type="'text'"
             :status="'normal'"
             :data="{
@@ -134,11 +134,27 @@
         </div>
       </div>
       <!-- pay coin header -->
-      <div v-if="!isDefaultState" class="denom-select-header flex -text-1 font-medium px-6 pt-6">
+      <div
+        v-if="!isDefaultState"
+        class="denom-select-header no-default-tippy-padding flex -text-1 font-medium px-6 pt-6"
+      >
         Receive
-        <span v-if="selectedQuoteIndex === 0" class="flex ml-auto font-normal text-muted"
-          >Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875"
-        /></span>
+        <tippy class="ml-auto" placement="bottom-start" delay="0" :interactive="true" :arrow="false">
+          <span v-if="selectedQuoteIndex === 0" class="flex ml-auto font-normal text-muted"
+            >Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875"
+          /></span>
+          <template #content>
+            <BestPrice
+              :number-of-exchanges-searched="2"
+              :dex="dex"
+              :expected-rate="expectedRate"
+              :limit-price="limitPrice"
+              :denom="data?.receiveCoinData?.displayName"
+              :max-slippage="slippage"
+              :min-received="data?.receiveCoinAmount"
+            />
+          </template>
+        </tippy>
       </div>
       <!-- receive coin selector -->
       <DenomSelect
@@ -192,6 +208,7 @@ import { computed, onUnmounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import BestPrice from '@/components/common/BestPrice.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import QuotesList from '@/components/common/QuotesList.vue';
@@ -210,7 +227,7 @@ import { GlobalGetterTypes } from '@/store';
 import { getTicker } from '@/utils/actionHandler';
 import { getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
+import { capitalizeFirstLetter, parseCoins } from '@/utils/basic';
 
 const props = defineProps({
   defaultAsset: {
@@ -227,7 +244,7 @@ const selectedQuoteIndex = ref(0);
 const daggRoutes = ref(null);
 const setIntervalId = ref(null);
 const txFee = ref(0);
-// const slippage = ref(0);
+const slippage = ref(0);
 const { isOpen, toggleModal: reviewModalToggle } = useModal();
 const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
 const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = useModal();
@@ -385,20 +402,6 @@ const isDefaultState = computed(
     !(data.payCoinAmount && data.payCoinData && data.receiveCoinData && daggRoutes.value && daggRoutes.value.length),
 );
 
-onUnmounted(() => {
-  if (setIntervalId.value) {
-    clearInterval(setIntervalId.value);
-  }
-
-  if (transactionsStore.currentId) {
-    const snapshot = transactionsStore.getCurrentService().getSnapshot();
-    const cursor = getTransactionOffset(snapshot.context);
-    if (snapshot.matches('transacting') || (cursor && cursor.total > cursor.offset)) {
-      transactionsStore.setTransactionAsPending();
-    }
-  }
-});
-
 const allBalances = computed(() => {
   //add denom to use generally
   const userBalance = balances.value.map((coin) => {
@@ -458,6 +461,12 @@ const assetsToReceive = computed(() => {
       .filter((receiveAsset) => receiveAsset?.base_denom !== data.payCoinData?.base_denom),
   );
 });
+
+const dex = computed(() => capitalizeFirstLetter(daggRoutes.value[0]?.steps[0]?.protocol));
+const expectedRate = computed(() =>
+  ((data?.receiveCoinAmount * 10 ** toPrecision.value) / (data?.payCoinAmount * 10 ** fromPrecision.value)).toFixed(8),
+);
+const limitPrice = computed(() => Number(expectedRate.value) * (1 - slippage.value));
 
 // default pay coin set
 watch(
@@ -654,7 +663,7 @@ function setChildModalOpenStatus(payload) {
   data.isChildModalOpen = payload;
 }
 
-async function getRoutes({ denomIn, denomOut, amountIn, amountOut }) {
+async function getRoutes({ denomIn, denomOut, amountIn, amountOut, chainIn, chainOut }) {
   try {
     //TODO: change url
     const response = await axios.post('https://dev.demeris.io/v1' + '/daggregation/routing', {
@@ -662,6 +671,8 @@ async function getRoutes({ denomIn, denomOut, amountIn, amountOut }) {
       denomOut: denomOut,
       amountIn: amountIn,
       amountOut: amountOut,
+      chainIn: chainIn,
+      chainOut: chainOut,
     });
     return response.data;
   } catch (e) {
@@ -673,6 +684,7 @@ async function getRoutes({ denomIn, denomOut, amountIn, amountOut }) {
 
 async function setCounterPairCoinAmount(e) {
   if (data.isBothSelected && (!!data.payCoinAmount || !!data.receiveCoinAmount)) {
+    selectedQuoteIndex.value = 0;
     if (e.includes('Pay') && !!data.payCoinAmount) {
       isReceiveAmountLoading.value = true;
       let { routes } = await getRoutes({
@@ -680,6 +692,8 @@ async function setCounterPairCoinAmount(e) {
         denomOut: data?.receiveCoinData?.base_denom,
         amountIn: data.payCoinAmount * 10 ** fromPrecision.value,
         amountOut: null,
+        chainIn: data.payCoinData?.on_chain,
+        chainOut: data.receiveCoinData?.on_chain,
       });
       //filters NaN (comes as a string) and Insufficient funds and other text
       routes = routes?.filter((route) => {
@@ -706,6 +720,8 @@ async function setCounterPairCoinAmount(e) {
         denomOut: data?.receiveCoinData?.base_denom,
         amountIn: null,
         amountOut: data.receiveCoinAmount * 10 ** toPrecision.value,
+        chainIn: data.payCoinData?.on_chain,
+        chainOut: data.receiveCoinData?.on_chain,
       });
       routes = routes?.filter((route) => {
         return !isNaN(route?.steps[0]?.data?.from?.amount);
@@ -754,9 +770,23 @@ function selectedQuoteIndexEvent(index) {
     )?.toFixed(4);
   }
 }
+
+onUnmounted(() => {
+  if (setIntervalId.value) {
+    clearInterval(setIntervalId.value);
+  }
+
+  if (transactionsStore.currentId) {
+    const snapshot = transactionsStore.getCurrentService().getSnapshot();
+    const cursor = getTransactionOffset(snapshot.context);
+    if (snapshot.matches('transacting') || (cursor && cursor.total > cursor.offset)) {
+      transactionsStore.setTransactionAsPending();
+    }
+  }
+});
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .wrapper {
   min-width: 20rem;
   /* min-height: 17rem; */
@@ -769,5 +799,8 @@ function selectedQuoteIndexEvent(index) {
 
 .denom-select-header {
   margin-bottom: -0.75rem;
+}
+.no-default-tippy-padding .tippy-content {
+  padding: 0 !important;
 }
 </style>

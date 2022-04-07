@@ -103,8 +103,7 @@ export default defineComponent({
           stepIndex === steps.length - 1
             ? (carryOver = `Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`)
             : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
-          (item as any).denom =
-            stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
+          (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
           (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
         } else if (steps[stepIndex].type === 'ibc') {
           lastType = 'ibc';
@@ -113,8 +112,7 @@ export default defineComponent({
             : (item as any).transactions.unshift(
                 `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`,
               );
-          (item as any).denom =
-            stepIndex == 0 ? steps[stepIndex].data.from.base_denom : steps[stepIndex].data.to.base_denom;
+          (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
           (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
         } else {
           console.log(`new type : ${steps[stepIndex].type}`);
