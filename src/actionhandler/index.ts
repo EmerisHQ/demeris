@@ -103,7 +103,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
         if (transferToHubStep.steps.length > 0) {
           steps.push({
             name: 'transfer',
-            description: 'Assets Must be transferred to hub first', //TODO
+            description: 'Assets must be transferred to hub first', //TODO
             memo: action.memo,
             transactions: [...transferToHubStep.steps],
           });
