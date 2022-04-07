@@ -35,7 +35,6 @@ export enum MutationTypes {
   //Airdrops Mutation Types
   SET_AIRDROPS = 'SET_AIRDROPS',
   SET_AIRDROPS_STATUS = 'SET_AIRDROPS_STATUS',
-  RESET_AIRDROPS = 'RESET_AIRDROPS',
   SET_SELECTED_AIRDROP = 'SET_SELECTED_AIRDROP',
 
   //Coingecko Mutation Types

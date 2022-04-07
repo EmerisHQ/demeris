@@ -49,7 +49,6 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
-  [MutationTypes.RESET_AIRDROPS](state: S): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -185,7 +184,7 @@ export const mutations: MutationTree<APIState> & Mutations = {
   },
   [MutationTypes.SET_CHAIN](state, payload) {
     const { status, ...toUpdate } = payload.value;
-    if (!state.chains[payload.params.chain_name].status) {
+    if (state.chains[payload.params.chain_name].status == undefined) {
       (toUpdate as EmerisAPI.Chain).status = status;
     }
     if (
@@ -246,10 +245,6 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
     state.airdropsStatus = payload.value;
   },
-  [MutationTypes.RESET_AIRDROPS](state) {
-    state.airdrops = [];
-  },
-
   //Coingecko Mutations
   [MutationTypes.SET_COINGECKO_ID](state, payload) {
     state.coinGeckoId = payload.value.data[payload.params];
