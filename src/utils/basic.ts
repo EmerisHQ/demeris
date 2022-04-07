@@ -215,11 +215,13 @@ export function capitalizeFirstLetter(string) {
 }
 
 export function getChainFromDex(dex) {
-  //switch case when dex increase. temp util till API includes this info.
-  if (dex.toLowerCase() === 'osmosis') return 'osmosis';
-  else if (dex.toLowerCase() === 'gravity') {
-    return 'cosmos-hub';
-  } else return null;
+  //temp util till API includes this info.
+  return (
+    {
+      osmosis: 'osmosis',
+      gravity: 'cosmos-hub',
+    }[dex] || null
+  );
 }
 
 export function getCleanURL(str: string) {
