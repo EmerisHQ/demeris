@@ -3,18 +3,34 @@ import { Request, Route } from 'playwright-core';
 const successReponse = {
   status: 200,
   contentType: 'text/json',
+  headers: {
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-origin': '*',
+  },
 };
 const notFoundReponse = {
   status: 404,
   contentType: 'text/json',
+  headers: {
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-origin': '*',
+  },
 };
 const errorResponse = {
   status: 400,
   contentType: 'text/json',
+  headers: {
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-origin': '*',
+  },
 };
 const serverErrorResponse = {
   status: 503,
   contentType: 'text/json',
+  headers: {
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-origin': '*',
+  },
 };
 function create200(body: string) {
   return Object.assign({ body }, successReponse);
@@ -38,7 +54,6 @@ export default function mockHandler(route: Route, request: Request): void {
           '{"verified_denoms":[{"name":"uakt","display_name":"AKT","logo":"https://storage.googleapis.com/emeris/logos/akash.svg","precision":6,"verified":true,"stakable":true,"ticker":"AKT","price_id":"akash-network","fee_token":true,"gas_price_levels":{"low":0.036,"average":0.09,"high":0.108},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":40000000,"chain_name":"akash"},{"name":"poolE71FE13681A283B7015E4E4C4852B0EDA72CC97A5CDE2ECA2A6C8C06C86AC775","display_name":"Gravity 2","precision":6,"verified":true,"ticker":"G2","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolDFB8434D5A80B4EAFA94B6878BD5B85265AC6C5D37204AB899B1C3C52543DA7E","display_name":"Gravity 1","precision":6,"verified":true,"ticker":"G1","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"uatom","display_name":"ATOM","logo":"https://storage.googleapis.com/emeris/logos/atom.svg","precision":6,"verified":true,"stakable":true,"ticker":"ATOM","price_id":"cosmos","fee_token":true,"gas_price_levels":{"low":0.005,"average":0.01,"high":0.03},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":10000000,"chain_name":"cosmos-hub"},{"name":"poolD639A99414646D7136C65C6845D0EB3456EDD3D6C2C43050D3FA3A24995B0E75","display_name":"Gravity 3","precision":6,"verified":true,"ticker":"G3","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"pool2B9C24833CAA268C9081EC251693A724E8D343FC25A841FF00FD37B047BA4DEA","display_name":"Gravity 4","precision":6,"verified":true,"ticker":"G4","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"pool32DD066BE949E5FDCC7DC09EBB67C7301D0CA957C2EF56A39B37430165447DAC","display_name":"Gravity 5","precision":6,"verified":true,"ticker":"G5","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"pool4BFAFC499776D30A4FA0D6033135F00CC4EFC770D19A74CAD37433B579F77FC0","display_name":"Gravity 6","precision":6,"verified":true,"ticker":"G6","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"pool7AE391C099D1D88CC85A9FA8A0DC5650BF8DDE0DCE7D0824C073802C020A7747","display_name":"Gravity 7","precision":6,"verified":true,"ticker":"G7","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolF2805980C54E1474BDCCF70EF5FE881F3B8EFCF8BA3198765C01D91904521788","display_name":"Gravity 8","precision":6,"verified":true,"ticker":"G8","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolBD5F1AF7A8B1F068C178F1D637DF126968EC10AB204A10116E320B2B8AF4FAC2","display_name":"Gravity 9","precision":6,"verified":true,"ticker":"G9","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolB457CE9240C221C0F76952FED6506F74375EDD38B32A6020B7DDDFD5A4867D5C","display_name":"Gravity 10","precision":6,"verified":true,"ticker":"G10","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolD1121E78E731AFD35FEA13CF9FA0044A1472F73A0EE784160CCAAAAE5C7AAD7E","display_name":"Gravity 11","precision":6,"verified":true,"ticker":"G11","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"pool60EFB07817D6B193A9FADA611404B8E11D82D6B7F0D10D57D3134C93E2BF7414","display_name":"Gravity 12","precision":6,"verified":true,"ticker":"G12","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolCF8B847997F5EB92B9C8DBAE41656F61D6BE708B1B42D31063291813014AD63F","display_name":"Gravity 13","precision":6,"verified":true,"ticker":"G13","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolAC9AF7B48E4497A0A9AF109E4286464A0EF06E7C35AD79198F03AB17A6A4CCA7","display_name":"Gravity 14","precision":6,"verified":true,"ticker":"G14","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"poolFD005C5AB01714A4B62E87F5213F5D5CDE357773D70712916A93664BCE5A6931","display_name":"Gravity 15","precision":6,"verified":true,"ticker":"G15","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":false,"relayer_denom":false,"chain_name":"cosmos-hub"},{"name":"basecro","display_name":"CRO","logo":"https://storage.googleapis.com/emeris/logos/crypto-com.svg","precision":8,"verified":true,"stakable":true,"ticker":"CRO","price_id":"crypto-com-chain","fee_token":true,"gas_price_levels":{"low":0.025,"average":0.03,"high":0.04},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":850000000,"chain_name":"crypto-org"},{"name":"uiris","display_name":"IRIS","logo":"https://storage.googleapis.com/emeris/logos/iris.svg","precision":6,"verified":true,"stakable":true,"ticker":"IRIS","price_id":"iris-network","fee_token":true,"gas_price_levels":{"low":0.2,"average":0.3,"high":0.4},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":1500000000,"chain_name":"iris"},{"name":"uosmo","display_name":"OSMO","logo":"https://storage.googleapis.com/emeris/logos/osmosis.svg","precision":6,"verified":true,"stakable":true,"ticker":"OSMO","price_id":"osmosis","fee_token":true,"gas_price_levels":{"low":0,"average":0,"high":0.12},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":60000000,"chain_name":"osmosis"},{"name":"uion","display_name":"ION","logo":"https://storage.googleapis.com/emeris/logos/ion.svg","precision":6,"verified":true,"ticker":"ION","price_id":"ion","gas_price_levels":{"low":0,"average":0,"high":0},"fetch_price":true,"relayer_denom":false,"chain_name":"osmosis"},{"name":"uxprt","display_name":"Persistence","logo":"https://storage.googleapis.com/emeris/logos/persistence.svg","precision":6,"verified":true,"stakable":true,"ticker":"XPRT","price_id":"persistence","fee_token":true,"gas_price_levels":{"low":0.015,"average":0.0375,"high":0.06},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":17000000,"chain_name":"persistence"},{"name":"uregen","display_name":"REGEN","logo":"https://storage.googleapis.com/emeris/logos/regen.svg","precision":6,"verified":true,"stakable":true,"ticker":"REGEN","price_id":"regen","fee_token":true,"gas_price_levels":{"low":0.03,"average":0.075,"high":0.12},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":50000000,"chain_name":"regen"},{"name":"udvpn","display_name":"Sentinel","logo":"https://storage.googleapis.com/emeris/logos/sentinel.svg","precision":6,"verified":true,"stakable":true,"ticker":"DVPN","price_id":"sentinel","fee_token":true,"gas_price_levels":{"low":0.1,"average":0.12,"high":0.2},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":5000000000,"chain_name":"sentinel"},{"name":"utick","display_name":"Microtick","logo":"https://storage.googleapis.com/emeris/logos/microtick.svg","precision":6,"verified":true,"stakable":true,"ticker":"TICK","price_id":"microtick","fee_token":true,"gas_price_levels":{"low":0.0005,"average":0.001,"high":0.0015},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"microtick"},{"name":"uixo","display_name":"IXO","logo":"https://storage.googleapis.com/emeris/logos/ixo.svg","precision":6,"verified":true,"stakable":true,"ticker":"IXO","price_id":"ixo","fee_token":true,"gas_price_levels":{"low":0.01,"average":0.025,"high":0.04},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"ixo"},{"name":"ungm","display_name":"NGM","logo":"https://storage.googleapis.com/emeris/logos/e-money.svg","precision":6,"verified":true,"stakable":true,"ticker":"NGM","price_id":"e-money","fee_token":true,"gas_price_levels":{"low":1.5,"average":1,"high":2},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"emoney"},{"name":"rowan","display_name":"ROWAN","logo":"https://storage.googleapis.com/emeris/logos/rowan.svg","precision":18,"verified":true,"stakable":true,"ticker":"EROWAN","price_id":"sifchain","fee_token":true,"gas_price_levels":{"low":250000000000,"average":500000000000,"high":1000000000000},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":50000000,"chain_name":"sifchain"},{"name":"nanolike","display_name":"LIKE","logo":"https://storage.googleapis.com/emeris/logos/likecoin.svg","precision":9,"verified":true,"stakable":true,"ticker":"LIKE","price_id":"likecoin","fee_token":true,"gas_price_levels":{"low":4,"average":4,"high":10},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":60000000,"chain_name":"likecoin"},{"name":"ujuno","display_name":"JUNO","logo":"https://storage.googleapis.com/emeris/logos/juno.svg","precision":6,"verified":true,"stakable":true,"ticker":"JUNO","price_id":"juno-network","fee_token":true,"gas_price_levels":{"low":0.005,"average":0.01,"high":0.025},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"juno"},{"name":"ubcna","display_name":"BCNA","logo":"https://storage.googleapis.com/emeris/logos/bitcanna.svg","precision":6,"verified":true,"stakable":true,"ticker":"BCNA","price_id":"bitcanna","fee_token":true,"gas_price_levels":{"low":0.25,"average":0.25,"high":0.5},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"bitcanna"},{"name":"ubtsg","display_name":"BTSG","logo":"https://storage.googleapis.com/emeris/logos/bitsong.svg","precision":6,"verified":true,"stakable":true,"ticker":"BTSG","price_id":"bitsong","fee_token":true,"gas_price_levels":{"low":0.01,"average":0.025,"high":0.03},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"bitsong"},{"name":"uxki","display_name":"XKI","logo":"https://storage.googleapis.com/emeris/logos/ki.svg","precision":6,"verified":true,"stakable":true,"ticker":"XKI","price_id":"ki","fee_token":true,"gas_price_levels":{"low":0.025,"average":0.025,"high":0.05},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"ki"},{"name":"uatolo","display_name":"ATOLO","logo":"https://storage.googleapis.com/emeris/logos/rizon.svg","precision":6,"verified":true,"stakable":true,"ticker":"ATOLO","price_id":"rizon","fee_token":true,"gas_price_levels":{"low":0.00025,"average":0.0003,"high":0.0005},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"rizon"},{"name":"ncheq","display_name":"CHEQ","logo":"https://storage.googleapis.com/emeris/logos/cheq.svg","precision":9,"verified":true,"stakable":true,"ticker":"CHEQ","price_id":"cheqd-network","fee_token":true,"gas_price_levels":{"low":25,"average":30,"high":50},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"cheqd"},{"name":"uhuahua","display_name":"HUAHUA","logo":"https://storage.googleapis.com/emeris/logos/huahua.svg","precision":6,"verified":true,"stakable":true,"ticker":"HUAHUA","price_id":"chihuahua-token","fee_token":true,"gas_price_levels":{"low":0.01,"average":0.025,"high":0.03},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"chihuahua"},{"name":"usomm","display_name":"SOMM","logo":"https://storage.googleapis.com/emeris/logos/somm.svg","precision":6,"verified":true,"stakable":true,"ticker":"SOMM","price_id":"sommelier","fee_token":true,"gas_price_levels":{"low":0.03,"average":0.075,"high":0.12},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":50000000,"chain_name":"sommelier"},{"name":"udsm","display_name":"DSM","logo":"https://storage.googleapis.com/emeris/logos/dsm.svg","precision":6,"verified":true,"stakable":true,"ticker":"DSM","price_id":"desmos","fee_token":true,"gas_price_levels":{"low":0.03,"average":0.075,"high":0.12},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":50000000,"chain_name":"desmos"},{"name":"ulum","display_name":"LUM","logo":"https://storage.googleapis.com/emeris/logos/lum.svg","precision":6,"verified":true,"stakable":true,"ticker":"LUM","price_id":"lum-network","fee_token":true,"gas_price_levels":{"low":0.03,"average":0.075,"high":0.12},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":50000000,"chain_name":"lum"},{"name":"ucmdx","display_name":"Comdex","logo":"https://storage.googleapis.com/emeris/logos/comdex.svg","precision":6,"verified":true,"stakable":true,"ticker":"CMDX","price_id":"comdex","fee_token":true,"gas_price_levels":{"low":0.25,"average":0.3,"high":0.5},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":42,"chain_name":"comdex"}]}',
         ),
       );
-      console.log('Mocked');
       return;
     case 'https://api.emeris.com/v1/chains':
       route.fulfill(
@@ -212,6 +227,193 @@ export default function mockHandler(route: Route, request: Request): void {
       route.fulfill(
         create200(
           '{"chain":{"enabled":true,"chain_name":"crypto-org","logo":"https://storage.googleapis.com/emeris/logos/crypto-com.svg","display_name":"Crypto.org","primary_channel":{"cosmos-hub":"channel-27","osmosis":"channel-10","sifchain":"channel-33"},"denoms":[{"name":"basecro","display_name":"CRO","logo":"https://storage.googleapis.com/emeris/logos/crypto-com.svg","precision":8,"verified":true,"stakable":true,"ticker":"CRO","price_id":"crypto-com-chain","fee_token":true,"gas_price_levels":{"low":0.025,"average":0.03,"high":0.04},"fetch_price":true,"relayer_denom":true,"minimum_thresh_relayer_balance":850000000}],"demeris_addresses":["feeaddress"],"genesis_hash":"genesis_hash","node_info":{"endpoint":"crypto-org","chain_id":"crypto-org-chain-mainnet-1","bech32_config":{"main_prefix":"cro","prefix_account":"cro","prefix_validator":"cncl","prefix_consensus":"cons","prefix_public":"pub","prefix_operator":"​","acc_addr":"cro","acc_pub":"cropub","val_addr":"crocncl​","val_pub":"crocncl​pub","cons_addr":"crocnclcons","cons_pub":"crocnclconspub"}},"valid_block_thresh":"30s","derivation_path":"m/44\'/394\'/0\'/0/0","supported_wallets":["keplr"],"block_explorer":"https://www.mintscan.io/crypto-org","public_node_endpoints":{"tendermint_rpc":["https://rpc-crypto-org.keplr.app:443"],"cosmos_api":["https://lcd-crypto-org.keplr.app:443"]},"cosmos_sdk_version":"v0.44.5"}}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/chain/persistence/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/iris/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/osmosis/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/regen/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/microtick/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/sentinel/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/ixo/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/ki/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/juno/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/bitsong/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/desmos/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/emoney/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/rizon/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/cheqd/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/lum/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/chihuahua/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/likecoin/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/comdex/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/bitcanna/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/sifchain/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/sommelier/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/akash/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/cosmos-hub/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/chain/crypto-org/status':
+      route.fulfill(create200('{"online":true }'));
+      return;
+    case 'https://api.emeris.com/v1/oracle/prices':
+      route.fulfill(
+        create200(
+          '{"data":{"Tokens":[{"Symbol":"AKTUSDT","Price":1.27,"Supply":155084777.843337},{"Symbol":"ATOLOUSDT","Price":0.0370808,"Supply":2174843709.22984},{"Symbol":"ATOMUSDT","Price":27.28,"Supply":292220476.401992},{"Symbol":"BCNAUSDT","Price":0.077357,"Supply":0},{"Symbol":"BTSGUSDT","Price":0.098383,"Supply":71322585.323597},{"Symbol":"CHEQUSDT","Price":0.093347,"Supply":0},{"Symbol":"CMDXUSDT","Price":1.18,"Supply":24072464.9307075},{"Symbol":"CROUSDT","Price":0.443898,"Supply":25263013692},{"Symbol":"DSMUSDT","Price":0.197041,"Supply":0},{"Symbol":"DVPNUSDT","Price":0.00401738,"Supply":7709314713.87425},{"Symbol":"EROWANUSDT","Price":0.10532,"Supply":933537256.93813},{"Symbol":"HUAHUAUSDT","Price":0.00084569,"Supply":0},{"Symbol":"IONUSDT","Price":4514.56,"Supply":21294},{"Symbol":"IOVUSDT","Price":0.03628286,"Supply":134963184.926895},{"Symbol":"IRISUSDT","Price":0.0667545,"Supply":1261352611.17844},{"Symbol":"IXOUSDT","Price":0.361047,"Supply":0},{"Symbol":"JUNOUSDT","Price":22.39,"Supply":47011670.194817},{"Symbol":"LIKEUSDT","Price":0.01655071,"Supply":1094646589.03287},{"Symbol":"LUMUSDT","Price":0.00914366,"Supply":0},{"Symbol":"LUNAUSDT","Price":104.15,"Supply":0},{"Symbol":"NGMUSDT","Price":1.1,"Supply":52767073.835489},{"Symbol":"OSMOUSDT","Price":7.35,"Supply":339176698},{"Symbol":"REGENUSDT","Price":0.806059,"Supply":125114520.004714},{"Symbol":"SOMMUSDT","Price":1.75,"Supply":0},{"Symbol":"STARSUSDT","Price":0.180442,"Supply":744977350.362096},{"Symbol":"TICKUSDT","Price":2.07,"Supply":647718.768946},{"Symbol":"XKIUSDT","Price":0.167536,"Supply":206131280},{"Symbol":"XPRTUSDT","Price":3.21,"Supply":96498102.432704}],"Fiats":[{"Symbol":"USDEUR","Price":0.91866},{"Symbol":"USDUSD","Price":1}]},"message":null,"status":200}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/742bdcf890fd4ba957350d90f27441b275320fb6/balance': //cro 394
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"ba551d35b2224ec1beabf8da7a678222b1e8ca76","base_denom":"basecro","verified":true,"amount":"33114664255basecro","on_chain":"crypto-org","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/11443b6ca513a08d65a18aee27803d8c1e3b8881/balance': //hub 118
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"udvpn","verified":true,"amount":"2364757569udvpn","on_chain":"sentinel","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"ubcna","verified":true,"amount":"11326460ubcna","on_chain":"bitcanna","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uregen","verified":true,"amount":"10100458uregen","on_chain":"regen","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uatom","verified":true,"amount":"100000ibc/5FEB332D2B121921C792F1A0DBF7C3163FF205337B4AFE6E14F69E8E49545F49","on_chain":"regen","ibc":{"path":"transfer/channel-11","hash":"5FEB332D2B121921C792F1A0DBF7C3163FF205337B4AFE6E14F69E8E49545F49"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uxki","verified":true,"amount":"1081100uxki","on_chain":"ki","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uiris","verified":true,"amount":"196626041uiris","on_chain":"iris","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"ncheq","verified":true,"amount":"1817689703ncheq","on_chain":"cheqd","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"nanolike","verified":true,"amount":"1893998000nanolike","on_chain":"likecoin","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"ujuno","verified":true,"amount":"132758ujuno","on_chain":"juno","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uxprt","verified":true,"amount":"450156ibc/81D08BC39FB520EBD948CF017910DD69702D34BF5AC160F76D3B5CFC444EBCE0","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-190","hash":"81D08BC39FB520EBD948CF017910DD69702D34BF5AC160F76D3B5CFC444EBCE0"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uatom","verified":true,"amount":"2676390uatom","on_chain":"cosmos-hub","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"udvpn","verified":true,"amount":"182586863ibc/42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-186","hash":"42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"basecro","verified":true,"amount":"7482924822ibc/C932ADFE2B4216397A4F17458B6E4468499B86C3BC8116180F85D799D6F5CC1B","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-187","hash":"C932ADFE2B4216397A4F17458B6E4468499B86C3BC8116180F85D799D6F5CC1B"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"poolF2805980C54E1474BDCCF70EF5FE881F3B8EFCF8BA3198765C01D91904521788","verified":true,"amount":"8poolF2805980C54E1474BDCCF70EF5FE881F3B8EFCF8BA3198765C01D91904521788","on_chain":"cosmos-hub","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"poolDFB8434D5A80B4EAFA94B6878BD5B85265AC6C5D37204AB899B1C3C52543DA7E","verified":true,"amount":"6276poolDFB8434D5A80B4EAFA94B6878BD5B85265AC6C5D37204AB899B1C3C52543DA7E","on_chain":"cosmos-hub","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uiris","verified":true,"amount":"17929472ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-182","hash":"12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"pool7AE391C099D1D88CC85A9FA8A0DC5650BF8DDE0DCE7D0824C073802C020A7747","verified":true,"amount":"2pool7AE391C099D1D88CC85A9FA8A0DC5650BF8DDE0DCE7D0824C073802C020A7747","on_chain":"cosmos-hub","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"poolD639A99414646D7136C65C6845D0EB3456EDD3D6C2C43050D3FA3A24995B0E75","verified":true,"amount":"374725poolD639A99414646D7136C65C6845D0EB3456EDD3D6C2C43050D3FA3A24995B0E75","on_chain":"cosmos-hub","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uion","verified":true,"amount":"370ibc/5BB694D466CCF099EF73F165F88472AF51D9C4991EAA42BD1168C5304712CC0D","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-141","hash":"5BB694D466CCF099EF73F165F88472AF51D9C4991EAA42BD1168C5304712CC0D"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uosmo","verified":true,"amount":"197976ibc/14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-141","hash":"14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uakt","verified":true,"amount":"13633399ibc/2181AAB0218EAC24BC9F86BD1364FBBFA3E6E3FCC25E88E3E68C15DC6E752D86","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-184","hash":"2181AAB0218EAC24BC9F86BD1364FBBFA3E6E3FCC25E88E3E68C15DC6E752D86"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uatom","verified":true,"amount":"1758500ibc/2E5D0AC026AC1AFA65A23023BA4F24BB8DDF94F118EDC0BAD6F625BFC557CDED","on_chain":"akash","ibc":{"path":"transfer/channel-17","hash":"2E5D0AC026AC1AFA65A23023BA4F24BB8DDF94F118EDC0BAD6F625BFC557CDED"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uakt","verified":true,"amount":"5455139uakt","on_chain":"akash","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"basecro","verified":true,"amount":"1000000ibc/CC6D7AE7F3EFAACC17468060C596A7D1A884856D18C595F748EEE03A42666107","on_chain":"akash","ibc":{"path":"transfer/channel-18","hash":"CC6D7AE7F3EFAACC17468060C596A7D1A884856D18C595F748EEE03A42666107"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uosmo","verified":true,"amount":"13523uosmo","on_chain":"osmosis","ibc":{}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uakt","verified":true,"amount":"10409150ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4","on_chain":"osmosis","ibc":{"path":"transfer/channel-1","hash":"1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"ubtsg","verified":true,"amount":"151585ibc/4E5444C35610CC76FC94E7F7886B93121175C28262DDFDDE6F84E82BF2425452","on_chain":"osmosis","ibc":{"path":"transfer/channel-73","hash":"4E5444C35610CC76FC94E7F7886B93121175C28262DDFDDE6F84E82BF2425452"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uixo","verified":true,"amount":"147270ibc/F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B","on_chain":"osmosis","ibc":{"path":"transfer/channel-38","hash":"F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uatom","verified":true,"amount":"427773ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","on_chain":"osmosis","ibc":{"path":"transfer/channel-0","hash":"27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"ujuno","verified":true,"amount":"50000ibc/46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED","on_chain":"osmosis","ibc":{"path":"transfer/channel-42","hash":"46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"usomm","verified":true,"amount":"172115ibc/9BBA9A1C257E971E38C1422780CE6F0B0686F0A3085E2D61118D904BFE0F5F5E","on_chain":"osmosis","ibc":{"path":"transfer/channel-165","hash":"9BBA9A1C257E971E38C1422780CE6F0B0686F0A3085E2D61118D904BFE0F5F5E"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uxprt","verified":true,"amount":"70000ibc/A0CC0CF735BFB30E730C70019D4218A1244FF383503FF7579C9201AB93CA9293","on_chain":"osmosis","ibc":{"path":"transfer/channel-4","hash":"A0CC0CF735BFB30E730C70019D4218A1244FF383503FF7579C9201AB93CA9293"}},{"address":"a9291de7ab7e6e6559f889ed326ca2c0859165a3","base_denom":"uregen","verified":true,"amount":"14786550ibc/1DCC8A6CB5689018431323953344A9F6CC4D0BFB261E88C9F7777372C10CD076","on_chain":"osmosis","ibc":{"path":"transfer/channel-8","hash":"1DCC8A6CB5689018431323953344A9F6CC4D0BFB261E88C9F7777372C10CD076"}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/de254511a074660debb2b15207489f2fd2813f24/balance': //persistence 750
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"e361989ea8accb81b1fc8fc784c8d91562871d01","base_denom":"uxprt","verified":true,"amount":"136250uxprt","on_chain":"persistence","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/ff7659b898e3e6f98328dc702bb503963bfa1801/balance': //bitsong 639
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"e4d038a2d7e008a9cb83fc07e86cce89d79a0329","base_denom":"ubtsg","verified":true,"amount":"199000ubtsg","on_chain":"bitsong","ibc":{}},{"address":"e4d038a2d7e008a9cb83fc07e86cce89d79a0329","base_denom":"uhuahua","verified":true,"amount":"1839063uhuahua","on_chain":"chihuahua","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/d6c5532cd1991081c051926501153665bfc65ee9/balance': //desmos 852
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"c7eff64c7a3707d39c99906ef38177f2c07667ec","base_denom":"udsm","verified":true,"amount":"97000udsm","on_chain":"desmos","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/a3a1f8cc0a6199844b9cd5e5ae4569a66cea39ec/balance': //lum 880
+      route.fulfill(create200('{"balances":null}'));
+      return;
+
+    case 'https://api.emeris.com/v1/account/742bdcf890fd4ba957350d90f27441b275320fb6/stakingbalances': //cro 394
+      route.fulfill(create200('{"staking_balances":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/11443b6ca513a08d65a18aee27803d8c1e3b8881/stakingbalances': //hub 118
+      route.fulfill(
+        create200(
+          '{"staking_balances":[{"validator_address":"c7c201d663b56d7458d2f1d3873afa6fe3c75721","amount":"10000.000000000000000000","chain_name":"cosmos-hub"},{"validator_address":"84bff84c7ddad11cb8c07386e91928c5675ca4bc","amount":"10000.000000000000000000","chain_name":"cosmos-hub"},{"validator_address":"a6900494f1f73cdae2baf1c8b88ff5fc0b8a339c","amount":"10001.000097548619401967","chain_name":"cosmos-hub"},{"validator_address":"2eba6ab30ffb8269b785692ecc77d2b983e78f78","amount":"10000.000000000000000000","chain_name":"cosmos-hub"},{"validator_address":"3c9978f5a7f6c44e35ef3aa9a688ed4fa0cb9238","amount":"500000.000000000000000000","chain_name":"akash"},{"validator_address":"c7c201d663b56d7458d2f1d3873afa6fe3c75721","amount":"170000.000000000000000000","chain_name":"osmosis"},{"validator_address":"c11d56394fcfcf9f644779dfb6bc670c10aa4df8","amount":"10000.000000000000000000","chain_name":"osmosis"},{"validator_address":"509c03871bda1d0f9683e64104ea9d625141624f","amount":"10000.000000000000000000","chain_name":"osmosis"}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/de254511a074660debb2b15207489f2fd2813f24/stakingbalances': //persistence 750
+      route.fulfill(create200('{"staking_balances":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/ff7659b898e3e6f98328dc702bb503963bfa1801/stakingbalances': //bitsong 639
+      route.fulfill(create200('{"staking_balances":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/d6c5532cd1991081c051926501153665bfc65ee9/stakingbalances': //desmos 852
+      route.fulfill(create200('{"staking_balances":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/a3a1f8cc0a6199844b9cd5e5ae4569a66cea39ec/stakingbalances': //lum 880
+      route.fulfill(create200('{"staking_balances":null}'));
+      return;
+
+    case 'https://api.emeris.com/v1/account/742bdcf890fd4ba957350d90f27441b275320fb6/unbondingdelegations': //cro 394
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/11443b6ca513a08d65a18aee27803d8c1e3b8881/unbondingdelegations': //hub 118
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/de254511a074660debb2b15207489f2fd2813f24/unbondingdelegations': //persistence 750
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/ff7659b898e3e6f98328dc702bb503963bfa1801/unbondingdelegations': //bitsong 639
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/d6c5532cd1991081c051926501153665bfc65ee9/unbondingdelegations': //desmos 852
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/account/a3a1f8cc0a6199844b9cd5e5ae4569a66cea39ec/unbondingdelegations': //lum 880
+      route.fulfill(create200('{"unbonding_delegations":null}'));
+      return;
+    case 'https://api.emeris.com/v1/liquidity/node_info':
+      route.fulfill(
+        create200(
+          '{"node_info":{"protocol_version":{"p2p":"8","block":"11","app":"0"},"id":"35446215effc686de58df31a7d9b2ca232bdbc46","listen_addr":"tcp://0.0.0.0:26656","network":"cosmoshub-4","version":"0.34.14","channels":"40202122233038606100","moniker":"emeris","other":{"tx_index":"on","rpc_address":"tcp://0.0.0.0:26657"}},"application_version":{"name":"","server_name":"\u003cappd\u003e","version":"","commit":"","build_tags":"","go":"go version go1.17.5 linux/amd64","build_deps":["filippo.io/edwards25519@v1.0.0-beta.2","github.com/99designs/keyring@v1.1.6","github.com/ChainSafe/go-schnorrkel@v0.0.0-20200405005733-88cbf1b4c40d","github.com/Workiva/go-datastructures@v1.0.52","github.com/armon/go-metrics@v0.3.9","github.com/beorn7/perks@v1.0.1","github.com/bgentry/speakeasy@v0.1.0","github.com/btcsuite/btcd@v0.22.0-beta","github.com/cespare/xxhash/v2@v2.1.1","github.com/coinbase/rosetta-sdk-go@v0.6.10","github.com/confio/ics23/go@v0.6.6","github.com/cosmos/cosmos-sdk@v0.44.3 =\u003e github.com/cosmos/cosmos-sdk@v0.44.2","github.com/cosmos/go-bip39@v1.0.0","github.com/cosmos/iavl@v0.17.1","github.com/cosmos/ibc-go/v2@v2.0.0","github.com/davecgh/go-spew@v1.1.1","github.com/desertbit/timer@v0.0.0-20180107155436-c41aec40b27f","github.com/dvsekhvalnov/jose2go@v0.0.0-20200901110807-248326c1351b","github.com/enigmampc/btcutil@v1.0.3-0.20200723161021-e2fb6adb2a25","github.com/felixge/httpsnoop@v1.0.1","github.com/fsnotify/fsnotify@v1.5.1","github.com/go-kit/kit@v0.10.0","github.com/go-logfmt/logfmt@v0.5.0","github.com/godbus/dbus@v0.0.0-20190726142602-4481cbc300e2","github.com/gogo/gateway@v1.1.0","github.com/gogo/protobuf@v1.3.3 =\u003e github.com/regen-network/protobuf@v1.3.3-alpha.regen.1","github.com/golang/protobuf@v1.5.2","github.com/golang/snappy@v0.0.3","github.com/google/btree@v1.0.0","github.com/google/orderedcode@v0.0.1","github.com/gorilla/handlers@v1.5.1","github.com/gorilla/mux@v1.8.0","github.com/gorilla/websocket@v1.4.2","github.com/gravity-devs/liquidity@v1.4.2","github.com/grpc-ecosystem/go-grpc-middleware@v1.3.0","github.com/grpc-ecosystem/grpc-gateway@v1.16.0","github.com/grpc-ecosystem/grpc-gateway/v2@v2.0.1","github.com/gsterjov/go-libsecret@v0.0.0-20161001094733-a6f4afe4910c","github.com/gtank/merlin@v0.1.1","github.com/gtank/ristretto255@v0.1.2","github.com/hashicorp/go-immutable-radix@v1.0.0","github.com/hashicorp/golang-lru@v0.5.4","github.com/hashicorp/hcl@v1.0.0","github.com/hdevalence/ed25519consensus@v0.0.0-20210204194344-59a8610d2b87","github.com/improbable-eng/grpc-web@v0.14.1","github.com/klauspost/compress@v1.11.7","github.com/lib/pq@v1.10.2","github.com/libp2p/go-buffer-pool@v0.0.2","github.com/magiconair/properties@v1.8.5","github.com/mattn/go-isatty@v0.0.14","github.com/matttproud/golang_protobuf_extensions@v1.0.1","github.com/mimoo/StrobeGo@v0.0.0-20181016162300-f8f6d4d2b643","github.com/minio/highwayhash@v1.0.1","github.com/mitchellh/go-homedir@v1.1.0","github.com/mitchellh/mapstructure@v1.4.2","github.com/mtibben/percent@v0.2.1","github.com/pelletier/go-toml@v1.9.4","github.com/pkg/errors@v0.9.1","github.com/pmezard/go-difflib@v1.0.0","github.com/prometheus/client_golang@v1.11.0","github.com/prometheus/client_model@v0.2.0","github.com/prometheus/common@v0.29.0","github.com/prometheus/procfs@v0.6.0","github.com/rakyll/statik@v0.1.7","github.com/rcrowley/go-metrics@v0.0.0-20200313005456-10cdbea86bc0","github.com/regen-network/cosmos-proto@v0.3.1","github.com/rs/cors@v1.7.0","github.com/rs/zerolog@v1.23.0","github.com/spf13/afero@v1.6.0","github.com/spf13/cast@v1.4.1","github.com/spf13/cobra@v1.2.1","github.com/spf13/jwalterweatherman@v1.1.0","github.com/spf13/pflag@v1.0.5","github.com/spf13/viper@v1.8.1","github.com/strangelove-ventures/packet-forward-middleware@v1.0.1","github.com/stretchr/testify@v1.7.0","github.com/subosito/gotenv@v1.2.0","github.com/syndtr/goleveldb@v1.0.1-0.20200815110645-5c35d600f0ca","github.com/tendermint/btcd@v0.1.1","github.com/tendermint/crypto@v0.0.0-20191022145703-50d29ede1e15","github.com/tendermint/go-amino@v0.16.0","github.com/tendermint/tendermint@v0.34.14","github.com/tendermint/tm-db@v0.6.4","golang.org/x/crypto@v0.0.0-20210817164053-32db794688a5","golang.org/x/net@v0.0.0-20210903162142-ad29c8ab022f","golang.org/x/sys@v0.0.0-20211004093028-2c5d950f24ef","golang.org/x/term@v0.0.0-20201126162022-7de9c90e9dd1","golang.org/x/text@v0.3.6","google.golang.org/genproto@v0.0.0-20210602131652-f16073e35f0c","google.golang.org/grpc@v1.40.0 =\u003e google.golang.org/grpc@v1.33.2","google.golang.org/protobuf@v1.27.1","gopkg.in/ini.v1@v1.63.2","gopkg.in/yaml.v2@v2.4.0","gopkg.in/yaml.v3@v3.0.0-20210107192922-496545a6307b","nhooyr.io/websocket@v1.8.6"],"cosmos_sdk_version":"v0.44.3"}}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/liquidity/cosmos/staking/v1beta1/params':
+      route.fulfill(
+        create200(
+          '{"params": {"unbonding_time": 1814400s","max_validators": 150,"max_entries": ,"historical_entries": 10000,"bond_denom": "uatom"}}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/liquidity/cosmos/liquidity/v1beta1/pools':
+      route.fulfill(
+        create200(
+          '{"pools":[{"id":"1","type_id":1,"reserve_coin_denoms":["ibc/14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC","uatom"],"reserve_account_address":"cosmos1m7uyxn26sz6w4755k6rch4dc2fj6cmzajkszvn","pool_coin_denom":"poolDFB8434D5A80B4EAFA94B6878BD5B85265AC6C5D37204AB899B1C3C52543DA7E"},{"id":"2","type_id":1,"reserve_coin_denoms":["ibc/68A333688E5B07451F95555F8FE510E43EF9D3D44DF0909964F92081EF9BE5A7","uatom"],"reserve_account_address":"cosmos1uu07zd5p52pmwq27fexys54saknjejt6r0dqjx","pool_coin_denom":"poolE71FE13681A283B7015E4E4C4852B0EDA72CC97A5CDE2ECA2A6C8C06C86AC775"},{"id":"3","type_id":1,"reserve_coin_denoms":["ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66","ibc/42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E"],"reserve_account_address":"cosmos16cu6n9q5v3khzdkxt35yt58tx3twm57k2ukak3","pool_coin_denom":"poolD639A99414646D7136C65C6845D0EB3456EDD3D6C2C43050D3FA3A24995B0E75"},{"id":"4","type_id":1,"reserve_coin_denoms":["ibc/81D08BC39FB520EBD948CF017910DD69702D34BF5AC160F76D3B5CFC444EBCE0","uatom"],"reserve_account_address":"cosmos19wwzfqeu4gngeyypasj3dya8yn5dxslu9yzyh3","pool_coin_denom":"pool2B9C24833CAA268C9081EC251693A724E8D343FC25A841FF00FD37B047BA4DEA"},{"id":"5","type_id":1,"reserve_coin_denoms":["ibc/2181AAB0218EAC24BC9F86BD1364FBBFA3E6E3FCC25E88E3E68C15DC6E752D86","uatom"],"reserve_account_address":"cosmos1xtwsv6lff8jlmnracz0tke78xqwse22h4sez9u","pool_coin_denom":"pool32DD066BE949E5FDCC7DC09EBB67C7301D0CA957C2EF56A39B37430165447DAC"},{"id":"6","type_id":1,"reserve_coin_denoms":["ibc/1FBDD58D438B4D04D26CBFB2E722C18984A0F1A52468C4F42F37D102F3D3F399","uatom"],"reserve_account_address":"cosmos1f0a0cjvhwmfs5naq6cpnzd0spnzwl3msjdn737","pool_coin_denom":"pool4BFAFC499776D30A4FA0D6033135F00CC4EFC770D19A74CAD37433B579F77FC0"},{"id":"7","type_id":1,"reserve_coin_denoms":["ibc/42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E","uatom"],"reserve_account_address":"cosmos10t3ersye68vgejz6n752phzk2zlcmhsdmzg40l","pool_coin_denom":"pool7AE391C099D1D88CC85A9FA8A0DC5650BF8DDE0DCE7D0824C073802C020A7747"},{"id":"8","type_id":1,"reserve_coin_denoms":["ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66","uatom"],"reserve_account_address":"cosmos172q9nqx9fc28f0wv7u80tl5gruacal8cuw0tzg","pool_coin_denom":"poolF2805980C54E1474BDCCF70EF5FE881F3B8EFCF8BA3198765C01D91904521788"},{"id":"9","type_id":1,"reserve_coin_denoms":["ibc/C932ADFE2B4216397A4F17458B6E4468499B86C3BC8116180F85D799D6F5CC1B","uatom"],"reserve_account_address":"cosmos1h4034aagk8cx3stc78tr0hcjd95wcy9tjk9kpk","pool_coin_denom":"poolBD5F1AF7A8B1F068C178F1D637DF126968EC10AB204A10116E320B2B8AF4FAC2"},{"id":"10","type_id":1,"reserve_coin_denoms":["ibc/5BB694D466CCF099EF73F165F88472AF51D9C4991EAA42BD1168C5304712CC0D","uatom"],"reserve_account_address":"cosmos1k3tuayjqcgsupamf2tldv5r0wsm4ahfclajeas","pool_coin_denom":"poolB457CE9240C221C0F76952FED6506F74375EDD38B32A6020B7DDDFD5A4867D5C"},{"id":"11","type_id":1,"reserve_coin_denoms":["ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7","uatom"],"reserve_account_address":"cosmos16yfpu788xxhaxhl2z08elgqyfg289ae64vvakd","pool_coin_denom":"poolD1121E78E731AFD35FEA13CF9FA0044A1472F73A0EE784160CCAAAAE5C7AAD7E"},{"id":"12","type_id":1,"reserve_coin_denoms":["ibc/E070CE91CC4BD15AEC9B5788C0826755AAD35052A3037E9AC62BE70B4C9A7DBB","uatom"],"reserve_account_address":"cosmos1vrhmq7qh66ce8206mfs3gp9cuywc944h7pq2w3","pool_coin_denom":"pool60EFB07817D6B193A9FADA611404B8E11D82D6B7F0D10D57D3134C93E2BF7414"},{"id":"13","type_id":1,"reserve_coin_denoms":["ibc/DCD1849E20837BC8FB2C252A7AE1D8AA7A1876911EE669E6CE6FDF9FEA54083D","uatom"],"reserve_account_address":"cosmos1e79cg7vh7h4e9wwgmwhyzet0v8ttuuyt3cvtzk","pool_coin_denom":"poolCF8B847997F5EB92B9C8DBAE41656F61D6BE708B1B42D31063291813014AD63F"},{"id":"14","type_id":1,"reserve_coin_denoms":["ibc/1D5826F7EDE6E3B13009FEF994DC9CAAF15CC24CA7A9FF436FFB2E56FD72F54F","uatom"],"reserve_account_address":"cosmos14jd00dywgjt6p2d0zz0y9pjxfg80qmnuc3hlhv","pool_coin_denom":"poolAC9AF7B48E4497A0A9AF109E4286464A0EF06E7C35AD79198F03AB17A6A4CCA7"},{"id":"15","type_id":1,"reserve_coin_denoms":["ibc/ADBEC1A7AC2FEF73E06B066A1C94DAB6C27924EF7EA3F5A43378150009620284","uatom"],"reserve_account_address":"cosmos1l5q9ck4szu22fd3wsl6jz06atn0r2amnqztpaa","pool_coin_denom":"poolFD005C5AB01714A4B62E87F5213F5D5CDE357773D70712916A93664BCE5A6931"}],"pagination":{"next_key":null,"total":"15"}}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/cached/cosmos/liquidity/v1beta1/params':
+      route.fulfill(
+        create200(
+          '{"params":{"pool_types":[{"id":1,"name":"StandardLiquidityPool","min_reserve_coin_num":2,"max_reserve_coin_num":2,"description":"Standard liquidity pool with pool price function X/Y, ESPM constraint, and two kinds of reserve coins"}],"min_init_deposit_amount":"1000000","init_pool_coin_mint_amount":"1000000","max_reserve_coin_amount":"0","pool_creation_fee":[{"denom":"uatom","amount":"40000000"}],"swap_fee_rate":"0.003000000000000000","withdraw_fee_rate":"0.000000000000000000","max_order_amount_ratio":"0.100000000000000000","unit_batch_height":1,"circuit_breaker_enabled":false}}',
         ),
       );
       return;

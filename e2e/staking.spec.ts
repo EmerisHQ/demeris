@@ -16,7 +16,7 @@ test.describe('Check Staking functionality', function () {
     const stakingTable = await page.locator('[data-cy=staking-table]');
     await expect(stakingTable).toBeVisible();
     const valRow = await stakingTable.locator('[data-cy=validator-row]');
-    await expect(valRow).toBeVisible();
+    await expect(valRow.first()).toBeVisible();
   });
 
   test('allows to stake', async ({ page, baseURL }) => {
