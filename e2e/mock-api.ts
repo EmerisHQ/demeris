@@ -543,7 +543,97 @@ export default function mockHandler(route: Route, request: Request): void {
         ),
       );
       return;
-
+    case 'https://api.emeris.com/v1/account/4bfafc499776d30a4fa0d6033135f00cc4efc770/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"4bfafc499776d30a4fa0d6033135f00cc4efc770","base_denom":"uregen","verified":true,"amount":"100837842526ibc/1FBDD58D438B4D04D26CBFB2E722C18984A0F1A52468C4F42F37D102F3D3F399","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-185","hash":"1FBDD58D438B4D04D26CBFB2E722C18984A0F1A52468C4F42F37D102F3D3F399"}},{"address":"4bfafc499776d30a4fa0d6033135f00cc4efc770","base_denom":"uatom","verified":true,"amount":"2997429480uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/b457ce9240c221c0f76952fed6506f74375edd38/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"b457ce9240c221c0f76952fed6506f74375edd38","base_denom":"uion","verified":true,"amount":"1609172ibc/5BB694D466CCF099EF73F165F88472AF51D9C4991EAA42BD1168C5304712CC0D","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-141","hash":"5BB694D466CCF099EF73F165F88472AF51D9C4991EAA42BD1168C5304712CC0D"}},{"address":"b457ce9240c221c0f76952fed6506f74375edd38","base_denom":"uatom","verified":true,"amount":"288293535uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/f2805980c54e1474bdccf70ef5fe881f3b8efcf8/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"f2805980c54e1474bdccf70ef5fe881f3b8efcf8","base_denom":"uatom","verified":true,"amount":"801446519uatom","on_chain":"cosmos-hub","ibc":{}},{"address":"f2805980c54e1474bdccf70ef5fe881f3b8efcf8","base_denom":"uiris","verified":true,"amount":"323267260559ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-182","hash":"12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66"}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/2b9c24833caa268c9081ec251693a724e8d343fc/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"2b9c24833caa268c9081ec251693a724e8d343fc","base_denom":"uxprt","verified":true,"amount":"18473962808ibc/81D08BC39FB520EBD948CF017910DD69702D34BF5AC160F76D3B5CFC444EBCE0","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-190","hash":"81D08BC39FB520EBD948CF017910DD69702D34BF5AC160F76D3B5CFC444EBCE0"}},{"address":"2b9c24833caa268c9081ec251693a724e8d343fc","base_denom":"uatom","verified":true,"amount":"2196842365uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/7ae391c099d1d88cc85a9fa8a0dc5650bf8dde0d/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"7ae391c099d1d88cc85a9fa8a0dc5650bf8dde0d","base_denom":"udvpn","verified":true,"amount":"3902609184248ibc/42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-186","hash":"42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E"}},{"address":"7ae391c099d1d88cc85a9fa8a0dc5650bf8dde0d","base_denom":"uatom","verified":true,"amount":"574645631uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/d639a99414646d7136c65c6845d0eb3456edd3d6/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"d639a99414646d7136c65c6845d0eb3456edd3d6","base_denom":"uiris","verified":true,"amount":"20675168661ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-182","hash":"12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66"}},{"address":"d639a99414646d7136c65c6845d0eb3456edd3d6","base_denom":"udvpn","verified":true,"amount":"339475539260ibc/42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-186","hash":"42E47A5BA708EBE6E0C227006254F2784E209F4DBD3C6BB77EDC4B29EF875E8E"}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/ac9af7b48e4497a0a9af109e4286464a0ef06e7c/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"ac9af7b48e4497a0a9af109e4286464a0ef06e7c","base_denom":"uatom","verified":true,"amount":"45186030uatom","on_chain":"cosmos-hub","ibc":{}},{"address":"ac9af7b48e4497a0a9af109e4286464a0ef06e7c","base_denom":"nanolike","verified":true,"amount":"83034817162576ibc/1D5826F7EDE6E3B13009FEF994DC9CAAF15CC24CA7A9FF436FFB2E56FD72F54F","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-217","hash":"1D5826F7EDE6E3B13009FEF994DC9CAAF15CC24CA7A9FF436FFB2E56FD72F54F"}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/d1121e78e731afd35fea13cf9fa0044a1472f73a/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"d1121e78e731afd35fea13cf9fa0044a1472f73a","base_denom":"uixo","verified":true,"amount":"14786116319ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-204","hash":"B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7"}},{"address":"d1121e78e731afd35fea13cf9fa0044a1472f73a","base_denom":"uatom","verified":true,"amount":"196401187uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/bd5f1af7a8b1f068c178f1d637df126968ec10ab/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"bd5f1af7a8b1f068c178f1d637df126968ec10ab","base_denom":"basecro","verified":true,"amount":"12951052456803ibc/C932ADFE2B4216397A4F17458B6E4468499B86C3BC8116180F85D799D6F5CC1B","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-187","hash":"C932ADFE2B4216397A4F17458B6E4468499B86C3BC8116180F85D799D6F5CC1B"}},{"address":"bd5f1af7a8b1f068c178f1d637df126968ec10ab","base_denom":"uatom","verified":true,"amount":"2128981547uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/fd005c5ab01714a4b62e87f5213f5d5cde357773/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"fd005c5ab01714a4b62e87f5213f5d5cde357773","base_denom":"ubcna","verified":true,"amount":"1184416703528ibc/ADBEC1A7AC2FEF73E06B066A1C94DAB6C27924EF7EA3F5A43378150009620284","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-232","hash":"ADBEC1A7AC2FEF73E06B066A1C94DAB6C27924EF7EA3F5A43378150009620284"}},{"address":"fd005c5ab01714a4b62e87f5213f5d5cde357773","base_denom":"uatom","verified":true,"amount":"3346191459uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/dfb8434d5a80b4eafa94b6878bd5b85265ac6c5d/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"dfb8434d5a80b4eafa94b6878bd5b85265ac6c5d","base_denom":"uosmo","verified":true,"amount":"92058009700ibc/14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-141","hash":"14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC"}},{"address":"dfb8434d5a80b4eafa94b6878bd5b85265ac6c5d","base_denom":"uatom","verified":true,"amount":"24569507330uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/60efb07817d6b193a9fada611404b8e11d82d6b7/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"60efb07817d6b193a9fada611404b8e11d82d6b7","base_denom":"ungm","verified":true,"amount":"2384241497ibc/E070CE91CC4BD15AEC9B5788C0826755AAD35052A3037E9AC62BE70B4C9A7DBB","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-202","hash":"E070CE91CC4BD15AEC9B5788C0826755AAD35052A3037E9AC62BE70B4C9A7DBB"}},{"address":"60efb07817d6b193a9fada611404b8e11d82d6b7","base_denom":"uatom","verified":true,"amount":"95809383uatom","on_chain":"cosmos-hub","ibc":{}}]}',
+        ),
+      );
+      return;
+    case 'https://api.emeris.com/v1/account/32dd066be949e5fdcc7dc09ebb67c7301d0ca957/balance':
+      route.fulfill(
+        create200(
+          '{"balances":[{"address":"32dd066be949e5fdcc7dc09ebb67c7301d0ca957","base_denom":"uatom","verified":true,"amount":"4335231445uatom","on_chain":"cosmos-hub","ibc":{}},{"address":"32dd066be949e5fdcc7dc09ebb67c7301d0ca957","base_denom":"uakt","verified":true,"amount":"92589247191ibc/2181AAB0218EAC24BC9F86BD1364FBBFA3E6E3FCC25E88E3E68C15DC6E752D86","on_chain":"cosmos-hub","ibc":{"path":"transfer/channel-184","hash":"2181AAB0218EAC24BC9F86BD1364FBBFA3E6E3FCC25E88E3E68C15DC6E752D86"}}]}',
+        ),
+      );
+      return;
     default:
       route.continue();
       return;
