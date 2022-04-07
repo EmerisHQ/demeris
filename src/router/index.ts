@@ -80,14 +80,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },
-];
-if (featureRunning('STAKING')) {
-  routes.push({
+  {
     path: '/staking/:denom/:action/:validator?',
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
-  });
-}
+  },
+];
 if (featureRunning('AIRDROPS_FEATURE')) {
   routes.push({
     path: '/airdrops',

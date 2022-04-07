@@ -70,7 +70,7 @@
               </dd>
             </div>
 
-            <div v-if="assetConfig?.stakable && stakingEnabled">
+            <div v-if="assetConfig?.stakable">
               <dt class="text-muted">{{ $t('pages.asset.unbonding') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: unstakedAmount, denom }" />
@@ -91,11 +91,9 @@
         </section>
 
         <!-- Staking -->
-        <template v-if="stakingEnabled">
-          <section v-if="assetConfig?.stakable">
-            <StakeTable class="mt-8" :denom="denom" />
-          </section>
-        </template>
+        <section v-if="assetConfig?.stakable">
+          <StakeTable class="mt-8" :denom="denom" />
+        </section>
 
         <!-- Chains -->
 
@@ -163,7 +161,7 @@
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <!-- Deliberately commented out - we're placing this back soon with APR
         <StakingBanner
-          v-else-if="isStakingRunning"
+          v-else
           :display-denom="nativeAsset.displayName"
           :base-denom="nativeAsset.base_denom"
           class="mt-4"
@@ -237,7 +235,6 @@ export default defineComponent({
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
-    const stakingEnabled = featureRunning('STAKING');
     const typedstore = useStore() as RootStoreTyped;
     const route = useRoute();
     const router = useRouter();
@@ -466,8 +463,6 @@ export default defineComponent({
       typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
     });
 
-    const isStakingRunning = featureRunning('STAKING');
-
     return {
       nativeAsset,
       assetConfig,
@@ -482,14 +477,12 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
-      stakingEnabled,
       dataStream,
       getTokenPrices,
       showPriceChart,
       showPriceChartLoadingSkeleton,
       priceDiffObject,
       setPriceDifference,
-      isStakingRunning,
       displayPrice,
     };
   },
