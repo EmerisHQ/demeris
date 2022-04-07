@@ -178,7 +178,7 @@
           </div>
         </section>
         <FeatureRunningConditional name="DISABLE_ADD_LIQUIDITY">
-          <template #deactivated>
+          <template #default>
             <div class="my-10 -text-1 flex mx-auto">
               <b>{{ $t('context.pools.disabled.description') }}</b> &nbsp;
               <a
