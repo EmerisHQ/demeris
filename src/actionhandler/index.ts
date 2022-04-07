@@ -351,7 +351,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           memo: '',
           transactions: [
             {
-              name: 'stake',
+              type: 'stake',
               status: 'pending',
               data: [
                 ...stakesteps
