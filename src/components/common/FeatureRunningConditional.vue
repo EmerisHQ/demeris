@@ -4,16 +4,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, withDefaults } from 'vue';
+import { computed } from 'vue';
 
 import { featureRunning } from '@/utils/FeatureManager';
 
-interface Props {
+const props = defineProps<{
   name: string;
-}
-const props = withDefaults(defineProps<Props>(), {
-  name: '',
-});
+}>();
 
 const isActivated = computed(() => {
   const isRunning = featureRunning(props.name);
