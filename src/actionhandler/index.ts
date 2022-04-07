@@ -254,7 +254,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           name: 'claim',
           description: 'claim rewards',
           memo: '',
-          transactions: [{ name: 'claim', status: 'pending', data: action.params }],
+          transactions: [{ type: 'claim', status: 'pending', data: action.params }],
         });
         break;
       case 'unstake':
