@@ -43,10 +43,7 @@ import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
-let showMaintenanceScreen = false;
-if (featureRunning('MAINTENANCE_SCREEN')) {
-  showMaintenanceScreen = true;
-}
+const showMaintenanceScreen = !!featureRunning('MAINTENANCE_SCREEN');
 
 const store = useStore();
 let liquidityEndpoint = import.meta.env.VITE_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
