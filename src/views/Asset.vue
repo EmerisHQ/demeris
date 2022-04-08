@@ -159,7 +159,12 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <LiquiditySwap :default-asset="nativeAsset" />
+        <FeatureRunningConditional name="DEX_AGG">
+          <template #deactivated>
+            <LiquiditySwap :default-asset="nativeAsset" />
+          </template>
+          <DexSwap :default-asset="nativeAsset" />
+        </FeatureRunningConditional>
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <!-- Deliberately commented out - we're placing this back soon with APR
         <StakingBanner
@@ -195,6 +200,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
+import DexSwap from '@/components/swap/DexSwap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -225,6 +231,7 @@ export default defineComponent({
     BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
+    DexSwap,
   },
 
   setup() {
