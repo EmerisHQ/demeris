@@ -5,10 +5,10 @@
   <MaintenanceScreen v-if="showMaintenanceScreen" />
   <div v-else-if="initialized">
     <CookieConsent />
-    <router-view />
-    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-      <TransactionsCenter />
-    </FeatureRunningConditional>
+    <ChainDownWrapper>
+      <router-view />
+    </ChainDownWrapper>
+    <TransactionsCenter />
     <SimplexModal />
     <MoonpayModal />
   </div>
@@ -34,7 +34,6 @@ import TransactionsCenter from '@/features/transactions/components/TransactionsC
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { setStore } from '@/utils/useStore';
 
-import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import usePoolsFactory from './composables/usePools';
 import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
@@ -47,7 +46,6 @@ export default defineComponent({
     EphemerisSpinner,
     CookieConsent,
     TransactionsCenter,
-    FeatureRunningConditional,
     SimplexModal,
     MoonpayModal,
     MaintenanceScreen,
