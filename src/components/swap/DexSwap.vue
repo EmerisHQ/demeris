@@ -462,7 +462,7 @@ const assetsToReceive = computed(() => {
   );
 });
 
-const dex = computed(() => capitalizeFirstLetter(daggRoutes.value[0]?.steps[0]?.protocol));
+const dex = computed(() => capitalizeFirstLetter(daggRoutes.value[selectedQuoteIndex.value]?.steps[0]?.protocol));
 const expectedRate = computed(() =>
   ((data?.receiveCoinAmount * 10 ** toPrecision.value) / (data?.payCoinAmount * 10 ** fromPrecision.value)).toFixed(8),
 );
