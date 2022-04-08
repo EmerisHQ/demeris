@@ -28,7 +28,7 @@
     </p>
     <div v-if="mappedItem.airdrops.length === 0 && keyword" class="mt-12">
       <div class="w-1/3 mx-auto text-center">
-        <img src="~@/assets/images/no-search-result.png" alt="Wallet not connected" />
+        <img src="~@/assets/images/no-search-result.png" alt="No search result" />
         <div class="w-full mx-auto">
           <div class="text-1 font-medium mt-6">
             {{

@@ -79,7 +79,7 @@ export default {
 
     watch(
       () => props.activeFilter,
-      async () => {
+      () => {
         keyword.value = '';
       },
       { immediate: true },
