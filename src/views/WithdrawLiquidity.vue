@@ -166,35 +166,23 @@
         </template>
 
         <template v-else>
-          <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-            <template #deactivated>
-              <TxStepsModal
-                :data="actionSteps"
-                action-name="withdrawliquidity"
-                @transacting="goToStep('send')"
-                @failed="goToStep('review')"
-                @reset="resetHandler"
-              />
-            </template>
-
-            <TransactionProcessCreator
-              :steps="actionSteps"
-              action="withdrawliquidity"
-              @pending="
-                () => {
-                  closeModal();
-                  resetHandler();
-                }
-              "
-              @close="
-                () => {
-                  closeModal();
-                  resetHandler();
-                }
-              "
-              @previous="goBack"
-            />
-          </FeatureRunningConditional>
+          <TransactionProcessCreator
+            :steps="actionSteps"
+            action="withdrawliquidity"
+            @pending="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @close="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @previous="goBack"
+          />
         </template>
       </main>
     </div>
@@ -215,9 +203,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
@@ -247,8 +233,6 @@ export default defineComponent({
     FeeLevelSelector,
     FlexibleAmountInput,
     TransactionProcessCreator,
-    FeatureRunningConditional,
-    TxStepsModal,
   },
 
   setup() {

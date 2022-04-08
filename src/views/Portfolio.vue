@@ -62,7 +62,7 @@
   </AppLayout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -86,56 +86,34 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 
-export default {
-  name: 'Portfolio',
-  components: {
-    FeatureRunningConditional,
-    PortfolioStakingBanner,
-    AppLayout,
-    Button,
-    BuyCryptoBanner,
-    LiquiditySwap,
-    TotalPrice,
-    AssetsTable,
-    Pools,
-    Intro,
-    SkeletonLoader,
-    DexSwap,
-  },
+const { t } = useI18n({ useScope: 'global' });
+pageview({ page_title: 'Portfolio', page_path: '/' });
+useMeta(
+  computed(() => ({
+    title: t('navbar.portfolio'),
+  })),
+);
 
-  setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Portfolio', page_path: '/' });
-    useMeta(
-      computed(() => ({
-        title: t('navbar.portfolio'),
-      })),
-    );
+const router = useRouter();
+const { balances } = useAccount();
+const { pools } = usePools();
 
-    const router = useRouter();
-    const { balances } = useAccount();
-    const { pools } = usePools();
-
-    const store = useStore();
-    const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
-    };
-
-    const openPoolsPage = () => {
-      router.push({ name: 'Pools' });
-    };
-
-    const initialLoadComplete = computed(() => {
-      return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
-    });
-    const poolsInvested = computed(() => {
-      const poolsCopy = pools.value?.slice() ?? [];
-      return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
-    });
-
-    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete };
-  },
+const store = useStore();
+const openAssetPage = (asset: Record<string, string>) => {
+  router.push({ name: 'Asset', params: { denom: asset.denom } });
 };
+
+const openPoolsPage = () => {
+  router.push({ name: 'Pools' });
+};
+
+const initialLoadComplete = computed(() => {
+  return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
+});
+const poolsInvested = computed(() => {
+  const poolsCopy = pools.value?.slice() ?? [];
+  return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
+});
 </script>
 <style lang="scss" scoped>
 ::v-deep(.skeleton-loader) {

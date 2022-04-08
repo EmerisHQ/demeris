@@ -82,14 +82,7 @@
       </template>
 
       <template v-else>
-        <div class="redeem__content">
-          <!-- <TxStepsModal
-            :data="state.selectedAsset.steps"
-            @transacting="goToStep('transfer')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-          /> -->
-        </div>
+        <div class="redeem__content"></div>
       </template>
     </main>
   </div>

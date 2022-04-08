@@ -6,17 +6,15 @@
     </template>
 
     <template v-else-if="['review', 'unstake', 'unstaked'].includes(step)">
-      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <TransactionProcessCreator
-          v-if="steps.length"
-          :steps="steps"
-          action="unstake"
-          @pending="closeModal"
-          @close="closeModal"
-          @previous="$emit('previous')"
-          @onReceiptState="goToUnstaked"
-        />
-      </FeatureRunningConditional>
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="unstake"
+        @pending="closeModal"
+        @close="closeModal"
+        @previous="$emit('previous')"
+        @onReceiptState="goToUnstaked"
+      />
     </template>
   </div>
 </template>
@@ -29,7 +27,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { UnstakeAction, UnstakeForm } from '@/types/actions';
@@ -44,7 +41,6 @@ export default defineComponent({
 
   components: {
     TransactionProcessCreator,
-    FeatureRunningConditional,
     UnstakeFormAmount,
   },
 
