@@ -8,9 +8,7 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
-    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-      <TransactionsCenter />
-    </FeatureRunningConditional>
+    <TransactionsCenter />
     <SimplexModal />
     <MoonpayModal />
   </div>
@@ -26,7 +24,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import MaintenanceScreen from '@/components/common/MaintenanceScreen.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
@@ -37,14 +34,12 @@ import TransactionsCenter from '@/features/transactions/components/TransactionsC
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { setStore } from '@/utils/useStore';
 
-import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import usePoolsFactory from './composables/usePools';
 import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
 const showMaintenanceScreen = !!featureRunning('MAINTENANCE_SCREEN');
-
 const store = useStore();
 let liquidityEndpoint = import.meta.env.VITE_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
 let emerisEndpoint = import.meta.env.VITE_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
