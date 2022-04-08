@@ -315,6 +315,7 @@
         "noPool": "No pool for this pair",
         "swapLimit": "Swap limit reached",
         "insufficentFunds": "Insufficent funds",
+        "inputBelowMin": "Below Min. Amount",
         "unAvailable": "Swap unavailable",
         "updatePrice": "Update prices",
         "review": "Review",

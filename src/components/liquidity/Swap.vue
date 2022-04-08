@@ -217,7 +217,7 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.swapButtonActionText?.includes('Min')) {
-          return 'Below Min. Amount';
+          return t('components.swap.inputBelowMin');
         }
         if (data.isBothSelected) {
           if (!data.selectedPoolData) {
