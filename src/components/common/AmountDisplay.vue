@@ -3,11 +3,11 @@
 </template>
 <script lang="ts">
 import { EmerisBase } from '@emeris/types';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes } from '@/store';
-import { getBaseDenom, getTicker } from '@/utils/actionHandler';
+import { getBaseDenomSync, getTicker } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'AmountDisplay',
@@ -20,13 +20,18 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const baseDenom = ref(props.amount?.denom);
+    const propsRef = toRefs(props);
 
+    const baseDenom = computed(() => {
+      return getBaseDenomSync(propsRef.amount.value.denom);
+    });
+    const precision = computed(() => {
+      return store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
+    });
     const ticker = ref('-');
 
     const displayValue = computed(() => {
-      const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
-      return parseInt(props.amount.amount) / Math.pow(10, precision);
+      return parseInt(props.amount.amount) / Math.pow(10, precision.value);
     });
 
     watch(
@@ -37,7 +42,6 @@ export default defineComponent({
             props.amount.denom,
             props.chain || store.getters[GlobalGetterTypes.API.getDexChain],
           );
-          baseDenom.value = await getBaseDenom(props.amount.denom);
         }
       },
       { immediate: true },
