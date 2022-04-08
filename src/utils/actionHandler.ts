@@ -108,7 +108,8 @@ export async function msgFromStepTransaction(
       price[0].denom == stepTx.data.from.denom
         ? parseInt(stepTx.data.from.amount) / orderPrice
         : parseInt(stepTx.data.from.amount) * orderPrice;
-    stepTx.data.to.amount = newToAmount.toString();
+
+    stepTx.data.to.amount = Math.ceil(newToAmount).toString();
     const msg = await (mapTransaction({
       chainName,
       signingAddress: await getOwnAddress({ chain_name: chainName }),
