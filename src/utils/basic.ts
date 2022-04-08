@@ -210,6 +210,20 @@ export function checkStringIsKeybase(str: string) {
   return /[0-9A-F]{16}/.test(str.toUpperCase());
 }
 
+export function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+export function getChainFromDex(dex) {
+  //temp util till API includes this info.
+  return (
+    {
+      osmosis: 'osmosis',
+      gravity: 'cosmos-hub',
+    }[dex] || null
+  );
+}
+
 export function getCleanURL(str: string) {
   if (!str || str === '') return;
   const url = str.split('://')[1];

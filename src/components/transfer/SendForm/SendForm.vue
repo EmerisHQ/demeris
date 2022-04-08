@@ -11,37 +11,23 @@
     </template>
 
     <template v-else-if="['review', 'send'].includes(step)">
-      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <template #deactivated>
-          <TxStepsModal
-            :data="steps"
-            :back-route="{ name: 'Portfolio' }"
-            action-name="transfer"
-            @transacting="goToStep('send')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-            @finish="resetHandler"
-          />
-        </template>
-
-        <TransactionProcessCreator
-          :steps="steps"
-          action="transfer"
-          @pending="
-            () => {
-              closeModal();
-              resetHandler();
-            }
-          "
-          @close="
-            (payload) => {
-              closeModal(payload);
-              resetHandler();
-            }
-          "
-          @previous="$emit('previous')"
-        />
-      </FeatureRunningConditional>
+      <TransactionProcessCreator
+        :steps="steps"
+        action="transfer"
+        @pending="
+          () => {
+            closeModal();
+            resetHandler();
+          }
+        "
+        @close="
+          (payload) => {
+            closeModal(payload);
+            resetHandler();
+          }
+        "
+        @previous="$emit('previous')"
+      />
     </template>
   </div>
 </template>
@@ -54,8 +40,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { MemoTransferAction, SendAddressForm, TransferAction } from '@/types/actions';
@@ -72,11 +56,9 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
     TransactionProcessCreator,
-    FeatureRunningConditional,
   },
 
   props: {

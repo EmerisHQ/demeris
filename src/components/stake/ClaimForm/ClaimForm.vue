@@ -1,29 +1,14 @@
 <template>
   <div class="w-full mx-auto">
     <template v-if="['review', 'stake'].includes(step)">
-      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <template #deactivated>
-          <TxStepsModal
-            v-if="steps.length"
-            :data="steps"
-            :gas-price-level="gasPrice"
-            :back-route="{ name: 'Portfolio' }"
-            action-name="unstake"
-            @transacting="goToStep('stake')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-            @finish="resetHandler"
-          />
-        </template>
-        <TransactionProcessCreator
-          v-if="steps.length"
-          :steps="steps"
-          action="claim"
-          @pending="closeModal"
-          @close="closeModal"
-          @previous="$emit('previous')"
-        />
-      </FeatureRunningConditional>
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="claim"
+        @pending="closeModal"
+        @close="closeModal"
+        @previous="$emit('previous')"
+      />
     </template>
   </div>
 </template>
@@ -34,8 +19,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -49,8 +32,6 @@ export default defineComponent({
 
   components: {
     TransactionProcessCreator,
-    TxStepsModal,
-    FeatureRunningConditional,
   },
 
   props: {

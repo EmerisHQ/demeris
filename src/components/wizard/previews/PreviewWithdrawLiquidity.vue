@@ -76,8 +76,10 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
+import usePoolsFactory from '@/composables/usePools';
 import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'PreviewWithdrawLiquidity',
@@ -112,14 +114,21 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
+    const { getPoolById } = usePoolsFactory();
 
     const data = computed(() => {
       if (props.response) {
-        const { pool } = usePool(props.response.pool_id);
+        const pool = getPoolById(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
         const precisions = {
-          coinA: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: pool.reserveBaseDenoms[0] }) ?? 6,
-          coinB: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: pool.reserveBaseDenoms[1] }) ?? 6,
+          coinA:
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+              name: getBaseDenomSync(pool.reserve_coin_denoms[0]),
+            }) ?? 6,
+          coinB:
+            store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+              name: getBaseDenomSync(pool.reserve_coin_denoms[1]),
+            }) ?? 6,
         };
 
         return { pool, poolCoin, precisions };
@@ -135,9 +144,14 @@ export default defineComponent({
     const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
 
     const precisions = computed(() => {
+      const pool = data.value.pool;
       return [
-        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: pool.value.reserveBaseDenoms[0] }) ?? 6,
-        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: pool.value.reserveBaseDenoms[1] }) ?? 6,
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: getBaseDenomSync(pool.reserve_coin_denoms[0]),
+        }) ?? 6,
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: getBaseDenomSync(pool.reserve_coin_denoms[1]),
+        }) ?? 6,
       ];
     });
 

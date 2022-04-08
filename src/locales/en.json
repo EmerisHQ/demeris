@@ -315,6 +315,7 @@
         "noPool": "No pool for this pair",
         "swapLimit": "Swap limit reached",
         "insufficentFunds": "Insufficent funds",
+        "inputBelowMin": "Below Min. Amount",
         "unAvailable": "Swap unavailable",
         "updatePrice": "Update prices",
         "review": "Review",
@@ -571,6 +572,10 @@
         "pair": "Token pair",
         "share": "Your share",
         "liquidity": "Liquidity",
+        "disabled": {
+          "description": "Adding liquidity is unavailable.",
+          "linkText": "Learn more"
+        },
         "empty": "Pools you add liquidity to will appear here.",
         "explore": "Explore pools"
       },

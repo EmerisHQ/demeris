@@ -400,14 +400,12 @@ export type Airdrop = {
   twitterUrl: string;
   discordUrl: string;
   mediumUrl: string;
-  imageExists: boolean;
-  address: string;
-  eligibilityResponse: any;
+  eligibilityResponse?: any;
   airdropBlogUrl: string;
   airdropStartDate: Date;
   airdropEndDate: Date;
   airdropStatus: string;
-  eligibility: AirdropEligibilityStatus;
+  eligibility?: AirdropEligibilityStatus;
   dateStatus: AirdropDateStatus;
   snapshotDate: string;
   snapshotBlockHeight: string;

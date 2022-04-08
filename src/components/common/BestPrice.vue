@@ -46,7 +46,7 @@ const props = defineProps({
     required: true,
   },
   expectedRate: {
-    type: Number,
+    type: String,
     required: true,
   },
   limitPrice: {
@@ -58,7 +58,7 @@ const props = defineProps({
     required: true,
   },
   minReceived: {
-    type: Number,
+    type: String,
     required: true,
   },
   denom: {
