@@ -106,12 +106,12 @@
           />
           <IconButton
             class="mr-0.5 bg-surface"
-            :name="maxButtonText"
+            :name="buttonText"
             :type="'text'"
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: setMax,
+              function: buttonText.includes('Min') ? setMin : setMax,
               isOver: isOver,
             }"
           />
@@ -161,6 +161,7 @@
 </template>
 <script lang="ts">
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -186,10 +187,11 @@ import { getTransactionOffset } from '@/features/transactions/transactionProcess
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { SwapAction } from '@/types/actions';
-import { getTicker } from '@/utils/actionHandler';
-import { getFeeForChain } from '@/utils/actionHandler';
+import { getFeeForChain, getTicker } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+
+const MIN_SWAPPABLE_MICROS = 100; // see https://github.com/EmerisHQ/demeris/issues/1351#issuecomment-1091686770
 
 export default defineComponent({
   name: 'Swap',
@@ -234,6 +236,9 @@ export default defineComponent({
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
+        if (data.buttonText?.includes('Min')) {
+          return 'Below Min. Amount';
+        }
         if (data.isBothSelected) {
           if (!data.selectedPoolData) {
             return t('components.swap.noPool');
@@ -282,7 +287,7 @@ export default defineComponent({
       buttonDisabled: computed(() => {
         return !data.isSwapReady;
       }),
-      maxButtonText: 'Max',
+      buttonText: 'Max',
       maxAmount: computed(() => {
         const selectedCoinBalance = parseInt(
           allBalances.value.filter((coin) => {
@@ -366,7 +371,8 @@ export default defineComponent({
           !data.isAmount ||
           !isSignedIn.value ||
           data.selectedPoolData === null ||
-          !dexStatus.value
+          !dexStatus.value ||
+          !data.buttonName.includes('Min')
         );
       }),
       isChildModalOpen: false,
@@ -811,27 +817,40 @@ export default defineComponent({
       },
     );
 
-    //max button text set
+    // button text set
     watch(
-      () => data.payCoinData,
+      () => [data.payCoinData, data.payCoinAmount],
       async () => {
-        if (data.payCoinData) {
-          const amount =
-            data.maxAmount /
-            10 ** (store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6);
+        const denomPrecision = Math.pow(
+          10,
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6,
+        );
+        const minValue = 1 / denomPrecision;
+        if (data.payCoinAmount < MIN_SWAPPABLE_MICROS * minValue) {
+          const ticker = await getTicker(
+            data.payCoinData?.base_denom,
+            store.getters[GlobalGetterTypes.API.getDexChain],
+          );
+          data.buttonText = `Min ${new BigNumber(minValue).multipliedBy(MIN_SWAPPABLE_MICROS)} ${
+            ticker ? ticker : 'ATOM'
+          }`;
+          return;
+        }
 
+        if (data.payCoinData) {
+          const amount = data.maxAmount / 10 ** denomPrecision;
           if (amount > 0) {
             const ticker = await getTicker(
               data.payCoinData.base_denom,
               store.getters[GlobalGetterTypes.API.getDexChain],
             );
             const formattedAmount = Math.trunc(amount * 100) / 100;
-            data.maxButtonText = `${formattedAmount} ${ticker} Max`;
+            data.buttonText = `${formattedAmount} ${ticker} Max`;
           } else {
-            data.maxButtonText = 'Max';
+            data.buttonText = 'Max';
           }
         } else {
-          data.maxButtonText = 'Max';
+          data.buttonText = 'Max';
         }
       },
     );
@@ -1028,6 +1047,17 @@ export default defineComponent({
       data.receiveCoinAmount = null;
     }
 
+    function setMin() {
+      const precisionDecimal = Math.pow(
+        10,
+
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: data.payCoinData.base_denom,
+        }) ?? 6,
+      );
+      data.payCoinAmount = MIN_SWAPPABLE_MICROS / precisionDecimal;
+    }
+
     function setMax() {
       const precisionDecimal = Math.pow(
         10,
@@ -1151,6 +1181,7 @@ export default defineComponent({
       denomSelectHandler,
       getPrecisedAmount,
       setMax,
+      setMin,
       swap,
       assetsToPay,
       assetsToReceive,
