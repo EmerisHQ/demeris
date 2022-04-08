@@ -1,4 +1,7 @@
 <template>
+  <h1>Skeleton Loader</h1>
+  <SkeletonLoader width="100%"></SkeletonLoader>
+
   <div class="max-w-5xl p-10 shadow-dropdown mt-20 mx-auto">
     <TransactionProcessViewer v-if="state.key" :step-id="state.key" />
   </div>
@@ -53,6 +56,7 @@ import { interpret, State } from 'xstate';
 import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
 import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
 import BestPrice from '@/components/common/BestPrice.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import QuotesList from '@/components/common/QuotesList.vue';
 import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';

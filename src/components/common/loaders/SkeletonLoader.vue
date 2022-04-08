@@ -2,41 +2,19 @@
   <span :style="{ height, width: computedWidth }" class="skeleton-loader rounded-md" />
 </template>
 
-<script>
-export default {
-  name: 'SkeletonLoader',
-  props: {
-    maxWidth: {
-      // The default maxiumum width is 100%.
-      default: 100,
-      type: Number,
-    },
-    minWidth: {
-      // Lines have a minimum width of 80%.
-      default: 80,
-      type: Number,
-    },
-    height: {
-      // Make lines the same height as text.
-      default: '1em',
-      type: String,
-    },
-    width: {
-      // Make it possible to define a fixed
-      // width instead of using a random one.
-      default: null,
-      type: String,
-    },
-  },
-  computed: {
-    computedWidth() {
-      // Either use the given fixed width or
-      // a random width between the given min
-      // and max values.
-      return this.width || `${Math.floor(Math.random() * (this.maxWidth - this.minWidth) + this.minWidth)}%`;
-    },
-  },
-};
+<script setup lang="ts">
+import { computed } from 'vue';
+interface Props {
+  maxWidth?: number;
+  minWidth?: number;
+  height?: string;
+  width?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), { maxWidth: 100, minWidth: 80, height: '1em', width: null });
+const computedWidth = computed(() => {
+  return props.width || `${Math.floor(Math.random() * (props.maxWidth - props.minWidth) + props.minWidth)}%`;
+});
 </script>
 
 <style lang="scss">
