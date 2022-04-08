@@ -6,18 +6,9 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import ring1 from '@/assets/images/gold-ephemeris-ring-1.png';
 import ring2 from '@/assets/images/gold-ephemeris-ring-2.png';
-
-export default defineComponent({
-  name: 'EphemerisSpinner',
-  setup() {
-    return { ring1, ring2 };
-  },
-});
 </script>
 
 <style lang="scss" scoped>
