@@ -49,6 +49,7 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
+  [MutationTypes.MAP_AIRDROPS_ELIGIBILITY](state: S, payload: { value: EmerisAirdrops.Airdrop[] }): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -234,7 +235,10 @@ export const mutations: MutationTree<APIState> & Mutations = {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED;
     } else if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.NOT_STARTED;
-    } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
+    } else if (
+      new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime() &&
+      new Date(tempAirdrop.airdropEndDate).getTime() > new Date().getTime()
+    ) {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ONGOING;
     } else if (new Date(tempAirdrop.airdropEndDate).getTime() <= new Date().getTime()) {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ENDED;
@@ -245,6 +249,11 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
     state.airdropsStatus = payload.value;
   },
+  [MutationTypes.MAP_AIRDROPS_ELIGIBILITY](state, payload) {
+    state.airdrops = [];
+    state.airdrops = payload.value;
+  },
+
   //Coingecko Mutations
   [MutationTypes.SET_COINGECKO_ID](state, payload) {
     state.coinGeckoId = payload.value.data[payload.params];

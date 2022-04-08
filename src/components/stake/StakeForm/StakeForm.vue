@@ -24,17 +24,15 @@
     </template>
 
     <template v-else-if="['review', 'stake', 'staked'].includes(step)">
-      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <TransactionProcessCreator
-          v-if="steps.length"
-          :steps="steps"
-          action="stake"
-          @pending="closeModal"
-          @close="closeModal"
-          @previous="$emit('previous')"
-          @onReceiptState="goToStaked"
-        />
-      </FeatureRunningConditional>
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="stake"
+        @pending="closeModal"
+        @close="closeModal"
+        @previous="$emit('previous')"
+        @onReceiptState="goToStaked"
+      />
     </template>
   </div>
 </template>
@@ -46,7 +44,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import StakeFormAmount from '@/components/stake/StakeForm/StakeFormAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -61,7 +58,6 @@ export default defineComponent({
 
   components: {
     TransactionProcessCreator,
-    FeatureRunningConditional,
     ValidatorsTable,
     StakeFormAmount,
   },
