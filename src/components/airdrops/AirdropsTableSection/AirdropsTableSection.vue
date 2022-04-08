@@ -49,8 +49,14 @@ export default {
     const keyword = ref('');
     const router = useRouter();
 
+    const sortAirdropstable = (x, y) => {
+      return x.project.localeCompare(y.project);
+    };
+
     const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+      const airdropsToBeSorted = typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+      const sortedAirdrops = airdropsToBeSorted.sort(sortAirdropstable);
+      return sortedAirdrops;
     });
 
     const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
