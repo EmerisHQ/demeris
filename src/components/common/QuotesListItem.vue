@@ -1,18 +1,18 @@
 <template>
-  <div class="p-4 group hover:bg-text hover:text-inverse rounded-xl cursor-pointer">
+  <div class="p-4 group rounded-xl cursor-pointer" :class="[isSelectedQuote ? 'text-inverse bg-text' : '']">
     <div v-if="isBestPrice" class="text-positive">Best price</div>
-    <div class="flex">
-      {{ quote.dex?.charAt(0)?.toUpperCase() + quote.dex?.slice(1) }}
+    <div class="flex capitalize">
+      {{ quote.dex }}
       <span class="ml-auto">{{ quote.amount }} {{ ticker }}</span>
     </div>
-    <div class="flex text-muted group-hover:text-inverse group-hover:opacity-70">
+    <div class="flex text-muted" :class="[isSelectedQuote ? 'text-inverse opacity-70' : '']">
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
-      <span v-else class="hover:opacity-70"
+      <span v-else class="hover:opacity-70" @click.stop="visualizeRoute"
         >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
       >
-      <span class="ml-auto">~${{ quote.usdAmount }}</span>
+      <span class="ml-auto">~{{ quote.usdAmount }}</span>
     </div>
   </div>
 </template>
@@ -22,9 +22,9 @@ import { computed, PropType } from 'vue';
 import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 
-const typedstore = useStore() as RootStoreTyped;
+const typedstore = useStore();
 
 const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
 const denomConfig = verifiedDenoms.find((item) => item.name === props.quote.denom);
@@ -40,5 +40,17 @@ const props = defineProps({
   isBestPrice: {
     type: Boolean,
   },
+  isSelectedQuote: {
+    type: Boolean,
+  },
+  index: {
+    type: Number,
+    required: true,
+  },
 });
+const emit = defineEmits(['visualizeRoute']);
+
+const visualizeRoute = () => {
+  emit('visualizeRoute', { quote: props.quote, index: props.index });
+};
 </script>

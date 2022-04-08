@@ -571,6 +571,10 @@
         "pair": "Token pair",
         "share": "Your share",
         "liquidity": "Liquidity",
+        "disabled": {
+          "description": "Adding liquidity is unavailable.",
+          "linkText": "Learn more"
+        },
         "empty": "Pools you add liquidity to will appear here.",
         "explore": "Explore pools"
       },

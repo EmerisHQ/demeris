@@ -24,7 +24,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import MaintenanceScreen from '@/components/common/MaintenanceScreen.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
@@ -45,7 +44,6 @@ export default defineComponent({
 
   components: {
     EphemerisSpinner,
-    ChainDownWrapper,
     CookieConsent,
     TransactionsCenter,
     SimplexModal,
