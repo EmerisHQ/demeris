@@ -54,9 +54,7 @@ export default {
     };
 
     const airdrops = computed(() => {
-      const airdropsToBeSorted = typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-      const sortedAirdrops = airdropsToBeSorted.sort(sortAirdropstable);
-      return sortedAirdrops;
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops].sort(sortAirdropstable);
     });
 
     const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
