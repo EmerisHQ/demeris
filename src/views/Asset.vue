@@ -90,6 +90,21 @@
           </dl>
         </section>
 
+        <!-- Token Airdrop -->
+        <div class="bg-fg w-full p-4 flex items-center justify-between rounded-xl mt-8">
+          <div class="flex items-center">
+            <img src="~@/assets/images/token-airdrop.png" alt="Token Airdrop" class="w-8 h-8 rounded-full mr-2" />
+            <p>ATOM Airdrop</p>
+          </div>
+          <div class="text-muted">0.123 ATOM</div>
+          <div class="flex items-center">
+            <div class="mr-6">
+              <Button name="Claim" size="sm" variant="secondary" />
+            </div>
+            <Icon :name="'CloseIcon'" :icon-size="1" />
+          </div>
+        </div>
+
         <!-- Staking -->
         <template v-if="stakingEnabled">
           <section v-if="assetConfig?.stakable">
@@ -180,7 +195,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -201,12 +216,15 @@ import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import DexSwap from '@/components/swap/DexSwap.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
 import { getDisplayName, getTicker } from '@/utils/actionHandler';
+import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -232,10 +250,13 @@ export default defineComponent({
     ChainDownWarning,
     AreaChart,
     DexSwap,
+    Icon,
+    Button,
   },
 
   setup() {
     const displayName = ref('');
+    const tokenTicker = ref('');
     const displayPrice = ref(0);
     const metaSource = computed(() => {
       return { title: displayName.value };
@@ -432,11 +453,10 @@ export default defineComponent({
       });
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
         const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
           subscribe: false,
           params: {
-            token: tokenTicker.toLowerCase(),
+            token: tokenTicker.value.toLowerCase(),
             showSkeleton: false,
           },
         });
@@ -473,7 +493,36 @@ export default defineComponent({
       typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
     });
 
+    onMounted(async () => {
+      tokenTicker.value = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+    });
+
     const isStakingRunning = featureRunning('STAKING');
+    const isAirdropsRunning = featureRunning('AIRDROPS_FEATURE');
+
+    const airdrops = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    });
+
+    const assetAirdrop = computed(() => {
+      return airdrops.value.find((item) => item.tokenTicker === tokenTicker.value);
+    });
+
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
+    const showAirdropCard = computed(() => {
+      return (
+        !isDemoAccount.value &&
+        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.ENDED &&
+        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.NOT_ELIGIBLE &&
+        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.NOT_AVAILABLE
+      );
+    });
 
     return {
       nativeAsset,
@@ -497,7 +546,10 @@ export default defineComponent({
       priceDiffObject,
       setPriceDifference,
       isStakingRunning,
+      isAirdropsRunning,
       displayPrice,
+      assetAirdrop,
+      showAirdropCard,
     };
   },
 });
