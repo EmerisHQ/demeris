@@ -265,7 +265,7 @@ export default defineComponent({
         }
       }),
       buttonDisabled: computed(() => {
-        return !data.isSwapReady;
+        return !data.isSwapReady || data.buttonName.includes('Min');
       }),
       swapButtonActionText: 'Max',
       maxAmount: computed(() => {
@@ -351,8 +351,7 @@ export default defineComponent({
           !data.isAmount ||
           !isSignedIn.value ||
           data.selectedPoolData === null ||
-          !dexStatus.value ||
-          !data.buttonName.includes('Min')
+          !dexStatus.value
         );
       }),
       isChildModalOpen: false,
