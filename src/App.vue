@@ -70,80 +70,6 @@ const { pools: _pools } = usePoolsFactory();
 const { t } = useI18n({ useScope: 'global' });
 const status = ref(t('appInit.status.initializing'));
 
-<<<<<<< HEAD
-  components: {
-    EphemerisSpinner,
-    ChainDownWrapper,
-    CookieConsent,
-    TransactionsCenter,
-    FeatureRunningConditional,
-    SimplexModal,
-    MoonpayModal,
-    MaintenanceScreen,
-    SwapMultiDex,
-  },
-
-  setup() {
-    let showMaintenanceScreen = false;
-    if (featureRunning('MAINTENANCE_SCREEN')) {
-      return {
-        showMaintenanceScreen: true,
-      };
-    }
-    const store = useStore();
-    let liquidityEndpoint =
-      import.meta.env.VITE_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
-    let emerisEndpoint = import.meta.env.VITE_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
-    let githubEndpoint = import.meta.env.VITE_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
-    let rawGithubEndpoint = import.meta.env.VITE_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
-    let wsEndpoint = import.meta.env.VITE_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
-    if (featureRunning('USE_STAGING')) {
-      liquidityEndpoint = import.meta.env.VITE_EMERIS_STAGING_LIQUIDITY_ENDPOINT;
-      emerisEndpoint = import.meta.env.VITE_EMERIS_STAGING_ENDPOINT;
-      wsEndpoint = import.meta.env.VITE_EMERIS_STAGING_WEBSOCKET_ENDPOINT;
-    }
-    if (featureRunning('USE_DEV')) {
-      liquidityEndpoint = import.meta.env.VITE_EMERIS_DEV_LIQUIDITY_ENDPOINT;
-      emerisEndpoint = import.meta.env.VITE_EMERIS_DEV_ENDPOINT;
-      wsEndpoint = import.meta.env.VITE_EMERIS_DEV_WEBSOCKET_ENDPOINT;
-    }
-    setStore(store); // make store availabe in some composition functions used in the store itself
-    const typedstore = store as RootStoreTyped;
-    const initialized = ref(false);
-    const router = useRouter();
-    const { pools: _pools } = usePoolsFactory();
-    const { t } = useI18n({ useScope: 'global' });
-    const status = ref(t('appInit.status.initializing'));
-
-    onMounted(async () => {
-      useTheme({ updateOnChange: true });
-      let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
-      if (!gasLimit) {
-        gasLimit = 500000;
-        window.localStorage.setItem('gasLimit', gasLimit.toString());
-      }
-      await typedstore.dispatch(GlobalActionTypes.API.INIT, {
-        wsEndpoint: wsEndpoint,
-        endpoint: emerisEndpoint,
-        gitEndpoint: githubEndpoint,
-        rawGitEndpoint: rawGithubEndpoint,
-        hub_chain: 'cosmos-hub',
-        refreshTime: 5000,
-      });
-      typedstore.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, {
-        gasLimit: gasLimit,
-      });
-      try {
-        await typedstore.dispatch(GlobalActionTypes.API.GET_VERIFIED_DENOMS, {
-          subscribe: true,
-        });
-      } catch (e) {
-        console.error('Could not load verified denoms: ' + e);
-      }
-      typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS_AND_CHAIN_STATUS, {
-        subscribe: false,
-      });
-=======
 onMounted(async () => {
   useTheme({ updateOnChange: true });
   let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
@@ -185,7 +111,6 @@ onMounted(async () => {
       refresh: 10000,
     })
     .then(() => {
->>>>>>> origin/production
       store
         .dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },

@@ -1,10 +1,10 @@
 <template>
   <SwapCoin
-    :input="state.context.depositAmount"
-    :denom="state.context.depositCoin?.denom"
-    :chain="state.context.depositCoin?.chain"
-    @select="swap.openAssetsMenu('deposit')"
-    @update:input="send({ type: 'UPDATE_DEPOSIT_AMOUNT', value: $event })"
+    :input="state.context.inputAmount"
+    :denom="state.context.inputCoin?.denom"
+    :chain="state.context.inputCoin?.chain"
+    @select="swap.openAssetsMenu('input')"
+    @update:input="send({ type: 'UPDATE_INPUT_AMOUNT', value: $event })"
   >
     <template #label> Pay </template>
     <template #header>

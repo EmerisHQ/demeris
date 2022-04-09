@@ -3,8 +3,8 @@
     <SwapOverlay>
       <template #header>
         <h2 class="mx-auto text-2 font-bold">
-          <span v-if="swap.selectAssetType === 'deposit'">Pay with</span>
-          <span v-if="swap.selectAssetType === 'receive'">Receive</span>
+          <span v-if="swap.selectAssetType === 'input'">Pay with</span>
+          <span v-if="swap.selectAssetType === 'output'">Receive</span>
         </h2>
         <Button variant="link" size="sm" @click="closeMenu">
           <Icon name="CloseIcon" :icon-size="1.5" />
@@ -23,10 +23,10 @@
 
         <template #label="{ item }">
           <AmountDisplay
-            v-if="swap.selectAssetType === 'deposit'"
+            v-if="swap.selectAssetType === 'input'"
             :amount="{ amount: totalDenomBalance(state.context, item), denom: item }"
           />
-          <ChainName v-if="swap.selectAssetType === 'receive'" name="cosmos-hub" />
+          <ChainName v-if="swap.selectAssetType === 'output'" name="cosmos-hub" />
         </template>
 
         <template #actions="{ item }">
@@ -78,7 +78,7 @@ const initialData = {
 const data = reactive({ ...initialData });
 
 const countDenomBalancesPerChain = (denom: string) => {
-  if (swap.selectAssetType === 'receive') {
+  if (swap.selectAssetType === 'output') {
     return 0;
   }
   return Object.values(denomBalancesPerChain(state.value.context, denom)).length;
@@ -103,10 +103,10 @@ const selectChain = (chain: string) => {
 const dispatchUpdate = () => {
   const coin = { denom: data.selectedDenom, chain: data.selectedChain };
 
-  if (swap.selectAssetType === 'deposit') {
-    send({ type: 'UPDATE_DEPOSIT_COIN', value: coin });
-  } else if (swap.selectAssetType === 'receive') {
-    send({ type: 'UPDATE_RECEIVE_COIN', value: coin });
+  if (swap.selectAssetType === 'input') {
+    send({ type: 'UPDATE_INPUT_COIN', value: coin });
+  } else if (swap.selectAssetType === 'output') {
+    send({ type: 'UPDATE_OUTPUT_COIN', value: coin });
   }
 };
 

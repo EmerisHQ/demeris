@@ -14,7 +14,7 @@ export const useSwapStore = defineStore('swap', {
   },
 
   actions: {
-    openAssetsMenu(type: 'deposit' | 'receive') {
+    openAssetsMenu(type: 'input' | 'output') {
       this.selectAssetType = type;
     },
 

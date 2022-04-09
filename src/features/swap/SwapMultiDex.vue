@@ -11,13 +11,13 @@
       </div>
 
       <div class="flex flex-col space-y-7">
-        <SwapCoinDeposit />
+        <SwapCoinInput />
         <div class="flex items-center justify-between">
           <div class="border-t border-border w-full absolute left-0" />
           <SwapButtonSwitch />
           <SwapButtonRoute />
         </div>
-        <SwapCoinReceive />
+        <SwapCoinOutput />
       </div>
 
       <Button>Swap</Button>
@@ -42,8 +42,8 @@ import { useStore } from '@/utils/useStore';
 
 import SwapButtonRoute from './components/SwapButtonRoute.vue';
 import SwapButtonSwitch from './components/SwapButtonSwitch.vue';
-import SwapCoinDeposit from './components/SwapCoinDeposit.vue';
-import SwapCoinReceive from './components/SwapCoinReceive.vue';
+import SwapCoinInput from './components/SwapCoinInput.vue';
+import SwapCoinOutput from './components/SwapCoinOutput.vue';
 import SwapOverlayAssets from './components/SwapOverlayAssets.vue';
 import SwapOverlayRoutes from './components/SwapOverlayRoutes.vue';
 import SwapOverlaySettings from './components/SwapOverlaySettings.vue';

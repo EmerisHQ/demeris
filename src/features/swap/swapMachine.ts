@@ -6,20 +6,20 @@ interface SwapContextData {
 }
 
 interface SwapContext {
-  depositCoin: any;
-  receiveCoin: any;
-  depositAmount: number;
-  receiveAmount: number;
+  inputCoin: any;
+  outputCoin: any;
+  inputAmount: number;
+  outputAmount: number;
   selectedRoute: any;
   balances: any[];
   data: SwapContextData;
 }
 
 const defaultContext = () => ({
-  depositCoin: {},
-  receiveCoin: {},
-  depositAmount: undefined,
-  receiveAmount: undefined,
+  inputCoin: {},
+  outputCoin: {},
+  inputAmount: undefined,
+  outputAmount: undefined,
   selectedRoute: undefined,
   showAssetSearch: '',
   balances: [],
@@ -35,19 +35,19 @@ export const swapMachine = createMachine<SwapContext>(
     initial: 'booting',
     context: defaultContext(),
     on: {
-      UPDATE_DEPOSIT_COIN: {
+      UPDATE_INPUT_COIN: {
         target: 'updating.routes.run',
         actions: 'setDepositCoin',
       },
-      UPDATE_RECEIVE_COIN: {
+      UPDATE_OUTPUT_COIN: {
         target: 'updating.routes.run',
         actions: 'setReceiveCoin',
       },
-      UPDATE_DEPOSIT_AMOUNT: {
+      UPDATE_INPUT_AMOUNT: {
         target: 'updating.routes.debounce',
         actions: 'setDepositAmount',
       },
-      UPDATE_RECEIVE_AMOUNT: {
+      UPDATE_OUTPUT_AMOUNT: {
         target: 'updating.routes.debounce',
         actions: 'setReceiveAmount',
       },
@@ -107,14 +107,14 @@ export const swapMachine = createMachine<SwapContext>(
         states: {
           choose: {
             always: [
-              { target: 'idle', cond: (ctx) => !ctx.depositAmount || !ctx.depositCoin || !ctx.receiveCoin },
+              { target: 'idle', cond: (ctx) => !ctx.inputAmount || !ctx.inputCoin || !ctx.outputCoin },
               { target: 'pending' },
             ],
           },
           idle: {},
           pending: {
             on: {
-              INVALID_INSUFFICIENT_DEPOSIT_AMOUNT: 'invalid.insufficientDepositAmount',
+              INVALID_INSUFFICIENT_INPUT_AMOUNT: 'invalid.insufficientDepositAmount',
               INVALID_INSUFFICIENT_BALANCE: 'invalid.insufficientBalance',
               INVALID: 'invalid',
             },
@@ -180,7 +180,7 @@ export const swapMachine = createMachine<SwapContext>(
   {
     services: {
       performValidation: (context) => (send) => {
-        if (!context.depositAmount) {
+        if (!context.inputAmount) {
           return send('INVALID');
         }
 
@@ -210,31 +210,31 @@ export const swapMachine = createMachine<SwapContext>(
         },
       })),
       switchCoins: assign({
-        receiveCoin: (ctx) => {
-          if (ctx.depositCoin?.denom) {
+        outputCoin: (ctx) => {
+          if (ctx.inputCoin?.denom) {
             return {
-              denom: ctx.depositCoin.denom,
+              denom: ctx.inputCoin.denom,
               chain: 'cosmos-hub',
             };
           }
         },
-        receiveAmount: (ctx) => ctx.depositAmount,
-        depositCoin: (ctx) => ctx.receiveCoin,
-        depositAmount: (ctx) => ctx.receiveAmount,
+        outputAmount: (ctx) => ctx.inputAmount,
+        inputCoin: (ctx) => ctx.outputCoin,
+        inputAmount: (ctx) => ctx.outputAmount,
       }),
       setDepositCoin: assign((context, event) => ({
-        depositCoin: event.value,
-        receiveCoin: event.value?.denom === context.receiveCoin?.denom ? {} : context.receiveCoin,
+        inputCoin: event.value,
+        outputCoin: event.value?.denom === context.outputCoin?.denom ? {} : context.outputCoin,
       })),
       setDepositAmount: assign((context, event) => ({
-        depositAmount: event.value,
+        inputAmount: event.value,
       })),
       setReceiveAmount: assign((context, event) => ({
-        receiveAmount: event.value,
+        outputAmount: event.value,
       })),
       setReceiveCoin: assign({
-        receiveCoin: (ctx, event) => ({ denom: event.value?.denom, chain: 'cosmos-hub' }),
-        depositCoin: (ctx, event) => (event.value?.denom === ctx.depositCoin?.denom ? {} : ctx.depositCoin),
+        outputCoin: (ctx, event) => ({ denom: event.value?.denom, chain: 'cosmos-hub' }),
+        inputCoin: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? {} : ctx.inputCoin),
       }),
       setSelectedRoute: assign((context, event) => ({
         selectedRoute: event.value,
