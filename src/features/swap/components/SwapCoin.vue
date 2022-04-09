@@ -1,0 +1,71 @@
+<template>
+  <div class="flex flex-col space-y-2">
+    <div class="flex justify-between items-center">
+      <p class="font-bold -text-1"><slot name="label" /></p>
+      <slot v-if="denom" name="header" />
+    </div>
+    <div class="flex items-center space-x-3">
+      <div>
+        <template v-if="state.matches('booting')">
+          <CircleSymbol size="sm" />
+        </template>
+        <CircleSymbol v-else :denom="denom" size="sm" :display-status="false" />
+      </div>
+
+      <button class="flex flex-col" @click="emit('select')">
+        <div class="flex items-center">
+          <template v-if="state.matches('booting')">
+            <SkeletonLoader height="16px" width="48px" />
+          </template>
+          <template v-else>
+            <span class="text-0 font-medium whitespace-nowrap">
+              <Ticker v-if="denom" :name="denom" />
+              <span v-else>Select asset</span>
+            </span>
+            <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
+          </template>
+        </div>
+        <template v-if="state.matches('booting')">
+          <SkeletonLoader height="12px" width="96px" class="mt-2" />
+        </template>
+        <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap"><ChainName :name="chain" /></span>
+      </button>
+
+      <div v-if="denom" class="flex flex-col items-end space-y-0.5">
+        <AmountInput
+          v-model="value"
+          class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
+        />
+        <span class="text-muted -text-1">$0.0</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed } from 'vue';
+
+import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import Ticker from '@/components/common/Ticker.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
+import Icon from '@/components/ui/Icon.vue';
+
+import { useSwapStore } from '../swapStore';
+
+const props = defineProps(['chain', 'denom', 'input']);
+const emit = defineEmits(['select', 'update:input']);
+
+const swap = useSwapStore();
+const { state } = swap.useSwapMachine();
+
+const value = computed({
+  get() {
+    return props.input as string;
+  },
+  set(value) {
+    emit('update:input', value);
+  },
+});
+</script>
