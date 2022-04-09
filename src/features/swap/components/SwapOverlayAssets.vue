@@ -104,9 +104,9 @@ const dispatchUpdate = () => {
   const coin = { denom: data.selectedDenom, chain: data.selectedChain };
 
   if (swap.selectAssetType === 'input') {
-    send({ type: 'UPDATE_INPUT_COIN', value: coin });
+    send({ type: 'INPUT.CHANGE_COIN', value: coin });
   } else if (swap.selectAssetType === 'output') {
-    send({ type: 'UPDATE_OUTPUT_COIN', value: coin });
+    send({ type: 'OUTPUT.CHANGE_COIN', value: coin });
   }
 };
 

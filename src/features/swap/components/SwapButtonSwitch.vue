@@ -1,6 +1,6 @@
 <template>
   <IconButton
-    :disabled="!state.can('SWITCH_COINS')"
+    :disabled="!state.can('COINS.SWITCH')"
     class="-ml-0.5 text-text bg-surface"
     :name="'UpsideDownIcon'"
     :type="'circle'"
@@ -21,5 +21,5 @@ import { useSwapStore } from '../swapStore';
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
 
-const handleClick = () => send('SWITCH_COINS');
+const handleClick = () => send('COINS.SWITCH');
 </script>

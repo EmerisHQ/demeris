@@ -9,7 +9,7 @@ it('should refetch routes when update input token', async () => {
 
   await waitFor(() => service.state.matches('idle'));
 
-  service.send({ type: 'UPDATE_INPUT_COIN', value: 'uatom' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: 'uatom' });
 
   await waitFor(() => expect(service.state.matches('updating.routes')).toBe(true));
   await waitFor(() => expect(service.state.context.inputCoin).toBe('uatom'));
@@ -20,7 +20,7 @@ it('should refetch routes when update input amount', async () => {
 
   await waitFor(() => service.state.matches('idle'));
 
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: '1' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: '1' });
 
   await waitFor(() => expect(service.state.matches('updating.routes')).toBe(true));
   await waitFor(() => expect(service.state.context.inputAmount).toBe('1'));
@@ -40,9 +40,9 @@ it('should debounce input amount changes', async () => {
 
   await waitFor(() => service.state.matches('idle'));
 
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: '1' });
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: '1.23' });
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: '1.1892' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: '1' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: '1.23' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: '1.1892' });
 
   await waitFor(() => expect(service.state.matches('updating.routes.debounce')).toBe(true));
 
@@ -60,7 +60,7 @@ it('should get idle state when amount is empty', async () => {
 
   await waitFor(() => expect(service.state.matches('active.idle')).toBe(true));
 
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: undefined });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: undefined });
   service.clock.increment(2000);
 
   await waitFor(() => expect(service.state.matches('active.idle')).toBe(true));
@@ -72,17 +72,17 @@ it('should switch coins', async () => {
 
   await waitFor(() => service.state.matches('idle'));
 
-  service.send({ type: 'UPDATE_INPUT_COIN', value: 'uatom' });
-  service.send({ type: 'UPDATE_INPUT_AMOUNT', value: '1' });
+  service.send({ type: 'INPUT.CHANGE_COIN', value: 'uatom' });
+  service.send({ type: 'INPUT.CHANGE_AMOUNT', value: '1' });
 
   await waitFor(() => expect(service.state.context.inputCoin).toBe('uatom'));
 
-  service.send({ type: 'UPDATE_OUTPUT_COIN', value: 'uosmo' });
+  service.send({ type: 'OUTPUT.CHANGE_COIN', value: 'uosmo' });
 
   await waitFor(() => expect(service.state.context.outputCoin).toBe('uosmo'));
   await waitFor(() => expect(service.state.matches('active.valid')).toBe(true));
 
-  service.send({ type: 'SWITCH_COINS' });
+  service.send({ type: 'COINS.SWITCH' });
 
   await waitFor(() =>
     expect(service.state.context).toMatchObject({

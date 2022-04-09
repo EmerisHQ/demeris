@@ -29,26 +29,55 @@ const defaultContext = () => ({
   },
 });
 
+const updateRoutesState = {
+  initial: 'choose',
+  states: {
+    choose: {
+      always: [
+        {
+          target: 'debounce',
+          cond: 'hasRouteParams',
+        },
+        { target: '#ready' },
+      ],
+    },
+    run: {
+      invoke: {
+        src: 'getRoutes',
+        onDone: {
+          target: '#ready',
+          actions: 'assignRoutes',
+        },
+      },
+    },
+    debounce: {
+      after: {
+        500: 'run',
+      },
+    },
+  },
+};
+
 export const swapMachine = createMachine<SwapContext>(
   {
     id: 'swap',
     initial: 'booting',
     context: defaultContext(),
     on: {
-      UPDATE_INPUT_COIN: {
-        target: 'updating.routes.run',
+      'INPUT.CHANGE_COIN': {
+        target: 'updating.routes.input',
         actions: 'setDepositCoin',
       },
-      UPDATE_OUTPUT_COIN: {
-        target: 'updating.routes.run',
+      'OUTPUT.CHANGE_COIN': {
+        target: 'updating.routes.output',
         actions: 'setReceiveCoin',
       },
-      UPDATE_INPUT_AMOUNT: {
-        target: 'updating.routes.debounce',
+      'INPUT.CHANGE_AMOUNT': {
+        target: 'updating.routes.input',
         actions: 'setDepositAmount',
       },
-      UPDATE_OUTPUT_AMOUNT: {
-        target: 'updating.routes.debounce',
+      'OUTPUT.CHANGE_AMOUNT': {
+        target: 'updating.routes.output',
         actions: 'setReceiveAmount',
       },
     },
@@ -61,7 +90,7 @@ export const swapMachine = createMachine<SwapContext>(
             states: {
               pending: {
                 on: {
-                  UPDATE_BALANCES: {
+                  'BALANCES.SET': {
                     actions: 'assignBalances',
                     target: 'success',
                   },
@@ -90,26 +119,23 @@ export const swapMachine = createMachine<SwapContext>(
             },
           },
         },
-        onDone: 'available',
+        onDone: 'ready',
       },
-      available: {
-        id: 'available',
+      ready: {
+        id: 'ready',
         initial: 'choose',
         on: {
-          SELECT_ROUTE: {
+          'ROUTE.SELECT': {
             actions: 'setSelectedRoute',
           },
-          SWITCH_COINS: {
-            target: 'updating.routes',
+          'COINS.SWITCH': {
+            target: 'updating.routes.input',
             actions: 'switchCoins',
           },
         },
         states: {
           choose: {
-            always: [
-              { target: 'idle', cond: (ctx) => !ctx.inputAmount || !ctx.inputCoin || !ctx.outputCoin },
-              { target: 'pending' },
-            ],
+            always: [{ target: 'pending', cond: 'hasAllParams' }, { target: 'idle' }],
           },
           idle: {},
           pending: {
@@ -145,29 +171,16 @@ export const swapMachine = createMachine<SwapContext>(
       updating: {
         states: {
           routes: {
-            initial: 'run',
             states: {
-              run: {
-                invoke: {
-                  src: 'getRoutes',
-                  onDone: {
-                    target: '#available',
-                    actions: 'assignRoutes',
-                  },
-                },
-              },
-              debounce: {
-                after: {
-                  500: 'run',
-                },
-              },
+              input: updateRoutesState,
+              output: updateRoutesState,
             },
           },
           availableDenoms: {
             invoke: {
               src: 'getAvailableDenoms',
               onDone: {
-                target: '#available',
+                target: '#ready',
                 actions: 'assignAvailableDenoms',
               },
             },
@@ -218,13 +231,14 @@ export const swapMachine = createMachine<SwapContext>(
             };
           }
         },
-        outputAmount: (ctx) => ctx.inputAmount,
+        outputAmount: 0,
         inputCoin: (ctx) => ctx.outputCoin,
         inputAmount: (ctx) => ctx.outputAmount,
       }),
       setDepositCoin: assign((context, event) => ({
         inputCoin: event.value,
         outputCoin: event.value?.denom === context.outputCoin?.denom ? {} : context.outputCoin,
+        outputAmount: event.value?.denom === context.outputCoin?.denom ? undefined : context.outputAmount,
       })),
       setDepositAmount: assign((context, event) => ({
         inputAmount: event.value,
@@ -235,10 +249,15 @@ export const swapMachine = createMachine<SwapContext>(
       setReceiveCoin: assign({
         outputCoin: (ctx, event) => ({ denom: event.value?.denom, chain: 'cosmos-hub' }),
         inputCoin: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? {} : ctx.inputCoin),
+        inputAmount: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? undefined : ctx.inputAmount),
       }),
       setSelectedRoute: assign((context, event) => ({
         selectedRoute: event.value,
       })),
+    },
+    guards: {
+      hasRouteParams: (ctx) => ctx.inputCoin?.denom && ctx.inputAmount && ctx.outputCoin?.denom,
+      hasAllParams: (ctx) => ctx.inputCoin?.denom && ctx.inputAmount && ctx.outputCoin?.denom && !!ctx.outputAmount,
     },
   },
 );

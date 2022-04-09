@@ -1,6 +1,6 @@
 <template>
   <IconButton
-    v-if="['updating', 'available'].some(state.matches)"
+    v-if="['updating', 'ready.pending', 'ready.valid'].some(state.matches)"
     type="text"
     class="bg-surface -text-1"
     status="normal"

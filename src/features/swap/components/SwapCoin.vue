@@ -6,7 +6,7 @@
     </div>
     <div class="flex items-center space-x-3">
       <div>
-        <template v-if="state.matches('booting')">
+        <template v-if="isLoadingCoin">
           <CircleSymbol size="sm" />
         </template>
         <CircleSymbol v-else :denom="denom" size="sm" :display-status="false" />
@@ -14,7 +14,7 @@
 
       <button class="flex flex-col" @click="emit('select')">
         <div class="flex items-center">
-          <template v-if="state.matches('booting')">
+          <template v-if="isLoadingCoin">
             <SkeletonLoader height="16px" width="48px" />
           </template>
           <template v-else>
@@ -25,18 +25,24 @@
             <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
           </template>
         </div>
-        <template v-if="state.matches('booting')">
-          <SkeletonLoader height="12px" width="96px" class="mt-2" />
+
+        <template v-if="isLoadingCoin || isLoadingChain">
+          <SkeletonLoader height="12px" width="96px" class="mt-0.5" />
         </template>
-        <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap"><ChainName :name="chain" /></span>
+        <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap">
+          <ChainName :name="chain" />
+        </span>
       </button>
 
-      <div v-if="denom" class="flex flex-col items-end space-y-0.5">
-        <AmountInput
-          v-model="value"
-          class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
-        />
-        <span class="text-muted -text-1">$0.0</span>
+      <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">
+        <SkeletonLoader v-if="isLoadingAmount" height="20px" width="82px" />
+        <template v-else>
+          <AmountInput
+            v-model="value"
+            class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
+          />
+          <span class="text-muted -text-1">$0.0</span>
+        </template>
       </div>
     </div>
   </div>
@@ -54,11 +60,13 @@ import Icon from '@/components/ui/Icon.vue';
 
 import { useSwapStore } from '../swapStore';
 
-const props = defineProps(['chain', 'denom', 'input']);
+const props = defineProps(['chain', 'denom', 'input', 'isLoadingAmount', 'isLoadingChain']);
 const emit = defineEmits(['select', 'update:input']);
 
 const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
+
+const isLoadingCoin = computed(() => state.value.matches('booting'));
 
 const value = computed({
   get() {

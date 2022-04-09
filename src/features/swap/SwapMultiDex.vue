@@ -20,7 +20,7 @@
         <SwapCoinOutput />
       </div>
 
-      <Button>Swap</Button>
+      <Button :disabled="state.matches('unavailable')">Swap</Button>
     </div>
 
     <SwapOverlaySettings />
@@ -53,7 +53,7 @@ import { useSwapStore } from './swapStore';
 const swap = useSwapStore();
 const globalStore = useStore();
 
-const { send, service } = useMachine(swapMachine);
+const { state, send, service } = useMachine(swapMachine);
 const { balances } = useAccount();
 
 const firstLoad = computed(() => globalStore.getters[GlobalGetterTypes.USER.getBalancesFirstLoad]);
@@ -62,6 +62,6 @@ swap.setActor(service);
 
 watch(firstLoad, async () => {
   await nextTick();
-  send({ type: 'UPDATE_BALANCES', balances: balances.value });
+  send({ type: 'BALANCES.SET', balances: balances.value });
 });
 </script>
