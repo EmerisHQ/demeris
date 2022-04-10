@@ -41,7 +41,9 @@
             v-model="value"
             class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
           />
-          <span class="text-muted -text-1">$0.0</span>
+          <span class="text-muted -text-1">
+            <Price :amount="amountToUnit({ denom, amount: value })" show-zero />
+          </span>
         </template>
       </div>
     </div>
@@ -54,10 +56,12 @@ import { computed } from 'vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 
+import { amountToUnit } from '../swapMachineHelpers';
 import { useSwapStore } from '../swapStore';
 
 const props = defineProps(['chain', 'denom', 'input', 'isLoadingAmount', 'isLoadingChain']);

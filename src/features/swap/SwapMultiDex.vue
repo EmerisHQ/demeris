@@ -20,7 +20,8 @@
         <SwapCoinOutput />
       </div>
 
-      <Button :disabled="state.matches('unavailable')">Swap</Button>
+      <Button v-if="state.matches('unavailable')" disabled>Swap unavailable</Button>
+      <Button v-else :disabled="['ready.invalid', 'booting'].some(state.matches)">Swap</Button>
     </div>
 
     <SwapOverlaySettings />
@@ -30,15 +31,13 @@
 </template>
 
 <script lang="ts" setup>
+import { whenever } from '@vueuse/core';
 import { useMachine } from '@xstate/vue';
-import { computed, nextTick } from 'vue';
-import { watch } from 'vue';
+import { nextTick } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalGetterTypes } from '@/store';
-import { useStore } from '@/utils/useStore';
 
 import SwapButtonRoute from './components/SwapButtonRoute.vue';
 import SwapButtonSwitch from './components/SwapButtonSwitch.vue';
@@ -51,17 +50,20 @@ import { swapMachine } from './swapMachine';
 import { useSwapStore } from './swapStore';
 
 const swap = useSwapStore();
-const globalStore = useStore();
 
+const { allLoaded, balances } = useAccount();
 const { state, send, service } = useMachine(swapMachine);
-const { balances } = useAccount();
-
-const firstLoad = computed(() => globalStore.getters[GlobalGetterTypes.USER.getBalancesFirstLoad]);
 
 swap.setActor(service);
 
-watch(firstLoad, async () => {
-  await nextTick();
-  send({ type: 'BALANCES.SET', balances: balances.value });
-});
+whenever(
+  allLoaded,
+  async () => {
+    if (!state.value.can('BALANCES.SET')) return;
+
+    await nextTick();
+    send({ type: 'BALANCES.SET', balances: balances.value });
+  },
+  { immediate: true },
+);
 </script>

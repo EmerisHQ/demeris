@@ -10,7 +10,7 @@
   >
     <template #label> Receive </template>
     <template #header>
-      <div class="flex ml-auto font-normal text-muted -text-1">
+      <div v-if="isBestRouteSelected(state.context)" class="flex ml-auto font-normal text-muted -text-1">
         Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875" />
       </div>
     </template>
@@ -20,8 +20,10 @@
 <script lang="ts" setup>
 import Icon from '@/components/ui/Icon.vue';
 
+import { isBestRouteSelected } from '../swapMachineHelpers';
 import { useSwapStore } from '../swapStore';
 import SwapCoin from './SwapCoin.vue';
+
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
 </script>

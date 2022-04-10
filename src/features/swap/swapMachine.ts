@@ -1,4 +1,14 @@
+import axios from 'axios';
+import BigNumber from 'bignumber.js';
 import { assign, createMachine } from 'xstate';
+
+import {
+  amountToHuman,
+  amountToUnit,
+  getInputAmountFromRoute,
+  getMaxAmount,
+  getOutputAmountFromRoute,
+} from './swapMachineHelpers';
 
 interface SwapContextData {
   availableDenoms: string[];
@@ -8,9 +18,9 @@ interface SwapContextData {
 interface SwapContext {
   inputCoin: any;
   outputCoin: any;
-  inputAmount: number;
-  outputAmount: number;
-  selectedRoute: any;
+  inputAmount: string;
+  outputAmount: string;
+  selectedRouteIndex: any;
   balances: any[];
   data: SwapContextData;
 }
@@ -20,8 +30,7 @@ const defaultContext = () => ({
   outputCoin: {},
   inputAmount: undefined,
   outputAmount: undefined,
-  selectedRoute: undefined,
-  showAssetSearch: '',
+  selectedRouteIndex: undefined,
   balances: [],
   data: {
     availableDenoms: [],
@@ -29,7 +38,7 @@ const defaultContext = () => ({
   },
 });
 
-const updateRoutesState = {
+const createUpdateRoutesState = ({ onDone, invokeSrc }: { onDone: string; invokeSrc: string }) => ({
   initial: 'choose',
   states: {
     choose: {
@@ -43,11 +52,12 @@ const updateRoutesState = {
     },
     run: {
       invoke: {
-        src: 'getRoutes',
+        src: invokeSrc,
         onDone: {
           target: '#ready',
-          actions: 'assignRoutes',
+          actions: ['assignRoutes', onDone],
         },
+        onError: '#unavailable',
       },
     },
     debounce: {
@@ -56,7 +66,7 @@ const updateRoutesState = {
       },
     },
   },
-};
+});
 
 export const swapMachine = createMachine<SwapContext>(
   {
@@ -66,19 +76,19 @@ export const swapMachine = createMachine<SwapContext>(
     on: {
       'INPUT.CHANGE_COIN': {
         target: 'updating.routes.input',
-        actions: 'setDepositCoin',
+        actions: 'setInputCoin',
       },
       'OUTPUT.CHANGE_COIN': {
         target: 'updating.routes.output',
-        actions: 'setReceiveCoin',
+        actions: 'setOutputCoin',
       },
       'INPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.input',
-        actions: 'setDepositAmount',
+        actions: 'setInputAmount',
       },
       'OUTPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.output',
-        actions: 'setReceiveAmount',
+        actions: 'setOutputAmount',
       },
     },
     states: {
@@ -125,8 +135,8 @@ export const swapMachine = createMachine<SwapContext>(
         id: 'ready',
         initial: 'choose',
         on: {
-          'ROUTE.SELECT': {
-            actions: 'setSelectedRoute',
+          'ROUTE.SELECT_INDEX': {
+            actions: ['setSelectedRouteIndex', 'updateOutputAmountFromRoute'],
           },
           'COINS.SWITCH': {
             target: 'updating.routes.input',
@@ -140,9 +150,8 @@ export const swapMachine = createMachine<SwapContext>(
           idle: {},
           pending: {
             on: {
-              INVALID_INSUFFICIENT_INPUT_AMOUNT: 'invalid.insufficientDepositAmount',
-              INVALID_INSUFFICIENT_BALANCE: 'invalid.insufficientBalance',
-              INVALID: 'invalid',
+              'INVALID.OVER_MAX': 'invalid.overMax',
+              'INVALID.BELOW_MIN': 'invalid.belowMin',
             },
             invoke: {
               src: 'performValidation',
@@ -159,10 +168,8 @@ export const swapMachine = createMachine<SwapContext>(
           invalid: {
             initial: 'unknown',
             states: {
-              insufficientDepositAmount: {},
-              insufficientFeeAmount: {},
-              insufficientBalance: {},
-              noRoutes: {},
+              overMax: {},
+              belowMin: {},
               unknown: {},
             },
           },
@@ -172,8 +179,14 @@ export const swapMachine = createMachine<SwapContext>(
         states: {
           routes: {
             states: {
-              input: updateRoutesState,
-              output: updateRoutesState,
+              input: createUpdateRoutesState({
+                invokeSrc: 'getRoutesFromInput',
+                onDone: 'updateOutputAmountFromRoute',
+              }),
+              output: createUpdateRoutesState({
+                invokeSrc: 'getRoutesFromOutput',
+                onDone: 'updateInputAmountFromRoute',
+              }),
             },
           },
           availableDenoms: {
@@ -187,14 +200,17 @@ export const swapMachine = createMachine<SwapContext>(
           },
         },
       },
-      unavailable: {},
+      unavailable: {
+        id: 'unavailable',
+      },
     },
   },
   {
     services: {
-      performValidation: (context) => (send) => {
-        if (!context.inputAmount) {
-          return send('INVALID');
+      performValidation: (ctx) => (send) => {
+        const { amount } = amountToUnit({ amount: ctx.inputAmount, denom: ctx.inputCoin?.denom });
+        if (new BigNumber(amount).isGreaterThan(getMaxAmount(ctx)?.amount)) {
+          return send('INVALID.OVER_MAX');
         }
 
         return Promise.resolve(true);
@@ -202,8 +218,25 @@ export const swapMachine = createMachine<SwapContext>(
       getAvailableDenoms: () => {
         return Promise.resolve(['uatom', 'uosmo']);
       },
-      getRoutes: () => {
-        return new Promise((resolve) => setTimeout(() => resolve([]), 1000));
+      getRoutesFromOutput: async (ctx) => {
+        const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', {
+          chainIn: ctx.inputCoin.chain,
+          chainOut: 'osmosis' /*ctx.outputCoin.chain*/,
+          denomIn: ctx.inputCoin.denom,
+          denomOut: ctx.outputCoin.denom,
+          amountOut: amountToUnit({ amount: ctx.outputAmount, denom: ctx.outputCoin?.denom }).amount,
+        });
+        return data.routes;
+      },
+      getRoutesFromInput: async (ctx) => {
+        const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', {
+          chainIn: ctx.inputCoin.chain,
+          chainOut: 'osmosis' /*ctx.outputCoin.chain*/,
+          denomIn: ctx.inputCoin.denom,
+          denomOut: ctx.outputCoin.denom,
+          amountIn: amountToUnit({ amount: ctx.inputAmount, denom: ctx.inputCoin?.denom }).amount,
+        });
+        return data.routes;
       },
     },
     actions: {
@@ -221,6 +254,7 @@ export const swapMachine = createMachine<SwapContext>(
           ...context.data,
           routes: event.data,
         },
+        selectedRouteIndex: 0,
       })),
       switchCoins: assign({
         outputCoin: (ctx) => {
@@ -231,29 +265,49 @@ export const swapMachine = createMachine<SwapContext>(
             };
           }
         },
-        outputAmount: 0,
-        inputCoin: (ctx) => ctx.outputCoin,
         inputAmount: (ctx) => ctx.outputAmount,
+        outputAmount: (ctx) => ctx.inputAmount,
+        inputCoin: (ctx) => ctx.outputCoin,
       }),
-      setDepositCoin: assign((context, event) => ({
+      setInputCoin: assign((context, event) => ({
         inputCoin: event.value,
         outputCoin: event.value?.denom === context.outputCoin?.denom ? {} : context.outputCoin,
         outputAmount: event.value?.denom === context.outputCoin?.denom ? undefined : context.outputAmount,
       })),
-      setDepositAmount: assign((context, event) => ({
+      setInputAmount: assign((context, event) => ({
         inputAmount: event.value,
       })),
-      setReceiveAmount: assign((context, event) => ({
+      setOutputAmount: assign((context, event) => ({
         outputAmount: event.value,
       })),
-      setReceiveCoin: assign({
+      setOutputCoin: assign({
         outputCoin: (ctx, event) => ({ denom: event.value?.denom, chain: 'cosmos-hub' }),
         inputCoin: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? {} : ctx.inputCoin),
         inputAmount: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? undefined : ctx.inputAmount),
       }),
-      setSelectedRoute: assign((context, event) => ({
-        selectedRoute: event.value,
+      setSelectedRouteIndex: assign((context, event) => ({
+        selectedRouteIndex: event.value,
       })),
+      updateInputAmountFromRoute: assign({
+        inputAmount: (ctx) => {
+          if (!ctx.data.routes.length) {
+            return '0';
+          }
+
+          const expectedAmount = getInputAmountFromRoute(ctx);
+          return amountToHuman(expectedAmount)?.amount;
+        },
+      }),
+      updateOutputAmountFromRoute: assign({
+        outputAmount: (ctx) => {
+          if (!ctx.data.routes.length) {
+            return '0';
+          }
+
+          const expectedAmount = getOutputAmountFromRoute(ctx);
+          return amountToHuman(expectedAmount)?.amount;
+        },
+      }),
     },
     guards: {
       hasRouteParams: (ctx) => ctx.inputCoin?.denom && ctx.inputAmount && ctx.outputCoin?.denom,

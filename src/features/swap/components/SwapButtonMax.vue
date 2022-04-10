@@ -1,5 +1,11 @@
 <template>
-  <Button v-if="maxAmount" variant="link" size="sm" @click="handleClick">
+  <Button
+    v-if="maxAmount"
+    :class="{ 'text-negative-text': state.matches('ready.invalid.overMax') }"
+    variant="link"
+    size="sm"
+    @click="handleClick"
+  >
     Max <AmountDisplay :amount="maxAmount" />
   </Button>
 </template>
@@ -13,7 +19,7 @@ import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
-import { totalDenomBalance } from '../swapMachineHelpers';
+import { getMaxAmount } from '../swapMachineHelpers';
 import { useSwapStore } from '../swapStore';
 
 const globalStore = useStore();
@@ -21,20 +27,7 @@ const globalStore = useStore();
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
 
-const maxAmount = computed(() => {
-  const inputCoin = state.value.context.inputCoin;
-
-  if (!inputCoin?.denom) {
-    return;
-  }
-
-  const total = totalDenomBalance(state.value.context, inputCoin.denom, inputCoin.chain);
-
-  return {
-    denom: inputCoin.denom,
-    amount: total,
-  };
-});
+const maxAmount = computed(() => getMaxAmount(state.value.context));
 
 const handleClick = () => {
   const denom = maxAmount.value.denom;
