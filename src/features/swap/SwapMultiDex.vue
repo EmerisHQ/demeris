@@ -5,7 +5,7 @@
     <div class="flex flex-col justify-between space-y-8 flex-1">
       <div class="flex items-center justify-between">
         <h2 class="text-2 font-bold">{{ $t('components.swap.title') }}</h2>
-        <Button variant="link" rounded @click="swap.toggleSettings">
+        <Button variant="link" rounded :click-function="swap.toggleSettings">
           <Icon name="ThreeDotsIcon" :icon-size="1.5" />
         </Button>
       </div>
@@ -39,13 +39,13 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 
-import SwapButtonRoute from './components/SwapButtonRoute.vue';
-import SwapButtonSwitch from './components/SwapButtonSwitch.vue';
-import SwapCoinInput from './components/SwapCoinInput.vue';
-import SwapCoinOutput from './components/SwapCoinOutput.vue';
-import SwapOverlayAssets from './components/SwapOverlayAssets.vue';
-import SwapOverlayRoutes from './components/SwapOverlayRoutes.vue';
-import SwapOverlaySettings from './components/SwapOverlaySettings.vue';
+import SwapButtonRoute from './components/SwapButton/SwapButtonRoute.vue';
+import SwapButtonSwitch from './components/SwapButton/SwapButtonSwitch.vue';
+import SwapCoinInput from './components/SwapCoin/SwapCoinInput.vue';
+import SwapCoinOutput from './components/SwapCoin/SwapCoinOutput.vue';
+import SwapOverlayAssets from './components/SwapOverlay/SwapOverlayAssets.vue';
+import SwapOverlayRoutes from './components/SwapOverlay/SwapOverlayRoutes.vue';
+import SwapOverlaySettings from './components/SwapOverlay/SwapOverlaySettings.vue';
 import { swapMachine } from './swapMachine';
 import { useSwapStore } from './swapStore';
 
@@ -54,12 +54,12 @@ const swap = useSwapStore();
 const { allLoaded, balances } = useAccount();
 const { state, send, service } = useMachine(swapMachine);
 
-swap.setActor(service);
+swap.setService(service);
 
 whenever(
   allLoaded,
   async () => {
-    if (!state.value.can('BALANCES.SET')) return;
+    if (!state.value.can({ type: 'BALANCES.SET', balances: [] })) return;
 
     await nextTick();
     send({ type: 'BALANCES.SET', balances: balances.value });

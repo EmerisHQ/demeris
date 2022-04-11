@@ -51,9 +51,9 @@ import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-import { denomBalancesPerChain, totalDenomBalance } from '../swapMachineHelpers';
-import { useSwapStore } from '../swapStore';
-import SwapMenu from './SwapMenu.vue';
+import { denomBalancesPerChain, totalDenomBalance } from '../../swapMachineHelpers';
+import { useSwapStore } from '../../swapStore';
+import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
 
 const props = defineProps(['denom']);

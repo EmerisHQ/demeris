@@ -70,7 +70,7 @@
     "vue-tippy": "^6.0.0-alpha.57",
     "vue3-apexcharts": "^1.4.1",
     "vuex": "^4.0.2",
-    "xstate": "^4.30.6"
+    "xstate": "^4.31.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.9",

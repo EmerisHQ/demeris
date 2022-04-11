@@ -54,8 +54,8 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { formatProtocolName, getOutputAmountFromRoute, getProtocolFromRoute } from '../swapMachineHelpers';
-import { useSwapStore } from '../swapStore';
+import { formatProtocolName, getOutputAmountFromRoute, getProtocolFromRoute } from '../../swapMachineHelpers';
+import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayRouteDetail from './SwapOverlayRouteDetail.vue';
 

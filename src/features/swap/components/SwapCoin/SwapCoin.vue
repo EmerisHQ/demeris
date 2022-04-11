@@ -62,10 +62,18 @@ import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { amountToUnit } from '../swapMachineHelpers';
-import { useSwapStore } from '../swapStore';
+import { amountToUnit } from '../../swapMachineHelpers';
+import { useSwapStore } from '../../swapStore';
 
-const props = defineProps(['chain', 'denom', 'input', 'isLoadingAmount', 'isLoadingChain']);
+interface Props {
+  chain?: string;
+  denom?: string;
+  input?: string;
+  isLoadingAmount?: boolean;
+  isLoadingChain?: boolean;
+}
+
+const props = defineProps<Props>();
 const emit = defineEmits(['select', 'update:input']);
 
 const swap = useSwapStore();
@@ -73,9 +81,9 @@ const { state } = swap.useSwapMachine();
 
 const isLoadingCoin = computed(() => state.value.matches('booting'));
 
-const value = computed({
+const value = computed<string>({
   get() {
-    return props.input as string;
+    return props.input;
   },
   set(value) {
     emit('update:input', value);

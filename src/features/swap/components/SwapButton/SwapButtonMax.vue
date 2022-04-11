@@ -15,14 +15,10 @@ import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Button from '@/components/ui/Button.vue';
-import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
-import { useStore } from '@/utils/useStore';
 
-import { getMaxAmount } from '../swapMachineHelpers';
-import { useSwapStore } from '../swapStore';
-
-const globalStore = useStore();
+import { amountToHuman, getMaxAmount } from '../../swapMachineHelpers';
+import { useSwapStore } from '../../swapStore';
 
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
@@ -32,8 +28,7 @@ const maxAmount = computed(() => getMaxAmount(state.value.context));
 const handleClick = () => {
   const denom = maxAmount.value.denom;
   const baseDenom = getBaseDenomSync(denom);
-  const precision = globalStore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
-  const amount = maxAmount.value?.amount / Math.pow(10, precision);
+  const { amount } = amountToHuman({ amount: maxAmount.value.amount, denom: baseDenom });
 
   // TODO: Reduce fee
 

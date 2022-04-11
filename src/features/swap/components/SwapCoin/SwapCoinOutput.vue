@@ -20,8 +20,8 @@
 <script lang="ts" setup>
 import Icon from '@/components/ui/Icon.vue';
 
-import { isBestRouteSelected } from '../swapMachineHelpers';
-import { useSwapStore } from '../swapStore';
+import { isBestRouteSelected } from '../../swapMachineHelpers';
+import { useSwapStore } from '../../swapStore';
 import SwapCoin from './SwapCoin.vue';
 
 const swap = useSwapStore();

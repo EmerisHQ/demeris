@@ -8,12 +8,14 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
-export const denomBalancesPerChain = (context: any, denom: string) => {
+import { SwapContext } from './swapMachine';
+
+export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
   return groupBy(balances, 'on_chain');
 };
 
-export const totalDenomBalance = (context: any, denom: string, chain?: string) => {
+export const totalDenomBalance = (context: SwapContext, denom: string, chain?: string) => {
   let balances = context.balances.filter((item) => item.base_denom === getBaseDenomSync(denom));
 
   if (chain) {
@@ -27,10 +29,10 @@ export const totalDenomBalance = (context: any, denom: string, chain?: string) =
     total = total.plus(amount);
   }
 
-  return total.toNumber();
+  return total.toString();
 };
 
-export const getMaxAmount = (context: any) => {
+export const getMaxAmount = (context: SwapContext) => {
   const inputCoin = context.inputCoin;
 
   if (!inputCoin?.denom) {
@@ -66,7 +68,7 @@ export const amountToUnit = ({ amount, denom }: EmerisBase.Amount) => {
   };
 };
 
-export const getInputAmountFromRoute = (context: any, routeIndex?: number) => {
+export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
@@ -79,7 +81,7 @@ export const getInputAmountFromRoute = (context: any, routeIndex?: number) => {
   };
 };
 
-export const getOutputAmountFromRoute = (context: any, routeIndex?: number) => {
+export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
@@ -108,8 +110,8 @@ export const formatProtocolName = (protocol: string) => {
   return protocols[protocol];
 };
 
-export const isBestRouteSelected = (context: any) => {
-  return context.selectedRouteIndex === 0;
+export const isBestRouteSelected = (context: SwapContext) => {
+  return context.selectedRouteIndex === 0 && !!getCurrentRoute(context);
 };
 
 export const getChainFromProtocol = (protocol: string) => {
@@ -120,7 +122,7 @@ export const getChainFromProtocol = (protocol: string) => {
   return protocols[protocol];
 };
 
-export const getAvailableDenoms = (context) => {
+export const getAvailableDenoms = (context: SwapContext) => {
   return context.data.availableDenoms?.map((item) => {
     const [chain, ...rest] = item.split('/');
     const denom = rest.join('/');
@@ -146,7 +148,60 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
   return denom;
 };
 
-export const getAvailableAssets = (context: any) => {
+export const getChainFromDenom = (denom: string) => {
+  const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
+  if (chain) return chain;
+
+  const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
+  const trace = traces[denom.split('/')[1]?.toUpperCase()];
+
+  if (trace) {
+    return trace.trace[0].chain_name;
+  }
+
+  return undefined;
+};
+
+export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
+  const result = context.data.routes[routeIndex]?.steps.map((step) => {
+    const data = step.data;
+    const chainIn = getChainFromDenom(data.from.denom) ?? getChainFromProtocol(step.protocol);
+    const chainOut = getChainFromDenom(data.to.denom) ?? getChainFromProtocol(step.protocol);
+    const baseDenomIn = getBaseDenomSync(data.from.denom);
+    const baseDenomOut = getBaseDenomSync(data.to.denom);
+
+    return {
+      ...step,
+      chainIn,
+      chainOut,
+      baseDenomIn,
+      baseDenomOut,
+    };
+  });
+
+  // Aggregate related denom steps in the same array
+  const steps = [];
+  let groupedStep = [result[0]];
+
+  for (let index = 1; index < result.length; index++) {
+    if (groupedStep[0]?.baseDenomIn === result[index].baseDenomIn) {
+      groupedStep.push(result[index]);
+    } else {
+      // Denom transition
+      steps.push(groupedStep);
+      groupedStep = [result[index]];
+
+      // Last step
+      if (index === result.length - 1) {
+        steps.push(groupedStep);
+      }
+    }
+  }
+
+  return steps;
+};
+
+export const getAvailableAssets = (context: SwapContext) => {
   const result = getAvailableDenoms(context).map(({ denom, chain }) => {
     const baseDenom = getBaseDenomSync(denom);
 
@@ -156,7 +211,7 @@ export const getAvailableAssets = (context: any) => {
     const isNativeDenom = isNative(denom);
     const displayName = config?.display_name;
     const totalBalance = totalDenomBalance(context, baseDenom);
-    const humanBalance = amountToHuman({ amount: totalBalance.toString(), denom: baseDenom }).amount;
+    const humanBalance = amountToHuman({ amount: totalBalance, denom: baseDenom }).amount;
 
     return {
       baseDenom,

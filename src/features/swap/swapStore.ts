@@ -1,13 +1,23 @@
 import { useActor } from '@xstate/vue';
 import { defineStore } from 'pinia';
 
+import { SwapService } from './swapMachine';
+
+interface SwapStoreState {
+  selectAssetType: string;
+  shownSettings: boolean;
+  shownRoutes: boolean;
+  service: SwapService;
+}
+
 export const useSwapStore = defineStore('swap', {
-  state: () => ({
-    selectAssetType: undefined,
-    shownSettings: false,
-    shownRoutes: false,
-    machineActor: undefined,
-  }),
+  state: () =>
+    ({
+      selectAssetType: undefined,
+      shownSettings: false,
+      shownRoutes: false,
+      service: undefined,
+    } as SwapStoreState),
 
   getters: {
     shownAssetMenu: (state) => !!state.selectAssetType,
@@ -22,8 +32,8 @@ export const useSwapStore = defineStore('swap', {
       this.selectAssetType = undefined;
     },
 
-    setActor(actor: any) {
-      this.machineActor = actor;
+    setService(actor: any) {
+      this.service = actor;
     },
 
     toggleSettings() {
@@ -35,7 +45,7 @@ export const useSwapStore = defineStore('swap', {
     },
 
     useSwapMachine() {
-      return useActor(this.machineActor);
+      return useActor(this.service as SwapService);
     },
   },
 });
