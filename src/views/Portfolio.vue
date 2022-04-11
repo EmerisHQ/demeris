@@ -16,7 +16,6 @@
               :hide-zero-assets="true"
               variant="balance"
               :show-headers="false"
-              :limit-rows="4"
               @row-click="openAssetPage"
             />
           </template>
