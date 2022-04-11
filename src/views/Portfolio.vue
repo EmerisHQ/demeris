@@ -10,10 +10,6 @@
           </div>
         </header>
         <section class="mt-16">
-          <header class="flex justify-between items-center mb-6">
-            <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
-          </header>
           <template v-if="initialLoadComplete">
             <AssetsTable
               :balances="balances"
