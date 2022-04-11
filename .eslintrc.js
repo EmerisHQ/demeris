@@ -26,6 +26,12 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/v-on-event-hyphenation': 'off',
     'vue/component-api-style': ['warn', ['script-setup']],
+    'vue/no-undef-components': [
+      'error',
+      {
+        ignorePatterns: ['apexchart', 'i18n-n', 'i18n-t', 'metainfo', 'router-link', 'router-view', 'tippy'],
+      },
+    ],
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-unused-vars': [
