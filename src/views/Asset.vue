@@ -195,6 +195,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -232,6 +233,7 @@ export default defineComponent({
     ChainDownWarning,
     AreaChart,
     DexSwap,
+    FeatureRunningConditional,
   },
 
   setup() {
