@@ -126,8 +126,10 @@ export const getAvailableDenoms = (context: SwapContext) => {
   return context.data.availableDenoms?.map((item) => {
     const [chain, ...rest] = item.split('/');
     const denom = rest.join('/');
+    const baseDenom = getBaseDenomSync(denom);
 
     return {
+      baseDenom,
       chain,
       denom,
     };
@@ -202,9 +204,7 @@ export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
 };
 
 export const getAvailableAssets = (context: SwapContext) => {
-  const result = getAvailableDenoms(context).map(({ denom, chain }) => {
-    const baseDenom = getBaseDenomSync(denom);
-
+  const result = getAvailableDenoms(context).map(({ baseDenom, denom, chain }) => {
     const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
 
     const isVerified = config?.verified ?? false;
@@ -230,4 +230,10 @@ export const getAvailableAssets = (context: SwapContext) => {
     [(x) => +x.humanBalance, 'displayName'],
     ['desc', 'asc'],
   );
+};
+
+export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: string) => {
+  return getAvailableDenoms(context)
+    .filter((item) => item.baseDenom === baseDenom)
+    .map((item) => item.chain);
 };

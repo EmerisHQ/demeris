@@ -17,7 +17,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Button from '@/components/ui/Button.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { amountToHuman, getMaxAmount } from '../../swapMachineHelpers';
+import { amountToHuman, getMaxAmount } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 
 const swap = useSwapStore();

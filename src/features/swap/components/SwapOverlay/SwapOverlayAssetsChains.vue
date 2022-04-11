@@ -11,7 +11,7 @@
     </template>
 
     <div class="text-center text-muted leading-copy">
-      <p>
+      <p v-if="swap.selectAssetType === 'input'">
         <i18n-t scope="global" keypath="components.chainSelect.text1" chain-no="4" chains="chains">
           <template #asset>
             <Denom :name="denom" />
@@ -51,7 +51,7 @@ import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-import { denomBalancesPerChain, totalDenomBalance } from '../../swapMachineHelpers';
+import { getAvailableChainsByDenom, totalDenomBalance } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
@@ -62,5 +62,5 @@ const emit = defineEmits(['back', 'close', 'select']);
 const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
 
-const chains = computed(() => Object.keys(denomBalancesPerChain(state.value.context, props.denom)));
+const chains = computed(() => getAvailableChainsByDenom(state.value.context, props.denom));
 </script>

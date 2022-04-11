@@ -62,7 +62,7 @@ import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { amountToUnit } from '../../swapMachineHelpers';
+import { amountToUnit } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 
 interface Props {

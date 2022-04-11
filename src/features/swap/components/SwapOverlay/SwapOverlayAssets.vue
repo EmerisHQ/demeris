@@ -3,8 +3,8 @@
     <SwapOverlay @esc="closeMenu">
       <template #header>
         <h2 class="mx-auto text-2 font-bold">
-          <span v-if="swap.selectAssetType === 'input'">Pay with</span>
-          <span v-if="swap.selectAssetType === 'output'">Receive</span>
+          <span v-if="isInputView">Pay with</span>
+          <span v-if="isOutputView">Receive</span>
         </h2>
         <Button variant="link" size="sm" @click="closeMenu">
           <Icon name="CloseIcon" :icon-size="1.5" />
@@ -33,11 +33,11 @@
             :chain="item.chain"
             :amount="{ amount: item.totalBalance, denom: item.denom }"
           />
-          <ChainName v-if="swap.selectAssetType === 'output'" name="cosmos-hub" />
+          <ChainName v-if="isOutputView" :name="item.chain" />
         </template>
 
         <template #actions="{ item }">
-          <div v-if="countDenomBalancesPerChain(item) > 1" class="flex items-center">
+          <div v-if="getAvailableChains(item).length > 1" class="flex items-center">
             <AssetChainsIndicator :balances="state.context.balances" :denom="item.denom" class="mr-2" />
             <div class="text-[0.7rem]"><CaretRightIcon /></div>
           </div>
@@ -69,7 +69,12 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { denomBalancesPerChain, getAvailableAssets, getDenomFromBaseDenom } from '../../swapMachineHelpers';
+import {
+  denomBalancesPerChain,
+  getAvailableAssets,
+  getAvailableChainsByDenom,
+  getDenomFromBaseDenom,
+} from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
@@ -89,14 +94,21 @@ const data = reactive({ ...initialData });
 
 const availableCoins = computed(() => getAvailableAssets(state.value.context));
 
-const countDenomBalancesPerChain = (asset: any) => {
-  return Object.values(denomBalancesPerChain(state.value.context, asset.denom)).length;
+const isInputView = computed(() => swap.selectAssetType === 'input');
+const isOutputView = computed(() => swap.selectAssetType === 'output');
+
+const getAvailableChains = (asset: any) => {
+  if (isInputView.value) {
+    return Object.keys(denomBalancesPerChain(state.value.context, asset.denom));
+  }
+
+  return getAvailableChainsByDenom(state.value.context, asset.baseDenom);
 };
 
 const selectAsset = (asset: any) => {
   data.selectedDenom = asset.denom;
   data.selectedChain = asset.chain;
-  if (countDenomBalancesPerChain(asset) <= 1) {
+  if (getAvailableChains(asset).length <= 1) {
     dispatchUpdate();
     return closeMenu();
   }

@@ -9,7 +9,7 @@ import {
   getInputAmountFromRoute,
   getMaxAmount,
   getOutputAmountFromRoute,
-} from './swapMachineHelpers';
+} from './swapHelpers';
 
 interface SwapContextData {
   availableDenoms: string[];

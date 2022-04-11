@@ -52,7 +52,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-import { formatProtocolName, getRouteDetails } from '../../swapMachineHelpers';
+import { formatProtocolName, getRouteDetails } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
