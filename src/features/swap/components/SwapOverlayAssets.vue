@@ -1,6 +1,6 @@
 <template>
   <template v-if="swap.shownAssetMenu">
-    <SwapOverlay>
+    <SwapOverlay @esc="closeMenu">
       <template #header>
         <h2 class="mx-auto text-2 font-bold">
           <span v-if="swap.selectAssetType === 'input'">Pay with</span>
@@ -12,27 +12,34 @@
       </template>
 
       <Search v-model:keyword="data.searchQuery" />
-      <SwapMenu :search="data.searchQuery" :items="['uatom', 'uosmo']" class="mt-3" @select="selectDenom($event)">
+      <SwapMenu
+        :search="data.searchQuery"
+        :items="availableCoins"
+        search-field="baseDenom"
+        class="mt-3"
+        @select="selectAsset($event)"
+      >
         <template #symbol="{ item }">
-          <CircleSymbol :display-status="false" :denom="item" />
+          <CircleSymbol :display-status="false" :denom="item.denom" :chain-name="item.chain" />
         </template>
 
         <template #title="{ item }">
-          <Ticker :name="item" />
+          <Ticker :name="item.denom" />
         </template>
 
         <template #label="{ item }">
           <AmountDisplay
             v-if="swap.selectAssetType === 'input'"
-            :amount="{ amount: totalDenomBalance(state.context, item), denom: item }"
+            :chain="item.chain"
+            :amount="{ amount: item.totalBalance, denom: item.denom }"
           />
           <ChainName v-if="swap.selectAssetType === 'output'" name="cosmos-hub" />
         </template>
 
         <template #actions="{ item }">
           <div v-if="countDenomBalancesPerChain(item) > 1" class="flex items-center">
-            <AssetChainsIndicator :balances="state.context.balances" :denom="item" class="mr-2" />
-            <Icon name="CaretRightIcon" :icon-size="0.7" class="-mr-1" stroke="currentColor" />
+            <AssetChainsIndicator :balances="state.context.balances" :denom="item.denom" class="mr-2" />
+            <div class="text-[0.7rem]"><CaretRightIcon /></div>
           </div>
         </template>
       </SwapMenu>
@@ -49,18 +56,20 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { denomBalancesPerChain, totalDenomBalance } from '../swapMachineHelpers';
+import { denomBalancesPerChain, getAvailableAssets, getDenomFromBaseDenom } from '../swapMachineHelpers';
 import { useSwapStore } from '../swapStore';
 import SwapMenu from './SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
@@ -75,18 +84,19 @@ const initialData = {
   searchQuery: '',
   shownChainMenu: false,
 };
+
 const data = reactive({ ...initialData });
 
-const countDenomBalancesPerChain = (denom: string) => {
-  if (swap.selectAssetType === 'output') {
-    return 0;
-  }
-  return Object.values(denomBalancesPerChain(state.value.context, denom)).length;
+const availableCoins = computed(() => getAvailableAssets(state.value.context));
+
+const countDenomBalancesPerChain = (asset: any) => {
+  return Object.values(denomBalancesPerChain(state.value.context, asset.denom)).length;
 };
 
-const selectDenom = (denom: string) => {
-  data.selectedDenom = denom;
-  if (countDenomBalancesPerChain(denom) <= 1) {
+const selectAsset = (asset: any) => {
+  data.selectedDenom = asset.denom;
+  data.selectedChain = asset.chain;
+  if (countDenomBalancesPerChain(asset) <= 1) {
     dispatchUpdate();
     return closeMenu();
   }
@@ -94,6 +104,7 @@ const selectDenom = (denom: string) => {
 };
 
 const selectChain = (chain: string) => {
+  data.selectedDenom = getDenomFromBaseDenom(data.selectedDenom, chain);
   data.selectedChain = chain;
   data.shownChainMenu = false;
   dispatchUpdate();
@@ -101,7 +112,11 @@ const selectChain = (chain: string) => {
 };
 
 const dispatchUpdate = () => {
-  const coin = { denom: data.selectedDenom, chain: data.selectedChain };
+  const coin = {
+    denom: data.selectedDenom,
+    chain: data.selectedChain,
+    baseDenom: getBaseDenomSync(data.selectedDenom),
+  };
 
   if (swap.selectAssetType === 'input') {
     send({ type: 'INPUT.CHANGE_COIN', value: coin });

@@ -215,13 +215,14 @@ export const swapMachine = createMachine<SwapContext>(
 
         return Promise.resolve(true);
       },
-      getAvailableDenoms: () => {
-        return Promise.resolve(['uatom', 'uosmo']);
+      getAvailableDenoms: async () => {
+        const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/available_denoms', {});
+        return data.denoms;
       },
       getRoutesFromOutput: async (ctx) => {
         const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', {
           chainIn: ctx.inputCoin.chain,
-          chainOut: 'osmosis' /*ctx.outputCoin.chain*/,
+          chainOut: ctx.outputCoin.chain,
           denomIn: ctx.inputCoin.denom,
           denomOut: ctx.outputCoin.denom,
           amountOut: amountToUnit({ amount: ctx.outputAmount, denom: ctx.outputCoin?.denom }).amount,
@@ -231,7 +232,7 @@ export const swapMachine = createMachine<SwapContext>(
       getRoutesFromInput: async (ctx) => {
         const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', {
           chainIn: ctx.inputCoin.chain,
-          chainOut: 'osmosis' /*ctx.outputCoin.chain*/,
+          chainOut: ctx.outputCoin.chain,
           denomIn: ctx.inputCoin.denom,
           denomOut: ctx.outputCoin.denom,
           amountIn: amountToUnit({ amount: ctx.inputAmount, denom: ctx.inputCoin?.denom }).amount,
@@ -257,22 +258,15 @@ export const swapMachine = createMachine<SwapContext>(
         selectedRouteIndex: 0,
       })),
       switchCoins: assign({
-        outputCoin: (ctx) => {
-          if (ctx.inputCoin?.denom) {
-            return {
-              denom: ctx.inputCoin.denom,
-              chain: 'cosmos-hub',
-            };
-          }
-        },
+        outputCoin: (ctx) => ctx.inputCoin,
         inputAmount: (ctx) => ctx.outputAmount,
         outputAmount: (ctx) => ctx.inputAmount,
         inputCoin: (ctx) => ctx.outputCoin,
       }),
       setInputCoin: assign((context, event) => ({
         inputCoin: event.value,
-        outputCoin: event.value?.denom === context.outputCoin?.denom ? {} : context.outputCoin,
-        outputAmount: event.value?.denom === context.outputCoin?.denom ? undefined : context.outputAmount,
+        outputCoin: event.value?.baseDenom === context.outputCoin?.baseDenom ? {} : context.outputCoin,
+        outputAmount: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputAmount,
       })),
       setInputAmount: assign((context, event) => ({
         inputAmount: event.value,
@@ -281,9 +275,10 @@ export const swapMachine = createMachine<SwapContext>(
         outputAmount: event.value,
       })),
       setOutputCoin: assign({
-        outputCoin: (ctx, event) => ({ denom: event.value?.denom, chain: 'cosmos-hub' }),
-        inputCoin: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? {} : ctx.inputCoin),
-        inputAmount: (ctx, event) => (event.value?.denom === ctx.inputCoin?.denom ? undefined : ctx.inputAmount),
+        outputCoin: (ctx, event) => event.value,
+        inputCoin: (ctx, event) => (event.value?.baseDenom === ctx.inputCoin?.baseDenom ? {} : ctx.inputCoin),
+        inputAmount: (ctx, event) =>
+          event.value?.baseDenom === ctx.inputCoin?.baseDenom ? undefined : ctx.inputAmount,
       }),
       setSelectedRouteIndex: assign((context, event) => ({
         selectedRouteIndex: event.value,

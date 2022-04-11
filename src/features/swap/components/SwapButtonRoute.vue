@@ -1,6 +1,6 @@
 <template>
   <IconButton
-    v-if="['updating', 'ready.pending', 'ready.valid'].some(state.matches)"
+    v-if="['updating', 'ready.pending', 'ready.valid', 'ready.invalid'].some(state.matches)"
     :data="{ type: 'custom', function: swap.toggleRoutes }"
     type="text"
     class="bg-surface -text-1"

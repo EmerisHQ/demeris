@@ -9,7 +9,7 @@
         <template v-if="isLoadingCoin">
           <CircleSymbol size="sm" />
         </template>
-        <CircleSymbol v-else :denom="denom" size="sm" :display-status="false" />
+        <CircleSymbol v-else :denom="denom ? getBaseDenomSync(denom) : ''" size="sm" :display-status="false" />
       </div>
 
       <button class="flex flex-col" @click="emit('select')">
@@ -19,7 +19,7 @@
           </template>
           <template v-else>
             <span class="text-0 font-medium whitespace-nowrap">
-              <Ticker v-if="denom" :name="denom" />
+              <Ticker v-if="denom" :name="getBaseDenomSync(denom)" />
               <span v-else>Select asset</span>
             </span>
             <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
@@ -60,6 +60,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { amountToUnit } from '../swapMachineHelpers';
 import { useSwapStore } from '../swapStore';

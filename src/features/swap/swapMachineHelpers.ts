@@ -1,10 +1,11 @@
 import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import groupBy from 'lodash.groupby';
+import orderBy from 'lodash.orderby';
 
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import { isNative, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export const denomBalancesPerChain = (context: any, denom: string) => {
@@ -13,7 +14,7 @@ export const denomBalancesPerChain = (context: any, denom: string) => {
 };
 
 export const totalDenomBalance = (context: any, denom: string, chain?: string) => {
-  let balances = context.balances.filter((item) => item.base_denom === denom);
+  let balances = context.balances.filter((item) => item.base_denom === getBaseDenomSync(denom));
 
   if (chain) {
     balances = balances.filter((item) => item.on_chain === chain);
@@ -40,7 +41,7 @@ export const getMaxAmount = (context: any) => {
   const total = totalDenomBalance(context, inputCoin.denom, inputCoin.chain);
 
   return {
-    denom: inputCoin.denom,
+    denom: getBaseDenomSync(inputCoin.denom),
     amount: total,
   };
 };
@@ -72,7 +73,10 @@ export const getInputAmountFromRoute = (context: any, routeIndex?: number) => {
   if (!route?.steps) return;
 
   const firstStep = route.steps[0];
-  return firstStep?.data?.from;
+  return {
+    amount: 0,
+    ...firstStep?.data?.from,
+  };
 };
 
 export const getOutputAmountFromRoute = (context: any, routeIndex?: number) => {
@@ -82,7 +86,10 @@ export const getOutputAmountFromRoute = (context: any, routeIndex?: number) => {
   if (!route?.steps) return;
 
   const lastStep = route.steps[route.steps.length - 1];
-  return lastStep?.data?.to;
+  return {
+    amount: 0,
+    ...lastStep?.data?.to,
+  };
 };
 
 export const getProtocolFromRoute = (route: any) => {
@@ -113,16 +120,59 @@ export const getChainFromProtocol = (protocol: string) => {
   return protocols[protocol];
 };
 
-export const getAvailableCoins = (context: any) => {
+export const getAvailableDenoms = (context) => {
   return context.data.availableDenoms?.map((item) => {
-    const [chain_name, ...rest] = item.split('/');
+    const [chain, ...rest] = item.split('/');
     const denom = rest.join('/');
-    const base_denom = getBaseDenomSync(denom);
 
     return {
-      chain_name,
+      chain,
       denom,
-      base_denom,
     };
   });
+};
+
+export const getDenomFromBaseDenom = (denom: string, chain: string) => {
+  const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
+  for (const trace of Object.values(traces)) {
+    if (trace.base_denom === denom) {
+      for (const item of trace.trace) {
+        if (item.chain_name === chain) {
+          return trace.ibc_denom;
+        }
+      }
+    }
+  }
+  return denom;
+};
+
+export const getAvailableAssets = (context: any) => {
+  const result = getAvailableDenoms(context).map(({ denom, chain }) => {
+    const baseDenom = getBaseDenomSync(denom);
+
+    const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
+
+    const isVerified = config?.verified ?? false;
+    const isNativeDenom = isNative(denom);
+    const displayName = config?.display_name;
+    const totalBalance = totalDenomBalance(context, baseDenom);
+    const humanBalance = amountToHuman({ amount: totalBalance.toString(), denom: baseDenom }).amount;
+
+    return {
+      baseDenom,
+      chain,
+      denom,
+      displayName,
+      isVerified,
+      isNativeDenom,
+      totalBalance,
+      humanBalance,
+    };
+  });
+
+  return orderBy(
+    result.filter((item) => item.isNativeDenom),
+    [(x) => +x.humanBalance, 'displayName'],
+    ['desc', 'asc'],
+  );
 };

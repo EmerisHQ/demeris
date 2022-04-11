@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-const props = defineProps(['items', 'search']);
+const props = defineProps(['items', 'search', 'searchField']);
 defineEmits(['select']);
 
 const results = computed(() => {
@@ -40,6 +40,6 @@ const results = computed(() => {
     return props.items;
   }
 
-  return props.items?.filter((item) => item.includes(props.search));
+  return props.items?.filter((item) => (props.searchField ? item[props.searchField] : item).includes(props.search));
 });
 </script>
