@@ -91,17 +91,42 @@
         </section>
 
         <!-- Token Airdrop -->
-        <div class="bg-fg w-full p-4 flex items-center justify-between rounded-xl mt-8">
+        <div v-if="showAirdropCard" class="bg-fg w-full p-4 flex items-center justify-between rounded-xl mt-8">
           <div class="flex items-center">
             <img src="~@/assets/images/token-airdrop.png" alt="Token Airdrop" class="w-8 h-8 rounded-full mr-2" />
-            <p>ATOM Airdrop</p>
+            <p>
+              <span class="uppercase">{{ assetAirdrop[0].project }}</span> {{ $t('context.airdrops.airdrop') }}
+            </p>
           </div>
-          <div class="text-muted">0.123 ATOM</div>
+          <div class="text-muted">0.123 {{ assetAirdrop[0].tokenTicker }}</div>
           <div class="flex items-center">
             <div class="mr-6">
-              <Button name="Claim" size="sm" variant="secondary" />
+              <Button
+                v-if="assetAirdrop[0].eligibility === AirdropEligibilityStatus.CLAIMABLE"
+                name="Claim"
+                size="sm"
+                variant="secondary"
+              />
+              <div v-else-if="assetAirdrop[0].eligibility === AirdropEligibilityStatus.ELIGIBLE">Eligible</div>
+              <div
+                v-if="assetAirdrop[0].eligibility === AirdropEligibilityStatus.AUTO_DROP"
+                class="flex items-center float-right"
+              >
+                <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Auto-drop
+              </div>
+              <div
+                v-else-if="assetAirdrop[0].eligibility === AirdropEligibilityStatus.CLAIMED"
+                class="flex items-center float-right"
+              >
+                <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Claimed
+              </div>
             </div>
-            <Icon :name="'CloseIcon'" :icon-size="1" />
+            <Icon
+              :name="'CloseIcon'"
+              :icon-size="1"
+              class="cursor-pointer"
+              @click="() => (airdropCardIsVisible = false)"
+            />
           </div>
         </div>
 
@@ -258,6 +283,7 @@ export default defineComponent({
     const displayName = ref('');
     const tokenTicker = ref('');
     const displayPrice = ref(0);
+    const airdropCardIsVisible = ref(true);
     const metaSource = computed(() => {
       return { title: displayName.value };
     });
@@ -500,12 +526,9 @@ export default defineComponent({
     const isStakingRunning = featureRunning('STAKING');
     const isAirdropsRunning = featureRunning('AIRDROPS_FEATURE');
 
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-    });
-
     const assetAirdrop = computed(() => {
-      return airdrops.value.find((item) => item.tokenTicker === tokenTicker.value);
+      const airdrops = typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+      return airdrops.filter((item) => item.tokenTicker === tokenTicker.value);
     });
 
     const isDemoAccount = computed(() => {
@@ -516,11 +539,15 @@ export default defineComponent({
     });
 
     const showAirdropCard = computed(() => {
+      console.log('checking here', assetAirdrop.value);
       return (
+        isAirdropsRunning &&
         !isDemoAccount.value &&
-        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.ENDED &&
-        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.NOT_ELIGIBLE &&
-        assetAirdrop.value.eligibility !== AirdropEligibilityStatus.NOT_AVAILABLE
+        airdropCardIsVisible.value &&
+        assetAirdrop.value[0] &&
+        assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.ENDED &&
+        assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.NOT_ELIGIBLE &&
+        assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.NOT_AVAILABLE
       );
     });
 
@@ -550,6 +577,8 @@ export default defineComponent({
       displayPrice,
       assetAirdrop,
       showAirdropCard,
+      airdropCardIsVisible,
+      AirdropEligibilityStatus,
     };
   },
 });
