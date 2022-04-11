@@ -20,30 +20,23 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { useCookie } from 'vue-cookie-next';
 
 import Button from '@/components/ui/Button.vue';
 
-export default defineComponent({
-  name: 'CookieConsent',
-  components: { Button },
-  setup() {
-    const { setCookie, getCookie } = useCookie();
-    const consented = ref(getCookie('cookie-consent-accepted'));
-    const acceptCookies = () => {
-      setCookie('cookie-consent-accepted', 'true', {
-        domain:
-          window.location.hostname === 'localhost'
-            ? 'localhost'
-            : `.${window.location.hostname.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, '$1')}`,
-      });
-      consented.value = 'true';
-    };
-    return { consented, acceptCookies };
-  },
-});
+const { setCookie, getCookie } = useCookie();
+const consented = ref(getCookie('cookie-consent-accepted'));
+const acceptCookies = () => {
+  setCookie('cookie-consent-accepted', 'true', {
+    domain:
+      window.location.hostname === 'localhost'
+        ? 'localhost'
+        : `.${window.location.hostname.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, '$1')}`,
+  });
+  consented.value = 'true';
+};
 </script>
 
 <style lang="scss" scoped>

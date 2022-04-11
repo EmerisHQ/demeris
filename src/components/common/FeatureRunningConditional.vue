@@ -8,18 +8,15 @@ import { computed } from 'vue';
 
 import { featureRunning } from '@/utils/FeatureManager';
 
-const props = defineProps({
-  name: {
-    type: String,
-    required: true,
-  },
-});
+const props = defineProps<{
+  name: string;
+}>();
 
 const isActivated = computed(() => {
-  const result = featureRunning(props.name);
-  if (result === undefined) {
+  const isRunning = featureRunning(props.name);
+  if (isRunning === undefined) {
     return false;
   }
-  return !!result;
+  return !!isRunning;
 });
 </script>

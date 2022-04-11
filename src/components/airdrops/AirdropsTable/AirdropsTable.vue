@@ -1,6 +1,6 @@
 <template>
   <div v-for="(mappedItem, mappedIndex) in mappedAirdrops" :key="mappedIndex">
-    <table class="assets-table w-full">
+    <table v-if="mappedItem.sectionTitle !== 'all' && mappedItem.sectionTitle !== 'past'" class="assets-table w-full">
       <tbody>
         <tr>
           <td
@@ -23,9 +23,25 @@
         </tr>
       </tbody>
     </table>
-    <p v-if="mappedItem.airdrops.length === 0" class="my-8 text-muted -text-1">
-      No {{ sectionTitle(mappedItem.sectionTitle) }} airdrops
+    <p v-if="mappedItem.airdrops.length === 0 && !keyword" class="my-8 text-muted -text-1">
+      {{ $t('context.airdrops.noResult.noAirdrops', { title: sectionTitle(mappedItem.sectionTitle) }) }}
     </p>
+    <div v-if="mappedItem.airdrops.length === 0 && keyword" class="mt-12">
+      <div class="w-1/3 mx-auto text-center">
+        <img src="~@/assets/images/no-search-result.png" alt="No search result" />
+        <div class="w-full mx-auto">
+          <div class="text-1 font-medium mt-6">
+            {{
+              $t('context.airdrops.noResult.noAirdropForKeyword', {
+                keyword,
+                title: sectionTitle(mappedItem.sectionTitle),
+              })
+            }}
+          </div>
+          <p class="text-muted mt-4">{{ $t('context.airdrops.noResult.couldNotFind') }}</p>
+        </div>
+      </div>
+    </div>
     <table v-else class="assets-table w-full">
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
         <tr>
@@ -41,21 +57,24 @@
         </tr>
       </thead>
 
-      <tbody>
-        <tr
-          v-for="(airdrop, index) in mappedItem.shouldMinimize ? mappedItem.airdrops.slice(0, 3) : mappedItem.airdrops"
-          :key="index"
-          class="assets-table__row group cursor-pointer"
-          @click="handleClick(airdrop)"
-        >
+      <p v-if="keyword" class="my-6 font-medium">
+        {{ $t('context.airdrops.noOfResults', { results: mappedItem.airdrops.length, keyword }) }}
+      </p>
+
+      <tbody
+        v-for="(airdrop, index) in mappedItem.shouldMinimize ? mappedItem.airdrops.slice(0, 3) : mappedItem.airdrops"
+        :key="index"
+      >
+        <tr v-if="airdrop.project" class="assets-table__row group cursor-pointer" @click="handleClick(airdrop)">
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <div class="flex items-center">
               <div>
                 <img
-                  v-if="airdrop.tokenIcon && airdrop.imageExists"
+                  v-if="!imageFailIndexes.includes(index)"
                   :src="airdrop.tokenIcon"
                   alt="Airdrop Logo"
                   class="w-10 rounded-full"
+                  @error="imageLoadError(index)"
                 />
 
                 <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-2 text-0">
@@ -63,7 +82,7 @@
                 </div>
               </div>
               <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
-                <span class="font-medium"><ChainName :name="airdrop.project" /></span>
+                <span class="font-medium"><ChainName :name="airdrop.project ? airdrop.project : '-'" /></span>
                 <div class="-text-1 font-normal text-muted mt-0.5">
                   <Ticker :name="airdrop.tokenTicker ? airdrop.tokenTicker : '-'" />
                 </div>
@@ -106,6 +125,7 @@
             <div v-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_AVAILABLE" class="text-muted">
               Not available
             </div>
+            <div v-if="airdrop.eligibility === AirdropEligibilityStatus.ENDED" class="text-muted">-</div>
           </td>
         </tr>
       </tbody>
@@ -149,6 +169,10 @@ export default defineComponent({
       type: Array as PropType<EmerisAirdrops.Airdrop[]>,
       required: true,
     },
+    keyword: {
+      type: String,
+      default: '',
+    },
     activeFilter: {
       type: String,
       default: '',
@@ -156,16 +180,16 @@ export default defineComponent({
   },
   emits: ['row-click'],
   setup(props, { emit }) {
-    const keyword = ref<string>('');
+    let watchedAirdrops = ref([]);
     let mappedAirdrops = ref([]);
-    let tempMappedAirdrops = ref([]);
+    let imageFailIndexes = ref([]);
 
     const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
       emit('row-click', airdrop);
     };
 
     const noAirdropsToClaim = computed(() => {
-      return props.airdrops.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
+      return watchedAirdrops.value.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
     });
 
     const sections = computed(() => {
@@ -183,18 +207,18 @@ export default defineComponent({
     const setAirdropsTable = (activeFilter: string) => {
       mappedAirdrops.value = [];
       if (activeFilter === 'all') {
-        const mappedAirdropsObj = { sectionTitle: null, airdrops: props.airdrops, shouldMinimize: false };
+        const mappedAirdropsObj = { sectionTitle: 'all', airdrops: watchedAirdrops.value, shouldMinimize: false };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else if (activeFilter === 'past') {
         const mappedAirdropsObj = {
-          sectionTitle: null,
-          airdrops: props.airdrops.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
+          sectionTitle: 'past',
+          airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
           shouldMinimize: false,
         };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else {
         sections.value.forEach((item) => {
-          const airdrops = props.airdrops.filter((airdropItem) => airdropItem.eligibility === item);
+          const airdrops = watchedAirdrops.value.filter((airdropItem) => airdropItem.eligibility === item);
           const mappedAirdropsObj = {
             sectionTitle: item,
             airdrops,
@@ -206,15 +230,19 @@ export default defineComponent({
     };
 
     const seeAllMappedSection = (mappedItem: any) => {
-      tempMappedAirdrops.value = mappedAirdrops.value;
       mappedAirdrops.value = [];
       mappedAirdrops.value.push(mappedItem);
     };
 
+    const imageLoadError = (airdropIndex: number) => {
+      imageFailIndexes.value.push(airdropIndex);
+    };
+
     watch(
-      () => [props.activeFilter],
-      async () => {
-        setAirdropsTable(props.activeFilter);
+      () => [props.activeFilter, props.airdrops],
+      async (props: any) => {
+        watchedAirdrops.value = props[1];
+        setAirdropsTable(props[0]);
       },
       { immediate: true },
     );
@@ -224,13 +252,14 @@ export default defineComponent({
     };
 
     return {
-      keyword,
       handleClick,
       mappedAirdrops,
       seeAllMappedSection,
       AirdropEligibilityStatus,
       EmerisAirdrops,
       sectionTitle,
+      imageLoadError,
+      imageFailIndexes,
     };
   },
 });

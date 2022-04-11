@@ -159,11 +159,15 @@
             </div>
 
             <div class="flex justify-between w-full gap-x-3 mt-6">
-              <Button
-                :name="walletBalances.poolCoin?.amount > 0 ? 'Add' : 'Add liquidity'"
-                class="flex-1"
-                :click-function="addLiquidityHandler"
-              />
+              <FeatureRunningConditional name="DISABLE_ADD_LIQUIDITY">
+                <template #deactivated>
+                  <Button
+                    :name="walletBalances.poolCoin?.amount > 0 ? 'Add' : 'Add liquidity'"
+                    class="flex-1"
+                    :click-function="addLiquidityHandler"
+                  />
+                </template>
+              </FeatureRunningConditional>
               <Button
                 v-if="walletBalances.poolCoin?.amount > 0"
                 name="Withdraw"
@@ -173,15 +177,28 @@
             </div>
           </div>
         </section>
+        <FeatureRunningConditional name="DISABLE_ADD_LIQUIDITY">
+          <template #default>
+            <div class="my-10 -text-1 flex mx-auto">
+              <b>{{ $t('context.pools.disabled.description') }}</b> &nbsp;
+              <a
+                variant="link"
+                href="https://support.emeris.com/en/articles/6095013-how-to-withdraw-your-funds-from-liquidity-pools"
+              >
+                {{ $t('context.pools.disabled.linkText') }} ↗
+              </a>
+            </div>
+          </template>
+        </FeatureRunningConditional>
       </aside>
     </div>
     <SkeletonLoader v-else width="100%" height="300px" />
   </AppLayout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, Ref, ref, unref, watch } from 'vue';
+import { computed, Ref, ref, unref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -189,6 +206,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -203,207 +221,172 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'Pool',
+const router = useRouter();
+const route = useRoute();
+const typedstore = useStore() as RootStoreTyped;
+const denoms = ref([]);
+pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
 
-  components: {
-    AmountDisplay,
-    AppLayout,
-    CircleSymbol,
-    CurrencyDisplay,
-    Denom,
-    Button,
-    Pools,
-    Price,
-    Ticker,
-    SkeletonLoader,
-  },
+const poolId = computed(() => route.params.id as string);
 
-  setup() {
-    const router = useRouter();
-    const route = useRoute();
-    const typedstore = useStore() as RootStoreTyped;
-    const denoms = ref([]);
-    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
+const { balancesByDenom } = useAccount();
+const { filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
-    const poolId = computed(() => route.params.id as string);
+const hasPrices = computed(() => {
+  let baseDenoms = denoms.value;
+  if (!baseDenoms.length) {
+    baseDenoms = pool.value.reserve_coin_denoms;
+  }
+  const coinA = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
+  const coinB = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
+  const all = coinA && coinB;
 
-    const { balancesByDenom } = useAccount();
-    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
-
-    const hasPrices = computed(() => {
-      let baseDenoms = denoms.value;
-      if (!baseDenoms.length) {
-        baseDenoms = pool.value.reserve_coin_denoms;
-      }
-      const coinA = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const coinB = !!typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
-      const all = coinA && coinB;
-
-      return {
-        coinA,
-        coinB,
-        all,
-      };
-    });
-
-    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
-    watch(
-      () => poolId.value,
-      async () => {
-        const inst = usePool(poolId);
-        await inst.initPromise;
-        usePoolInstance.value = inst;
-      },
-      { immediate: true },
-    );
-
-    const pool = computed(() => {
-      return unref(usePoolInstance.value?.pool);
-    });
-    const pairName = computed(() => {
-      return unref(usePoolInstance.value?.pairName);
-    });
-    const isReverse = computed(() => {
-      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
-      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
-      return firstDenom !== reserveBalanceFirstDenom;
-    });
-    const reserveBalances = computed(() => {
-      return unref(
-        isReverse.value
-          ? [...usePoolInstance.value?.reserveBalances].reverse()
-          : usePoolInstance.value?.reserveBalances,
-      );
-    });
-    const totalSupply = computed(() => {
-      return unref(usePoolInstance.value?.totalSupply);
-    });
-    const totalLiquidityPrice = computed(() => {
-      return unref(usePoolInstance.value?.totalLiquidityPrice);
-    });
-    const isReversePairName = computed(() => {
-      return unref(usePoolInstance.value?.isReversePairName);
-    });
-
-    const metaSource = computed(() => ({
-      title: pairName.value ? pairName.value : 'Gravity DEX Pool',
-    }));
-    useMeta(metaSource);
-
-    const walletBalances = computed(() => {
-      if (!pool.value || !reserveBalances.value?.length) {
-        return;
-      }
-
-      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
-
-      const poolCoin = {
-        denom: pool.value.pool_coin_denom,
-        base_denom: pool.value.pool_coin_denom,
-        amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
-      };
-
-      const withdrawBalances = isReverse.value
-        ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
-        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
-
-      return {
-        coinA: withdrawBalances[0],
-        coinB: withdrawBalances[1],
-        poolCoin,
-      };
-    });
-
-    const exchangeAmount = computed(() => {
-      if (!reserveBalances.value?.length) {
-        return;
-      }
-
-      const fromPrecision =
-        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: reserveBalances.value[0].base_denom,
-        }) ?? 6;
-      const toPrecision =
-        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: reserveBalances.value[1].base_denom,
-        }) ?? 6;
-      let balanceA = reserveBalances.value[0].amount;
-      let balanceB = reserveBalances.value[1].amount;
-      if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
-      }
-      return undefined;
-    });
-
-    const relatedPools = computed(() => {
-      // TODO: Order by descending  %ownership
-      return [
-        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[0]),
-        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[1]),
-      ]
-        .filter((item) => item.id !== pool.value.id)
-        .slice(0, 3);
-    });
-
-    const addLiquidityHandler = () => {
-      router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
-    };
-
-    const withdrawLiquidityHandler = () => {
-      router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
-    };
-
-    const updateDenoms = async () => {
-      if (!pool.value) {
-        return;
-      }
-
-      const reserveDenoms = await getReserveBaseDenoms(pool.value);
-      denoms.value = reserveDenoms;
-    };
-
-    const ownShare = computed(() => {
-      if (!pool.value || !totalSupply.value || !walletBalances.value.poolCoin.amount) {
-        return 0;
-      }
-
-      return new BigNumber(walletBalances.value.poolCoin.amount)
-        .dividedBy(totalSupply.value)
-        .multipliedBy(100)
-        .toNumber();
-    });
-
-    const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.base_denom } });
-    };
-
-    watch(reserveBalances, updateDenoms, { immediate: true });
-
-    return {
-      hasPrices,
-      pool,
-      pairName,
-      reserveBalances,
-      relatedPools,
-      walletBalances,
-      totalLiquidityPrice,
-      addLiquidityHandler,
-      withdrawLiquidityHandler,
-      getPoolName,
-      ownShare,
-      openAssetPage,
-      exchangeAmount,
-      isReversePairName,
-    };
-  },
+  return {
+    coinA,
+    coinB,
+    all,
+  };
 });
+
+const usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+
+watch(
+  () => poolId.value,
+  async () => {
+    const inst = usePool(poolId);
+    await inst.initPromise;
+    usePoolInstance.value = inst;
+  },
+  { immediate: true },
+);
+
+const pool = computed(() => {
+  return unref(usePoolInstance.value?.pool);
+});
+
+const pairName = computed(() => {
+  return unref(usePoolInstance.value?.pairName);
+});
+
+const isReverse = computed(() => {
+  const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
+  const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
+  return firstDenom !== reserveBalanceFirstDenom;
+});
+
+const reserveBalances = computed(() => {
+  return unref(
+    isReverse.value ? [...usePoolInstance.value?.reserveBalances].reverse() : usePoolInstance.value?.reserveBalances,
+  );
+});
+
+const totalSupply = computed(() => {
+  return unref(usePoolInstance.value?.totalSupply);
+});
+
+const totalLiquidityPrice = computed(() => {
+  return unref(usePoolInstance.value?.totalLiquidityPrice);
+});
+
+const isReversePairName = computed(() => {
+  return unref(usePoolInstance.value?.isReversePairName);
+});
+
+const metaSource = computed(() => ({
+  title: pairName.value ? pairName.value : 'Gravity DEX Pool',
+}));
+useMeta(metaSource);
+
+const walletBalances = computed(() => {
+  if (!pool.value || !reserveBalances.value?.length) {
+    return;
+  }
+
+  const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
+
+  const poolCoin = {
+    denom: pool.value.pool_coin_denom,
+    base_denom: pool.value.pool_coin_denom,
+    amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
+  };
+
+  const withdrawBalances = isReverse.value
+    ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
+    : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
+
+  return {
+    coinA: withdrawBalances[0],
+    coinB: withdrawBalances[1],
+    poolCoin,
+  };
+});
+
+const exchangeAmount = computed(() => {
+  if (!reserveBalances.value?.length) {
+    return;
+  }
+
+  const fromPrecision =
+    typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: reserveBalances.value[0].base_denom,
+    }) ?? 6;
+  const toPrecision =
+    typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: reserveBalances.value[1].base_denom,
+    }) ?? 6;
+  let balanceA = reserveBalances.value[0].amount;
+  let balanceB = reserveBalances.value[1].amount;
+  if (balanceA && balanceB) {
+    return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
+  }
+  return undefined;
+});
+
+const relatedPools = computed(() => {
+  // TODO: Order by descending  %ownership
+  return [
+    ...filterPoolsByDenom(pool.value.reserve_coin_denoms[0]),
+    ...filterPoolsByDenom(pool.value.reserve_coin_denoms[1]),
+  ]
+    .filter((item) => item.id !== pool.value.id)
+    .slice(0, 3);
+});
+
+const addLiquidityHandler = () => {
+  router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
+};
+
+const withdrawLiquidityHandler = () => {
+  router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
+};
+
+const updateDenoms = async () => {
+  if (!pool.value) {
+    return;
+  }
+
+  const reserveDenoms = await getReserveBaseDenoms(pool.value);
+  denoms.value = reserveDenoms;
+};
+
+const ownShare = computed(() => {
+  if (!pool.value || !totalSupply.value || !walletBalances.value.poolCoin.amount) {
+    return 0;
+  }
+
+  return new BigNumber(walletBalances.value.poolCoin.amount).dividedBy(totalSupply.value).multipliedBy(100).toNumber();
+});
+
+const openAssetPage = (asset: Record<string, string>) => {
+  router.push({ name: 'Asset', params: { denom: asset.base_denom } });
+};
+
+watch(reserveBalances, updateDenoms, { immediate: true });
 </script>
 
 <style lang="scss" scoped>
 .assets-table {
   width: calc(100% + 3rem);
-
   td,
   th {
     &:first-child {
@@ -422,7 +405,6 @@ export default defineComponent({
 
 .pool-equity {
   min-width: 20rem;
-
   &__inner {
     border-radius: 0.875rem; // ~14px
   }
