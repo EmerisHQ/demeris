@@ -1,25 +1,29 @@
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    :width="width"
-    :height="height"
-    :viewBox="viewBox"
-    :aria-labelledby="iconName"
+    fill="none"
+    class="w-4 h-4"
+    :width="props.width"
+    :height="props.height"
+    :viewBox="props.viewBox"
+    :aria-labelledby="props.iconName"
   >
-    <g :fill="iconColor">
-      <slot />
-    </g>
+    <slot />
   </svg>
 </template>
 
-<script>
-export default {
-  props: {
-    viewBox: { type: String, default: '0 0 24 24' },
-    iconName: { type: String, default: '' },
-    width: { type: [Number, String], default: 18 },
-    height: { type: [Number, String], default: 18 },
-    iconColor: { type: String, default: 'transparent' },
-  },
-};
+<script lang="ts" setup>
+interface Props {
+  viewBox?: string;
+  width?: number | string;
+  height?: number | string;
+  iconName?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  viewBox: '0 0 24 24',
+  width: 18,
+  height: 18,
+  iconName: '',
+});
 </script>
