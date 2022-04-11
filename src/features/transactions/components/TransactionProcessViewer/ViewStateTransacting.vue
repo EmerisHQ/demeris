@@ -226,7 +226,7 @@ const getDepositDenoms = () => {
 //console.log('transaction value >>>>> ', transaction.value);
 // console.log('coins >>> ', alphanumericSplit(transaction.value.data?.total));
 const subtitle = computed(() => {
-  if (transaction.value.type.startsWith('IBC')) {
+  if (transaction.value.type == 'IBCtransferBackward' || transaction.value.type == 'IBCtransferForward') {
     return t('components.txHandlingModal.ibcTransferSubtitle');
   }
   return t('components.txHandlingModal.txProgress');

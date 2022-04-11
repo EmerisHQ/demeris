@@ -264,12 +264,12 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           memo: '',
           transactions: [
             {
-              name: 'unstake',
+              type: 'unstake',
               status: 'pending',
               data: {
                 validatorAddress: action.params.validatorAddress,
                 amount: { amount: action.params.amount.amount, denom: action.params.amount.denom },
-                chain_name: action.params.amount.chain_name,
+                chainName: action.params.amount.chain_name,
               },
             },
           ],
@@ -282,7 +282,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           memo: '',
           transactions: [
             {
-              name: 'switch',
+              type: 'switch',
               status: 'pending',
               data: {
                 validatorSrcAddress: action.params.validatorSrcAddress,
@@ -291,7 +291,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
                   amount: action.params.amount.amount,
                   denom: action.params.amount.denom,
                 },
-                chain_name: action.params.amount.chain_name,
+                chainName: action.params.amount.chain_name,
               },
             },
           ],
@@ -351,7 +351,7 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           memo: '',
           transactions: [
             {
-              name: 'stake',
+              type: 'stake',
               status: 'pending',
               data: [
                 ...stakesteps

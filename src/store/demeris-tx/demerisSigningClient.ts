@@ -75,6 +75,13 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
 
     const signDoc = makeSignDocAmino(msgs, fee, chainId, memo, accountNumber, sequence);
     const { signature, signed } = await this.exposedSigner.signAmino(signerAddress, signDoc);
+    /*
+      The following works, but I don't know why! 
+      (always wanted to write this :P)
+      The msgs returned by the mapper appear to be somewhat wrongly formatted.
+      Mapping them to proto and back to amino seems to fix them.
+      TODO: Figure this out and fix
+    */
     const signedTxBody = {
       messages: signed.msgs
         .map((msg) => aminoTypes.fromAmino(msg))

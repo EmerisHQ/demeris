@@ -29,7 +29,7 @@
     "@cosmjs/stream": "0.28.0",
     "@cosmjs/tendermint-rpc": "0.28.0",
     "@cosmjs/utils": "0.28.0",
-    "@emeris/mapper": "^0.0.20",
+    "@emeris/mapper": "^0.0.26",
     "@sentry/tracing": "^6.19.2",
     "@sentry/vue": "^6.19.2",
     "@starport/tendermint-liquidity-js": "^1.4.7",
@@ -73,6 +73,9 @@
     "xstate": "^4.30.6"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.7",
+    "@babel/plugin-proposal-optional-chaining": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@emeris/types": "^0.0.33",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
