@@ -19,11 +19,19 @@ module.exports = {
     '@vue/eslint-config-prettier',
   ],
   rules: {
+    'max-lines': [1, { max: 300, skipBlankLines: true, skipComments: true }],
+    'max-lines-per-function': [1, { max: 50, skipBlankLines: true, skipComments: true }],
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     'vue/multi-word-component-names': 'off',
     'vue/v-on-event-hyphenation': 'off',
     'vue/component-api-style': ['warn', ['script-setup']],
+    'vue/no-undef-components': [
+      'error',
+      {
+        ignorePatterns: ['apexchart', 'i18n-n', 'i18n-t', 'metainfo', 'router-link', 'router-view', 'tippy'],
+      },
+    ],
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-unused-vars': [
