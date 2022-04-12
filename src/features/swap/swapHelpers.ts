@@ -32,7 +32,7 @@ export const totalDenomBalance = (context: SwapContext, denom: string, chain?: s
   return total.toString();
 };
 
-export const getMaxAmount = (context: SwapContext) => {
+export const getMaxInputAmount = (context: SwapContext) => {
   const inputCoin = context.inputCoin;
 
   if (!inputCoin?.denom) {
@@ -46,6 +46,10 @@ export const getMaxAmount = (context: SwapContext) => {
     denom: getBaseDenomSync(inputCoin.denom),
     amount: total,
   };
+};
+
+export const getMinInputValue = () => {
+  return 10;
 };
 
 export const amountToHuman = ({ amount, denom }: EmerisBase.Amount) => {
@@ -95,7 +99,7 @@ export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: numb
 };
 
 export const getProtocolFromRoute = (route: any) => {
-  return route.steps[0].protocol;
+  return route.steps[0]?.protocol;
 };
 
 export const getCurrentRoute = (context: any) => {

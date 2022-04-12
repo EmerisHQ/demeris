@@ -56,7 +56,7 @@ import { useSwapStore } from '../../swapStore';
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
 
-const props = defineProps(['denom']);
+const props = defineProps<{ denom: string }>();
 const emit = defineEmits(['back', 'close', 'select']);
 
 const swap = useSwapStore();

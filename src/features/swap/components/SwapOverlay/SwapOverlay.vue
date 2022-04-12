@@ -1,6 +1,7 @@
 <template>
-  <div class="absolute bg-bg w-full h-full inset-0 z-50 flex flex-col scroll-container">
-    <div class="flex justify-between items-center sticky top-0 bg-bg p-6 z-50">
+  <div class="absolute bg-bg w-full h-full inset-0 z-50 flex flex-col">
+    <div class="scroll-shadow h-10 w-full block absolute bottom-0 z-[100] pointer-events-none" />
+    <div class="flex justify-between items-center bg-bg p-6 z-50">
       <slot name="header">
         <div class="flex flex-col">
           <h2 class="text-2 font-bold">
@@ -12,7 +13,7 @@
       </slot>
     </div>
 
-    <div class="flex-1 flex flex-col pt-2 px-6 pb-6">
+    <div class="flex-1 flex flex-col pt-2 px-6 pb-6 scroll-container">
       <slot />
     </div>
   </div>
@@ -21,10 +22,10 @@
 <script lang="ts" setup>
 import { useMagicKeys, whenever } from '@vueuse/core';
 
-defineProps(['title']);
 const emit = defineEmits(['esc']);
 
 const { Escape } = useMagicKeys();
+
 whenever(Escape, () => emit('esc'));
 </script>
 
@@ -34,5 +35,9 @@ whenever(Escape, () => emit('esc'));
 }
 .scroll-container::-webkit-scrollbar {
   display: none;
+}
+
+.scroll-shadow {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.9), transparent);
 }
 </style>

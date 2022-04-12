@@ -17,13 +17,13 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Button from '@/components/ui/Button.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { amountToHuman, getMaxAmount } from '../../swapHelpers';
+import { amountToHuman, getMaxInputAmount } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
 
-const maxAmount = computed(() => getMaxAmount(state.value.context));
+const maxAmount = computed(() => getMaxInputAmount(state.value.context));
 
 const handleClick = () => {
   const denom = maxAmount.value.denom;

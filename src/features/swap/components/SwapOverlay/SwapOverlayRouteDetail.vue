@@ -56,7 +56,7 @@ import { formatProtocolName, getRouteDetails } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
-const props = defineProps(['routeIndex']);
+const props = defineProps<{ routeIndex: number }>();
 const emit = defineEmits(['close']);
 
 const swap = useSwapStore();

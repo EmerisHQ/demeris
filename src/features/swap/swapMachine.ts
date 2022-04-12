@@ -7,7 +7,8 @@ import {
   amountToHuman,
   amountToUnit,
   getInputAmountFromRoute,
-  getMaxAmount,
+  getMaxInputAmount,
+  getMinInputValue,
   getOutputAmountFromRoute,
 } from './swapHelpers';
 
@@ -225,6 +226,12 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       },
       unavailable: {
         id: 'unavailable',
+        on: {
+          'COINS.SWITCH': {
+            target: 'updating.routes.input',
+            actions: 'switchCoins',
+          },
+        },
       },
     },
   },
@@ -232,8 +239,13 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
     services: {
       performValidation: (ctx) => (send) => {
         const { amount } = amountToUnit({ amount: ctx.inputAmount, denom: ctx.inputCoin?.denom });
-        if (new BigNumber(amount).isGreaterThan(getMaxAmount(ctx)?.amount)) {
+
+        if (new BigNumber(amount).isGreaterThan(getMaxInputAmount(ctx)?.amount)) {
           return send('INVALID.OVER_MAX');
+        }
+
+        if (new BigNumber(amount).isLessThan(getMinInputValue())) {
+          return send('INVALID.BELOW_MIN');
         }
 
         return Promise.resolve(true);
