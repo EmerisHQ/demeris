@@ -8,11 +8,12 @@
       <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
     </div>
   </header>
-  <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
+  <AirdropClaimablePanel v-if="!keyword" :active-filter="activeFilter" class="mb-6" />
   <section class="mt-4">
     <AirdropsTable
-      :airdrops="airdrops"
+      :airdrops="filteredAirdrops"
       :active-filter="activeFilter"
+      :keyword="keyword"
       :show-headers="false"
       :limit-rows="10"
       @row-click="openAirdropPage"
@@ -22,7 +23,7 @@
 
 <script lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
@@ -45,12 +46,23 @@ export default {
     },
   },
 
-  setup() {
+  setup(props) {
     const keyword = ref('');
     const router = useRouter();
 
+    const sortAirdropstable = (x, y) => {
+      return x.project.localeCompare(y.project);
+    };
+
     const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops].sort(sortAirdropstable);
+    });
+
+    const filteredAirdrops = computed(() => {
+      const filtered = airdrops?.value?.filter((airdrop) => {
+        return airdrop?.project?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+      });
+      return filtered;
     });
 
     const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
@@ -69,8 +81,17 @@ export default {
       );
     });
 
+    watch(
+      () => props.activeFilter,
+      () => {
+        keyword.value = '';
+      },
+      { immediate: true },
+    );
+
     return {
       airdrops,
+      filteredAirdrops,
       openAirdropPage,
       keyword,
       isDemoAccount,

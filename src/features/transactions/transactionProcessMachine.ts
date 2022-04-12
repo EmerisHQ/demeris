@@ -561,43 +561,22 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           let traceResult;
 
-          const rpcFallback = async () => {
-            try {
-              traceResult = await useStore().dispatch(GlobalActionTypes.API.GET_TX_FROM_RPC, {
-                chain_name: responseData.chain_name,
-                txhash: responseData.txhash,
-              });
-            } catch (e) {
-              // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
-            }
-          };
-
           try {
-            // NOTE: Inluded for testing, timeout to wait for tx in the blockchain
-            if (featureRunning('FORCE_RPC_FALLBACK')) {
-              // const timeout = currentTransaction.name.includes('ibc') ? 30000 : 15000;
-              await new Promise((resolve) => setTimeout(resolve, 60000));
-              throw new Error('Force RPC fallback enabled');
-            }
-
             traceResult = await useStore().dispatch(GlobalActionTypes.API.TRACE_TX_RESPONSE, {
               chain_name: responseData.chain_name,
               txhash: responseData.txhash,
             });
           } catch (e) {
-            console.error(e);
-            await rpcFallback();
-          }
-
-          if (traceResult) {
-            responseData.websocket = traceResult;
-
-            await fetchEndBlock(traceResult.height);
-
             // @ts-ignore
-            callback({ type: 'GOT_RESPONSE', data: responseData });
+            return callback({ type: 'GOT_FAILURE', error: e.message, data: { ...responseData } });
           }
+
+          responseData.websocket = traceResult;
+
+          await fetchEndBlock(traceResult.height);
+
+          // @ts-ignore
+          callback({ type: 'GOT_RESPONSE', data: responseData });
         };
 
         if (featureRunning('WEBSOCKET_RESPONSE')) {

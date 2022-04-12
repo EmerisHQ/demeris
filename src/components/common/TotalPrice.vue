@@ -3,23 +3,16 @@
     <CurrencyDisplay :value="displayPrice" :small-decimals="smallDecimals" />
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
 
+<script setup lang="ts">
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import { useTotalPortfolioBalance } from '@/composables/useTotalPortfolioBalance';
 
-export default defineComponent({
-  components: { CurrencyDisplay },
-  props: {
-    smallDecimals: {
-      type: Boolean as PropType<true | false>,
-      default: false,
-    },
-  },
-  setup() {
-    return { displayPrice: useTotalPortfolioBalance() };
-  },
-});
+interface Props {
+  smallDecimals: boolean;
+}
+withDefaults(defineProps<Props>(), { smallDecimals: false });
+const displayPrice = useTotalPortfolioBalance();
 </script>
+
 <style lang="scss" scoped></style>

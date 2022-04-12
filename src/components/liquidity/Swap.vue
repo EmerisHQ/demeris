@@ -13,47 +13,31 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
-      <template #deactivated>
-        <ReviewModal
-          :data="actionHandlerResult"
-          action-name="swap"
-          variant="widget"
-          @close="reviewModalToggle"
-          @reset="
-            () => {
-              reviewModalToggle();
-              reset();
-            }
-          "
-          @goback="() => reviewModalToggle()"
-        />
-      </template>
 
-      <TransactionProcessCreator
-        :steps="actionHandlerResult"
-        action="swap"
-        class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
-        @pending="
-          () => {
-            reviewModalToggle();
-            reset();
-          }
-        "
-        @close="
-          () => {
-            reviewModalToggle();
-            reset();
-          }
-        "
-        @finish="
-          () => {
-            isFinished = true;
-          }
-        "
-        @previous="reviewModalToggle"
-      />
-    </FeatureRunningConditional>
+    <TransactionProcessCreator
+      v-if="isOpen && !isSlippageSettingModalOpen"
+      :steps="actionHandlerResult"
+      action="swap"
+      class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
+      @pending="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
+      @close="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
+      @finish="
+        () => {
+          isFinished = true;
+        }
+      "
+      @previous="reviewModalToggle"
+    />
 
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -106,12 +90,12 @@
           />
           <IconButton
             class="mr-0.5 bg-surface"
-            :name="maxButtonText"
+            :name="swapButtonActionText"
             :type="'text'"
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: setMax,
+              function: swapButtonActionText.includes('Min') ? setMin : setMax,
               isOver: isOver,
             }"
           />
@@ -161,15 +145,14 @@
 </template>
 <script lang="ts">
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
 import DenomSelect from '@/components/common/DenomSelect.vue';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -186,10 +169,11 @@ import { getTransactionOffset } from '@/features/transactions/transactionProcess
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { SwapAction } from '@/types/actions';
-import { getTicker } from '@/utils/actionHandler';
-import { getFeeForChain } from '@/utils/actionHandler';
+import { getFeeForChain, getTicker } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+
+const MIN_SWAPPABLE_MICROS = 100; // see https://github.com/EmerisHQ/demeris/issues/1351#issuecomment-1091686770
 
 export default defineComponent({
   name: 'Swap',
@@ -201,9 +185,7 @@ export default defineComponent({
     Alert,
     SlippageSettingModal,
     FeeLevelSelector,
-    FeatureRunningConditional,
     TransactionProcessCreator,
-    ReviewModal,
   },
 
   props: {
@@ -234,6 +216,9 @@ export default defineComponent({
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
+        if (data.swapButtonActionText?.includes('Min')) {
+          return t('components.swap.inputBelowMin');
+        }
         if (data.isBothSelected) {
           if (!data.selectedPoolData) {
             return t('components.swap.noPool');
@@ -280,9 +265,9 @@ export default defineComponent({
         }
       }),
       buttonDisabled: computed(() => {
-        return !data.isSwapReady;
+        return !data.isSwapReady || data.buttonName.includes('Min');
       }),
-      maxButtonText: 'Max',
+      swapButtonActionText: 'Max',
       maxAmount: computed(() => {
         const selectedCoinBalance = parseInt(
           allBalances.value.filter((coin) => {
@@ -811,27 +796,40 @@ export default defineComponent({
       },
     );
 
-    //max button text set
+    // button text set
     watch(
-      () => data.payCoinData,
+      () => [data.payCoinData, data.payCoinAmount],
       async () => {
-        if (data.payCoinData) {
-          const amount =
-            data.maxAmount /
-            10 ** (store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6);
+        const denomPrecision = Math.pow(
+          10,
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom }) ?? 6,
+        );
+        const minValue = 1 / denomPrecision;
+        if (data.payCoinAmount < MIN_SWAPPABLE_MICROS * minValue) {
+          const ticker = await getTicker(
+            data.payCoinData?.base_denom,
+            store.getters[GlobalGetterTypes.API.getDexChain],
+          );
+          data.swapButtonActionText = `Min ${new BigNumber(minValue).multipliedBy(MIN_SWAPPABLE_MICROS)} ${
+            ticker ? ticker : 'ATOM'
+          }`;
+          return;
+        }
 
+        if (data.payCoinData) {
+          const amount = data.maxAmount / 10 ** denomPrecision;
           if (amount > 0) {
             const ticker = await getTicker(
               data.payCoinData.base_denom,
               store.getters[GlobalGetterTypes.API.getDexChain],
             );
             const formattedAmount = Math.trunc(amount * 100) / 100;
-            data.maxButtonText = `${formattedAmount} ${ticker} Max`;
+            data.swapButtonActionText = `${formattedAmount} ${ticker} Max`;
           } else {
-            data.maxButtonText = 'Max';
+            data.swapButtonActionText = 'Max';
           }
         } else {
-          data.maxButtonText = 'Max';
+          data.swapButtonActionText = 'Max';
         }
       },
     );
@@ -1028,10 +1026,19 @@ export default defineComponent({
       data.receiveCoinAmount = null;
     }
 
+    function setMin() {
+      const precisionDecimal = Math.pow(
+        10,
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: data.payCoinData.base_denom,
+        }) ?? 6,
+      );
+      data.payCoinAmount = MIN_SWAPPABLE_MICROS / precisionDecimal;
+    }
+
     function setMax() {
       const precisionDecimal = Math.pow(
         10,
-
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: data.payCoinData.base_denom,
         }) ?? 6,
@@ -1151,6 +1158,7 @@ export default defineComponent({
       denomSelectHandler,
       getPrecisedAmount,
       setMax,
+      setMin,
       swap,
       assetsToPay,
       assetsToReceive,

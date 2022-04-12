@@ -5,6 +5,7 @@ import { ActionTree } from 'vuex';
 import { GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, Subscribable } from '@/types/util';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 import TendermintWS from '@/utils/TendermintWS';
 
 import { ActionTypes } from '../action-types';
@@ -82,9 +83,14 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       throw new EmerisError('Demeris:GetTXDestHash', 'Could not perform API query.');
     }
   },
-  async [ActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
+  async [ActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
-      const timeout = 60000;
+      const timeoutMs = 300000;
+      const fallbackIntervalMs = 50000;
+
+      let timeoutId = undefined;
+      let intervalId = undefined;
+
       const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
@@ -112,6 +118,22 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         subscribeTx();
       };
 
+      const handleError = (err: Error) => {
+        complete();
+        return reject(err);
+      };
+
+      const handleSuccess = (data: Record<string, any>) => {
+        complete();
+        return resolve(data);
+      };
+
+      const complete = () => {
+        done = true;
+        clearTimeout(timeoutId);
+        clearInterval(intervalId);
+      };
+
       const handleMessage = async (data: Record<string, any>) => {
         if (done) return;
 
@@ -119,28 +141,35 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
           // Not found
           if (data.error.code === -32603) return;
 
-          done = true;
-          reject(new Error(data.error));
+          return handleError(new Error(data.error));
+        }
+
+        if (data.result && !Object.values(data.result).length) return;
+
+        if (!data.rpc && featureRunning('FORCE_RPC_FALLBACK')) {
+          console.log('Skipping websocket result, FORCE_RPC fallback enabled', data);
+          return;
         }
 
         if (data.result?.data?.value?.TxResult) {
-          done = true;
-          resolve(data.result);
+          return handleSuccess({ ...data.result, height: data.result.data.value.TxResult.height });
         }
 
         if (data?.result?.tx_result) {
-          done = true;
-          resolve(data.result);
+          return handleSuccess({ ...data.result, height: data.result.height });
         }
       };
 
-      await wss.connect().catch(reject);
+      await wss.connect().catch(handleError);
       handleOpen();
 
-      setTimeout(() => {
-        done = true;
-        reject(new Error('Could not find transaction response'));
-      }, timeout);
+      intervalId = setInterval(() => {
+        dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
+      }, fallbackIntervalMs);
+
+      timeoutId = setTimeout(() => {
+        handleError(new Error('Could not find transaction response'));
+      }, timeoutMs);
     });
   },
 
@@ -155,7 +184,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const { data } = await axios.get(`${rpcUrl}/tx?hash=0x${txhash}`);
 
-      return data?.result;
+      return { rpc: true, ...data };
     } catch (e) {
       throw new Error('Could not find transaction response from RPC');
     }

@@ -24,30 +24,14 @@
     </template>
 
     <template v-else-if="['review', 'restake'].includes(step)">
-      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <template #deactivated>
-          <TxStepsModal
-            v-if="steps.length"
-            :data="steps"
-            :gas-price-level="gasPrice"
-            :back-route="{ name: 'Portfolio' }"
-            action-name="switch"
-            @transacting="goToStep('restake')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-            @finish="resetHandler"
-          />
-        </template>
-
-        <TransactionProcessCreator
-          v-if="steps.length"
-          :steps="steps"
-          action="switch"
-          @pending="closeModal"
-          @close="closeModal"
-          @previous="$emit('previous')"
-        />
-      </FeatureRunningConditional>
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="switch"
+        @pending="closeModal"
+        @close="closeModal"
+        @previous="$emit('previous')"
+      />
     </template>
   </div>
 </template>
@@ -59,8 +43,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import SwitchValidatorAmount from '@/components/stake/SwitchForm/SwitchValidatorAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -75,8 +57,6 @@ export default defineComponent({
 
   components: {
     TransactionProcessCreator,
-    TxStepsModal,
-    FeatureRunningConditional,
     ValidatorsTable,
     SwitchValidatorAmount,
   },
