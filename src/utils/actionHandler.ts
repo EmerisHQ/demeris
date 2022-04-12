@@ -524,63 +524,40 @@ export async function isLive(chain_name) {
   return status;
 }
 
-export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
+function getChainNameFromStepTransaction(stepTx: Actions.StepTransaction) {
   const typedstore = useStore() as RootStoreTyped;
+  let chain_name;
   if (stepTx.name == 'transfer') {
-    const chain_name = (stepTx.data as Actions.TransferData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.TransferData).chain_name;
   }
   if (stepTx.name == 'ibc_backward') {
-    const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
   }
   if (stepTx.name == 'ibc_forward') {
-    const chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
   }
-  if (stepTx.name == 'addliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'createpool') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
-  }
-  if (stepTx.name == 'swap') {
-    const chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+  if (['addliquidity', 'withdrawliquidity', 'createpool', 'swap'].includes(stepTx.name)) {
+    chain_name = typedstore.getters[GlobalGetterTypes.API.getDexChain];
   }
   if (stepTx.name == 'claim') {
-    const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.ClaimData).chain_name;
   }
   if (stepTx.name == 'stake') {
-    const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
   }
   if (stepTx.name == 'unstake') {
-    const chain_name = (stepTx.data as Actions.UnstakeData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.UnstakeData).chain_name;
   }
   if (stepTx.name == 'switch') {
-    const chain_name = (stepTx.data as Actions.RestakeData).chain_name;
-    const fee = await getFeeForChain(chain_name);
-    return fee;
+    chain_name = (stepTx.data as Actions.RestakeData).chain_name;
   }
+  return chain_name;
+}
+
+export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
+  const chain_name = getChainNameFromStepTransaction(stepTx);
+  const fee = await getFeeForChain(chain_name);
+  return fee;
 }
 export async function feeForStep(
   step: Actions.Step,
