@@ -1,16 +1,21 @@
 <template>
-  <span :style="{ height, width }" class="skeleton-loader rounded-md" />
+  <span :style="{ height, width: computedWidth }" class="skeleton-loader rounded-md" />
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface Props {
   maxWidth?: number;
   minWidth?: number;
   height?: string;
-  width: string;
+  width?: string;
 }
+const props = withDefaults(defineProps<Props>(), { maxWidth: 100, minWidth: 80, height: '1em', width: null });
 
-withDefaults(defineProps<Props>(), { maxWidth: 100, minWidth: 80, height: '1em', width: null });
+const computedWidth = computed(() => {
+  return props.width || `${Math.floor(Math.random() * (props.maxWidth - props.minWidth) + props.minWidth)}%`;
+});
 </script>
 
 <style lang="scss">
