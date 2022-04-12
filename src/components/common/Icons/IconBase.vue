@@ -2,7 +2,7 @@
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    class="w-4 h-4"
+    :class="props.class"
     :width="props.width"
     :height="props.height"
     :viewBox="props.viewBox"
@@ -14,6 +14,7 @@
 
 <script lang="ts" setup>
 interface Props {
+  class?: string;
   viewBox?: string;
   width?: number | string;
   height?: number | string;
@@ -21,9 +22,10 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  class: 'w-[1em] h-[1em]',
   viewBox: '0 0 24 24',
-  width: 18,
-  height: 18,
+  width: 24,
+  height: 24,
   iconName: '',
 });
 </script>
