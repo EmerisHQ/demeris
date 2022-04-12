@@ -1,6 +1,6 @@
 <template>
   <div v-for="(mappedItem, mappedIndex) in mappedAirdrops" :key="mappedIndex">
-    <table class="assets-table w-full">
+    <table v-if="mappedItem.sectionTitle !== 'all' && mappedItem.sectionTitle !== 'past'" class="assets-table w-full">
       <tbody>
         <tr>
           <td
@@ -23,9 +23,25 @@
         </tr>
       </tbody>
     </table>
-    <p v-if="mappedItem.airdrops.length === 0" class="my-8 text-muted -text-1">
-      No {{ sectionTitle(mappedItem.sectionTitle) }} airdrops
+    <p v-if="mappedItem.airdrops.length === 0 && !keyword" class="my-8 text-muted -text-1">
+      {{ $t('context.airdrops.noResult.noAirdrops', { title: sectionTitle(mappedItem.sectionTitle) }) }}
     </p>
+    <div v-if="mappedItem.airdrops.length === 0 && keyword" class="mt-12">
+      <div class="w-1/3 mx-auto text-center">
+        <img src="~@/assets/images/no-search-result.png" alt="No search result" />
+        <div class="w-full mx-auto">
+          <div class="text-1 font-medium mt-6">
+            {{
+              $t('context.airdrops.noResult.noAirdropForKeyword', {
+                keyword,
+                title: sectionTitle(mappedItem.sectionTitle),
+              })
+            }}
+          </div>
+          <p class="text-muted mt-4">{{ $t('context.airdrops.noResult.couldNotFind') }}</p>
+        </div>
+      </div>
+    </div>
     <table v-else class="assets-table w-full">
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
         <tr>
@@ -40,6 +56,10 @@
           </th>
         </tr>
       </thead>
+
+      <p v-if="keyword" class="my-6 font-medium">
+        {{ $t('context.airdrops.noOfResults', { results: mappedItem.airdrops.length, keyword }) }}
+      </p>
 
       <tbody
         v-for="(airdrop, index) in mappedItem.shouldMinimize ? mappedItem.airdrops.slice(0, 3) : mappedItem.airdrops"
@@ -149,6 +169,10 @@ export default defineComponent({
       type: Array as PropType<EmerisAirdrops.Airdrop[]>,
       required: true,
     },
+    keyword: {
+      type: String,
+      default: '',
+    },
     activeFilter: {
       type: String,
       default: '',
@@ -156,10 +180,8 @@ export default defineComponent({
   },
   emits: ['row-click'],
   setup(props, { emit }) {
-    const keyword = ref<string>('');
     let watchedAirdrops = ref([]);
     let mappedAirdrops = ref([]);
-    let tempMappedAirdrops = ref([]);
     let imageFailIndexes = ref([]);
 
     const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
@@ -185,11 +207,11 @@ export default defineComponent({
     const setAirdropsTable = (activeFilter: string) => {
       mappedAirdrops.value = [];
       if (activeFilter === 'all') {
-        const mappedAirdropsObj = { sectionTitle: null, airdrops: watchedAirdrops.value, shouldMinimize: false };
+        const mappedAirdropsObj = { sectionTitle: 'all', airdrops: watchedAirdrops.value, shouldMinimize: false };
         mappedAirdrops.value.push(mappedAirdropsObj);
       } else if (activeFilter === 'past') {
         const mappedAirdropsObj = {
-          sectionTitle: null,
+          sectionTitle: 'past',
           airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
           shouldMinimize: false,
         };
@@ -208,7 +230,6 @@ export default defineComponent({
     };
 
     const seeAllMappedSection = (mappedItem: any) => {
-      tempMappedAirdrops.value = mappedAirdrops.value;
       mappedAirdrops.value = [];
       mappedAirdrops.value.push(mappedItem);
     };
@@ -231,7 +252,6 @@ export default defineComponent({
     };
 
     return {
-      keyword,
       handleClick,
       mappedAirdrops,
       seeAllMappedSection,

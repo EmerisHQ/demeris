@@ -315,6 +315,7 @@
         "noPool": "No pool for this pair",
         "swapLimit": "Swap limit reached",
         "insufficentFunds": "Insufficent funds",
+        "inputBelowMin": "Below Min. Amount",
         "unAvailable": "Swap unavailable",
         "updatePrice": "Update prices",
         "review": "Review",
@@ -514,6 +515,7 @@
       "airdrops": {
         "title": "Airdrops",
         "allAirdrops": "All airdrops",
+        "seeAll": "See all",
         "airdrop": "Airdrop",
         "live": "Live",
         "chain": "Chain",
@@ -528,12 +530,18 @@
         "viewAll": "View all",
         "airdropContentDisclaimer": "Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.",
         "featureProjects": "Feature your project’s airdrop",
+        "noOfResults": "{ results } results for '{ keyword }'",
         "filterItems": {
           "all": "All",
           "mine": "My",
           "upcoming": "Upcoming",
           "live": "Live",
           "past": "Past"
+        },
+        "noResult": {
+          "noAirdrops": "No { title } airdrops",
+          "noAirdropForKeyword": "No results for { keyword } in { title }",
+          "couldNotFind": "We couldn't find anything, try again with a different term."
         },
         "claimablepanel": {
           "connectWallet": "Connect your wallet",
