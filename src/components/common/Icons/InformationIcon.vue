@@ -1,5 +1,5 @@
 <template>
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="16" :height="16" view-box="0 0 16 16" icon-name="Information icon">
     <path
       d="M8 6C8.55228 6 9 5.55228 9 5C9 4.44772 8.55228 4 8 4C7.44772 4 7 4.44772 7 5C7 5.55228 7.44772 6 8 6Z"
       fill="currentColor"
@@ -12,20 +12,9 @@
       stroke-linejoin="round"
     />
     <path d="M8 12.5V8.5" stroke="currentColor" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-  </svg>
+  </IconBase>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'InformationIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>
