@@ -1,5 +1,11 @@
 <template>
-  <IconBase class="w-[1em] h-[1em] animate-spin" :width="16" :height="16" view-box="0 0 16 16" icon-name="Loading icon">
+  <IconBase
+    icon-class="w-[1em] h-[1em] animate-spin"
+    :width="16"
+    :height="16"
+    view-box="0 0 16 16"
+    icon-name="Loading icon"
+  >
     <path
       d="M15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15"
       stroke="currentColor"

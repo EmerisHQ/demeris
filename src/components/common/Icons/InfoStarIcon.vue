@@ -1,5 +1,5 @@
 <template>
-  <IconBase class="w-[2.4em] h-[2.4em]" view-box="0 0 40 40" icon-name="Info star icon">
+  <IconBase icon-class="w-[2.4em] h-[2.4em]" view-box="0 0 40 40" icon-name="Info star icon">
     <circle cx="20" cy="20" r="20" fill="black" fill-opacity="0.03" />
     <path
       fill-rule="evenodd"
