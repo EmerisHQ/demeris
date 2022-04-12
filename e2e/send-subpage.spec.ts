@@ -1,10 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-import mockHandler from './mock-api';
-
 test.beforeEach(async ({ page }) => {
   page.on('domcontentloaded', () => {
-    page.route('https://api.emeris.com/**/*', mockHandler);
     page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
   });
   await page.goto('/welcome'); // TODO: Our redirects flicker the original URL before going to welcome which confuses the tests. Needs fixing on the router level

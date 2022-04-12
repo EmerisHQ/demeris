@@ -1,9 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import mockHandler from './mock-api';
-
 test.beforeEach(async ({ page }) => {
-  page.route('https://api.emeris.com/**/*', mockHandler);
   page.on('domcontentloaded', () => {
     page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
   });
