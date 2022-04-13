@@ -93,7 +93,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
 
       const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
 
-      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
+      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: true });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
       const subscribeQuery = `tm.event = 'Tx' AND tx.hash = '${txhash}'`;
 
@@ -161,15 +161,17 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       };
 
       await wss.connect().catch(handleError);
-      handleOpen();
 
       intervalId = setInterval(() => {
+        if (done) return;
         dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
       }, fallbackIntervalMs);
 
       timeoutId = setTimeout(() => {
         handleError(new Error('Could not find transaction response'));
       }, timeoutMs);
+
+      handleOpen();
     });
   },
 
