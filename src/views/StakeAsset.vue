@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { EmerisAPI } from '@emeris/types';
 import { reactive } from '@vue/reactivity';
 import { computed } from '@vue/runtime-core';
@@ -35,26 +35,17 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 
-export default {
-  name: 'StakeAsset',
-  components: { Button, Icon, DenomSelectModal },
+const { nativeBalances } = useAccount();
 
-  setup() {
-    const { nativeBalances } = useAccount();
+const balances = computed(() => {
+  return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
+});
 
-    const assetsList = computed(() => {
-      return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
-    });
+const state = reactive({
+  selectedAsset: undefined,
+});
 
-    const state = reactive({
-      selectedAsset: undefined,
-    });
-
-    const assetSelectHandler = (asset: EmerisAPI.Balance) => {
-      state.selectedAsset = asset;
-    };
-
-    return { balances: assetsList, state, assetSelectHandler };
-  },
+const assetSelectHandler = (asset: EmerisAPI.Balance) => {
+  state.selectedAsset = asset;
 };
 </script>
