@@ -99,7 +99,7 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
       const response: AxiosResponse<EmerisAPI.ChainAPR> = await axios.get(
         getters['getEndpoint'] + '/chain/' + params.chain_name + '/apr',
       );
-      commit(MutationTypes.SET_CHAIN_APR, { params, value: response.data.apr });
+      commit(MutationTypes.SET_CHAIN_APR, { params, value: response.data.apr ? response.data.apr : '0.00' });
     } catch (e) {
       throw new EmerisError('Demeris:GetChainAPR', 'Could not perform API query.');
     }
