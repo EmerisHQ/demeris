@@ -15,6 +15,9 @@
             <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
           </header>
           <template v-if="initialLoadComplete">
+            <FeatureRunningConditional name="STAKING">
+              <AssetsFilter :assets-length="assetsLength" />
+            </FeatureRunningConditional>
             <AssetsTable
               :balances="balances"
               :hide-zero-assets="true"
@@ -64,11 +67,13 @@
 
 <script setup lang="ts">
 import { computed } from '@vue/runtime-core';
+import groupBy from 'lodash.groupby';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import AssetsFilter from '@/components/assets/AssetsFilter';
 import AssetsTable from '@/components/assets/AssetsTable';
 import PortfolioStakingBanner from '@/components/banners/PortfolioStakingBanner.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
@@ -110,11 +115,17 @@ const openPoolsPage = () => {
 const initialLoadComplete = computed(() => {
   return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
 });
+
+const assetsLength = computed(() => {
+  return Object.keys(groupBy(balances.value, 'base_denom')).length;
+});
+
 const poolsInvested = computed(() => {
   const poolsCopy = pools.value?.slice() ?? [];
   return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
 });
 </script>
+
 <style lang="scss" scoped>
 ::v-deep(.skeleton-loader) {
   margin-top: 0;

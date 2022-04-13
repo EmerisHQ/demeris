@@ -50,6 +50,11 @@
       "asset": {
         "pooledTooltip": "Pooled assets are not added to your balance because pool ratios continuously change."
       },
+      "assetsFilter": {
+        "allAssets": "All assets",
+        "staking": "Staking",
+        "stakeAsset": "Stake asset"
+      },
       "withdrawLiquidity": {
         "title": "Withdraw liquidity",
         "navigation": {
