@@ -156,7 +156,7 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
   return denom;
 };
 
-export const getChainFromDenom = (denom: string) => {
+export const getChainFromDenom = (denom: string, protocol?: string) => {
   const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
   if (chain) return chain;
 
@@ -165,6 +165,10 @@ export const getChainFromDenom = (denom: string) => {
 
   if (trace) {
     return trace.trace[0].chain_name;
+  }
+
+  if (protocol) {
+    return getChainFromProtocol(protocol);
   }
 
   return undefined;
@@ -189,24 +193,15 @@ export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
 
   // Aggregate related denom steps into the same array
   const steps = [];
-  let groupedStep = [result[0]];
+  let aggregatedIndex = 0;
 
-  if (result.length === 1) {
-    return [groupedStep];
-  }
-
-  for (let index = 1; index < result.length; index++) {
-    if (groupedStep[0]?.baseDenomIn === result[index].baseDenomIn) {
-      groupedStep.push(result[index]);
+  for (let index = 0; index < result.length; index++) {
+    if (steps[aggregatedIndex]?.[0]?.baseDenomIn === result[index].baseDenomIn) {
+      steps[aggregatedIndex].push(result[index]);
     } else {
-      // Start a new array and store the old one when a denom transition occurs
-      steps.push(groupedStep);
-      groupedStep = [result[index]];
-
-      // Last step
-      if (index === result.length - 1) {
-        steps.push(groupedStep);
-      }
+      // Start a new array when a denom transition occurs
+      steps[aggregatedIndex] = [result[index]];
+      aggregatedIndex++;
     }
   }
 
@@ -267,8 +262,8 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
           amount: step.data.from.amount,
           denom: formatToValidDenom(step.data.from.denom),
         },
-        chain_name: getChainFromDenom(step.data.from.denom),
-        destination_chain_name: getChainFromDenom(step.data.to.denom),
+        chain_name: getChainFromDenom(step.data.from.denom, step.protocol),
+        destination_chain_name: getChainFromDenom(step.data.to.denom, step.protocol),
       });
 
       txs.push({
