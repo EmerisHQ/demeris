@@ -7,7 +7,7 @@
           <Icon name="CloseIcon" :icon-size="1.5" />
         </Button>
       </template>
-      <template #subtitle>Fees included</template>
+      <template #caption>Fees included</template>
 
       <div role="menu" class="-mx-6 flex flex-col space-y-2">
         <button

@@ -11,12 +11,16 @@
         </Button>
       </template>
 
-      <Search v-model:keyword="data.searchQuery" />
+      <template #subheader>
+        <div class="px-6 pt-1 pb-3">
+          <Search v-model:keyword="data.searchQuery" />
+        </div>
+      </template>
+
       <SwapMenu
         :search="data.searchQuery"
         :items="availableCoins"
         search-field="baseDenom"
-        class="mt-3"
         @select="selectAsset($event)"
       >
         <template #symbol="{ item }">

@@ -1,8 +1,10 @@
 <template>
-  <div
-    class="w-[320px] min-h-[432px] max-h-[552px] p-6 relative rounded-lg shadow-panel border-2 overflow-hidden flex flex-col"
-  >
-    <div class="flex flex-col justify-between space-y-8 flex-1">
+  <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel border-2 overflow-hidden flex flex-col">
+    <template v-if="hasSubmitted">
+      <TransactionProcessCreator :steps="state.context.data.steps" action="swap" class="flex-1 flex flex-col" />
+    </template>
+
+    <div v-else class="flex flex-col justify-between space-y-8 flex-1 p-6">
       <div class="flex items-center justify-between">
         <h2 class="text-2 font-bold">{{ $t('components.swap.title') }}</h2>
         <Button variant="link" rounded :click-function="swap.toggleSettings">
@@ -21,7 +23,9 @@
       </div>
 
       <Button v-if="state.matches('unavailable')" disabled>Swap unavailable</Button>
-      <Button v-else :disabled="['ready.invalid', 'booting'].some(state.matches)">Swap</Button>
+      <Button v-else :disabled="['ready.invalid', 'ready.idle', 'booting'].some(state.matches)" @click="send('SUBMIT')"
+        >Swap</Button
+      >
     </div>
 
     <SwapOverlaySettings />
@@ -31,13 +35,13 @@
 </template>
 
 <script lang="ts" setup>
-import { whenever } from '@vueuse/core';
 import { useMachine } from '@xstate/vue';
-import { nextTick } from 'vue';
+import { computed, nextTick, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 
 import SwapButtonRoute from './components/SwapButton/SwapButtonRoute.vue';
 import SwapButtonSwitch from './components/SwapButton/SwapButtonSwitch.vue';
@@ -51,13 +55,15 @@ import { useSwapStore } from './swapStore';
 
 const swap = useSwapStore();
 
-const { allLoaded, balances } = useAccount();
+const { balances } = useAccount();
 const { state, send, service } = useMachine(swapMachine);
 
 swap.setService(service);
 
-whenever(
-  allLoaded,
+const hasSubmitted = computed(() => state.value.matches('submitted'));
+
+watch(
+  balances,
   async () => {
     if (!state.value.can({ type: 'BALANCES.SET', balances: [] })) return;
 

@@ -12,7 +12,7 @@
         <CircleSymbol v-else :denom="denom ? getBaseDenomSync(denom) : ''" size="sm" :display-status="false" />
       </div>
 
-      <button class="flex flex-col" @click="emit('select')">
+      <button class="flex flex-col" :disabled="isLoadingCoin" @click="emit('select')">
         <div class="flex items-center">
           <template v-if="isLoadingCoin">
             <SkeletonLoader height="16px" width="48px" />
@@ -27,7 +27,7 @@
         </div>
 
         <template v-if="isLoadingCoin || isLoadingChain">
-          <SkeletonLoader height="12px" width="96px" class="mt-0.5" />
+          <div><SkeletonLoader height="12px" width="96px" /></div>
         </template>
         <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap">
           <ChainName :name="chain" />
@@ -51,6 +51,7 @@
 </template>
 
 <script lang="ts" setup>
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { computed } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
@@ -77,6 +78,7 @@ const props = defineProps<Props>();
 const emit = defineEmits(['select', 'update:input']);
 
 const swap = useSwapStore();
+
 const { state } = swap.useSwapMachine();
 
 const isLoadingCoin = computed(() => state.value.matches('booting'));

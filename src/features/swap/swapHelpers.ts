@@ -3,7 +3,9 @@ import BigNumber from 'bignumber.js';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 
+import { move } from '@/actionhandler/actions/move';
 import { GlobalGetterTypes } from '@/store';
+import { Step } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -185,15 +187,19 @@ export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
     };
   });
 
-  // Aggregate related denom steps in the same array
+  // Aggregate related denom steps into the same array
   const steps = [];
   let groupedStep = [result[0]];
+
+  if (result.length === 1) {
+    return [groupedStep];
+  }
 
   for (let index = 1; index < result.length; index++) {
     if (groupedStep[0]?.baseDenomIn === result[index].baseDenomIn) {
       groupedStep.push(result[index]);
     } else {
-      // Denom transition
+      // Start a new array and store the old one when a denom transition occurs
       steps.push(groupedStep);
       groupedStep = [result[index]];
 
@@ -240,4 +246,66 @@ export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: strin
   return getAvailableDenoms(context)
     .filter((item) => item.baseDenom === baseDenom)
     .map((item) => item.chain);
+};
+
+export const convertRouteToSteps = async (context: SwapContext, routeIndex: number): Promise<Step[]> => {
+  const route = context.data.routes[routeIndex];
+  if (!route) return [];
+
+  const txs: Step[] = [];
+
+  const formatToValidDenom = (denom: string) => {
+    if (isNative(denom)) return;
+    const [prefix, hash] = denom.split('/');
+    return `${prefix}/${hash.toUpperCase()}`;
+  };
+
+  for (const step of route.steps) {
+    if (step.type === 'ibc') {
+      const result = await move({
+        amount: {
+          amount: step.data.from.amount,
+          denom: formatToValidDenom(step.data.from.denom),
+        },
+        chain_name: getChainFromDenom(step.data.from.denom),
+        destination_chain_name: getChainFromDenom(step.data.to.denom),
+      });
+
+      txs.push({
+        name: 'move',
+        description: '',
+        transactions: result.steps,
+      });
+    }
+
+    if (step.type === 'pool') {
+      txs.push({
+        name: 'swap',
+        description: '',
+        transactions: [
+          {
+            status: 'pending',
+            type: 'swap',
+            protocol: step.protocol,
+            data: {
+              from: {
+                amount: step.data.from.amount,
+                denom: formatToValidDenom(step.data.from.denom),
+              },
+              to: {
+                amount: step.data.to.amount,
+                denom: formatToValidDenom(step.data.to.denom),
+              },
+              pool: {
+                id: step.data.pool_id.split('/')[1],
+              },
+              chainName: getChainFromDenom(step.data.from.denom),
+            },
+          },
+        ],
+      });
+    }
+  }
+
+  return txs;
 };

@@ -94,7 +94,7 @@ export async function msgFromStepTransaction(
   if (stepTx.type == 'swap') {
     const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
     let isReverse = false;
-    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms[0]) {
+    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms?.[0]) {
       isReverse = true;
     }
     const price = [stepTx.data.from, stepTx.data.to].sort((a, b) => {

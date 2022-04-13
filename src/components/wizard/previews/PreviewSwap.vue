@@ -47,6 +47,7 @@
     <ListItem :size="size" :label="$t('components.previews.swap.priceLbl')" direction="col">
       <!-- minReceivedAmount -->
       <ListItem
+        v-if="minReceivedAmount?.amount"
         :size="size"
         :description="$t('components.previews.swap.minReceivedLbl')"
         :hint="$t('components.previews.swap.minReceivedLblHint')"
@@ -168,7 +169,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { getReserveBalances, getReserveBaseDenoms } = usePools();
+    const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
     const { getSwapPrice } = useCalculation();
     const swapFeeRate = computed(() => {
       const feeRate =
@@ -195,7 +196,10 @@ export default defineComponent({
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
       },
       async () => {
-        const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
+        let pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
+        if (!pool.reserve_coin_denoms) {
+          pool = getPoolById(pool.id);
+        }
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await getReserveBalances(pool);
         const inputAmount = parseInt(String(Number(data.value.from.amount)));

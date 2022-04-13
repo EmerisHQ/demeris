@@ -3,9 +3,12 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { assign, createMachine, Interpreter, State } from 'xstate';
 
+import { Step } from '@/types/actions';
+
 import {
   amountToHuman,
   amountToUnit,
+  convertRouteToSteps,
   getInputAmountFromRoute,
   getMaxInputAmount,
   getMinInputValue,
@@ -15,6 +18,7 @@ import {
 interface SwapContextData {
   availableDenoms: string[];
   routes: any[];
+  steps: Step[];
 }
 
 export interface SwapCoin {
@@ -43,6 +47,7 @@ const defaultContext = (): SwapContext => ({
   data: {
     availableDenoms: [],
     routes: [],
+    steps: [],
   },
 });
 
@@ -171,7 +176,13 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           choose: {
             always: [{ target: 'pending', cond: 'hasAllParams' }, { target: 'idle' }],
           },
-          idle: {},
+          idle: {
+            on: {
+              'BALANCES.SET': {
+                actions: 'assignBalances',
+              },
+            },
+          },
           pending: {
             on: {
               'INVALID.OVER_MAX': 'invalid.overMax',
@@ -184,9 +195,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           },
           valid: {
             on: {
-              SUBMIT: {
-                actions: 'handleSubmit',
+              SUBMIT: 'submitting',
+            },
+          },
+          submitting: {
+            invoke: {
+              src: 'handleSubmit',
+              onDone: {
+                target: '#submitted',
+                actions: 'assignSteps',
               },
+              onError: 'invalid',
             },
           },
           invalid: {
@@ -233,6 +252,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           },
         },
       },
+      submitted: {
+        id: 'submitted',
+        type: 'final',
+      },
     },
   },
   {
@@ -249,6 +272,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         }
 
         return Promise.resolve(true);
+      },
+      handleSubmit: async (context) => {
+        return Promise.resolve(convertRouteToSteps(context, context.selectedRouteIndex));
       },
       getAvailableDenoms: async () => {
         try {
@@ -346,6 +372,12 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           routes: event.data,
         },
         selectedRouteIndex: 0,
+      })),
+      assignSteps: assign((context, event: any) => ({
+        data: {
+          ...context.data,
+          steps: event.data,
+        },
       })),
       clearRoutes: assign((context) => ({
         data: {

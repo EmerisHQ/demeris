@@ -12,7 +12,7 @@
         v-for="item of results"
         :key="item"
         role="menuitem"
-        class="py-4 px-6 hover:bg-fg flex items-center justify-between"
+        class="py-4 px-4 hover:bg-fg transition-colors flex items-center justify-between rounded-lg mx-2"
         @click="$emit('select', item)"
       >
         <div class="flex items-center space-x-3">

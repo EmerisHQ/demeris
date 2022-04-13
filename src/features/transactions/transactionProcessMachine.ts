@@ -10,7 +10,6 @@ import {
   feeForStep,
   feeForStepTransaction,
   msgFromStepTransaction,
-  validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -367,15 +366,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        let validation = {};
-        if (!context.input.isDemoAccount) {
-          validation = await validateStepsFeeBalances(
-            context.formattedSteps,
-            context.input.balances,
-            totals,
-            context.input.gasPriceLevel,
-          );
-        }
+        const validation = {};
+        // if (!context.input.isDemoAccount) {
+        //   validation = await validateStepsFeeBalances(
+        //     context.formattedSteps,
+        //     context.input.balances,
+        //     totals,
+        //     context.input.gasPriceLevel,
+        //   );
+        // }
         return { totals, validation };
       },
       validateChainStatus: async (context) => {

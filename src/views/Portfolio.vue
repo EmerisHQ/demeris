@@ -51,7 +51,7 @@
           <template #deactivated>
             <LiquiditySwap />
           </template>
-          <DexSwap />
+          <SwapMultiDex />
         </FeatureRunningConditional>
         <Intro class="mt-4" />
         <FeatureRunningConditional name="STAKING">
@@ -78,10 +78,10 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import DexSwap from '@/components/swap/DexSwap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
+import SwapMultiDex from '@/features/swap/SwapMultiDex.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';

@@ -1,27 +1,22 @@
 <template>
-  <template v-if="true">
-    <SwapMultiDex />
-  </template>
-  <template v-else>
-    <metainfo>
-      <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
-    </metainfo>
-    <MaintenanceScreen v-if="showMaintenanceScreen" />
-    <div v-else-if="initialized">
-      <CookieConsent />
-      <ChainDownWrapper>
-        <router-view />
-      </ChainDownWrapper>
-      <TransactionsCenter />
-      <SimplexModal />
-      <MoonpayModal />
-    </div>
-    <div v-else class="h-screen flex flex-col items-center justify-center">
-      <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
-      <EphemerisSpinner class="h-64 w-64" />
-      <p class="leading-copy text-muted -text-1">{{ status }}</p>
-    </div>
-  </template>
+  <metainfo>
+    <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
+  </metainfo>
+  <MaintenanceScreen v-if="showMaintenanceScreen" />
+  <div v-else-if="initialized">
+    <CookieConsent />
+    <ChainDownWrapper>
+      <router-view />
+    </ChainDownWrapper>
+    <TransactionsCenter />
+    <SimplexModal />
+    <MoonpayModal />
+  </div>
+  <div v-else class="h-screen flex flex-col items-center justify-center">
+    <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
+    <EphemerisSpinner class="h-64 w-64" />
+    <p class="leading-copy text-muted -text-1">{{ status }}</p>
+  </div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
@@ -40,7 +35,6 @@ import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { setStore } from '@/utils/useStore';
 
 import usePoolsFactory from './composables/usePools';
-import SwapMultiDex from './features/swap/SwapMultiDex.vue';
 import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';

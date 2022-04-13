@@ -6,9 +6,9 @@
         <Icon name="CloseIcon" :icon-size="1.5" />
       </Button>
     </template>
-    <template #subtitle>{{ selectedRoute.steps.length }} transactions</template>
+    <template #caption>{{ selectedRoute.steps.length }} transactions</template>
 
-    <dl class="relative">
+    <dl class="relative space-y-5 mt-2">
       <template v-for="(steps, index) in routeDetail" :key="index">
         <dt class="flex items-center space-x-4 mb-5">
           <CircleSymbol :denom="steps[0].baseDenomIn" />
@@ -38,7 +38,7 @@
         </div>
       </dt>
 
-      <span class="absolute top-0 left-4 transform -translate-x-1/2 w-[2px] h-full bg-border block -z-[1]" />
+      <span hidden class="absolute top-0 left-4 transform -translate-x-1/2 w-[2px] h-full bg-border block -z-[1]" />
     </dl>
   </SwapOverlay>
 </template>
