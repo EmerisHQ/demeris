@@ -721,7 +721,6 @@
     },
     "navbar": {
       "portfolio": "Portfolio",
-      "markets": "Markets",
       "assets": "Assets",
       "pools": "Pools",
       "airdrops": "Airdrops",
@@ -766,9 +765,6 @@
         "chains": "Chains"
       },
       "portfolio": {},
-      "markets": {
-        "markets": "Markets"
-      },
       "receive": {
         "select": "Select asset",
         "receive": "Receive",

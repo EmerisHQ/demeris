@@ -10,15 +10,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Navbar elements location and availibility', function () {
-  test('Portfolio, Markets, Pools, Logo - Navbar elements', async ({ page, baseURL }) => {
+  test('Portfolio, Assets, Pools, Logo - Navbar elements', async ({ page, baseURL }) => {
     const navbar = await page.locator("header[role='navigation']");
 
-    // go to Markets
+    // go to Assets
     // check url /path
-    (await navbar.locator('text=Markets')).click();
-    await expect(page).toHaveURL(baseURL + '/markets');
+    (await navbar.locator('text=Assets')).click();
+    await expect(page).toHaveURL(baseURL + '/assets');
 
-    // go to Portfolio via Tab
+    // go to Portwolio via Tab
     // check url /path
     (await navbar.locator('text=Portfolio')).click();
     await expect(page).toHaveURL(baseURL + '/');

@@ -23,7 +23,7 @@ export default defineComponent({
     const propsRef = toRefs(props);
 
     const baseDenom = computed(() => {
-      return getBaseDenomSync(propsRef.amount.value.denom);
+      return propsRef.amount.value.denom ? getBaseDenomSync(propsRef.amount.value.denom) : '-';
     });
     const precision = computed(() => {
       return store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
