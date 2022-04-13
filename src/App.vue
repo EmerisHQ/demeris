@@ -5,9 +5,7 @@
   <MaintenanceScreen v-if="showMaintenanceScreen" />
   <div v-else-if="initialized">
     <CookieConsent />
-    <ChainDownWrapper>
-      <router-view />
-    </ChainDownWrapper>
+    <router-view />
     <TransactionsCenter />
     <SimplexModal />
     <MoonpayModal />

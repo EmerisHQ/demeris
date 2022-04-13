@@ -30,10 +30,7 @@ const { setCookie, getCookie } = useCookie();
 const consented = ref(getCookie('cookie-consent-accepted'));
 const acceptCookies = () => {
   setCookie('cookie-consent-accepted', 'true', {
-    domain:
-      window.location.hostname === 'localhost'
-        ? 'localhost'
-        : `.${window.location.hostname.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, '$1')}`,
+    domain: window.location.hostname === 'localhost' ? 'localhost' : '.emeris.com',
   });
   consented.value = 'true';
 };

@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 46 46">
+  <IconBase view-box="0 0 46 46" icon-name="Question icon">
     <path
       d="M23 45c12.15 0 22-9.85 22-22S35.15 1 23 1 1 10.85 1 23s9.85 22 22 22Z"
       stroke="currentColor"
@@ -12,18 +12,9 @@
       fill="currentColor"
       transform="translate(17 12)"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

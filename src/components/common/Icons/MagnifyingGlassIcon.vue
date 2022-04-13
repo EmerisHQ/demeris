@@ -1,25 +1,14 @@
 <template>
-  <svg width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="17" :height="17" view-box="0 0 17 17" icon-name="Magnifying glass icon">
     <path
       fill-rule="evenodd"
       clip-rule="evenodd"
       d="M7.66671 1.58334C4.30698 1.58334 1.58337 4.30694 1.58337 7.66668C1.58337 11.0264 4.30698 13.75 7.66671 13.75C9.07627 13.75 10.3739 13.2706 11.4053 12.466L14.9364 15.997C15.2293 16.2899 15.7041 16.2899 15.997 15.997C16.2899 15.7041 16.2899 15.2292 15.997 14.9363L12.466 11.4053C13.2706 10.3738 13.75 9.07624 13.75 7.66668C13.75 4.30694 11.0264 1.58334 7.66671 1.58334ZM10.9599 10.8545C11.7585 10.0296 12.25 8.90554 12.25 7.66668C12.25 5.13537 10.198 3.08334 7.66671 3.08334C5.1354 3.08334 3.08337 5.13537 3.08337 7.66668C3.08337 10.198 5.1354 12.25 7.66671 12.25C8.90557 12.25 10.0296 11.7585 10.8545 10.9598C10.8701 10.9408 10.8868 10.9223 10.9046 10.9046C10.9224 10.8868 10.9408 10.8701 10.9599 10.8545Z"
       style="fill: currentColor"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'AlertIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

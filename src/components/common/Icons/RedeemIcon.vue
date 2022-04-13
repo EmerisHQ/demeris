@@ -1,7 +1,6 @@
 <template>
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
+  <IconBase
+    icon-name="Redeem icon"
     fill-rule="evenodd"
     clip-rule="evenodd"
     stroke-linecap="round"
@@ -29,5 +28,9 @@
       />
       <path d="M6.833 6.196l-4.656.01-.01-4.656" />
     </g>
-  </svg>
+  </IconBase>
 </template>
+
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
+</script>

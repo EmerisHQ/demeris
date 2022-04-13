@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+import mockHandler from './mock-api';
+
 test.beforeEach(async ({ page, baseURL }) => {
+  page.route('https://api.emeris.com/**/*', mockHandler);
   page.on('domcontentloaded', () => {
     page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
   });
@@ -19,17 +22,19 @@ test.describe('Portfolio visual check', function () {
     const totalBalanceValue = await page.locator('*[class="total-price"]');
     await expect(totalBalanceValue).toHaveText(/\$/);
 
-    const assets = await page.locator('h2', { hasText: 'Assets' });
-    await expect(assets).toBeVisible();
     const pools = await page.locator('h2', { hasText: 'Pools' });
     await expect(pools).toBeVisible();
     const atomRow = await page.locator('table').locator('tr', { hasText: 'ATOM' });
     await expect(atomRow).toBeVisible();
-    const emptyPools = await page.locator('text=Pools you add liquidity to will appear here.');
-    await expect(emptyPools).toBeVisible();
-    const poolsBtn = await page.locator('button:has-text("Explore pools")');
-    await expect(poolsBtn).toBeVisible();
-    await poolsBtn.click();
-    await expect(page).toHaveURL(baseURL + '/pools');
+    const dvpnPool = await page.locator('text=ATOM · DVPN');
+    await expect(dvpnPool).toBeVisible();
+    const irisPool = await page.locator('text=ATOM · IRIS');
+    await expect(irisPool).toBeVisible();
+    const osmoPool = await page.locator('text=ATOM · OSMO');
+    await expect(osmoPool).toBeVisible();
+    const irisDvpnPool = await page.locator('text=DVPN · IRIS');
+    await expect(irisDvpnPool).toBeVisible();
+    await irisDvpnPool.click();
+    await expect(page).toHaveURL(baseURL + '/pool/3');
   });
 });

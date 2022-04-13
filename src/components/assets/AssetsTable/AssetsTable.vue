@@ -375,7 +375,7 @@ export default defineComponent({
 
     const orderedUserBalances = computed(() => {
       let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
-      return tokens.slice(0, currentLimit.value);
+      return currentLimit.value ? tokens.slice(0, currentLimit.value) : tokens;
     });
 
     const orderedAllBalances = computed(() => {

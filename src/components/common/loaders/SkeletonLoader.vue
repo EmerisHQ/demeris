@@ -4,14 +4,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+
 interface Props {
   maxWidth?: number;
   minWidth?: number;
   height?: string;
   width?: string;
 }
-
 const props = withDefaults(defineProps<Props>(), { maxWidth: 100, minWidth: 80, height: '1em', width: null });
+
 const computedWidth = computed(() => {
   return props.width || `${Math.floor(Math.random() * (props.maxWidth - props.minWidth) + props.minWidth)}%`;
 });

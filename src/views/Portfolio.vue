@@ -10,17 +10,12 @@
           </div>
         </header>
         <section class="mt-16">
-          <header class="flex justify-between items-center mb-6">
-            <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
-          </header>
           <template v-if="initialLoadComplete">
             <AssetsTable
               :balances="balances"
               :hide-zero-assets="true"
               variant="balance"
               :show-headers="false"
-              :limit-rows="4"
               @row-click="openAssetPage"
             />
           </template>
@@ -47,7 +42,12 @@
       </div>
 
       <aside class="md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <LiquiditySwap />
+        <FeatureRunningConditional name="DEX_AGG">
+          <template #deactivated>
+            <LiquiditySwap />
+          </template>
+          <DexSwap />
+        </FeatureRunningConditional>
         <Intro class="mt-4" />
         <FeatureRunningConditional name="STAKING">
           <PortfolioStakingBanner :balances="balances" class="mt-4" />
@@ -73,6 +73,7 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import DexSwap from '@/components/swap/DexSwap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
