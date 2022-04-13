@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.16.7",
-    "@emeris/types": "^0.0.33",
+    "@emeris/types": "^0.1.1-pr-167-a026a4446b4cf261c00180db0c13efb12c88073b.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@keplr-wallet/types": "0.8.8",
     "@pinia/testing": "^0.0.10",

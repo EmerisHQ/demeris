@@ -4,7 +4,7 @@ import { ActionTree } from 'vuex';
 
 import { GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, Subscribable } from '@/types/util';
-import { getOwnAddress, keyHashfromAddress } from '@/utils/basic';
+import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
 
 import { ActionTypes } from '../action-types';
@@ -30,6 +30,10 @@ export interface StakingActionsInterface {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<EmerisAPI.Validator[]>;
+  [ActionTypes.GET_CHAIN_APR](
+    context: APIActionContext,
+    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<string>;
 }
 
 export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInterface = {
@@ -74,6 +78,36 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
     } catch {
       throw new EmerisError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
     }
+  },
+
+  async [ActionTypes.GET_CHAIN_APR](
+    { commit, getters, state, rootGetters },
+    { params }: { params: EmerisAPI.ChainReq },
+  ): Promise<string> {
+    const { chain_name } = params;
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
+    const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_APR, payload: { params } });
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+      return getters['getChainAPR'](params);
+    }
+    let resolver;
+    const promise: Promise<void> = new Promise((resolve, _) => {
+      resolver = resolve;
+    });
+    commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+    try {
+      const response: AxiosResponse<EmerisAPI.ChainAPR> = await axios.get(
+        getters['getEndpoint'] + '/chain/' + params.chain_name + '/apr',
+      );
+      commit(MutationTypes.SET_CHAIN_APR, { params, value: response.data.apr });
+      return getters['getChainAPR']({ chain_name });
+    } catch (e) {
+      throw new EmerisError('Demeris:GetChainAPR', 'Could not perform API query.');
+    }
+    resolver();
+    commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
+    return getters['getChainAPR'](params);
   },
 
   async [ActionTypes.GET_VALIDATORS]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {

@@ -63,7 +63,23 @@ export default function useStaking() {
     return moniker;
   };
 
+  const getChainAPR = async (base_denom: string): Promise<string> => {
+    const chain_name = await getChainName(base_denom);
+    try {
+      const apr = await store.dispatch(GlobalActionTypes.API.GET_CHAIN_APR, {
+        subscribe: false,
+        params: {
+          chain_name: chain_name,
+        },
+      });
+      return apr;
+    } catch {
+      return '';
+    }
+  };
+
   return {
+    getChainAPR,
     getValidatorMoniker,
     getValidatorsByBaseDenom,
     getChainDisplayInflationByBaseDenom,
