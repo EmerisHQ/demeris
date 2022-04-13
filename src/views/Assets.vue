@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <header class="pb-3 sm:pb-6 md:pb-6">
-      <h1 class="text-2 sm:text-3 md:text-4 font-bold">{{ $t('pages.markets.markets') }}</h1>
+      <h1 class="text-2 sm:text-3 md:text-4 font-bold">{{ $t('pages.assets.assets') }}</h1>
     </header>
 
     <AssetsTable :balances="[]" :show-all-assets="true" :hide-lp-assets="true" @row-click="openAssetPage" />
