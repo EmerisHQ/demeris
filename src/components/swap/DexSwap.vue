@@ -608,34 +608,8 @@ watch(
 function switchPayToReceive() {
   const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
   const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-  if (originPayCoinData) {
-    originPayCoinData.on_chain = store.getters[GlobalGetterTypes.API.getDexChain];
-  }
-
-  const sortedBalance =
-    allBalances.value
-      .filter((asset) => asset?.base_denom === originReceiveCoinData?.base_denom)
-      .sort((a, b) => {
-        const amountA = parseInt(a.amount);
-        const amountB = parseInt(b.amount);
-        if (amountA > amountB) {
-          return -1;
-        } else {
-          return 0;
-        }
-      }) ?? [];
-
-  if (sortedBalance.length > 0) {
-    data.payCoinData = sortedBalance[0];
-  } else {
-    data.payCoinData = originReceiveCoinData;
-  }
-
-  data.receiveCoinData =
-    assetsToReceive.value.find((asset) => {
-      return asset?.base_denom === originPayCoinData?.base_denom;
-    }) ?? originPayCoinData;
-
+  data.payCoinData = originReceiveCoinData;
+  data.receiveCoinData = originPayCoinData;
   setCounterPairCoinAmount('Pay');
   isReverse.value = !isReverse.value;
 }
