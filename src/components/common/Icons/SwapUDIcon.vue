@@ -1,5 +1,5 @@
 <template>
-  <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="17" :height="16" view-box="0 0 17 16" icon-name="Swap up down arrows icon">
     <path
       d="M16.3672 3.5L13.3672 0.5L10.3672 3.5"
       stroke="currentColor"
@@ -28,19 +28,9 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'SwapUDIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

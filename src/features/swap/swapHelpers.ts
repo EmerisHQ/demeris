@@ -157,6 +157,7 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
 };
 
 export const getChainFromDenom = (denom: string) => {
+  debugger;
   const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
   if (chain) return chain;
 
@@ -255,7 +256,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
   const txs: Step[] = [];
 
   const formatToValidDenom = (denom: string) => {
-    if (isNative(denom)) return;
+    if (isNative(denom)) return denom;
     const [prefix, hash] = denom.split('/');
     return `${prefix}/${hash.toUpperCase()}`;
   };

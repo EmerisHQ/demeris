@@ -1,5 +1,5 @@
 <template>
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="16" :height="16" view-box="0 0 16 16" icon-name="Dagg swap left right icon">
     <path
       d="M5 2L2 5L5 8"
       stroke="currentColor"
@@ -32,20 +32,9 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'DaggSwapLRIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

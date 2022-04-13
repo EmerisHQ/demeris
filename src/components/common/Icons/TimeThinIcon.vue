@@ -1,5 +1,5 @@
 <template>
-  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase view-box="0 0 48 48" icon-name="Time thin icon">
     <path
       d="M25.5 46.5c11.598 0 21-9.402 21-21s-9.402-21-21-21-21 9.402-21 21 9.402 21 21 21Z"
       stroke="currentColor"
@@ -14,19 +14,9 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'TimeThinIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

@@ -70,6 +70,6 @@ watch(
     await nextTick();
     send({ type: 'BALANCES.SET', balances: balances.value });
   },
-  { immediate: true },
+  { deep: true, immediate: true },
 );
 </script>

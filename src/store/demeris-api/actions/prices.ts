@@ -35,7 +35,6 @@ export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterfa
    */
   async [ActionTypes.GET_PRICES]({ commit, getters, rootGetters, state, dispatch }, { subscribe = false }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
-    const isCypress = !!window['Cypress'];
     const reqHash = hashObject({ action: ActionTypes.GET_PRICES, payload: {} });
 
     if (state._InProgess.get(reqHash)) {
@@ -55,18 +54,8 @@ export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterfa
           getters['getEndpoint'] + '/oracle/prices',
         );
         if (response.data?.data?.Tokens) {
-          if (isCypress) {
-            commit(MutationTypes.SET_PRICES, {
-              value: {
-                Fiats: response.data.data.Fiats,
-                Tokens: response.data.data.Tokens.map((x) => {
-                  return { ...x, Price: 1.1 };
-                }),
-              },
-            });
-          } else {
-            commit(MutationTypes.SET_PRICES, { value: response.data.data });
-          }
+          commit(MutationTypes.SET_PRICES, { value: response.data.data });
+
           // Set initial prices so pool calculations can find them
           await Promise.all(
             getters['getVerifiedDenoms'].map(async (denom) => {
@@ -94,18 +83,8 @@ export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterfa
               }
             }),
           );
-          if (isCypress) {
-            commit(MutationTypes.SET_PRICES, {
-              value: {
-                Fiats: response.data.data.Fiats,
-                Tokens: response.data.data.Tokens.map((x) => {
-                  return { ...x, Price: 1.1 };
-                }),
-              },
-            });
-          } else {
-            commit(MutationTypes.SET_PRICES, { value: response.data.data });
-          }
+          commit(MutationTypes.SET_PRICES, { value: response.data.data });
+
           // Set prices incl. pool calculations
 
           if (rootGetters[GlobalGetterTypes.USER.getPricesFirstLoad]) {
