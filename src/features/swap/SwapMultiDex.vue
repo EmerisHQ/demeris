@@ -1,7 +1,12 @@
 <template>
   <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel border-2 overflow-hidden flex flex-col">
     <template v-if="hasSubmitted">
-      <TransactionProcessCreator :steps="state.context.data.steps" action="swap" class="flex-1 flex flex-col" />
+      <TransactionProcessCreator
+        :steps="state.context.data.steps"
+        action="swap"
+        class="flex-1 flex flex-col"
+        @close="send({ type: 'STEPS.CLEAR' })"
+      />
     </template>
 
     <div v-else class="flex flex-col justify-between space-y-8 flex-1 p-6">
@@ -23,9 +28,14 @@
       </div>
 
       <Button v-if="state.matches('unavailable')" disabled>Swap unavailable</Button>
-      <Button v-else :disabled="['ready.invalid', 'ready.idle', 'booting'].some(state.matches)" @click="send('SUBMIT')"
-        >Swap</Button
+      <Button
+        v-else
+        :status="state.matches('ready.submitting') ? 'loading' : 'active'"
+        :disabled="['ready.invalid', 'ready.idle', 'booting'].some(state.matches)"
+        @click="send('SUBMIT')"
       >
+        Swap
+      </Button>
     </div>
 
     <SwapOverlaySettings />

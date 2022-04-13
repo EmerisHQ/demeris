@@ -1,6 +1,6 @@
 <template>
   <div class="absolute bg-bg w-full h-full inset-0 z-[10] flex flex-col">
-    <div class="h-10 w-full block absolute bottom-0 z-[20] pointer-events-none" :class="`scroll-shadow--${theme}`" />
+    <div class="h-6 w-full block absolute bottom-0 z-[20] pointer-events-none" :class="`scroll-shadow--${theme}`" />
 
     <header class="flex justify-between items-center bg-bg p-6 z-50">
       <slot name="header">

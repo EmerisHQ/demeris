@@ -163,7 +163,7 @@ export const getChainFromDenom = (denom: string, protocol?: string) => {
   const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
   const trace = traces[denom.split('/')[1]?.toUpperCase()];
 
-  if (trace) {
+  if (trace?.trace) {
     return trace.trace[0].chain_name;
   }
 

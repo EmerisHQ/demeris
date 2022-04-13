@@ -1,6 +1,6 @@
 <template>
   <IconButton
-    v-if="['updating', 'ready.pending', 'ready.valid', 'ready.invalid'].some(state.matches)"
+    v-if="canShow"
     :data="{ type: 'custom', function: swap.toggleRoutes }"
     type="text"
     class="bg-surface -text-1"
@@ -32,6 +32,12 @@ import { useSwapStore } from '../../swapStore';
 const swap = useSwapStore();
 
 const { state } = swap.useSwapMachine();
+
+const canShow = computed(() => {
+  if (['ready.idle', 'booting'].some(state.value.matches)) return false;
+  return true;
+});
+
 const currentProtocol = computed(() => {
   const route = getCurrentRoute(state.value.context);
   const protocol = getProtocolFromRoute(route);

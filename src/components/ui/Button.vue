@@ -39,7 +39,7 @@
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
-        <Spinner :size="1" :variant="variant === 'link' ? 'solid' : 'gold'" />
+        <Spinner :size="2.5" :variant="variant === 'link' ? 'solid' : 'gold'" style="transform: scale(0.6)" />
       </div>
 
       <span

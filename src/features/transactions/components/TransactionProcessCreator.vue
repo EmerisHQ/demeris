@@ -8,12 +8,7 @@
       }"
       :show-close="!state.matches('ibcConfirmation')"
       class="relative z-10"
-      @goback="
-        () => {
-          transactionsStore.removeTransaction(stepId);
-          emits('close');
-        }
-      "
+      @goback="onBack"
       @close="handleCloseHeader"
     />
     <TransactionProcessViewer
@@ -33,7 +28,7 @@
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, onUnmounted, PropType, watch } from 'vue';
+import { computed, nextTick, onUnmounted, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
@@ -73,6 +68,12 @@ const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
 const onClose = (payload) => emits('close', payload);
 const onPrevious = () => emits('previous');
 const onReceiptState = () => emits('onReceiptState');
+
+const onBack = async () => {
+  emits('close');
+  await nextTick();
+  transactionsStore.removeTransaction(stepId);
+};
 
 watch(isPending, (value) => {
   if (value) {
