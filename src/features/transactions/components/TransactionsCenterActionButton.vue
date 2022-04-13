@@ -9,7 +9,7 @@
           {{ notificationsCount }}
         </span>
       </div>
-      <Icon name="MenuIcon" :icon-size="7" />
+      <Icon name="MenuIcon" :icon-size="1" />
     </Button>
 
     <template #content>

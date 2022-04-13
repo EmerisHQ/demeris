@@ -61,9 +61,13 @@ export function getAirdropEligibility(airdrop: Airdrop) {
     when the projects format there responses correctly. 
     After which we will be comparing each response per 
     address checked and adding the eligible amounts all together */
-    return eligibility_check_responses[0].then((res) => {
-      return res.eligibility;
-    });
+    if (eligibility_check_responses.length > 0) {
+      return eligibility_check_responses[0].then((res) => {
+        return res.eligibility;
+      });
+    } else {
+      return AirdropEligibilityStatus.NOT_AVAILABLE;
+    }
   } else {
     return AirdropEligibilityStatus.NOT_AVAILABLE;
   }

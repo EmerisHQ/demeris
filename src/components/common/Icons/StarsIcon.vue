@@ -1,5 +1,5 @@
 <template>
-  <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="16" :height="17" view-box="0 0 16 17" icon-name="Stars icon">
     <path
       fill-rule="evenodd"
       clip-rule="evenodd"
@@ -56,19 +56,9 @@
         <stop offset="0.71875" stop-color="#FFFD38" />
       </linearGradient>
     </defs>
-  </svg>
+  </IconBase>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'Starsicon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>
