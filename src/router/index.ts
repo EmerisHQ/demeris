@@ -87,6 +87,12 @@ if (featureRunning('STAKING')) {
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
   });
+
+  routes.push({
+    path: '/staking/stake-asset',
+    name: 'Stake Asset',
+    component: () => import('@/views/StakeAsset.vue'),
+  });
 }
 if (featureRunning('AIRDROPS_FEATURE')) {
   routes.push({
