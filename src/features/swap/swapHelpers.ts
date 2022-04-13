@@ -157,7 +157,6 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
 };
 
 export const getChainFromDenom = (denom: string) => {
-  debugger;
   const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
   if (chain) return chain;
 
@@ -299,6 +298,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
               },
               pool: {
                 id: step.data.pool_id.split('/')[1],
+                type_id: 1,
               },
               chainName: getChainFromDenom(step.data.from.denom),
             },
