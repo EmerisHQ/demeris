@@ -1,5 +1,5 @@
 <template>
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <IconBase :width="16" :height="16" view-box="0 0 16 16" icon-name="Upside down arrows icon">
     <path
       d="M15.5 3.5L12.5 0.5L9.5 3.5"
       stroke="currentColor"
@@ -28,17 +28,9 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-  </svg>
+  </IconBase>
 </template>
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'UpsideDownIcon',
-});
+
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-  <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <IconBase icon-name="Success outline icon">
     <circle
       cx="12"
       cy="12"
@@ -16,19 +16,9 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-  </svg>
+  </IconBase>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'SuccessOutlineIcon',
-});
+<script lang="ts" setup>
+import IconBase from '@/components/common/Icons/IconBase.vue';
 </script>
-
-<style lang="scss" scoped>
-svg {
-  width: 1em;
-  height: 1em;
-}
-</style>
