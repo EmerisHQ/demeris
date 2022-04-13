@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <GobackWithClose
+    <GoBackWithClose
       v-if="action === 'swap'"
       :class="{
         invisible: !['review', 'ibcConfirmation'].some(state.matches),
@@ -8,7 +8,7 @@
       }"
       :show-close="!state.matches('ibcConfirmation')"
       class="relative z-10"
-      @goback="
+      @go-back="
         () => {
           transactionsStore.removeTransaction(stepId);
           emits('close');
@@ -36,7 +36,7 @@ import { useActor } from '@xstate/vue';
 import { computed, onUnmounted, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
-import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import GoBackWithClose from '@/components/common/headers/GoBackWithClose.vue';
 import useAccount from '@/composables/useAccount';
 import { Step } from '@/types/actions';
 

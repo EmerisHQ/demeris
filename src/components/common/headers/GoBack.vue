@@ -1,41 +1,33 @@
 <template>
   <div class="flex items-center py-8">
-    <Button v-if="showBackButton" variant="link" @click="handleGoBackClick">
+    <Button v-if="props.showBackButton" variant="link" @click="handleGoBackClick">
       <Icon :name="'ArrowLeftIcon'" :icon-size="1" />
     </Button>
-    <div class="ml-4">{{ title }}</div>
+    <div class="ml-4">{{ props.title }}</div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
 
+<script lang="ts" setup>
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-export default defineComponent({
-  name: 'Goback',
-  components: { Button, Icon },
-  props: {
-    title: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    showBackButton: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-  },
-  emits: ['go-back'],
-  setup(_, { emit }) {
-    const handleGoBackClick = () => {
-      emit('go-back');
-    };
+interface Props {
+  title?: string;
+  showBackButton?: boolean;
+}
 
-    return {
-      handleGoBackClick,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  title: null,
+  showBackButton: true,
 });
+
+interface Events {
+  (e: 'go-back'): void;
+}
+
+const emit = defineEmits<Events>();
+
+const handleGoBackClick = () => {
+  emit('go-back');
+};
 </script>
