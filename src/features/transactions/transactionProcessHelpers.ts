@@ -1,23 +1,11 @@
 import { EmerisAPI, EmerisBase } from '@emeris/types';
+import { EmerisTransactions } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
 import { GlobalGetterTypes } from '@/store';
-import {
-  ClaimData,
-  CreatePoolData,
-  IBCBackwardsData,
-  IBCForwardsData,
-  RestakeData,
-  StakeData,
-  Step,
-  StepTransaction,
-  SwapData,
-  TransferData,
-  UnstakeData,
-  WithdrawLiquidityData,
-} from '@/types/actions';
+import { Step, StepTransaction } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -50,24 +38,11 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
-  const dexChain = useStore().getters[GlobalGetterTypes.API.getDexChain];
-  switch (transaction.name) {
-    case 'transfer':
-      return (transaction.data as TransferData).chain_name;
-    case 'ibc_forward':
-      return (transaction.data as IBCForwardsData).from_chain;
-    case 'ibc_backward':
-      return (transaction.data as IBCForwardsData).from_chain;
+  switch (transaction.type) {
     case 'stake':
-      return (transaction.data as StakeData[])[0].chain_name;
-    case 'unstake':
-      return (transaction.data as UnstakeData).chain_name;
-    case 'claim':
-      return (transaction.data as ClaimData).chain_name;
-    case 'switch':
-      return (transaction.data as RestakeData).chain_name;
+      return transaction.data[0].chainName;
     default:
-      return dexChain;
+      return transaction.data.chainName;
   }
 };
 
@@ -96,7 +71,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
           const sourceBalance = balances.find((balance) => {
             const amount = parseCoins(balance.amount)[0];
             return (
-              amount.denom === (transaction.data as IBCBackwardsData).amount.denom &&
+              amount.denom === (transaction.data as EmerisTransactions.AbstractTransferTransactionData).amount.denom &&
               balance.base_denom === transaction.feeToAdd[0].denom
             );
           });
@@ -104,7 +79,9 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
           if (sourceBalance) {
             const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
             const fee = Math.ceil(transaction.feeToAdd[0].amount[context.input.gasPriceLevel]);
-            const txAmount = parseInt((transaction.data as IBCBackwardsData).amount.amount);
+            const txAmount = parseInt(
+              (transaction.data as EmerisTransactions.AbstractTransferTransactionData).amount.amount,
+            );
             if (txAmount + fee > amount) {
               if (txAmount === amount) {
                 transaction.feeToAdd = [];
@@ -129,23 +106,21 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
           }
         }
 
-        if (transaction.name == 'ibc_forward') {
+        if (transaction.type == 'IBCtransferForward') {
           const baseDenomBalance = balances.find((x) => {
             const amount = parseCoins(x.amount)[0];
-            return amount.denom == x.base_denom && x.base_denom == (transaction.data as IBCForwardsData).amount.denom;
+            return amount.denom == x.base_denom && x.base_denom == transaction.data.amount.denom;
           });
 
-          const fee =
-            parseInt((transaction.data as IBCForwardsData).chain_fee[0].amount[context.input.gasPriceLevel]) *
-            context.input.gasLimit;
-          const txAmount = parseInt((transaction.data as IBCForwardsData).amount.amount);
+          const fee = transaction.chainFee[0].amount[context.input.gasPriceLevel] * context.input.gasLimit;
+          const txAmount = parseInt(transaction.data.amount.amount);
           if (baseDenomBalance) {
             const amount = parseCoins(baseDenomBalance.amount)[0];
             if (parseInt(amount.amount) - txAmount < fee) {
-              (transaction.data as IBCForwardsData).amount.amount = parseInt(amount.amount) - fee + '';
+              transaction.data.amount.amount = parseInt(amount.amount) - fee + '';
             }
           } else {
-            (transaction.data as IBCForwardsData).amount.amount = txAmount - fee + '';
+            transaction.data.amount.amount = txAmount - fee + '';
           }
         }
         return transaction;
@@ -177,10 +152,10 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
     return (price * parseInt(amount)) / Math.pow(10, precision);
   };
 
-  switch (stepTx.name) {
-    case 'ibc_forward':
-      baseDenom = getBaseDenomSync((stepTx.data as IBCForwardsData).amount.denom);
-      denomAmount = (stepTx.data as IBCForwardsData).amount.amount;
+  switch (stepTx.type) {
+    case 'IBCtransferForward':
+      baseDenom = getBaseDenomSync(stepTx.data.amount.denom);
+      denomAmount = stepTx.data.amount.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
       event('usd_volume', {
@@ -194,9 +169,9 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
         value: denomAmount,
       });
       break;
-    case 'ibc_backward':
-      baseDenom = getBaseDenomSync((stepTx.data as IBCBackwardsData).amount.denom);
-      denomAmount = (stepTx.data as IBCBackwardsData).amount.amount;
+    case 'IBCtransferBackward':
+      baseDenom = getBaseDenomSync(stepTx.data.amount.denom);
+      denomAmount = stepTx.data.amount.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
       event('usd_volume', {
@@ -211,11 +186,11 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       });
       break;
     case 'swap':
-      baseDenom = getBaseDenomSync((stepTx.data as SwapData).from.denom);
-      denomAmount = (stepTx.data as SwapData).from.amount;
+      baseDenom = getBaseDenomSync(stepTx.data.from.denom);
+      denomAmount = stepTx.data.from.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
-      const toDenom = getBaseDenomSync((stepTx.data as SwapData).to.denom);
+      const toDenom = getBaseDenomSync(stepTx.data.to.denom);
 
       event('usd_volume', {
         event_label: 'Swap USD volume',
@@ -225,25 +200,21 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor(
-          (parseInt((stepTx.data as SwapData).from.amount) * getSwappedPercent(lastResult.endBlock)) / 100,
-        ),
+        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult.endBlock)) / 100),
       });
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' -> ' + toDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor(
-          (parseInt((stepTx.data as SwapData).from.amount) * getSwappedPercent(lastResult.endBlock)) / 100,
-        ),
+        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult.endBlock)) / 100),
       });
       break;
-    case 'createpool':
-      baseDenom = getBaseDenomSync((stepTx.data as CreatePoolData).coinA.denom);
-      denomAmount = (stepTx.data as CreatePoolData).coinA.amount;
+    case 'createPool':
+      baseDenom = getBaseDenomSync(stepTx.data.coinA.denom);
+      denomAmount = stepTx.data.coinA.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
-      const baseDenomB = getBaseDenomSync((stepTx.data as CreatePoolData).coinB.denom);
-      const denomAmountB = (stepTx.data as CreatePoolData).coinB.amount;
+      const baseDenomB = getBaseDenomSync(stepTx.data.coinB.denom);
+      const denomAmountB = stepTx.data.coinB.amount;
       const usdAmountB = getDisplayPrice(baseDenomB, denomAmountB);
 
       event('usd_volume', {
@@ -262,7 +233,7 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
         value: denomAmountB,
       });
       break;
-    case 'addliquidity':
+    case 'addLiquidity':
       const coins = parseCoins(lastResult.endBlock.accepted_coins);
 
       baseDenom = getBaseDenomSync(coins[0].denom);
@@ -289,7 +260,7 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
         value: denomAmount2,
       });
       break;
-    case 'withdrawliquidity':
+    case 'withdrawLiquidity':
       const amounts = parseCoins(lastResult.endBlock.withdraw_coins);
 
       baseDenom = getBaseDenomSync(amounts[0].denom);
@@ -298,7 +269,7 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
 
       const usdAmountWithdraw = getDisplayPrice(getBaseDenomSync(amounts[1].denom), amounts[1].amount);
 
-      const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
+      const poolCoin = stepTx.data.poolCoin.denom;
       const displayName =
         useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)?.display_name ??
         null;
@@ -311,12 +282,12 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       event('denom_volume', {
         event_label: 'Withdraw Liquidity ' + displayName + ' volume',
         event_category: 'volume',
-        value: new BigNumber((stepTx.data as WithdrawLiquidityData).poolCoin.amount).shiftedBy(-6),
+        value: new BigNumber(stepTx.data.poolCoin.amount).shiftedBy(-6),
       });
       break;
     case 'transfer':
-      baseDenom = getBaseDenomSync((stepTx.data as TransferData).amount.denom);
-      denomAmount = (stepTx.data as TransferData).amount.amount;
+      baseDenom = getBaseDenomSync(stepTx.data.amount.denom);
+      denomAmount = stepTx.data.amount.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
       event('usd_volume', {

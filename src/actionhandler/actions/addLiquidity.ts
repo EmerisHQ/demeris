@@ -1,6 +1,8 @@
-import { EmerisBase } from '@emeris/types';
+import { EmerisDEXInfo } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
-import { RootStoreTyped } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
 import { useStore } from '@/utils/useStore';
 
 export async function addLiquidity({
@@ -9,22 +11,22 @@ export async function addLiquidity({
   coinB,
 }: {
   pool_id: bigint;
-  coinA: EmerisBase.Amount;
-  coinB: EmerisBase.Amount;
+  coinA: AbstractAmount;
+  coinB: AbstractAmount;
 }) {
-  const libStore = useStore();
-  const store = libStore as RootStoreTyped;
-  const result = {
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };
   const liquidityPools =
     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await libStore.dispatch(
+    (await store.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -33,12 +35,14 @@ export async function addLiquidity({
   const pool = liquidityPools.pools.find((item) => item.id == pool_id);
   if (pool) {
     result.steps.push({
-      name: 'addliquidity',
+      type: 'addLiquidity',
       status: 'pending',
+      protocol: EmerisDEXInfo.DEX.Gravity,
       data: {
         coinA,
         coinB,
         pool,
+        chainName: typedstore.getters[GlobalGetterTypes.API.getDexChain],
       },
     });
     return result;

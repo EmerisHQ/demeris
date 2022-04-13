@@ -1,4 +1,5 @@
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { AminoMsg } from '@cosmjs/amino';
+import { Registry } from '@cosmjs/proto-signing';
 import { StdFee } from '@cosmjs/stargate';
 
 export type TxParams = {
@@ -11,7 +12,7 @@ export type TxResultParams = {
   stepType: string;
 };
 export type SignParams = {
-  msgs: Array<EncodeObject>;
+  msgs: Array<AminoMsg>;
   chain_name: string;
   fee: StdFee;
   registry: Registry;
