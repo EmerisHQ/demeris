@@ -84,7 +84,6 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
     { commit, getters, state, rootGetters },
     { params }: { params: EmerisAPI.ChainReq },
   ): Promise<string> {
-    const { chain_name } = params;
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_APR, payload: { params } });
     if (state._InProgess.get(reqHash)) {
@@ -101,7 +100,6 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
         getters['getEndpoint'] + '/chain/' + params.chain_name + '/apr',
       );
       commit(MutationTypes.SET_CHAIN_APR, { params, value: response.data.apr });
-      return getters['getChainAPR']({ chain_name });
     } catch (e) {
       throw new EmerisError('Demeris:GetChainAPR', 'Could not perform API query.');
     }
