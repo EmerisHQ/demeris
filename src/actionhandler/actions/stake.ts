@@ -1,15 +1,16 @@
-import { EmerisBase } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
 import { useStore } from '@/utils/useStore';
 
-export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: EmerisBase.Amount }) {
+export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: AbstractAmount }) {
   const typedstore = useStore() as RootStoreTyped;
-  const result = {
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };
@@ -20,13 +21,13 @@ export async function stake({ validatorAddress, amount }: { validatorAddress: st
   }
   const chain_name = verified.chain_name;
   result.steps.push({
-    name: 'stake',
+    type: 'stake',
     status: 'pending',
     data: [
       {
         validatorAddress,
         amount,
-        chain_name,
+        chainName: chain_name,
       },
     ],
   });

@@ -22,9 +22,9 @@
         v-if="!['failed.sign', 'failed.unknown', 'failed.genericError'].some(state.matches)"
         class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8"
       >
-        <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
-          <ChainName :name="getBaseDenomSync(transaction.data.from_chain)" /> &rarr;
-          <ChainName :name="transaction.data.to_chain" />
+        <template v-if="transaction.type == 'IBCtransferForward' || transaction.type == 'IBCtransferBackward'">
+          <ChainName :name="getBaseDenomSync(transaction.data.chainName)" /> &rarr;
+          <ChainName :name="transaction.data.toChain" />
         </template>
       </div>
 
@@ -33,7 +33,7 @@
       </h1>
 
       <p v-if="state.matches('failed.broadcast')" class="text-center px-6">
-        <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
+        <template v-if="transaction.type == 'IBCtransferForward' || transaction.type == 'IBCtransferBackward'">
           <i18n-t scope="global" keypath="components.txHandlingModal.notTransferredAtoB">
             <template #amount>
               <AmountDisplay
@@ -44,15 +44,15 @@
               />
             </template>
             <template #chainA>
-              <ChainName :name="transaction.data.from_chain" />
+              <ChainName :name="transaction.data.chainName" />
             </template>
             <template #chainB>
-              <ChainName :name="transaction.data.to_chain" />
+              <ChainName :name="transaction.data.toChain" />
             </template>
           </i18n-t>
         </template>
 
-        <template v-if="transaction.name == 'transfer'">
+        <template v-if="transaction.type == 'transfer'">
           <i18n-t scope="global" keypath="components.txHandlingModal.notTransferred">
             <template #amount>
               <AmountDisplay
@@ -63,12 +63,12 @@
               />
             </template>
             <template #chain>
-              <ChainName :name="transaction.data.chain_name" />
+              <ChainName :name="transaction.data.chainName" />
             </template>
           </i18n-t>
         </template>
 
-        <template v-if="transaction.name == 'swap'">
+        <template v-if="transaction.type == 'swap'">
           <i18n-t scope="global" keypath="components.txHandlingModal.failedSwap">
             <template #amount>
               <AmountDisplay
@@ -81,7 +81,7 @@
           </i18n-t>
         </template>
 
-        <template v-if="transaction.name == 'addliquidity'">
+        <template v-if="transaction.type == 'addLiquidity'">
           <i18n-t scope="global" keypath="components.txHandlingModal.failedAddLiquidity">
             <template #denomA> <Denom :name="getBaseDenomSync(transaction.data.coinA.denom)" /> &middot; </template>
             <template #denomB>
@@ -90,7 +90,7 @@
           </i18n-t>
         </template>
 
-        <template v-if="transaction.name == 'createpool'">
+        <template v-if="transaction.type == 'createPool'">
           <i18n-t scope="global" keypath="components.txHandlingModal.failedCreatePool">
             <template #denomA>
               <Denom :name="getBaseDenomSync(transaction.data.coinA.denom)" />
@@ -101,7 +101,7 @@
           </i18n-t>
         </template>
 
-        <template v-if="transaction.name == 'withdrawliquidity'">
+        <template v-if="transaction.type == 'withdrawLiquidity'">
           <i18n-t scope="global" keypath="components.txHandlingModal.failedWithdrawLiquidity">
             <template #denom>
               <Denom :name="getBaseDenomSync(transaction.data.poolCoin.denom)" />
@@ -116,7 +116,7 @@
 
       <p
         v-else-if="
-          !subtitle && transaction.name === 'swap' && ['default', 'broadcast', 'confirmations'].some(state.matches)
+          !subtitle && transaction.type === 'swap' && ['default', 'broadcast', 'confirmations'].some(state.matches)
         "
       >
         <i18n-t scope="global" keypath="components.txHandlingModal.notSwapped">
@@ -204,6 +204,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { StepTransaction } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getCurrentTransaction, getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
@@ -216,16 +217,16 @@ const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideView
 const { state, send } = actor;
 
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transaction = computed<StepTransaction>(() => getCurrentTransaction(state.value.context));
 
 const titleMap = {
   transfer: t('components.txHandlingModal.txFail'),
-  ibc_forward: t('components.txHandlingModal.txFail'),
-  ibc_backward: t('components.txHandlingModal.txFail'),
+  IBCtransferForward: t('components.txHandlingModal.txFail'),
+  IBCtransferBackward: t('components.txHandlingModal.txFail'),
   swap: t('components.txHandlingModal.swapActionFail'),
-  addliquidity: t('components.txHandlingModal.addLiqActionFail'),
-  withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionFail'),
-  createpool: t('components.txHandlingModal.createPoolActionFail'),
+  addLiquidity: t('components.txHandlingModal.addLiqActionFail'),
+  withdrawLiquidity: t('components.txHandlingModal.withdrawLiqActionFail'),
+  createPool: t('components.txHandlingModal.createPoolActionFail'),
   stake: t('components.txHandlingModal.stakeActionFail'),
   multistake: t('components.txHandlingModal.stakeActionFail'),
   unstake: t('components.txHandlingModal.unstakeActionFail'),
@@ -250,8 +251,8 @@ const title = computed(() => {
     return t('components.txHandlingModal.genericError');
   }
 
-  if (titleMap[transaction.value.name]) {
-    return titleMap[transaction.value.name];
+  if (titleMap[transaction.value.type]) {
+    return titleMap[transaction.value.type];
   }
 
   return t('components.txHandlingModal.somethingWentWrong');
