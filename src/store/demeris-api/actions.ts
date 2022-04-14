@@ -215,7 +215,9 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         }
       });
 
-      setTimeout(reject, timeout);
+      setTimeout(() => {
+        reject(new Error('ERR_WSS_TIMEOUT'));
+      }, timeout);
     });
   },
 
