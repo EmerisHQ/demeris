@@ -1,20 +1,29 @@
-import { EmerisBase } from '@emeris/types';
+import { EmerisDEXInfo } from '@emeris/types';
+import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
-export async function createPool({ coinA, coinB }: { coinA: EmerisBase.Amount; coinB: EmerisBase.Amount }) {
-  const result = {
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { ActionStepResult } from '@/types/actions';
+import { useStore } from '@/utils/useStore';
+
+export async function createPool({ coinA, coinB }: { coinA: AbstractAmount; coinB: AbstractAmount }) {
+  const store = useStore();
+  const typedstore = store as RootStoreTyped;
+  const result: ActionStepResult = {
     steps: [],
     output: {
       denom: '',
-      amount: 0,
+      amount: '0',
       chain_name: '',
     },
   };
   result.steps.push({
-    name: 'createpool',
+    type: 'createPool',
     status: 'pending',
+    protocol: EmerisDEXInfo.DEX.Gravity,
     data: {
       coinA,
       coinB,
+      chainName: typedstore.getters[GlobalGetterTypes.API.getDexChain],
     },
   });
   return result;

@@ -51,9 +51,9 @@
           <template
             v-if="
               action == 'transfer' &&
-              (transactionAction.name === 'transfer' ||
-                transactionAction.name === 'ibc_backward' ||
-                transactionAction.name === 'ibc_forward')
+              (transactionAction.type === 'transfer' ||
+                transactionAction.type === 'IBCtransferBackward' ||
+                transactionAction.type === 'IBCtransferForward')
             "
           >
             Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
@@ -61,39 +61,39 @@
           <template
             v-if="
               action == 'move' &&
-              (transactionAction.name === 'transfer' ||
-                transactionAction.name === 'ibc_backward' ||
-                transactionAction.name === 'ibc_forward')
+              (transactionAction.type === 'transfer' ||
+                transactionAction.type === 'IBCtransferBackward' ||
+                transactionAction.type === 'IBCtransferForward')
             "
           >
             Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
           </template>
-          <template v-if="action == 'swap' && transactionAction.name === 'swap'">
+          <template v-if="action == 'swap' && transactionAction.type === 'swap'">
             Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
             <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
           </template>
-          <template v-if="action == 'addliquidity' && transactionAction.name === 'addliquidity'">
+          <template v-if="action == 'addliquidity' && transactionAction.type === 'addLiquidity'">
             Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
             <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
           </template>
-          <template v-if="action === 'withdrawliquidity' && transactionAction.name === 'withdrawliquidity'">
+          <template v-if="action === 'withdrawliquidity' && transactionAction.type === 'withdrawLiquidity'">
             Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[0])" /> ·
             <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[1])" />
           </template>
-          <template v-if="action === 'createpool' && transactionAction.name === 'createpool'">
+          <template v-if="action === 'createpool' && transactionAction.type === 'createPool'">
             Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
             <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
           </template>
-          <template v-if="action === 'claim' && transactionAction.name === 'claim'">
-            Claim <Ticker :name="getStakableBaseDenomFromChainName(transactionAction.data.chain_name)" />
+          <template v-if="action === 'claim' && transactionAction.type === 'claim'">
+            Claim <Ticker :name="getStakableBaseDenomFromChainName(transactionAction.data.chainName)" />
           </template>
-          <template v-if="action === 'stake' && transactionAction.name === 'stake'">
+          <template v-if="action === 'stake' && transactionAction.type === 'stake'">
             Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
           </template>
-          <template v-if="action === 'unstake' && transactionAction.name === 'unstake'">
+          <template v-if="action === 'unstake' && transactionAction.type === 'unstake'">
             Unstake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
           </template>
-          <template v-if="action === 'switch' && transactionAction.name === 'switch'">
+          <template v-if="action === 'switch' && transactionAction.type === 'switch'">
             Restake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
           </template>
         </p>
@@ -217,7 +217,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 import useDenomsFactory from '@/composables/useDenoms';
 import { GlobalGetterTypes } from '@/store';
-import type { ClaimData } from '@/types/actions';
+import type { Pool } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import {
@@ -256,10 +256,10 @@ const chainName = computed(() => getSourceChainFromTransaction(transaction.value
 const transactionOffset = computed(() => getTransactionOffset(state.value.context));
 
 const getIconAssets = () => {
-  const name = transaction.value.name;
+  const name = transaction.value.type;
   const assets = [];
 
-  if (name === 'transfer' || name === 'ibc_backward' || name === 'ibc_forward') {
+  if (name === 'transfer' || name === 'IBCtransferBackward' || name === 'IBCtransferForward') {
     const denom = transaction.value.data.amount.denom;
     const chainName = getSourceChainFromTransaction(transaction.value);
     assets.push({ denom, chainName });
@@ -270,26 +270,26 @@ const getIconAssets = () => {
     assets.push({ denom });
   }
 
-  if (name === 'addliquidity') {
+  if (name === 'addLiquidity') {
     const denomA = transaction.value.data.coinA.denom;
     const denomB = transaction.value.data.coinB.denom;
     assets.push({ denom: denomA }, { denom: denomB });
   }
 
-  if (name === 'withdrawliquidity') {
-    const denoms = transaction.value.data.pool.reserve_coin_denoms.map(getBaseDenomSync);
+  if (name === 'withdrawLiquidity') {
+    const denoms = (transaction.value.data.pool as Pool).reserve_coin_denoms.map(getBaseDenomSync);
     assets.push(...denoms);
   }
 
-  if (name === 'createpool') {
+  if (name === 'createPool') {
     const denomA = transaction.value.data.coinA.denom;
     const denomB = transaction.value.data.coinB.denom;
     assets.push({ denom: denomA }, { denom: denomB });
   }
 
   if (name === 'claim') {
-    const data = transaction.value.data as ClaimData;
-    const denom = getStakableBaseDenomFromChainName(data.chain_name);
+    const data = transaction.value.data;
+    const denom = getStakableBaseDenomFromChainName(data.chainName);
     assets.push({ denom });
   }
 

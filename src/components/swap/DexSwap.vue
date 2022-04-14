@@ -17,6 +17,7 @@
       v-if="isQuotesListModalOpen"
       :routes="daggRoutes"
       :selected-quote-index="selectedQuoteIndex"
+      :type-changed="typeChanged"
       @selectedQuoteIndex="(e) => selectedQuoteIndexEvent(e)"
       @goback="quotesListModalToggle"
     />
@@ -29,13 +30,13 @@
         @pending="
           () => {
             reviewModalToggle();
-            reset();
+            data.reset();
           }
         "
         @close="
           () => {
             reviewModalToggle();
-            reset();
+            data.reset();
           }
         "
         @finish="
@@ -149,7 +150,7 @@
               :dex="dex"
               :expected-rate="expectedRate"
               :limit-price="limitPrice"
-              :denom="data?.receiveCoinData?.displayName"
+              :denom="data?.receiveCoinData?.displayName || ''"
               :max-slippage="slippage"
               :min-received="data?.receiveCoinAmount"
             />
@@ -245,6 +246,7 @@ const daggRoutes = ref(null);
 const setIntervalId = ref(null);
 const txFee = ref(0);
 const slippage = ref(0);
+const typeChanged = ref('Pay');
 const { isOpen, toggleModal: reviewModalToggle } = useModal();
 const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
 const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = useModal();
@@ -639,12 +641,7 @@ function switchPayToReceive() {
 }
 
 function setMax() {
-  const precisionDecimal = Math.pow(
-    10,
-    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-      name: data?.payCoinData?.base_denom,
-    }) ?? 6,
-  );
+  const precisionDecimal = 10 ** fromPrecision.value;
   data.payCoinAmount = (data.maxAmount / precisionDecimal).toFixed(4);
   setCounterPairCoinAmount('Pay');
 }
@@ -683,6 +680,7 @@ async function getRoutes({ denomIn, denomOut, amountIn, amountOut, chainIn, chai
 }
 
 async function setCounterPairCoinAmount(e) {
+  typeChanged.value = e.includes('Receive') ? 'Receive' : 'Pay';
   if (data.isBothSelected && (!!data.payCoinAmount || !!data.receiveCoinAmount)) {
     selectedQuoteIndex.value = 0;
     if (e.includes('Pay') && !!data.payCoinAmount) {
@@ -728,9 +726,9 @@ async function setCounterPairCoinAmount(e) {
       });
       daggRoutes.value = routes;
       if (routes && routes.length) {
-        const len = routes[0]?.steps.length; //comes out in reverse order.. so check needed after confirming that amountout works fine API wise..
-        if (routes[0]?.steps[len - 1]?.data?.from?.amount) {
-          data.payCoinAmount = (routes[0]?.steps[len - 1]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(4);
+        // routes comes out in reverse order.. lowest payamount should be first..
+        if (routes[0]?.steps[0]?.data?.from?.amount) {
+          data.payCoinAmount = (routes[0]?.steps[0]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(4);
         }
       } else {
         data.payCoinAmount = 0;
@@ -762,12 +760,20 @@ function sortAssetList(list) {
 function selectedQuoteIndexEvent(index) {
   selectedQuoteIndex.value = index;
   isQuotesListModalOpen.value = !isQuotesListModalOpen.value;
-  const len = daggRoutes.value[index]?.steps.length;
-  if (daggRoutes.value[index]?.steps[len - 1]?.data?.to?.amount) {
-    data.receiveCoinAmount = (
-      daggRoutes.value[index]?.steps[len - 1]?.data?.to?.amount /
-      10 ** toPrecision.value
-    )?.toFixed(4);
+  const numberOfSteps = daggRoutes.value[index]?.steps.length;
+  if (typeChanged.value === 'Receive') {
+    if (daggRoutes.value[index]?.steps[0]?.data?.from?.amount) {
+      data.payCoinAmount = (daggRoutes.value[index]?.steps[0]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(
+        4,
+      );
+    }
+  } else {
+    if (daggRoutes.value[index]?.steps[numberOfSteps - 1]?.data?.to?.amount) {
+      data.receiveCoinAmount = (
+        daggRoutes.value[index]?.steps[numberOfSteps - 1]?.data?.to?.amount /
+        10 ** toPrecision.value
+      )?.toFixed(4);
+    }
   }
 }
 

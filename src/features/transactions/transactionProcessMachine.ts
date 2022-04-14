@@ -2,7 +2,7 @@ import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { assign, createMachine, Interpreter, State } from 'xstate';
 
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
-import { FeeTotals, FeeWarning, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
+import { FeeTotals, FeeWarning, Step, StepTransaction } from '@/types/actions';
 import { TxParams, TxResponse } from '@/types/tx';
 import {
   chainStatusForSteps,
@@ -521,8 +521,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         const findIBCDestHash = async () => {
-          if (currentTransaction.name.includes('ibc')) {
-            const { from_chain, to_chain } = currentTransaction.data as IBCBackwardsData;
+          if (currentTransaction.type == 'IBCtransferBackward' || currentTransaction.type == 'IBCtransferForward') {
+            const { chainName, toChain } = currentTransaction.data;
 
             let retriesDestCount = 0;
             let destTx;
@@ -530,8 +530,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalActionTypes.API.GET_TX_DEST_HASH, {
-                  from_chain,
-                  to_chain,
+                  from_chain: chainName,
+                  to_chain: toChain,
                   txhash: responseData.txhash,
                 });
 
@@ -556,7 +556,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         const traceResponse = async () => {
-          await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
+          try {
+            await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
+          } catch (e) {
+            if (e?.message !== 'ERR_WSS_TIMEOUT') {
+              // Fallback when websocket fails
+              await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for the block time
+            }
+          }
+
           await findIBCDestHash();
 
           let traceResult;
@@ -655,19 +663,19 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             break;
           case 'confirm_tx':
             data = {
-              event_label: 'Confirmed ' + getCurrentTransaction(context).name + ' tx',
+              event_label: 'Confirmed ' + getCurrentTransaction(context).type + ' tx',
               event_category: 'transactions',
             };
             break;
           case 'signed_tx':
             data = {
-              event_label: 'Signed ' + getCurrentTransaction(context).name + ' tx',
+              event_label: 'Signed ' + getCurrentTransaction(context).type + ' tx',
               event_category: 'transactions',
             };
             break;
           case 'completed_tx':
             data = {
-              event_label: 'Completed ' + getCurrentTransaction(context).name + ' tx',
+              event_label: 'Completed ' + getCurrentTransaction(context).type + ' tx',
               event_category: 'transactions',
             };
             logAmountVolume(context);
@@ -689,7 +697,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
 
         if (context.input.action === 'transfer') {
-          if (getCurrentStep(context).transactions[0].name.includes('ibc')) {
+          if (
+            getCurrentStep(context).transactions[0].type == 'IBCtransferBackward' ||
+            getCurrentStep(context).transactions[0].type == 'IBCtransferForward'
+          ) {
             return true;
           }
         }

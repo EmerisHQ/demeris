@@ -100,7 +100,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       let done = false;
 
       const getTx = async () => {
-        const result = await wss.call('tx', [txHash64, false]).catch(reject);
+        const result = await wss.call('tx', [txHash64, false]);
         handleMessage(result);
       };
 
@@ -160,16 +160,21 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
       };
 
-      await wss.connect().catch(handleError);
-      handleOpen();
-
       intervalId = setInterval(() => {
+        if (done) return;
         dispatch(ActionTypes.GET_TX_FROM_RPC, { chain_name, txhash }).then(handleMessage);
       }, fallbackIntervalMs);
 
       timeoutId = setTimeout(() => {
         handleError(new Error('Could not find transaction response'));
       }, timeoutMs);
+
+      try {
+        await wss.connect();
+        handleOpen();
+      } catch {
+        // Skip websocket connection failure to be handled by fallback
+      }
     });
   },
 

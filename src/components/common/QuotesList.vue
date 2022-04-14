@@ -67,6 +67,9 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  typeChanged: {
+    type: String,
+  },
 });
 
 const store = useStore();
@@ -103,6 +106,17 @@ const routesTransformedToQuotes = computed(() => {
     routeObj.numberOfTransactions = numberOfSteps;
     routeObj.usdAmount = getDisplayPrice((route as any).steps[numberOfSteps - 1].data.to.denom, routeObj.amount).value;
     //fee token when?
+    if (props?.typeChanged === 'Receive') {
+      routeObj.amount = (
+        (route as any).steps[0].data.from.amount /
+        (10 **
+          store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+            name: (route as any).steps[0].data.from.denom,
+          }) || 6)
+      ).toFixed(4);
+      routeObj.denom = (route as any).steps[0].data.from.denom;
+      routeObj.usdAmount = getDisplayPrice((route as any).steps[0].data.from.denom, routeObj.amount).value;
+    }
     quotesArr.push(routeObj);
   }
   return quotesArr;

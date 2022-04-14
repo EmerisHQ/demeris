@@ -47,6 +47,7 @@
     <ListItem :size="size" :label="$t('components.previews.swap.priceLbl')" direction="col">
       <!-- minReceivedAmount -->
       <ListItem
+        v-if="minReceivedAmount?.denom"
         :size="size"
         :description="$t('components.previews.swap.minReceivedLbl')"
         :hint="$t('components.previews.swap.minReceivedLblHint')"
