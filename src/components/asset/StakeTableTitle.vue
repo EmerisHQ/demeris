@@ -9,7 +9,7 @@
       </h2>
       <!-- TODO: a separate check for liquid staking? -->
       <div v-if="denom === 'ucre'" class="flex items-center gap-2">
-        <NoticeIcon class="ml-6 w-5 h-5" />
+        <InformationIcon class="ml-6 w-5 h-5" />
         <p class="text-muted -text-1">{{ $t('components.stakeTable.noLiquidStaking') }}</p>
       </div>
       <h2
@@ -50,7 +50,7 @@ import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import NoticeIcon from '@/components/common/Icons/NoticeIcon.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
