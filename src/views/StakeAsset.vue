@@ -64,7 +64,7 @@ const keyword = ref('');
 const displayNameAddedList = ref([]);
 
 watch(
-  () => stakableBalances,
+  () => stakableBalances.value,
   async () => {
     if (stakableBalances.value.length) {
       displayNameAddedList.value = [
