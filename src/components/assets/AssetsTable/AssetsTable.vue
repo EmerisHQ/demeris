@@ -2,10 +2,7 @@
   <div class="relative flex flex-col">
     <table class="assets-table -ml-6">
       <colgroup v-if="variant === 'balance'">
-        <col width="35%" />
-        <col width="20%" />
-        <col width="35%" />
-        <col width="10%" />
+        <col v-for="(width, index) in tableColumns" :key="`col-asset-table-${index}`" :width="width" />
       </colgroup>
 
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
@@ -60,12 +57,22 @@
               <Price :amount="{ denom: asset.denom, amount: null }" />
             </td>
 
+            <FeatureRunningConditional name="STAKING">
+              <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition">
+                <div class="flex justify-end gap-x-2">
+                  <Price :amount="{ denom: asset.denom, amount: `${asset.totalAmount - asset.stakedAmount}` }" />
+                  {{ $t('context.assets.available') }}
+                </div>
+              </td>
+            </FeatureRunningConditional>
+
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
               <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
                 <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               </div>
             </td>
+
             <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
               <div class="flex items-center justify-center space-x-3">
                 <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
@@ -147,6 +154,7 @@ import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
@@ -177,6 +185,7 @@ export default defineComponent({
     Price,
     Ticker,
     CurrencyDisplay,
+    FeatureRunningConditional,
   },
 
   props: {
@@ -187,6 +196,10 @@ export default defineComponent({
     showHeaders: {
       type: Boolean,
       default: true,
+    },
+    showAvailableAsset: {
+      type: Boolean,
+      default: false,
     },
     showAllAssets: {
       type: Boolean,
@@ -220,6 +233,12 @@ export default defineComponent({
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
     const propsRef = toRefs(props);
+
+    const tableColumns = ref(['35%', '20%', '35%', '10%']);
+    if (featureRunning('STAKING')) {
+      tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
+    }
+
     const allBalances = computed(() => {
       let balances = propsRef.balances.value;
       if (props.showAllAssets) {
@@ -262,10 +281,11 @@ export default defineComponent({
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+        let stakedAmount = 0;
         if (denom_details.length > 0) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
-            const stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+            stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
             totalAmount = totalAmount + stakedAmount;
           }
           if (featureRunning('STAKING')) {
@@ -283,6 +303,7 @@ export default defineComponent({
         return {
           denom,
           totalAmount,
+          stakedAmount, // ToDo: Having this as a property is a possibility?
           chainsNames,
         };
       });
@@ -291,6 +312,7 @@ export default defineComponent({
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
             summary.push({
+              // ToDo: When this operation take place?
               chainsNames: [denom.chain_name],
               denom: denom.name,
               totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
@@ -414,6 +436,7 @@ export default defineComponent({
       getUnavailableChains,
       orderedUserBalances,
       orderedAllBalances,
+      tableColumns,
     };
   },
 });
