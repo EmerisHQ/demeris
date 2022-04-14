@@ -18,6 +18,9 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@clockwork-projects/cosmos-gaia-js": "^6.0.0",
+    "@clockwork-projects/crescent-network-crescent-js": "^1.0.0",
+    "@clockwork-projects/osmosis-labs-osmosis-js": "^6.1.0",
     "@cosmjs/amino": "0.28.0",
     "@cosmjs/cosmwasm-stargate": "0.28.0",
     "@cosmjs/crypto": "0.28.0",
@@ -32,7 +35,6 @@
     "@emeris/mapper": "^0.2.1-pr-166-5421c362f34a13e36679fb96245bd174bc640532.0",
     "@sentry/tracing": "^6.19.2",
     "@sentry/vue": "^6.19.2",
-    "@starport/tendermint-liquidity-js": "^1.4.7",
     "@types/long": "^4.0.1",
     "@vueuse/core": "^8.1.2",
     "@xstate/vue": "^1.0.0",
