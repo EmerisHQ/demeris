@@ -100,8 +100,12 @@ export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: numb
   };
 };
 
+export const getProtocolFromStep = (step: any) => {
+  return step.protocol ?? step?.data?.pool_id?.split('/')[0];
+};
+
 export const getProtocolFromRoute = (route: any) => {
-  return route.steps[0]?.protocol;
+  return route.steps[0]?.protocol ?? route.steps[0]?.data?.pool_id?.split('/')[0];
 };
 
 export const getCurrentRoute = (context: any) => {
@@ -112,6 +116,7 @@ export const formatProtocolName = (protocol: string) => {
   const protocols = {
     osmosis: 'Osmosis',
     gravity: 'Gravity Dex',
+    crescent: 'Crescent',
   };
   return protocols[protocol];
 };

@@ -47,12 +47,7 @@
       </div>
 
       <aside class="md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <FeatureRunningConditional name="DEX_AGG">
-          <template #deactivated>
-            <LiquiditySwap />
-          </template>
-          <SwapMultiDex />
-        </FeatureRunningConditional>
+        <SwapMultiDex />
         <Intro class="mt-4" />
         <FeatureRunningConditional name="STAKING">
           <PortfolioStakingBanner :balances="balances" class="mt-4" />
@@ -77,7 +72,6 @@ import Intro from '@/components/common/Intro.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';

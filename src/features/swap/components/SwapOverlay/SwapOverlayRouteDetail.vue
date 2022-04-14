@@ -24,7 +24,7 @@
               <Icon v-if="step.type === 'pool'" class="relative" name="DaggSwapLRIcon" :icon-size="1" />
               <Icon v-else-if="step.type === 'ibc'" class="relative" name="DaggArrowRightIcon" :icon-size="1" />
             </div>
-            <span v-if="step.type === 'pool'">Swap on {{ formatProtocolName(step.protocol) }}</span>
+            <span v-if="step.type === 'pool'">Swap on {{ formatProtocolName(getProtocolFromStep(step)) }}</span>
             <span v-else-if="step.type === 'ibc'">Transfer to <ChainName :name="step.chainOut" /></span>
           </dd>
         </template>
@@ -52,7 +52,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-import { formatProtocolName, getRouteDetails } from '../../swapHelpers';
+import { formatProtocolName, getProtocolFromStep, getRouteDetails } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
