@@ -1,5 +1,5 @@
 <template>
-  <div class="receive relative flex flex-col w-full min-h-screen items-center">
+  <div class="stake-asset relative flex flex-col w-full min-h-screen items-center">
     <header class="absolute w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
       <router-link to="/" class="ml-auto">
         <Button variant="link" :full-width="false">
