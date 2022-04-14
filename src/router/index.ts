@@ -19,9 +19,9 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: '/markets/:tab?',
-    name: 'Markets',
-    component: () => import('@/views/Markets.vue'),
+    path: '/assets/:tab?',
+    name: 'Assets',
+    component: () => import('@/views/Assets.vue'),
   },
   {
     path: '/send/:type?',

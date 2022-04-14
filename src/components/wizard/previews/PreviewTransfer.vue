@@ -201,7 +201,7 @@ export default defineComponent({
         any
       >[];
 
-      const isIBC = ['ibc_forward', 'ibc_backward'].includes(firstTransaction.name);
+      const isIBC = ['IBCtransferBackward', 'IBCtransferForward'].includes(firstTransaction.type);
       let fromAmount = firstTransaction.data.amount.amount;
       if (firstTransaction.addFee) {
         fromAmount = (
@@ -213,15 +213,15 @@ export default defineComponent({
       const from = {
         address: '',
         amount: fromAmount,
-        chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
+        chain: firstTransaction.data.chainName || firstTransaction.data.chainName,
         denom: (firstTransaction.data.amount as EmerisBase.Amount).denom,
       };
 
       const to = {
         amount: firstTransaction.data.amount.amount,
-        address: lastTransaction.data.to_address,
+        address: lastTransaction.data.toAddress,
         chain:
-          lastTransaction.data.to_chain ||
+          lastTransaction.data.toChain ||
           lastTransaction.data.destination_chain_name ||
           lastTransaction.data.chain_name,
         denom: (lastTransaction.data.amount as EmerisBase.Amount).denom,
@@ -239,7 +239,7 @@ export default defineComponent({
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
       const getName = (name: string) => store.getters[GlobalGetterTypes.API.getDisplayChain]({ name });
       // @ts-ignore
-      return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
+      return `Fee ${getName(transaction.data.chainName)} -> ${getName(transaction.data.toChain)}`;
     };
 
     const formatChain = (name: string) => {
