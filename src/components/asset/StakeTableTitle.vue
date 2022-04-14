@@ -1,23 +1,35 @@
 <template>
   <div class="flex justify-between mt-16">
-    <div class="flex">
-      <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="emit('selectTab', 1)">
-        {{ $t('components.stakeTable.staking') }}
-        <div v-if="showTotalStakedAsset" class="text-0 font-normal text-muted">
-          {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+    <div>
+      <div class="flex items-center">
+        <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="emit('selectTab', 1)">
+          {{ $t('components.stakeTable.staking') }}
+          <div v-if="showTotalStakedAsset" class="text-0 font-normal text-muted">
+            {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+          </div>
+        </h2>
+        <h2
+          v-if="isUnstakingAssetExist"
+          class="text-2 font-bold ml-6 cursor-pointer"
+          :class="getTabClass(2)"
+          @click="$emit('selectTab', 2)"
+        >
+          {{ $t('components.stakeTable.unstaking') }}
+          <div class="text-0 font-normal text-muted">
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
+          </div>
+        </h2>
+        <div class="flex items-center justify-center">
+          <div class="ml-4 bg-border rounded-md px-1.5 py-2 flex items-center justify-center">
+            <p class="-text-1">{{ apr === '' ? '--.--' : apr }}% APR</p>
+          </div>
         </div>
-      </h2>
-      <h2
-        v-if="isUnstakingAssetExist"
-        class="text-2 font-bold ml-6 cursor-pointer"
-        :class="getTabClass(2)"
-        @click="$emit('selectTab', 2)"
-      >
-        {{ $t('components.stakeTable.unstaking') }}
-        <div class="text-0 font-normal text-muted">
-          <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
-        </div>
-      </h2>
+      </div>
+      <!-- TODO: a separate check for liquid staking? -->
+      <div v-if="denom === 'ucre'" class="flex items-center gap-2 mt-3">
+        <InformationIcon class="w-5 h-5" />
+        <p class="text-muted -text-1">{{ $t('components.stakeTable.noLiquidStaking') }}</p>
+      </div>
     </div>
 
     <Button
@@ -34,24 +46,29 @@
 </template>
 
 <script lang="ts" setup>
-import { toRefs } from '@vue/reactivity';
+import { ref, toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { event } from '@/utils/analytics';
+
+const { getStakingAPR } = useStaking();
 
 const emit = defineEmits(['selectTab']);
 
 const router = useRouter();
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
+const apr = ref<string>('');
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
 const store = useStore() as RootStoreTyped;
@@ -69,10 +86,22 @@ const assetPrecision = computed(() => {
   );
 });
 
+const chainName = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value });
+});
+
+watch(
+  () => chainName.value,
+  async () => {
+    const ret = await getStakingAPR(chainName.value);
+    apr.value = ret;
+  },
+  { immediate: true },
+);
+
 const unbondingBalances = computed(() => {
-  return unbondingDelegationsByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  );
+  if (!chainName.value) return;
+  return unbondingDelegationsByChain(chainName.value);
 });
 
 const showStakingButton = computed(() => {
@@ -84,7 +113,7 @@ const showTotalStakedAsset = computed(() => {
 });
 
 const isUnstakingAssetExist = computed(() => {
-  return unbondingBalances.value.length > 0;
+  return unbondingBalances.value?.length > 0;
 });
 const getTabClass = (tabNumber: number): string => {
   return propsRef.selectedTab.value === tabNumber ? '' : 'text-inactive';

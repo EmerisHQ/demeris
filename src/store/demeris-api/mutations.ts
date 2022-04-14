@@ -32,6 +32,7 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: EmerisAPI.VerifiedDenoms }): void;
   [MutationTypes.SET_VALID_POOLS](state: S, payload: Pool[]): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: EmerisAPI.SupportedChain[] }): void;
+  [MutationTypes.SET_CHAIN_APR](state: S, payload: { params: EmerisAPI.ChainReq; value: string }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: EmerisAPI.Prices }): void;
   [MutationTypes.SET_TX_STATUS](
     state: S,
@@ -113,6 +114,13 @@ export const mutations: MutationTree<APIState> & Mutations = {
         state.chains[chain.chain_name] = chain;
       }
     }
+  },
+  [MutationTypes.SET_CHAIN_APR](state, payload) {
+    const {
+      value,
+      params: { chain_name },
+    } = payload;
+    state.chains[chain_name].apr = value;
   },
   [MutationTypes.SET_PRICES](state, payload) {
     state.prices.Fiats = payload.value.Fiats;

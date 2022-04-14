@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 import useSafeGetters from '@/composables/useSafeGetters';
 import { GlobalActionTypes, RootStoreTyped } from '@/store';
 import { keyHashfromAddress } from '@/utils/basic';
@@ -63,7 +65,23 @@ export default function useStaking() {
     return moniker;
   };
 
+  const getStakingAPR = async (chain_name: string): Promise<string> => {
+    if (!chain_name) return '';
+    try {
+      const apr = await store.dispatch(GlobalActionTypes.API.GET_CHAIN_APR, {
+        subscribe: false,
+        params: {
+          chain_name: chain_name,
+        },
+      });
+      return new BigNumber(apr).toFixed(2).toString();
+    } catch {
+      return '';
+    }
+  };
+
   return {
+    getStakingAPR,
     getValidatorMoniker,
     getValidatorsByBaseDenom,
     getChainDisplayInflationByBaseDenom,

@@ -550,7 +550,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         const traceResponse = async () => {
-          await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
+          try {
+            await useStore().dispatch(GlobalActionTypes.API.GET_NEW_BLOCK, { chain_name: responseData.chain_name });
+          } catch (e) {
+            if (e?.message !== 'ERR_WSS_TIMEOUT') {
+              // Fallback when websocket fails
+              await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for the block time
+            }
+          }
+
           await findIBCDestHash();
 
           let traceResult;

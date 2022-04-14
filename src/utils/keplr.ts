@@ -93,9 +93,9 @@ export async function addChain(chain_name: string): Promise<void> {
         }),
       coinType: parseInt(chain.derivation_path.split('/')[2].slice(0, -1)),
       gasPriceStep: {
-        low: 0.01,
-        average: 0.025,
-        high: 0.04,
+        low: chain.denoms.find((x) => x.fee_token == true).gas_price_levels.low,
+        average: chain.denoms.find((x) => x.fee_token == true).gas_price_levels.average,
+        high: chain.denoms.find((x) => x.fee_token == true).gas_price_levels.high,
       },
       features: ['stargate', 'ibc-transfer'],
     });
