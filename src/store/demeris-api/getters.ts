@@ -19,7 +19,7 @@ export type Getters = {
     (params: EmerisAPI.AddrReq): EmerisAPI.UnbondingDelegations | null;
   };
   [GetterTypes.getNumbersChain](state: APIState): { (params: EmerisAPI.ChainAddrReq): EmerisAPI.SeqNumber | null };
-
+  [GetterTypes.getChainAPR](state: APIState): { (params: EmerisAPI.ChainReq): string };
   [GetterTypes.getRelayerChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
   [GetterTypes.getAllBalances](state: APIState, getters, rootState, rootGetters): EmerisAPI.Balances | null;
   [GetterTypes.getAllStakingBalances](state: APIState): EmerisAPI.StakingBalances | null;
@@ -127,6 +127,9 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   },
   [GetterTypes.getNumbersChain]: (state) => (params) => {
     return state.chainnumbers[params.chain_name][params.address] ?? null;
+  },
+  [GetterTypes.getChainAPR]: (state) => (params) => {
+    return state.chains[params.chain_name].apr;
   },
   [GetterTypes.getFeeAddresses]: (state) => {
     const feeAddresses = [];

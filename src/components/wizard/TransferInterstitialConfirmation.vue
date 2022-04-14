@@ -40,6 +40,10 @@
 </template>
 
 <script lang="ts">
+import {
+  AbstractIBCTransferTransactionData,
+  AbstractTransferTransactionData,
+} from '@emeris/types/lib/EmerisTransactions';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -50,8 +54,8 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
 import { RootStoreTyped } from '@/store';
-import { IBCBackwardsData, IBCForwardsData, Step, TransferData, UserAction } from '@/types/actions';
-import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { Step, UserAction } from '@/types/actions';
+import { getBaseDenom, getBaseDenomSync, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -124,15 +128,19 @@ export default defineComponent({
       let result = '';
 
       if (currentAction.value === 'transfer') {
-        const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+        const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
         let fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-          name: backwardData.from_chain,
+          name: backwardData.chainName,
         });
-        let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.to_chain });
+        let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.toChain });
 
-        if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
-          const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
-          toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain });
+        if (
+          props.steps[0].transactions.length > 1 &&
+          (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+            props.steps[0].transactions[1].type == 'IBCtransferForward')
+        ) {
+          const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
+          toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: forwardData.toChain });
         }
 
         return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
@@ -170,17 +178,23 @@ export default defineComponent({
           });
           break;
         case 'transfer':
-          if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
-            const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
-            const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+          if (
+            props.steps[0].transactions.length > 1 &&
+            (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+              props.steps[0].transactions[1].type == 'IBCtransferForward')
+          ) {
+            const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
+            const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
 
             const fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-              name: backwardData.from_chain,
+              name: backwardData.chainName,
             });
             const toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-              name: forwardData.to_chain,
+              name: forwardData.toChain,
             });
-            const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
+            const asset = nativeBalances.value.find(
+              (item) => item.base_denom === getBaseDenomSync(backwardData.amount.denom),
+            );
             const nativeChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
               name: asset.on_chain,
             });
@@ -218,13 +232,13 @@ export default defineComponent({
         stepDenoms = props.steps
           .map((step) => {
             const transaction = step.transactions[0];
-            if (!transaction.name.startsWith('ibc')) {
+            if (!(transaction.type == 'IBCtransferBackward' || transaction.type == 'IBCtransferForward')) {
               return;
             }
-            const chain = (transaction.data as IBCForwardsData).from_chain || dexChain;
-            const tochain = (transaction.data as IBCForwardsData).to_chain || dexChain;
+            const chain = (transaction.data as AbstractIBCTransferTransactionData).chainName || dexChain;
+            const tochain = (transaction.data as AbstractIBCTransferTransactionData).toChain || dexChain;
 
-            const denom = (transaction.data as TransferData).amount.denom;
+            const denom = (transaction.data as AbstractTransferTransactionData).amount.denom;
             return { chain, denom, tochain };
           })
           .filter(Boolean);
