@@ -235,7 +235,7 @@ export default defineComponent({
     const propsRef = toRefs(props);
 
     const tableColumns = ref(['35%', '20%', '35%', '10%']);
-    if (featureRunning('STAKING')) {
+    if (featureRunning('STAKING') && props.showAvailableAsset) {
       tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
     }
 
