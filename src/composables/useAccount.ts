@@ -184,8 +184,9 @@ export default function useAccount() {
   return {
     balances,
     nativeBalances,
-    stakableBalances,
     getNativeBalances,
+    stakableBalances,
+    getStakableBalances,
     allbalances,
     balancesByDenom,
     orderBalancesByPrice,
