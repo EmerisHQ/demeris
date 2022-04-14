@@ -7,34 +7,28 @@
         </Button>
       </router-link>
     </header>
-    <main class="w-full max-w-7xl mx-auto md:pt-8 px-8 pb-0 flex-1 flex flex-col items-center overflow-hidden">
-      <div class="-mt-9 h-full w-full max-w-md mx-auto">
-        <div class="w-full h-full flex-1 flex flex-col items-stretch">
-          <header class="w-full max-w-7xl mx-auto px-2">
-            <TitleWithGoback
-              :title="$t('pages.receive.select')"
-              :func="() => $router.back()"
-              :show-back-button="false"
-            />
-          </header>
+    <main class="w-full max-w-7xl mx-auto px-8">
+      <div class="w-full max-w-md mx-auto">
+        <header class="w-full max-w-7xl mx-auto px-2">
+          <TitleWithGoback :title="$t('pages.receive.select')" :func="() => $router.back()" :show-back-button="false" />
+        </header>
 
-          <div class="search-bar relative flex-1 min-h-0 flex flex-col">
-            <Search v-model:keyword="keyword" placeholder="Search assets" class="w-full mx-auto max-w-md px-6 pb-3" />
-            <div class="scroll-container overflow-y-auto grow min-h-0 pt-1">
-              <div class="mx-auto max-w-md mb-20">
-                <CoinList
-                  v-if="keywordFilteredAssets.length > 0"
-                  :data="keywordFilteredAssets"
-                  type="pay"
-                  show-balance
-                  :keyword="keyword"
-                  @select="assetSelectHandler"
-                >
-                </CoinList>
-              </div>
+        <div class="search-bar relative flex-1 min-h-0 flex flex-col">
+          <Search v-model:keyword="keyword" placeholder="Search assets" class="w-full mx-auto max-w-md px-6 pb-3" />
+          <div class="scroll-container overflow-y-auto grow min-h-0 pt-1">
+            <div class="mx-auto max-w-md mb-20">
+              <CoinList
+                v-if="keywordFilteredAssets.length > 0"
+                :data="keywordFilteredAssets"
+                type="pay"
+                show-balance
+                :keyword="keyword"
+                @select="assetSelectHandler"
+              >
+              </CoinList>
             </div>
-            <WhiteOverlay />
           </div>
+          <WhiteOverlay />
         </div>
       </div>
     </main>
