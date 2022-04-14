@@ -12,7 +12,7 @@
       </div>
       <span class="ml-5">Finding the best price</span>
     </div>
-    <div v-else class="flex items-center">
+    <div v-else-if="currentProtocol" class="flex items-center">
       <CircleSymbol size="xs" variant="chain" :chain-name="currentProtocol.chain" :display-status="false" />
       <span class="ml-1.5">{{ currentProtocol.name }}</span>
     </div>
@@ -40,6 +40,7 @@ const canShow = computed(() => {
 
 const currentProtocol = computed(() => {
   const route = getCurrentRoute(state.value.context);
+  if (!route) return;
   const protocol = getProtocolFromRoute(route);
   const chain = getChainFromProtocol(protocol);
 

@@ -8,18 +8,18 @@
     </template>
     <template #caption>{{ selectedRoute.steps.length }} transactions</template>
 
-    <dl class="relative space-y-5 mt-2">
+    <dl class="timeline-container relative space-y-5 mt-2">
       <template v-for="(steps, index) in routeDetail" :key="index">
-        <dt class="flex items-center space-x-4 mb-5">
+        <dt class="timeline-denom flex items-center space-x-4 mb-5">
           <CircleSymbol :denom="steps[0].baseDenomIn" />
           <div>
             <span class="font-medium"><Ticker :name="steps[0].baseDenomIn" /></span>
-            <span class="text-muted"> · <ChainName :name="steps[0].chainIn" /></span>
+            <span class="text-muted"> &middot; <ChainName :name="steps[0].chainIn" /></span>
           </div>
         </dt>
 
         <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-          <dd class="flex items-center space-x-4 mb-4 -text-1">
+          <dd class="timeline-sub-item flex items-center space-x-4 -text-1">
             <div class="rounded-full bg-bg flex items-center justify-center w-8 h-8 border-2 border-border">
               <Icon v-if="step.type === 'pool'" class="relative" name="DaggSwapLRIcon" :icon-size="1" />
               <Icon v-else-if="step.type === 'ibc'" class="relative" name="DaggArrowRightIcon" :icon-size="1" />
@@ -65,3 +65,11 @@ const { state } = swap.useSwapMachine();
 const selectedRoute = computed(() => state.value.context.data.routes[props.routeIndex]);
 const routeDetail = computed(() => getRouteDetails(state.value.context, props.routeIndex));
 </script>
+
+<style lang="postcss" scoped>
+.timeline-sub-item {
+  & + .timeline-sub-item {
+    @apply mt-2;
+  }
+}
+</style>

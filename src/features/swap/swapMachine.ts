@@ -71,14 +71,28 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
     initial: 'booting',
     context: defaultContext(),
     on: {
-      'INPUT.CHANGE_COIN': {
-        target: 'updating.routes.input',
-        actions: 'setInputCoin',
-      },
-      'OUTPUT.CHANGE_COIN': {
-        target: 'updating.routes.output',
-        actions: 'setOutputCoin',
-      },
+      'INPUT.CHANGE_COIN': [
+        {
+          target: 'updating.routes.input',
+          actions: 'setInputCoin',
+          cond: 'hasInputParams',
+        },
+        {
+          target: 'updating.routes.output',
+          actions: 'setInputCoin',
+        },
+      ],
+      'OUTPUT.CHANGE_COIN': [
+        {
+          target: 'updating.routes.output',
+          actions: 'setOutputCoin',
+          cond: 'hasOutputParams',
+        },
+        {
+          target: 'updating.routes.input',
+          actions: 'setOutputCoin',
+        },
+      ],
       'INPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.input',
         actions: 'setInputAmount',
@@ -424,7 +438,13 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       }),
     },
     guards: {
-      hasRouteParams: (context) => context.inputCoin?.denom && context.inputAmount && !!context.outputCoin?.denom,
+      hasInputParams: (context) => context.inputCoin?.denom && !!context.inputAmount,
+      hasOutputParams: (context) => context.outputCoin?.denom && !!context.outputAmount,
+      hasRouteParams: (context) => {
+        if (context.inputCoin?.denom && context.inputAmount && !!context.outputCoin?.denom) return true;
+        if (context.outputCoin?.denom && context.outputAmount && !!context.inputCoin?.denom) return true;
+        return false;
+      },
       hasAllParams: (context) =>
         context.inputCoin?.denom && context.inputAmount && context.outputCoin?.denom && !!context.outputAmount,
     },
