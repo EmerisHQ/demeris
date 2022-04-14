@@ -771,6 +771,9 @@
         "chains": "Chains"
       },
       "portfolio": {},
+      "stakeAsset": {
+        "select": "Select asset"
+      },
       "receive": {
         "select": "Select asset",
         "receive": "Receive",

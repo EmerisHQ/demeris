@@ -10,7 +10,11 @@
     <main class="w-full max-w-7xl mx-auto px-8">
       <div class="w-full max-w-md mx-auto">
         <header class="w-full max-w-7xl mx-auto px-2">
-          <TitleWithGoback :title="$t('pages.receive.select')" :func="() => $router.back()" :show-back-button="false" />
+          <TitleWithGoback
+            :title="$t('pages.stakeAsset.select')"
+            :func="() => $router.back()"
+            :show-back-button="false"
+          />
         </header>
 
         <div class="search-bar relative flex-1 min-h-0 flex flex-col">
