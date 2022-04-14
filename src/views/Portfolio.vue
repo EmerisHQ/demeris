@@ -16,9 +16,10 @@
           </header>
           <template v-if="initialLoadComplete">
             <FeatureRunningConditional name="STAKING">
-              <AssetsFilter :assets-length="assetsLength" />
+              <AssetsFilter :assets-length="assetsLength" @active-filter="(value) => (activeFilter = value)" />
             </FeatureRunningConditional>
             <AssetsTable
+              v-if="!featureRunning('STAKING') || activeFilter === 'all'"
               :balances="balances"
               :hide-zero-assets="true"
               variant="balance"
@@ -68,6 +69,7 @@
 <script setup lang="ts">
 import { computed } from '@vue/runtime-core';
 import groupBy from 'lodash.groupby';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -90,6 +92,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 
 const { t } = useI18n({ useScope: 'global' });
 pageview({ page_title: 'Portfolio', page_path: '/' });
@@ -104,6 +107,9 @@ const { balances } = useAccount();
 const { pools } = usePools();
 
 const store = useStore();
+
+const activeFilter = ref('all');
+
 const openAssetPage = (asset: Record<string, string>) => {
   router.push({ name: 'Asset', params: { denom: asset.denom } });
 };

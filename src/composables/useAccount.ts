@@ -49,9 +49,11 @@ export default function useAccount() {
     },
     { immediate: true },
   );
+
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
   };
+
   const userAccountBalances = computed(() => {
     const sortedBalances = {
       verified: [],
@@ -68,9 +70,11 @@ export default function useAccount() {
 
     return sortedBalances;
   });
+
   const allLoaded = computed(() => {
     return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
   });
+
   const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
 
   const getNativeBalances = (
@@ -127,6 +131,21 @@ export default function useAccount() {
     );
   };
 
+  /* Account Balances that could enter the stake process */
+  const stakableBalances = computed(() => getStakableBalances({ balances }));
+
+  const getStakableBalances = (
+    { balances }: { balances?: EmerisAPI.Balances | Ref<EmerisAPI.Balances> } = {
+      balances: [],
+    },
+  ) => {
+    const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
+
+    return unref(balances).filter(
+      (balance) => verifiedDenoms.find((denom) => denom.name == balance.base_denom)?.stakable,
+    );
+  };
+
   const stakingBalances = computed(() => {
     return store.getters[GlobalGetterTypes.API.getAllStakingBalances] || [];
   });
@@ -165,6 +184,7 @@ export default function useAccount() {
   return {
     balances,
     nativeBalances,
+    stakableBalances,
     getNativeBalances,
     allbalances,
     balancesByDenom,

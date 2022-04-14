@@ -9,7 +9,7 @@
       capitalize
       rounded
       :name="`${$t('components.assetsFilter.allAssets')} (${props.assetsLength})`"
-      :click-function="() => (activeFilter = 'all')"
+      :click-function="() => setActiveFilter('all')"
     />
     <Button
       size="sm"
@@ -19,7 +19,7 @@
       capitalize
       rounded
       :name="`${$t('components.assetsFilter.staking')} (${props.assetsStakingLength})`"
-      :click-function="() => (activeFilter = 'staking')"
+      :click-function="() => setActiveFilter('staking')"
     />
     <router-link class="ml-auto font-medium" :to="{ name: 'Stake Asset' }">
       {{ $t('components.assetsFilter.stakeAsset') }} &rarr;
@@ -43,4 +43,11 @@ const props = withDefaults(defineProps<Props>(), {
   assetsLength: 0,
   assetsStakingLength: 0,
 });
+
+const emit = defineEmits(['activeFilter']);
+
+const setActiveFilter = (newActiveFilter: string): void => {
+  activeFilter.value = newActiveFilter;
+  emit('activeFilter', newActiveFilter);
+};
 </script>
