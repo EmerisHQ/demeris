@@ -30,6 +30,7 @@ import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { axiosInit } from '@/utils/api-settings';
 import { setStore } from '@/utils/useStore';
 
 import usePoolsFactory from './composables/usePools';
@@ -63,6 +64,7 @@ const { t } = useI18n({ useScope: 'global' });
 const status = ref(t('appInit.status.initializing'));
 
 onMounted(async () => {
+  axiosInit();
   useTheme({ updateOnChange: true });
   let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
   if (!gasLimit) {
