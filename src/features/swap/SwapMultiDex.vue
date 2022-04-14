@@ -5,7 +5,8 @@
         :steps="state.context.data.steps"
         action="swap"
         class="flex-1 flex flex-col"
-        @close="send({ type: 'STEPS.CLEAR' })"
+        @close="send({ type: 'RESET' })"
+        @pending="send({ type: 'RESET' })"
       />
     </template>
 

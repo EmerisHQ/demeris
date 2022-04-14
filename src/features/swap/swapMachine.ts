@@ -62,6 +62,7 @@ export type SwapEvents =
   | { type: 'COINS.SWITCH' }
   | { type: 'INVALID.OVER_MAX' }
   | { type: 'INVALID.BELOW_MIN' }
+  | { type: 'RESET' }
   | { type: 'SUBMIT' };
 
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
@@ -223,6 +224,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       submitted: {
         id: 'submitted',
         on: {
+          RESET: {
+            target: '#ready',
+            actions: 'resetData',
+          },
           'STEPS.CLEAR': {
             target: '#ready',
             actions: 'clearSteps',
@@ -386,6 +391,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       setSelectedRouteIndex: assign({
         selectedRouteIndex: (_, event: any) => event.value,
       }),
+      resetData: assign((context) => ({
+        outputCoin: undefined,
+        outputAmount: undefined,
+        inputAmount: undefined,
+        selectedRouteIndex: undefined,
+        data: {
+          ...context.data,
+          steps: [],
+          routes: [],
+        },
+      })),
       updateInputAmountFromRoute: assign({
         inputAmount: (context) => {
           if (!context.data.routes.length) {
