@@ -93,9 +93,9 @@ export const liquidityTypes = {
       offerCoinFee,
       orderPrice,
     }: MsgSwapWithinBatch): AminoMsgSwapWithinBatch['value'] => {
-      const orderPrice = orderPrice.split('');
-      while (orderPrice.length < 19) {
-        orderPrice.unshift('0');
+      const order_price = orderPrice.split('');
+      while (order_price.length < 19) {
+        order_price.unshift('0');
       }
       order_price.splice(order_price.length - 18, 0, '.');
       return {

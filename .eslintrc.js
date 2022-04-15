@@ -24,9 +24,9 @@ module.exports = {
      * Would like to turn this on at some moment, but right now it's causing too much noise
      */
 
-    '@typescript-eslint/naming-convention': ['error', { selector: 'variableLike', format: ['camelCase'] }],
+    '@typescript-eslint/naming-convention': ['warn', { selector: 'variableLike', format: ['camelCase'] }],
     '@typescript-eslint/naming-convention': [
-      'error',
+      'warn',
       {
         selector: 'memberLike',
         modifiers: ['private'],
@@ -35,7 +35,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/naming-convention': [
-      'error',
+      'warn',
       {
         selector: 'variable',
         types: ['boolean'],
@@ -44,7 +44,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/naming-convention': [
-      'error',
+      'warn',
       {
         selector: 'variable',
         format: ['camelCase', 'UPPER_CASE'],
