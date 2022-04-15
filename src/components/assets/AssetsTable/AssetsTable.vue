@@ -303,7 +303,7 @@ export default defineComponent({
         return {
           denom,
           totalAmount,
-          stakedAmount, // ToDo: Having this as a property is a possibility?
+          stakedAmount,
           chainsNames,
         };
       });
@@ -311,11 +311,12 @@ export default defineComponent({
         for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
+            const calcStakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
             summary.push({
-              // ToDo: When this operation take place?
               chainsNames: [denom.chain_name],
               denom: denom.name,
-              totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
+              totalAmount: calcStakedAmount,
+              stakedAmount: calcStakedAmount,
             });
           }
         }
