@@ -457,6 +457,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
 function createUpdateRoutesState({ onDone, invokeSrc }: { onDone: string; invokeSrc: string }) {
   return {
     initial: 'choosing',
+    entry: 'clearRoutes',
     states: {
       choosing: {
         always: [

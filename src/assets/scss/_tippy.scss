@@ -16,3 +16,7 @@ body {
     @apply px-3;
   }
 }
+
+.no-default-tippy-padding .tippy-content {
+  padding: 0 !important;
+}

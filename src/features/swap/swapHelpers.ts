@@ -122,7 +122,7 @@ export const formatProtocolName = (protocol: string) => {
 };
 
 export const isBestRouteSelected = (context: SwapContext) => {
-  return context.selectedRouteIndex === 0 && !!getCurrentRoute(context);
+  return context.selectedRouteIndex === 0 && getCurrentRoute(context) !== undefined;
 };
 
 export const getChainFromProtocol = (protocol: string) => {
@@ -319,4 +319,29 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
   }
 
   return txs;
+};
+
+export const getOrderPrice = (context: SwapContext) => {
+  return new BigNumber(context.outputAmount).dividedBy(context.inputAmount).toString();
+};
+
+export const getLimitPrice = (context: SwapContext) => {
+  const precision =
+    useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: context.outputCoin.baseDenom }) ?? 6;
+  return new BigNumber(getOrderPrice(context))
+    .multipliedBy(1 - 0.005)
+    .decimalPlaces(precision)
+    .toString();
+};
+
+export const countExchangesFromRoutes = (context: SwapContext) => {
+  const protocols = [];
+  for (const route of context.data.routes) {
+    for (const step of route.steps) {
+      if (protocols.includes(step.protocol)) continue;
+      protocols.push(step.protocol);
+    }
+  }
+
+  return protocols.length;
 };

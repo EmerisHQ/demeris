@@ -9,20 +9,51 @@
   >
     <template #label> Receive </template>
     <template #header>
-      <div v-if="isBestRouteSelected(state.context)" class="flex ml-auto font-normal text-muted -text-1">
-        Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875" />
+      <div
+        v-if="isBestRouteSelected(state.context)"
+        class="flex ml-auto font-normal text-muted -text-1 no-default-tippy-padding"
+      >
+        <tippy class="ml-auto" placement="bottom-start" delay="0" :interactive="true" :arrow="false">
+          <span class="flex items-center">Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875" /></span>
+
+          <template #content>
+            <SwapBestPriceDetails
+              :number-of-exchanges-searched="countExchangesFromRoutes(state.context)"
+              :dex="protocol"
+              :expected-rate="getOrderPrice(state.context)"
+              :limit-price="getLimitPrice(state.context)"
+              :denom="state.context.outputCoin?.baseDenom"
+              :max-slippage="0"
+              :min-received="state.context.outputAmount"
+            />
+          </template>
+        </tippy>
       </div>
     </template>
   </SwapCoin>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
+
 import Icon from '@/components/ui/Icon.vue';
 
-import { isBestRouteSelected } from '../../swapHelpers';
+import {
+  countExchangesFromRoutes,
+  formatProtocolName,
+  getCurrentRoute,
+  getLimitPrice,
+  getOrderPrice,
+  getProtocolFromRoute,
+  isBestRouteSelected,
+} from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
+import SwapBestPriceDetails from '../SwapBestPriceDetails.vue';
 import SwapCoin from './SwapCoin.vue';
 
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();
+
+const currentRoute = computed(() => getCurrentRoute(state.value.context));
+const protocol = computed(() => formatProtocolName(getProtocolFromRoute(currentRoute.value)));
 </script>
