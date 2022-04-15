@@ -265,7 +265,7 @@ export default defineComponent({
         }
       }),
       buttonDisabled: computed(() => {
-        return !data.isSwapReady || data.buttonName.includes('Min');
+        return !data.isSwapReady || data.buttonName.includes('Min') || !data.actionHandlerResult;
       }),
       swapButtonActionText: 'Max',
       maxAmount: computed(() => {
