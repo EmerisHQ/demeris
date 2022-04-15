@@ -9,9 +9,17 @@
       <span v-if="quote.fee && quote.fee.amount" class="flex flex-row -text-1 items-center">
         <Icon name="ExclamationThinIcon" class="text-warning pr-2" :icon-size="1" />Fee token required</span
       >
-      <span v-else class="hover:opacity-70" @click.stop="visualizeRoute"
-        >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
-      >
+      <FeatureRunningConditional v-else name="ENABLE_SWAP_ROUTE">
+        <template #deactivated>
+          <span class="hover:opacity-70" @click.stop=""
+            >{{ quote.numberOfTransactions }}
+            {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
+          >
+        </template>
+        <span class="hover:opacity-70" @click.stop="visualizeRoute"
+          >{{ quote.numberOfTransactions }} {{ quote.numberOfTransactions == 1 ? 'transaction' : 'transactions' }}</span
+        >
+      </FeatureRunningConditional>
       <span class="ml-auto">~{{ quote.usdAmount }}</span>
     </div>
   </div>
@@ -23,6 +31,8 @@ import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes } from '@/store';
+
+import FeatureRunningConditional from './FeatureRunningConditional.vue';
 
 const typedstore = useStore();
 

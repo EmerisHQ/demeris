@@ -34,7 +34,7 @@
     <TitleSubTitleWithClose
       class="ml-6 mt-6"
       title="Swap route"
-      sub-title="TODO"
+      :sub-title="swapRouteSubTitle"
       :func="
         () => {
           isVisualizeRouteVisible = false;
@@ -42,7 +42,11 @@
         }
       "
     />
-    <SwapRoute :quote="routes[visualizeRouteIndex]" />
+    <SwapRoute
+      :quote="routes[visualizeRouteIndex]"
+      @number-of-chains="(number) => (numberOfChains = number)"
+      @number-of-transactions="(number) => (numberOfTransactions = number)"
+    />
   </div>
 </template>
 
@@ -78,6 +82,18 @@ const { getDisplayPrice } = usePrice();
 const selectedQuoteIndex = ref(props.selectedQuoteIndex || 0);
 const isVisualizeRouteVisible = ref(false);
 const visualizeRouteIndex = ref(0);
+const numberOfChains = ref(0);
+const numberOfTransactions = ref(0);
+
+const swapRouteSubTitle = computed(() => {
+  if (numberOfChains.value <= 1) {
+    return numberOfTransactions.value === 1 ? `1 transaction` : `${numberOfTransactions.value} transactions`;
+  } else {
+    return numberOfTransactions.value === 1
+      ? `1 transaction across ${numberOfChains.value} chains`
+      : `${numberOfTransactions.value} transactions across ${numberOfChains.value} chains`;
+  }
+});
 
 const selectQuote = (index) => {
   selectedQuoteIndex.value = index;

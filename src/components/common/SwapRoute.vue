@@ -68,16 +68,7 @@ const props = defineProps({
 
 const store = useStore();
 const routeProcessed = ref(null);
-// const numberOftransactions = computed(() => {
-//   for(let ) //subitems length sum
-// })
-
-// const chains = computed(() => {
-//   //diff chains per item.. set
-// })
-
-// TODO:
-// 2. Add X transaction over Y chains logic
+const numberOfChains = ref(new Set());
 
 const getChainName = (chain_name) => {
   return store.getters[GlobalGetterTypes.API.getDisplayChain]({
@@ -135,49 +126,24 @@ const route = async () => {
         getChainFromDex(steps[stepIndex].protocol),
         steps[stepIndex].data.from.denom.split('/')[1],
       );
-      // let verifyTraceTo = await getVerifyTrace(
-      //   getChainFromDex(steps[stepIndex].protocol),
-      //   steps[stepIndex].data.to.denom.split('/')[1],
-      // );
       if (items && items.length && stepIndex !== steps.length - 1) {
-        // items[items.length - 1].chain = steps[stepIndex].data.from.denom.includes('/')
-        //   ? verifyTraceFrom.trace[0].counterparty_name
-        //   : getChainNameByBaseDenom(steps[stepIndex].data.from.denom);
-
-        // items[items.length - 1]?.transactions?.push(
-        //   `Transfer to ${
-        //     steps[stepIndex].data.from.denom.includes('/')
-        //       ? getChainName(verifyTraceFrom.trace[0].counterparty_name)
-        //       : getChainName(getChainNameByBaseDenom(steps[stepIndex].data.from.denom))
-        //   }`,
-        // );
-        // if (lastPoolChain !== getChainFromDex(steps[stepIndex].protocol)) {
-        //   items[items.length - 1].chain = getChainFromDex(steps[stepIndex].protocol);
-        //   items[items.length - 1]?.transactions?.push(
-        //     `Transfer to ${getChainName(getChainFromDex(steps[stepIndex].protocol))}`,
-        //   );
-        // } else {
-        // }
         //  compare protocol, counterparty for to and from..
         //   both ibc - get chainin. from ibc - counterparty. to ibc - dexchain. no ibc - to chainfromdenom
         if (steps[stepIndex].data.from.denom.includes('/') && steps[stepIndex].data.to.denom.includes('/')) {
           //handle case
           // carryOverChain = getChainFromDex(steps[stepIndex].protocol);
         } else if (steps[stepIndex].data.from.denom.includes('/')) {
-          // items[items.length - 1].chain = verifyTraceFrom?.trace[0]?.counterparty_name;
           carryOverChain = verifyTraceFrom?.trace[0]?.counterparty_name;
           items[items.length - 1]?.transactions?.push(
             `Transfer to ${getChainName(verifyTraceFrom?.trace[0]?.counterparty_name)}`,
           );
         } else if (steps[stepIndex].data.to.denom.includes('/')) {
           carryOverChain = getChainFromDex(steps[stepIndex].protocol);
-          // items[items.length - 1].chain = getChainFromDex(steps[stepIndex].protocol);
           items[items.length - 1]?.transactions?.push(
             `Transfer to ${getChainName(getChainFromDex(steps[stepIndex].protocol))}`,
           );
         } else {
           carryOverChain = getChainFromDex(getChainNameByBaseDenom(steps[stepIndex].data.to.denom));
-          // items[items.length - 1].chain = getChainNameByBaseDenom(steps[stepIndex].data.to.denom);
           items[items.length - 1]?.transactions?.push(
             `Transfer to ${getChainName(getChainNameByBaseDenom(steps[stepIndex].data.to.denom))}`,
           );
@@ -189,18 +155,19 @@ const route = async () => {
         getChainFromDex(steps[stepIndex].protocol),
       );
       (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
-      // lastPoolChain = item.chain;
+      numberOfChains.value.add(getChainFromDex(steps[stepIndex].protocol));
       (item as any).transactions.push(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
       if (carryOverChain) {
-        // (item as any).transactions.unshift(`Transfer to ${getChainName(carryOverChain)}`);
         (item as any).chain = carryOverChain;
         carryOverChain = null;
+        numberOfChains.value.add(item.chain);
       }
       items.push(item);
     } else {
       console.log(`new type : ${steps[stepIndex].type}`);
     }
   }
+  //edge cases from here.
   if (steps[steps.length - 1].type === 'pool') {
     items.push({
       chain: getChainFromDex(steps[steps.length - 1].protocol),
@@ -209,7 +176,9 @@ const route = async () => {
         getChainFromDex(steps[steps.length - 1].protocol),
       ),
     });
+    numberOfChains.value.add(getChainFromDex(steps[steps.length - 1].protocol));
   }
+
   if (steps[steps.length - 1].type === 'ibc') {
     items[items.length - 1]?.transactions?.push(
       `Transfer to ${getChainName(getChainNameByBaseDenom(steps[steps.length - 1].data.to.denom))}`,
@@ -221,20 +190,26 @@ const route = async () => {
         getChainFromDex(steps[steps.length - 1].protocol),
       ),
     });
+    numberOfChains.value.add(getChainNameByBaseDenom(steps[steps.length - 1].data.to.denom));
   }
+
   if (steps[0].type === 'ibc') {
     items[0].chain = getChainNameByBaseDenom(steps[0].data.from.denom); //use chainIn. handle input ibc case
     if (items[0].chain !== getChainFromDex(steps[0].protocol)) {
       items[0]?.transactions?.unshift(`Transfer to ${getChainName(getChainFromDex(steps[0].protocol))}`);
     }
+    numberOfChains.value.add(items[0].chain);
   }
-  console.log(items);
   return items;
 };
 
 onMounted(async () => {
   routeProcessed.value = await route();
+  emit('numberOfTransactions', props.quote.steps.length);
+  emit('numberOfChains', numberOfChains.value.size);
 });
+
+const emit = defineEmits(['numberOfTransactions', 'numberOfChains']);
 </script>
 <style lang="scss" scoped>
 .timeline-container {
