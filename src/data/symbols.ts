@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 type SymbolConfig = {
   colors: {
     primary: string;

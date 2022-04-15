@@ -68,6 +68,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { defineComponent, nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';

@@ -180,6 +180,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';

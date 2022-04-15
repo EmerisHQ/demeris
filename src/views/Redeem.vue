@@ -89,6 +89,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { defineComponent, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';

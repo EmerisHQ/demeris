@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import {
   AminoMsg,
   encodeSecp256k1Pubkey,

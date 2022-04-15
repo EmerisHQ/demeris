@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops } from '@emeris/types';
 import { Airdrop } from '@emeris/types/lib/EmerisAirdrops';
 import axios, { AxiosResponse } from 'axios';

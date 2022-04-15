@@ -200,6 +200,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
 export default {
   inheritAttrs: false,
 };

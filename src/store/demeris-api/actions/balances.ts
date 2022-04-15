@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';

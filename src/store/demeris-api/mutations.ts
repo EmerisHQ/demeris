@@ -1,3 +1,6 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops, EmerisAPI } from '@emeris/types';
 import isEqual from 'lodash.isequal';
 import { MutationTree } from 'vuex';

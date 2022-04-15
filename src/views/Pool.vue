@@ -197,6 +197,7 @@
 </template>
 
 <script lang="ts" setup>
+/* eslint-disable max-lines */
 import BigNumber from 'bignumber.js';
 import { computed, Ref, ref, unref, watch } from 'vue';
 import { useMeta } from 'vue-meta';

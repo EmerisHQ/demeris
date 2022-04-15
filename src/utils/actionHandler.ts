@@ -1,3 +1,6 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { AminoMsg } from '@cosmjs/amino';
 import mapTransaction from '@emeris/mapper';
 import { EmerisAPI, EmerisBase, EmerisFees } from '@emeris/types';

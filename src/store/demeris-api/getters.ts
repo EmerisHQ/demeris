@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops, EmerisAPI, EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';

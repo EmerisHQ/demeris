@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { assign, createMachine, Interpreter, State } from 'xstate';
 

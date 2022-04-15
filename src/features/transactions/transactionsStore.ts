@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import { defineStore } from 'pinia';
 import { interpret } from 'xstate';

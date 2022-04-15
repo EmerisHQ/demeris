@@ -92,6 +92,9 @@
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisFees } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';

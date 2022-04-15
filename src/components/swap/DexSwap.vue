@@ -203,6 +203,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import axios from 'axios';
 import { computed, onUnmounted, PropType, reactive, ref, watch } from 'vue';

@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
 import axios from 'axios';

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { EmerisBase } from '@emeris/types';
 
 export enum LoadingState {

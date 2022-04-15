@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI, EmerisBase } from '@emeris/types';
 import { EmerisTransactions } from '@emeris/types';
 import BigNumber from 'bignumber.js';

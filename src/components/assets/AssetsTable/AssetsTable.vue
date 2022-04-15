@@ -134,6 +134,9 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';

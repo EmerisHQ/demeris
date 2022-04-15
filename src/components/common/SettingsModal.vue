@@ -257,6 +257,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { computed, defineComponent, reactive, ref } from 'vue';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';

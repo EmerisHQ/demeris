@@ -77,6 +77,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 

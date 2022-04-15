@@ -111,6 +111,7 @@
 </template>
 
 <script lang="ts" setup>
+/* eslint-disable max-lines */
 import { onClickOutside, useDebounceFn } from '@vueuse/core';
 import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
