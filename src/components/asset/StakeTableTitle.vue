@@ -1,32 +1,34 @@
 <template>
   <div class="flex justify-between mt-16">
-    <div class="flex items-center">
-      <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="emit('selectTab', 1)">
-        {{ $t('components.stakeTable.staking') }}
-        <div v-if="showTotalStakedAsset" class="text-0 font-normal text-muted">
-          {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+    <div>
+      <div class="flex items-center">
+        <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="emit('selectTab', 1)">
+          {{ $t('components.stakeTable.staking') }}
+          <div v-if="showTotalStakedAsset" class="text-0 font-normal text-muted">
+            {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+          </div>
+        </h2>
+        <h2
+          v-if="isUnstakingAssetExist"
+          class="text-2 font-bold ml-6 cursor-pointer"
+          :class="getTabClass(2)"
+          @click="$emit('selectTab', 2)"
+        >
+          {{ $t('components.stakeTable.unstaking') }}
+          <div class="text-0 font-normal text-muted">
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
+          </div>
+        </h2>
+        <div class="flex items-center justify-center">
+          <div class="ml-4 bg-border rounded-md px-1.5 py-2 flex items-center justify-center">
+            <p class="-text-1">{{ apr === '' ? '--.--' : apr }}% APR</p>
+          </div>
         </div>
-      </h2>
-      <!-- TODO: a separate check for liquid staking? -->
-      <div v-if="denom === 'ucre'" class="flex items-center gap-2">
-        <NoticeIcon class="ml-6 w-5 h-5" />
-        <p class="text-muted -text-1">{{ $t('components.stakeTable.noLiquidStaking') }}</p>
       </div>
-      <h2
-        v-if="isUnstakingAssetExist"
-        class="text-2 font-bold ml-6 cursor-pointer"
-        :class="getTabClass(2)"
-        @click="$emit('selectTab', 2)"
-      >
-        {{ $t('components.stakeTable.unstaking') }}
-        <div class="text-0 font-normal text-muted">
-          <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
-        </div>
-      </h2>
-      <div class="flex items-center justify-center">
-        <div class="ml-4 bg-border rounded-md px-1.5 py-2 flex items-center justify-center">
-          <p class="-text-1">{{ apr === '' ? '--.--' : apr }}% APR</p>
-        </div>
+      <!-- TODO: a separate check for liquid staking? -->
+      <div v-if="denom === 'ucre'" class="flex items-center gap-2 mt-3">
+        <InformationIcon class="w-5 h-5" />
+        <p class="text-muted -text-1">{{ $t('components.stakeTable.noLiquidStaking') }}</p>
       </div>
     </div>
 
@@ -50,7 +52,7 @@ import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import NoticeIcon from '@/components/common/Icons/NoticeIcon.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
