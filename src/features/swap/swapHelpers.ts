@@ -105,7 +105,7 @@ export const getProtocolFromStep = (step: any) => {
 };
 
 export const getProtocolFromRoute = (route: any) => {
-  return route.steps[0]?.protocol ?? route.steps[0]?.data?.pool_id?.split('/')[0];
+  return getProtocolFromStep(route?.steps?.[0]);
 };
 
 export const getCurrentRoute = (context: any) => {
@@ -118,7 +118,7 @@ export const formatProtocolName = (protocol: string) => {
     gravity: 'Gravity Dex',
     crescent: 'Crescent',
   };
-  return protocols[protocol];
+  return protocols[protocol] ?? 'Unknown';
 };
 
 export const isBestRouteSelected = (context: SwapContext) => {
@@ -179,6 +179,28 @@ export const getChainFromDenom = (denom: string, protocol?: string) => {
   return undefined;
 };
 
+/* Aggregate related items into the same array
+ */
+export const chunkBy = <T>(items: T[], fn: (item: T) => any): T[][] => {
+  const chunks: T[][] = [];
+  let chunkValue: unknown;
+
+  items.forEach((item, i) => {
+    const value = fn(item);
+
+    if (value !== chunkValue || i === 0) {
+      chunks.push([]);
+      chunkValue = value;
+    }
+
+    const chunk = chunks[chunks.length - 1];
+
+    chunk.push(item);
+  });
+
+  return chunks;
+};
+
 export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
   const result = context.data.routes[routeIndex]?.steps.map((step) => {
     const data = step.data;
@@ -196,21 +218,9 @@ export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
     };
   });
 
-  // Aggregate related denom steps into the same array
-  const steps = [];
-  let aggregatedIndex = 0;
+  const chunks = chunkBy<any>(result, (item) => item.baseDenomIn);
 
-  for (let index = 0; index < result.length; index++) {
-    if (steps[aggregatedIndex]?.[0]?.baseDenomIn === result[index].baseDenomIn) {
-      steps[aggregatedIndex].push(result[index]);
-    } else {
-      // Start a new array when a denom transition occurs
-      steps[aggregatedIndex] = [result[index]];
-      aggregatedIndex++;
-    }
-  }
-
-  return steps;
+  return chunks;
 };
 
 export const getAvailableAssets = (context: SwapContext) => {

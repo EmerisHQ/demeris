@@ -35,6 +35,7 @@ const { state } = swap.useSwapMachine();
 
 const canShow = computed(() => {
   if (['ready.idle', 'booting'].some(state.value.matches)) return false;
+  if (!state.value.matches('updating') && !getCurrentRoute(state.value.context)) return false;
   return true;
 });
 

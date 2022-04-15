@@ -4,7 +4,6 @@
     :denom="state.context.outputCoin?.denom"
     :chain="state.context.outputCoin?.chain"
     :is-loading-amount="state.matches('updating.routes.input')"
-    :is-loading-chain="state.matches('updating.routes.output')"
     @select="swap.openAssetsMenu('output')"
     @update:input="send({ type: 'OUTPUT.CHANGE_AMOUNT', value: $event })"
   >
