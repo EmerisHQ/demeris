@@ -291,7 +291,7 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[dexChainName.value]['uatom'];
+      return props.fees[dexChainName.value]?.['uatom'];
     });
 
     const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';

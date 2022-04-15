@@ -275,6 +275,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         } catch {
           // Mock fallback
           return [
+            'crescent/ucre',
+            'crescent/ubcre',
+            'crescent/ibc/c4cff46fd6de35ca4cf4ce031e643c8fdc9ba4b99ae598e9b0ed98fe3a2319f9',
             'cosmos-hub/ibc/14F9BC3E44B8A9C1BE1FB08980FAB87034C9905EF17CF2F5008FC085218811CC',
             'cosmos-hub/uatom',
             'osmosis/uosmo',
