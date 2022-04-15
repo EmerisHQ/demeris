@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel flex flex-col">
+  <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel flex flex-col bg-surface dark:bg-fg">
     <template v-if="hasSubmitted">
       <TransactionProcessCreator
         :steps="state.context.data.steps"

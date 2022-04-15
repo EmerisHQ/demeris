@@ -5,6 +5,7 @@
     type="text"
     class="bg-surface -text-1"
     status="normal"
+    :disabled="state.matches('updating')"
   >
     <div v-if="state.matches('updating')" class="flex items-center">
       <div class="absolute" style="transform: scale(0.4) translateX(-2.4rem)">

@@ -22,7 +22,9 @@
 
         <template v-for="(step, stepIndex) in steps" :key="stepIndex">
           <dd class="timeline-sub-item flex items-center space-x-4 -text-1">
-            <div class="rounded-full bg-bg flex items-center justify-center w-8 h-8 border-2 border-border">
+            <div
+              class="rounded-full bg-surface dark:bg-fg-solid flex items-center justify-center w-8 h-8 border-2 border-border"
+            >
               <Icon v-if="step.type === 'pool'" class="relative" name="DaggSwapLRIcon" :icon-size="1" />
               <Icon v-else-if="step.type === 'ibc'" class="relative" name="DaggArrowRightIcon" :icon-size="1" />
             </div>
