@@ -17,7 +17,7 @@
       v-if="isQuotesListModalOpen"
       :routes="daggRoutes"
       :selected-quote-index="selectedQuoteIndex"
-      :type-changed="typeChanged"
+      :show-pay-denom-quotes="showPayDenomQuotes"
       @selectedQuoteIndex="(e) => selectedQuoteIndexEvent(e)"
       @goback="quotesListModalToggle"
     />
@@ -88,7 +88,7 @@
         :is-over="data?.isOver"
         :is-default-state="isDefaultState"
         :is-amount-loading="isPayAmountLoading"
-        @change="setCounterPairCoinAmount"
+        @change="debouncedSetCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -172,7 +172,7 @@
         :assets="assetsToReceive"
         :is-default-state="isDefaultState"
         :is-amount-loading="isReceiveAmountLoading"
-        @change="setCounterPairCoinAmount"
+        @change="debouncedSetCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -204,6 +204,7 @@
 </template>
 <script lang="ts" setup>
 import { EmerisAPI } from '@emeris/types';
+import { useDebounceFn } from '@vueuse/core';
 import axios from 'axios';
 import { computed, onUnmounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -246,7 +247,7 @@ const daggRoutes = ref(null);
 const setIntervalId = ref(null);
 const txFee = ref(0);
 const slippage = ref(0);
-const typeChanged = ref('Pay');
+const showPayDenomQuotes = ref(false);
 const { isOpen, toggleModal: reviewModalToggle } = useModal();
 const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
 const { isOpen: isQuotesListModalOpen, toggleModal: quotesListModalToggle } = useModal();
@@ -654,7 +655,7 @@ async function getRoutes({ denomIn, denomOut, amountIn, amountOut, chainIn, chai
 }
 
 async function setCounterPairCoinAmount(e) {
-  typeChanged.value = e.includes('Receive') ? 'Receive' : 'Pay';
+  showPayDenomQuotes.value = e.includes('Receive');
   if (data.isBothSelected && (!!data.payCoinAmount || !!data.receiveCoinAmount)) {
     selectedQuoteIndex.value = 0;
     if (e.includes('Pay') && !!data.payCoinAmount) {
@@ -712,6 +713,8 @@ async function setCounterPairCoinAmount(e) {
   }
 }
 
+const debouncedSetCounterPairCoinAmount = useDebounceFn((e) => setCounterPairCoinAmount(e), 300, { maxWait: 1500 });
+
 async function swap() {
   event('review_tx', { event_label: 'Reviewing swap tx', event_category: 'transactions' });
   reviewModalToggle();
@@ -735,7 +738,7 @@ function selectedQuoteIndexEvent(index) {
   selectedQuoteIndex.value = index;
   isQuotesListModalOpen.value = !isQuotesListModalOpen.value;
   const numberOfSteps = daggRoutes.value[index]?.steps.length;
-  if (typeChanged.value === 'Receive') {
+  if (showPayDenomQuotes.value) {
     if (daggRoutes.value[index]?.steps[0]?.data?.from?.amount) {
       data.payCoinAmount = (daggRoutes.value[index]?.steps[0]?.data?.from?.amount / 10 ** fromPrecision.value)?.toFixed(
         4,

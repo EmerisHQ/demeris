@@ -67,8 +67,8 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  typeChanged: {
-    type: String,
+  showPayDenomQuotes: {
+    type: Boolean,
   },
 });
 
@@ -106,7 +106,7 @@ const routesTransformedToQuotes = computed(() => {
     routeObj.numberOfTransactions = numberOfSteps;
     routeObj.usdAmount = getDisplayPrice((route as any).steps[numberOfSteps - 1].data.to.denom, routeObj.amount).value;
     //fee token when?
-    if (props?.typeChanged === 'Receive') {
+    if (props?.showPayDenomQuotes) {
       routeObj.amount = (
         (route as any).steps[0].data.from.amount /
         (10 **
