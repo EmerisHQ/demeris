@@ -1,20 +1,20 @@
 <template>
-  <Button
+  <button
     v-if="maxAmount"
-    :class="{ 'text-negative-text': state.matches('ready.invalid.overMax') }"
-    variant="link"
-    size="sm"
+    class="-text-1 hover:text-link transition-colors"
+    :class="{
+      'text-negative-text': state.matches('ready.invalid.overMax'),
+    }"
     @click="handleClick"
   >
     Max <AmountDisplay :amount="maxAmount" />
-  </Button>
+  </button>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import Button from '@/components/ui/Button.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { amountToHuman, getMaxInputAmount } from '../../swapHelpers';

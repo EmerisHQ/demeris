@@ -4,7 +4,7 @@
       <div class="flex items-start text-muted mb-1">
         <!-- TODO: handle case when 1 exchange is searched. (without the s) -->
         {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }}
-        <StarIcon class="ml-auto" />
+        <StarIcon class="ml-auto text-[1rem]" />
       </div>
       <div class="font-medium text-0">
         {{ $t('components.bestPrice.bestPriceFrom') }} <span class="text-positive-text capitalize">{{ dex }}</span>
@@ -13,12 +13,12 @@
     <hr class="border-border" />
     <div class="px-5 pt-4 pb-5">
       <div class="flex text-muted mb-3">
-        {{ $t('components.bestPrice.expectedRate')
-        }}<span class="ml-auto text-text font-medium">~{{ expectedRate }} {{ denom }}</span>
+        {{ $t('components.bestPrice.expectedRate') }}
+        <span class="ml-auto text-text font-medium">~<AmountDisplay :amount="expectedAmount" /></span>
       </div>
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.limitPrice')
-        }}<span class="ml-auto text-text font-medium">~{{ limitPrice }} {{ denom }}</span>
+        }}<span class="ml-auto text-text font-medium">~<AmountDisplay :amount="limitAmount" /></span>
       </div>
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.maxSlippage')
@@ -26,15 +26,19 @@
       </div>
       <div class="flex text-muted">
         {{ $t('components.bestPrice.minReceived') }}<br />{{ $t('components.bestPrice.fullSwapped')
-        }}<span class="ml-auto text-text font-medium"> {{ minReceived }} {{ denom }}</span>
+        }}<span class="ml-auto text-text font-medium"> <AmountDisplay :amount="minAmount" /></span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import StarIcon from '@/components/common/Icons/StarIcon.vue';
+
+import { amountToUnit } from '../swapHelpers';
+
 // eslint-disable-next-line
 const props = defineProps({
   numberOfExchangesSearched: {
@@ -50,7 +54,7 @@ const props = defineProps({
     required: true,
   },
   limitPrice: {
-    type: [Number, String],
+    type: String,
     required: true,
   },
   maxSlippage: {
@@ -66,6 +70,8 @@ const props = defineProps({
     required: true,
   },
 });
-// eslint-disable-next-line
-const { t } = useI18n({ useScope: 'global' });
+
+const expectedAmount = computed(() => amountToUnit({ amount: props.expectedRate, denom: props.denom }));
+const limitAmount = computed(() => amountToUnit({ amount: props.limitPrice, denom: props.denom }));
+const minAmount = computed(() => amountToUnit({ amount: props.minReceived, denom: props.denom }));
 </script>

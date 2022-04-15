@@ -201,7 +201,22 @@ export const chunkBy = <T>(items: T[], fn: (item: T) => any): T[][] => {
   return chunks;
 };
 
-export const getRouteDetails = (context: SwapContext, routeIndex: number) => {
+export const countChainsFromRoute = (context: SwapContext, routeIndex: number) => {
+  const route = context.data.routes[routeIndex];
+  if (!route) return;
+
+  const chains = [];
+  for (const details of getDetailsFromRoute(context, routeIndex)) {
+    for (const item of details) {
+      if (chains.includes(item.chainIn)) continue;
+      chains.push(item.chainIn);
+    }
+  }
+
+  return chains.length;
+};
+
+export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) => {
   const result = context.data.routes[routeIndex]?.steps.map((step) => {
     const data = step.data;
     const chainIn = getChainFromDenom(data.from.denom) ?? getChainFromProtocol(step.protocol);

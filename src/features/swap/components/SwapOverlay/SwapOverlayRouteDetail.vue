@@ -6,7 +6,9 @@
         <Icon name="CloseIcon" :icon-size="1.5" />
       </Button>
     </template>
-    <template #caption>{{ selectedRoute.steps.length }} transactions</template>
+    <template #caption>
+      {{ selectedRoute.steps.length }} transactions across {{ countChainsFromRoute(state.context, routeIndex) }} chains
+    </template>
 
     <dl class="timeline-container relative space-y-5 mt-2">
       <template v-for="(steps, index) in routeDetail" :key="index">
@@ -52,7 +54,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-import { formatProtocolName, getProtocolFromStep, getRouteDetails } from '../../swapHelpers';
+import { countChainsFromRoute, formatProtocolName, getDetailsFromRoute, getProtocolFromStep } from '../../swapHelpers';
 import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
@@ -63,7 +65,7 @@ const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
 
 const selectedRoute = computed(() => state.value.context.data.routes[props.routeIndex]);
-const routeDetail = computed(() => getRouteDetails(state.value.context, props.routeIndex));
+const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 </script>
 
 <style lang="postcss" scoped>
