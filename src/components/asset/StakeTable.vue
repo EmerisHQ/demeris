@@ -21,6 +21,7 @@ import StakeTableContents from '@/components/asset/StakeTableContents.vue';
 import StakeTableTitle from '@/components/asset/StakeTableTitle.vue';
 import AsyncBoundary from '@/components/common/AsyncBoundary.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking, { StakingRewards } from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event } from '@/utils/analytics';
@@ -32,10 +33,11 @@ const selectedTab = ref<number>(1);
 const props = defineProps<{ denom: string }>();
 const { getStakingRewardsByBaseDenom } = useStaking();
 const { stakingBalancesByChain } = useAccount();
+const { getChainNameByBaseDenomFromStore } = useChains();
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  const chainName = getChainNameByBaseDenomFromStore(props.denom);
+  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const showStakingBanner = computed(() => {

@@ -163,6 +163,7 @@ import DropdownMenu from '@/components/ui/DropdownMenu.vue';
 import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
@@ -179,6 +180,8 @@ const assetStakingAPY = ref<number | string>('-');
 const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
+
+const { getChainNameByBaseDenomFromStore } = useChains();
 
 watch(
   () => propsRef.denom.value,
@@ -198,24 +201,21 @@ const assetPrecision = computed(() => {
     }) ?? 6
   );
 });
+
+const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 const getTimeToString = (isodate: string) => {
   return dayjs().to(dayjs(isodate));
 };
 const unbondingBalances = computed(() => {
-  return unbondingDelegationsByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  );
+  return unbondingDelegationsByChain(chainName);
 });
 const operator_prefix = computed(() => {
   return store.getters[GlobalGetterTypes.API.getBech32Config]({
-    chain_name: store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({
-      denom: propsRef.denom.value,
-    }),
+    chain_name: chainName,
   }).val_addr;
 });
 

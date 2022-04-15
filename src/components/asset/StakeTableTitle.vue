@@ -57,6 +57,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
@@ -72,10 +73,12 @@ const apr = ref<string>('');
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
 const store = useStore() as RootStoreTyped;
+const { getChainNameByBaseDenomFromStore } = useChains();
+
+const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const assetPrecision = computed(() => {
@@ -86,22 +89,18 @@ const assetPrecision = computed(() => {
   );
 });
 
-const chainName = computed(() => {
-  return store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value });
-});
-
 watch(
-  () => chainName.value,
+  () => chainName,
   async () => {
-    const ret = await getStakingAPR(chainName.value);
+    const ret = await getStakingAPR(chainName);
     apr.value = ret;
   },
   { immediate: true },
 );
 
 const unbondingBalances = computed(() => {
-  if (!chainName.value) return;
-  return unbondingDelegationsByChain(chainName.value);
+  if (!chainName) return;
+  return unbondingDelegationsByChain(chainName);
 });
 
 const showStakingButton = computed(() => {

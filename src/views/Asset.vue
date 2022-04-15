@@ -166,13 +166,6 @@
           <DexSwap :default-asset="nativeAsset" />
         </FeatureRunningConditional>
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <!-- Deliberately commented out - we're placing this back soon with APR
-        <StakingBanner
-          v-else-if="isStakingRunning"
-          :display-denom="nativeAsset.displayName"
-          :base-denom="nativeAsset.base_denom"
-          class="mt-4"
-        /> -->
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
@@ -187,7 +180,6 @@ import { useStore } from 'vuex';
 
 import StakeTable from '@/components/asset/StakeTable.vue';
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
-// import StakingBanner from '@/components/banners/StakingBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
@@ -216,7 +208,6 @@ export default defineComponent({
   name: 'Asset',
 
   components: {
-    // StakingBanner,
     AmountDisplay,
     ChainName,
     Denom,
