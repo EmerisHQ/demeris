@@ -80,7 +80,7 @@ const swap = useSwapStore();
 
 const { state } = swap.useSwapMachine();
 
-const isLoadingCoin = computed(() => state.value.matches('booting'));
+const isLoadingCoin = computed(() => ['booting', 'idle'].some(state.value.matches));
 
 const value = computed<string>({
   get() {

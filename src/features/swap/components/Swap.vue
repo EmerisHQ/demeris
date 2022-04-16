@@ -32,7 +32,7 @@
       <Button
         v-else
         :status="state.matches('ready.submitting') ? 'loading' : 'active'"
-        :disabled="['ready.invalid', 'ready.idle', 'booting'].some(state.matches)"
+        :disabled="!state.can('SUBMIT')"
         @click="send('SUBMIT')"
       >
         Swap
@@ -46,6 +46,7 @@
 </template>
 
 <script lang="ts" setup>
+import { whenever } from '@vueuse/core';
 import { useMachine } from '@xstate/vue';
 import { computed, nextTick, watch } from 'vue';
 
@@ -65,12 +66,35 @@ import SwapOverlayAssets from './SwapOverlay/SwapOverlayAssets.vue';
 import SwapOverlayRoutes from './SwapOverlay/SwapOverlayRoutes.vue';
 import SwapOverlaySettings from './SwapOverlay/SwapOverlaySettings.vue';
 
-const props = defineProps(['defaultDenom']);
+const props = defineProps(['canStart', 'defaultDenom']);
 const globalStore = useStore();
 const swapStore = useSwapStore();
 
-const { balances, allLoaded } = useAccount();
+const { balances, isValidatingBalances } = useAccount();
+
+const isBalancesLoaded = computed(() => {
+  return globalStore.getters[GlobalGetterTypes.USER.isAllBalancesLoaded] && !isValidatingBalances.value;
+});
+const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
+const hasSubmitted = computed(() => state.value.matches('submitted'));
+
+const setAllBalances = async () => {
+  if (!isBalancesLoaded.value) return;
+  if (!state.value.can({ type: 'BALANCES.SET' })) return;
+
+  await nextTick();
+  send({ type: 'BALANCES.SET', balances: balances.value });
+};
+
+const startMachine = () => {
+  if (!state.value.can('START')) return;
+  send('START');
+};
+
 const { state, send, service } = useMachine(swapMachine, {
+  context: {
+    defaultInputDenom: props.defaultDenom,
+  },
   services: {
     getAvailableDenoms: () => swapStore.syncAvailableDenoms(),
   },
@@ -78,20 +102,6 @@ const { state, send, service } = useMachine(swapMachine, {
 
 swapStore.setService(service);
 
-const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
-const hasSubmitted = computed(() => state.value.matches('submitted'));
-
-const _updateStateWhenBalancesChanges = watch(
-  () => [balances, allLoaded],
-  async () => {
-    if (!allLoaded.value) return;
-    if (!state.value.can({ type: 'BALANCES.SET', balances: [] })) return;
-
-    await nextTick();
-
-    send({ type: 'BALANCES.SET', balances: balances.value });
-    send({ type: 'INPUT.SET_DEFAULT_DENOM', value: props.defaultDenom });
-  },
-  { deep: true, immediate: true },
-);
+watch([isBalancesLoaded, balances], setAllBalances, { immediate: true, deep: true });
+whenever(() => props.canStart, startMachine, { immediate: true });
 </script>

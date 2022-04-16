@@ -25,6 +25,7 @@ export default function useAccount() {
 
   const redeemableBalances = ref([]);
   const balances = ref(allbalances.value);
+  const isValidatingBalances = ref(false);
   /*
   watch(
     () => allbalances.value,
@@ -40,12 +41,14 @@ export default function useAccount() {
   watch(
     () => allbalances.value,
     async (newBalances) => {
+      isValidatingBalances.value = true;
       const result = await validBalances(newBalances);
       balances.value = result.sort((a, b) => {
         const coinA = parseCoins(a.amount)[0];
         const coinB = parseCoins(b.amount)[0];
         return +coinB.amount - +coinA.amount;
       });
+      isValidatingBalances.value = false;
     },
     { immediate: true },
   );
@@ -177,5 +180,6 @@ export default function useAccount() {
     allLoaded,
     unbondingDelegations,
     unbondingDelegationsByChain,
+    isValidatingBalances,
   };
 }

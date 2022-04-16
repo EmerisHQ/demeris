@@ -58,6 +58,7 @@ export const useSwapStore = defineStore('swap', {
 
       const data = await logic.fetchAvailableDenoms();
       this.sync.availableDenoms = data;
+      return data;
     },
 
     useSwapMachine() {

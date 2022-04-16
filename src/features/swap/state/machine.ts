@@ -46,23 +46,23 @@ const defaultContext = (): SwapContext => ({
 
 export type SwapEvents =
   | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'INPUT.SET_DEFAULT_DENOM'; value: string }
   | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
-  | { type: 'BALANCES.SET'; balances: EmerisAPI.Balances }
+  | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
   | { type: 'ROUTE.SELECT_INDEX'; value: number }
   | { type: 'STEPS.CLEAR' }
   | { type: 'COINS.SWITCH' }
   | { type: 'INVALID.OVER_MAX' }
   | { type: 'INVALID.BELOW_MIN' }
+  | { type: 'START' }
   | { type: 'RESET' }
   | { type: 'SUBMIT' };
 
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
     id: 'swap',
-    initial: 'booting',
+    initial: 'idle',
     context: defaultContext(),
     on: {
       'INPUT.CHANGE_COIN': [
@@ -97,6 +97,11 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       },
     },
     states: {
+      idle: {
+        on: {
+          START: 'booting',
+        },
+      },
       booting: {
         type: 'parallel',
         states: {
@@ -107,9 +112,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
                 on: {
                   'BALANCES.SET': {
                     actions: 'assignBalances',
-                  },
-                  'INPUT.SET_DEFAULT_DENOM': {
-                    actions: 'assignDefaultInputDenom',
                     target: 'success',
                   },
                 },
@@ -268,7 +270,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       handleSubmit: async (context) => {
         return Promise.resolve(logic.convertRouteToSteps(context, context.selectedRouteIndex));
       },
-      getAvailableDenoms: async () => logic.fetchAvailableDenoms(),
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
     },

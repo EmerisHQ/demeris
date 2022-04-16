@@ -1,5 +1,5 @@
 <template>
-  <Swap :key="userCorrelationId" :default-denom="defaultDenom" />
+  <Swap :key="userCorrelationId" :default-denom="defaultDenom" :can-start="!!userCorrelationId" />
 </template>
 
 <script lang="ts" setup>
