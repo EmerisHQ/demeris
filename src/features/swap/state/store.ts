@@ -1,6 +1,7 @@
 import { useActor } from '@xstate/vue';
 import { defineStore } from 'pinia';
 
+import * as logic from '../logic';
 import { SwapService } from './machine';
 
 interface SwapStoreState {
@@ -8,6 +9,9 @@ interface SwapStoreState {
   shownSettings: boolean;
   shownRoutes: boolean;
   service: SwapService;
+  sync: {
+    availableDenoms: string[];
+  };
 }
 
 export const useSwapStore = defineStore('swap', {
@@ -17,6 +21,9 @@ export const useSwapStore = defineStore('swap', {
       shownSettings: false,
       shownRoutes: false,
       service: undefined,
+      sync: {
+        availableDenoms: [],
+      },
     } as SwapStoreState),
 
   getters: {
@@ -42,6 +49,15 @@ export const useSwapStore = defineStore('swap', {
 
     toggleRoutes() {
       this.shownRoutes = !this.shownRoutes;
+    },
+
+    async syncAvailableDenoms() {
+      if (this.sync.availableDenoms.length > 0) {
+        return this.sync.availableDenoms;
+      }
+
+      const data = await logic.fetchAvailableDenoms();
+      this.sync.availableDenoms = data;
     },
 
     useSwapMachine() {

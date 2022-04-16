@@ -13,7 +13,7 @@
     <div v-else class="flex flex-col justify-between space-y-8 flex-1 p-6">
       <div class="flex items-center justify-between">
         <h2 class="text-2 font-bold">{{ $t('components.swap.title') }}</h2>
-        <Button variant="link" rounded :click-function="swap.toggleSettings">
+        <Button variant="link" rounded :click-function="swapStore.toggleSettings">
           <Icon name="ThreeDotsIcon" :icon-size="1.5" />
         </Button>
       </div>
@@ -67,12 +67,16 @@ import SwapOverlaySettings from './SwapOverlay/SwapOverlaySettings.vue';
 
 const props = defineProps(['defaultDenom']);
 const globalStore = useStore();
-const swap = useSwapStore();
+const swapStore = useSwapStore();
 
 const { balances, allLoaded } = useAccount();
-const { state, send, service } = useMachine(swapMachine);
+const { state, send, service } = useMachine(swapMachine, {
+  services: {
+    getAvailableDenoms: () => swapStore.syncAvailableDenoms(),
+  },
+});
 
-swap.setService(service);
+swapStore.setService(service);
 
 const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
 const hasSubmitted = computed(() => state.value.matches('submitted'));
