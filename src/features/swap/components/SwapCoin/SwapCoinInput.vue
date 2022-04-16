@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useSwapStore } from '../../swapStore';
+import { useSwapStore } from '@/features/swap/state';
+
 import SwapButtonMax from '../SwapButton/SwapButtonMax.vue';
 import SwapCoin from './SwapCoin.vue';
 

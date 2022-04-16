@@ -37,7 +37,6 @@
 import { computed } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
-
 import {
   countExchangesFromRoutes,
   formatProtocolName,
@@ -46,8 +45,9 @@ import {
   getOrderPrice,
   getProtocolFromRoute,
   isBestRouteSelected,
-} from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
+} from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
+
 import SwapBestPriceDetails from '../SwapBestPriceDetails.vue';
 import SwapCoin from './SwapCoin.vue';
 

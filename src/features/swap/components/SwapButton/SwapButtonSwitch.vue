@@ -15,8 +15,7 @@
 
 <script lang="ts" setup>
 import IconButton from '@/components/ui/IconButton.vue';
-
-import { useSwapStore } from '../../swapStore';
+import { useSwapStore } from '@/features/swap/state';
 
 const swap = useSwapStore();
 const { state, send } = swap.useSwapMachine();

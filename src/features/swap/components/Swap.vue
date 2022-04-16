@@ -52,12 +52,11 @@ import { computed, nextTick, watch } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { swapMachine, useSwapStore } from '@/features/swap/state';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
-import { swapMachine } from '../swapMachine';
-import { useSwapStore } from '../swapStore';
 import SwapButtonRoute from './SwapButton/SwapButtonRoute.vue';
 import SwapButtonSwitch from './SwapButton/SwapButtonSwitch.vue';
 import SwapCoinInput from './SwapCoin/SwapCoinInput.vue';

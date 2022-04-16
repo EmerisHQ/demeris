@@ -26,9 +26,8 @@ import { computed } from 'vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-
-import { formatProtocolName, getChainFromProtocol, getCurrentRoute, getProtocolFromRoute } from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
+import { formatProtocolName, getChainFromProtocol, getCurrentRoute, getProtocolFromRoute } from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
 
 const swap = useSwapStore();
 

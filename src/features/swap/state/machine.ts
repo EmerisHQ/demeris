@@ -5,16 +5,7 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 
 import { Step } from '@/types/actions';
 
-import {
-  amountToHuman,
-  amountToUnit,
-  convertRouteToSteps,
-  getDefaultInputCoin,
-  getInputAmountFromRoute,
-  getMaxInputAmount,
-  getMinInputValue,
-  getOutputAmountFromRoute,
-} from './swapHelpers';
+import * as logic from '../logic';
 
 interface SwapContextData {
   availableDenoms: string[];
@@ -263,20 +254,20 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
     services: {
       performValidation: (context) => (send) => {
-        const { amount } = amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom });
+        const { amount } = logic.amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom });
 
-        if (new BigNumber(amount).isGreaterThan(getMaxInputAmount(context)?.amount)) {
+        if (new BigNumber(amount).isGreaterThan(logic.getMaxInputAmount(context)?.amount)) {
           return send('INVALID.OVER_MAX');
         }
 
-        if (new BigNumber(amount).isLessThan(getMinInputValue())) {
+        if (new BigNumber(amount).isLessThan(logic.getMinInputValue())) {
           return send('INVALID.BELOW_MIN');
         }
 
         return Promise.resolve(true);
       },
       handleSubmit: async (context) => {
-        return Promise.resolve(convertRouteToSteps(context, context.selectedRouteIndex));
+        return Promise.resolve(logic.convertRouteToSteps(context, context.selectedRouteIndex));
       },
       getAvailableDenoms: async () => {
         try {
@@ -348,7 +339,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           chainOut: context.outputCoin.chain,
           denomIn: context.inputCoin.denom,
           denomOut: context.outputCoin.denom,
-          amountOut: amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.denom }).amount,
+          amountOut: logic.amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.denom }).amount,
         });
         return data.routes;
       },
@@ -358,7 +349,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           chainOut: context.outputCoin.chain,
           denomIn: context.inputCoin.denom,
           denomOut: context.outputCoin.denom,
-          amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom }).amount,
+          amountIn: logic.amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom }).amount,
         });
         return data.routes;
       },
@@ -438,8 +429,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             return '0';
           }
 
-          const expectedAmount = getInputAmountFromRoute(context);
-          return amountToHuman(expectedAmount)?.amount;
+          const expectedAmount = logic.getInputAmountFromRoute(context);
+          return logic.amountToHuman(expectedAmount)?.amount;
         },
       }),
       updateOutputAmountFromRoute: assign({
@@ -448,12 +439,12 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             return '0';
           }
 
-          const expectedAmount = getOutputAmountFromRoute(context);
-          return amountToHuman(expectedAmount)?.amount;
+          const expectedAmount = logic.getOutputAmountFromRoute(context);
+          return logic.amountToHuman(expectedAmount)?.amount;
         },
       }),
       loadDefaultInputCoin: assign((context) => ({
-        inputCoin: getDefaultInputCoin(context),
+        inputCoin: logic.getDefaultInputCoin(context),
       })),
     },
     guards: {

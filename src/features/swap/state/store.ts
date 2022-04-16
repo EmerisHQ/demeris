@@ -1,7 +1,7 @@
 import { useActor } from '@xstate/vue';
 import { defineStore } from 'pinia';
 
-import { SwapService } from './swapMachine';
+import { SwapService } from './machine';
 
 interface SwapStoreState {
   selectAssetType: string;

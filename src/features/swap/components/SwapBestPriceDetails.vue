@@ -36,8 +36,7 @@ import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import StarIcon from '@/components/common/Icons/StarIcon.vue';
-
-import { amountToUnit } from '../swapHelpers';
+import { amountToUnit } from '@/features/swap/logic';
 
 // eslint-disable-next-line
 const props = defineProps({

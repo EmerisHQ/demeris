@@ -61,10 +61,9 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { amountToUnit } from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
-
-import { amountToUnit } from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
 
 interface Props {
   chain?: string;

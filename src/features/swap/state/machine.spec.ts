@@ -2,7 +2,7 @@ import { waitFor } from '@testing-library/vue';
 import { interpret } from 'xstate';
 import { SimulatedClock } from 'xstate/lib/SimulatedClock';
 
-import { swapMachine } from './swapMachine';
+import { swapMachine } from './machine';
 
 it('should refetch routes when update input token', async () => {
   const service = interpret(swapMachine).start();

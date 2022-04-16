@@ -55,9 +55,14 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import {
+  countChainsFromRoute,
+  formatProtocolName,
+  getDetailsFromRoute,
+  getProtocolFromStep,
+} from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
 
-import { countChainsFromRoute, formatProtocolName, getDetailsFromRoute, getProtocolFromStep } from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
 const props = defineProps<{ routeIndex: number }>();

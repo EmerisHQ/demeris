@@ -49,8 +49,8 @@ import { useToggle } from '@vueuse/core';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { useSwapStore } from '@/features/swap/state';
 
-import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 
 const swap = useSwapStore();

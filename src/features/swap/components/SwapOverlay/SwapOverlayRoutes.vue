@@ -52,10 +52,10 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { formatProtocolName, getOutputAmountFromRoute, getProtocolFromRoute } from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { formatProtocolName, getOutputAmountFromRoute, getProtocolFromRoute } from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayRouteDetail from './SwapOverlayRouteDetail.vue';
 

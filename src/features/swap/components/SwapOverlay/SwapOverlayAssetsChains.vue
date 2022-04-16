@@ -50,9 +50,9 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { getAvailableChainsByDenom, totalDenomBalance } from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
 
-import { getAvailableChainsByDenom, totalDenomBalance } from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
 

@@ -71,15 +71,15 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { getBaseDenomSync } from '@/utils/actionHandler';
-
 import {
   denomBalancesPerChain,
   getAvailableAssets,
   getAvailableChainsByDenom,
   getDenomFromBaseDenom,
-} from '../../swapHelpers';
-import { useSwapStore } from '../../swapStore';
+} from '@/features/swap/logic';
+import { useSwapStore } from '@/features/swap/state';
+import { getBaseDenomSync } from '@/utils/actionHandler';
+
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayAssetsChains from './SwapOverlayAssetsChains.vue';

@@ -132,7 +132,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
-import { getChainFromProtocol } from '@/features/swap/swapHelpers';
+import { getChainFromProtocol } from '@/features/swap/logic';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
