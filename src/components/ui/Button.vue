@@ -133,6 +133,16 @@ export default defineComponent({
   transition-duration: 0s;
 }
 
+.light .button:disabled {
+  background: rgba(0, 0, 0, 0.33);
+  @apply text-text shadow-none;
+}
+
+.dark .button:disabled {
+  background: rgba(255, 255, 255, 0.44);
+  @apply text-text shadow-none;
+}
+
 .button-link {
   &:before {
     content: '';

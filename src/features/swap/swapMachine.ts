@@ -9,6 +9,7 @@ import {
   amountToHuman,
   amountToUnit,
   convertRouteToSteps,
+  getDefaultInputCoin,
   getInputAmountFromRoute,
   getMaxInputAmount,
   getMinInputValue,
@@ -32,6 +33,7 @@ export interface SwapContext {
   outputCoin?: SwapCoin;
   inputAmount: string;
   outputAmount: string;
+  defaultInputDenom?: string;
   selectedRouteIndex?: number;
   balances: EmerisAPI.Balances;
   data: SwapContextData;
@@ -42,6 +44,7 @@ const defaultContext = (): SwapContext => ({
   outputCoin: undefined,
   inputAmount: undefined,
   outputAmount: undefined,
+  defaultInputDenom: undefined,
   selectedRouteIndex: undefined,
   balances: [],
   data: {
@@ -53,6 +56,7 @@ const defaultContext = (): SwapContext => ({
 
 export type SwapEvents =
   | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
+  | { type: 'INPUT.SET_DEFAULT_DENOM'; value: string }
   | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
@@ -113,6 +117,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
                 on: {
                   'BALANCES.SET': {
                     actions: 'assignBalances',
+                  },
+                  'INPUT.SET_DEFAULT_DENOM': {
+                    actions: 'assignDefaultInputDenom',
                     target: 'success',
                   },
                 },
@@ -141,7 +148,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             },
           },
         },
-        onDone: 'ready',
+        onDone: {
+          target: 'ready',
+          actions: ['loadDefaultInputCoin'],
+        },
       },
       ready: {
         id: 'ready',
@@ -354,6 +364,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       },
     },
     actions: {
+      assignDefaultInputDenom: assign({
+        defaultInputDenom: (_, event: any) => event.value,
+      }),
       assignBalances: assign((_, event: any) => ({ balances: event.balances })),
       assignAvailableDenoms: assign((context, event: any) => ({
         data: {
@@ -439,6 +452,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           return amountToHuman(expectedAmount)?.amount;
         },
       }),
+      loadDefaultInputCoin: assign((context) => ({
+        inputCoin: getDefaultInputCoin(context),
+      })),
     },
     guards: {
       hasInputParams: (context) => context.inputCoin?.denom && !!context.inputAmount,

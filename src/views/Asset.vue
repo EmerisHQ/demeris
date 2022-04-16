@@ -159,12 +159,7 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <FeatureRunningConditional name="DEX_AGG">
-          <template #deactivated>
-            <LiquiditySwap :default-asset="nativeAsset" />
-          </template>
-          <DexSwap :default-asset="nativeAsset" />
-        </FeatureRunningConditional>
+        <SwapMultiDex :default-denom="denom" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <!-- Deliberately commented out - we're placing this back soon with APR
         <StakingBanner
@@ -195,15 +190,13 @@ import ChainName from '@/components/common/ChainName.vue';
 import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
-import DexSwap from '@/components/swap/DexSwap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
+import SwapMultiDex from '@/features/swap/SwapMultiDex.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
@@ -225,15 +218,13 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    LiquiditySwap,
     Pools,
     TooltipPools,
     PoolBanner,
     BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
-    DexSwap,
-    FeatureRunningConditional,
+    SwapMultiDex,
   },
 
   setup() {

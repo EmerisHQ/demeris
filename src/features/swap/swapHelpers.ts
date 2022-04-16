@@ -10,7 +10,7 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
-import { SwapContext } from './swapMachine';
+import { SwapCoin, SwapContext } from './swapMachine';
 
 export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
@@ -129,6 +129,7 @@ export const getChainFromProtocol = (protocol: string) => {
   const protocols = {
     osmosis: 'osmosis',
     gravity: 'cosmos-hub',
+    crescent: 'crescent',
   };
   return protocols[protocol];
 };
@@ -341,12 +342,7 @@ export const getOrderPrice = (context: SwapContext) => {
 };
 
 export const getLimitPrice = (context: SwapContext) => {
-  const precision =
-    useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: context.outputCoin.baseDenom }) ?? 6;
-  return new BigNumber(getOrderPrice(context))
-    .multipliedBy(1 - 0.005)
-    .decimalPlaces(precision)
-    .toString();
+  return new BigNumber(getOrderPrice(context)).multipliedBy(1 - 0.005).toString();
 };
 
 export const countExchangesFromRoutes = (context: SwapContext) => {
@@ -359,4 +355,28 @@ export const countExchangesFromRoutes = (context: SwapContext) => {
   }
 
   return protocols.length;
+};
+
+export const getDefaultInputCoin = (context: SwapContext) => {
+  let coin: SwapCoin;
+  const availableAssets = getAvailableDenoms(context);
+  const defaultDenom = context.defaultInputDenom;
+
+  if (defaultDenom) {
+    coin = availableAssets.find((item) => item.denom === defaultDenom);
+
+    if (!coin) {
+      coin = availableAssets.find((item) => item.baseDenom === defaultDenom);
+    }
+  }
+
+  if (!coin) {
+    coin = {
+      denom: 'uatom',
+      chain: 'cosmos-hub',
+      baseDenom: 'uatom',
+    };
+  }
+
+  return coin;
 };
