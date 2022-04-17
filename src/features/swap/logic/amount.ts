@@ -46,7 +46,7 @@ export const getMinInputValue = () => {
 };
 
 export const amountToHuman = ({ amount, denom }: EmerisBase.Amount) => {
-  const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+  const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: getBaseDenomSync(denom) }) ?? 6;
   return {
     amount: new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString(),
     denom,
@@ -54,7 +54,7 @@ export const amountToHuman = ({ amount, denom }: EmerisBase.Amount) => {
 };
 
 export const amountToUnit = ({ amount, denom }: EmerisBase.Amount) => {
-  const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+  const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: getBaseDenomSync(denom) }) ?? 6;
   const amountBN = new BigNumber(amount);
 
   const value = amountBN.isPositive() ? new BigNumber(amount).shiftedBy(precision) : 0;

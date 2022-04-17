@@ -71,6 +71,13 @@ export const chunkBy = <T>(items: T[], fn: (item: T) => any): T[][] => {
   return chunks;
 };
 
+export const countTransactiosnFromRoute = (context: SwapContext, routeIndex: number) => {
+  const route = context.data.routes[routeIndex];
+  if (!route) return;
+
+  return route.steps.length;
+};
+
 export const countChainsFromRoute = (context: SwapContext, routeIndex: number) => {
   const route = context.data.routes[routeIndex];
   if (!route) return;
@@ -162,7 +169,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
             data: {
               from: {
                 amount: step.data.from.amount,
-                denom: formatToValidDeno(step.data.from.denom),
+                denom: formatToValidDenom(step.data.from.denom),
               },
               to: {
                 amount: step.data.to.amount,

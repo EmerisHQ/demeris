@@ -11,7 +11,7 @@
     <template #header>
       <div
         v-if="isBestRouteSelected(state.context)"
-        class="flex ml-auto font-normal text-muted -text-1 no-default-tippy-padding"
+        class="flex ml-auto font-normal text-muted -text-1 no-default-tippy-padding hover:text-link transition-colors"
       >
         <tippy class="ml-auto" placement="bottom-start" delay="0" :interactive="true" :arrow="false">
           <span class="flex items-center">Best price <Icon class="ml-1.5" name="StarIcon" :icon-size="0.875" /></span>

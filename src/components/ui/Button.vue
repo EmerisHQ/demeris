@@ -133,12 +133,12 @@ export default defineComponent({
   transition-duration: 0s;
 }
 
-.light .button:disabled {
+.light .button:not(.loading):disabled {
   background: rgba(0, 0, 0, 0.33);
   @apply text-text shadow-none;
 }
 
-.dark .button:disabled {
+.dark .button:not(.loading):disabled {
   background: rgba(255, 255, 255, 0.44);
   @apply text-text shadow-none;
 }

@@ -255,7 +255,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
     services: {
       performValidation: (context) => (send) => {
-        const { amount } = logic.amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom });
+        const { amount } = logic.amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom });
 
         if (new BigNumber(amount).isGreaterThan(logic.getMaxInputAmount(context)?.amount)) {
           return send('INVALID.OVER_MAX');

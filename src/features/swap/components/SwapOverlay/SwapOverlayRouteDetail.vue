@@ -7,7 +7,8 @@
       </Button>
     </template>
     <template #caption>
-      {{ selectedRoute.steps.length }} transactions across {{ countChainsFromRoute(state.context, routeIndex) }} chains
+      {{ countTransactiosnFromRoute(state.context, routeIndex) }} transactions across
+      {{ countChainsFromRoute(state.context, routeIndex) }} chains
     </template>
 
     <dl class="timeline-container relative space-y-5 mt-2">
@@ -57,6 +58,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
   countChainsFromRoute,
+  countTransactiosnFromRoute,
   formatProtocolName,
   getDetailsFromRoute,
   getProtocolFromStep,
@@ -71,7 +73,6 @@ const emit = defineEmits(['close']);
 const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
 
-const selectedRoute = computed(() => state.value.context.data.routes[props.routeIndex]);
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 </script>
 

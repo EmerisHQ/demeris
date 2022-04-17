@@ -74,8 +74,8 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
     chainOut: context.outputCoin.chain,
     denomIn: context.inputCoin.denom,
     denomOut: context.outputCoin.denom,
-    amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.denom }).amount,
-    amountOut: amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.denom }).amount,
+    amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom }).amount,
+    amountOut: amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.baseDenom }).amount,
   };
 
   if (direction === 'input') payload.amountOut = null;
