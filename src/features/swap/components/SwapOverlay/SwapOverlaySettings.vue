@@ -1,8 +1,8 @@
 <template>
-  <SwapOverlay v-if="swap.shownSettings" @esc="swap.toggleSettings">
+  <SwapOverlay v-if="swapStore.shownSettings" @esc="swapStore.toggleSettings">
     <template #title> Settings </template>
     <template #actions>
-      <Button variant="link" @click="swap.toggleSettings">Done</Button>
+      <Button variant="link" @click="swapStore.toggleSettings">Done</Button>
     </template>
 
     <div class="flex flex-col">
@@ -10,7 +10,10 @@
         <template #handler="{ isOpen, onClick }">
           <button class="w-full py-3 flex justify-between" @click="onClick">
             <span class="transition-all" :class="{ 'font-medium': isOpen }">Slippage tolerance</span>
-            <div>
+            <div class="flex items-center">
+              <span class="mr-3 font-medium transition-opacity duration-300" :class="{ 'opacity-0': isOpen }">
+                {{ slippageValue }}%
+              </span>
               <Icon
                 :name="'CaretDownIcon'"
                 :icon-size="1"
@@ -20,7 +23,9 @@
             </div>
           </button>
         </template>
-        <div class="pb-4">Slippage content</div>
+        <div class="pb-4">
+          <SwapSettingsSlippage />
+        </div>
       </Collapse>
 
       <Collapse :is-open="isExchangesOpen" class="w-full" @update:is-open="toggleExchanges">
@@ -45,16 +50,23 @@
 
 <script lang="ts" setup>
 import { useToggle } from '@vueuse/core';
+import { computed } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useSwapStore } from '@/features/swap/state';
+import { GlobalGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
+import SwapSettingsSlippage from '../SwapSettings/SwapSettingsSlippage.vue';
 import SwapOverlay from './SwapOverlay.vue';
 
-const swap = useSwapStore();
+const swapStore = useSwapStore();
+const globaStore = useStore();
 
 const [isSlippageOpen, toggleSlippage] = useToggle(false);
 const [isExchangesOpen, toggleExchanges] = useToggle(false);
+
+const slippageValue = computed(() => globaStore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5);
 </script>

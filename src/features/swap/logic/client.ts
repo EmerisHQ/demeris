@@ -81,6 +81,6 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
   if (direction === 'input') payload.amountOut = null;
   if (direction === 'output') payload.amountIn = null;
 
-  const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing');
+  const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', payload);
   return data.routes;
 };
