@@ -56,7 +56,7 @@ export default defineComponent({
     const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
-    const { getChainNameByBaseDenomFromStore } = useChains();
+    const { getChainNameByBaseDenom } = useChains();
     const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
 
     const propsRef = toRefs(props);
@@ -80,7 +80,7 @@ export default defineComponent({
     };
     onMounted(async () => {
       const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-      const chainName = getChainNameByBaseDenomFromStore(baseDenom);
+      const chainName = await getChainNameByBaseDenom(baseDenom);
       const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
         reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
         return reward;

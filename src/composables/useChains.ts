@@ -17,10 +17,6 @@ export default function useChains() {
     return chains;
   };
 
-  const getChainNameByBaseDenomFromStore = (baseDenom: string) => {
-    return store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
-  };
-
   const getChainNameByBaseDenom = async (baseDenom: string) => {
     let chain_name = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
     if (!chain_name) {
@@ -55,6 +51,5 @@ export default function useChains() {
   return {
     getChains,
     getChainNameByBaseDenom,
-    getChainNameByBaseDenomFromStore,
   };
 }

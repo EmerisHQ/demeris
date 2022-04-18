@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import { ref, toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed, watch } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -73,12 +73,17 @@ const apr = ref<string>('');
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
 const store = useStore() as RootStoreTyped;
-const { getChainNameByBaseDenomFromStore } = useChains();
+const { getChainNameByBaseDenom } = useChains();
 
-const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
+let chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+  apr.value = await getStakingAPR(chainName.value);
+});
 
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const assetPrecision = computed(() => {
@@ -89,18 +94,9 @@ const assetPrecision = computed(() => {
   );
 });
 
-watch(
-  () => chainName,
-  async () => {
-    const ret = await getStakingAPR(chainName);
-    apr.value = ret;
-  },
-  { immediate: true },
-);
-
 const unbondingBalances = computed(() => {
-  if (!chainName) return;
-  return unbondingDelegationsByChain(chainName);
+  if (!chainName.value) return;
+  return unbondingDelegationsByChain(chainName.value);
 });
 
 const showStakingButton = computed(() => {

@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -111,15 +111,19 @@ const baseDenom = route.params.denom as string;
 const rawValidatorList = ref([]);
 const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator');
 const inModal = ref(undefined);
-const { getChainNameByBaseDenomFromStore } = useChains();
+const { getChainNameByBaseDenom } = useChains();
 
-const chain_name = computed(() => getChainNameByBaseDenomFromStore(baseDenom));
+let chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(baseDenom);
+});
 
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(chain_name.value);
+  return stakingBalancesByChain(chainName.value);
 });
 watch(
-  () => chain_name.value,
+  () => chainName.value,
   async (newVal, _) => {
     if (newVal) {
       rawValidatorList.value = await getValidatorsByBaseDenom(baseDenom);

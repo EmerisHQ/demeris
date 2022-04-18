@@ -13,7 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
@@ -36,12 +36,16 @@ const propsRef = toRefs(props);
 
 const { getStakingRewardsByBaseDenom } = useStaking();
 const { stakingBalancesByChain } = useAccount();
-const { getChainNameByBaseDenomFromStore } = useChains();
+const { getChainNameByBaseDenom } = useChains();
 
-const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
+let chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+});
 
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const showStakingBanner = computed(() => {

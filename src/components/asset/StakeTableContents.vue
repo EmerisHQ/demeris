@@ -150,7 +150,7 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -180,8 +180,9 @@ const assetStakingAPY = ref<number | string>('-');
 const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
+let chainName = ref<string>(null);
 
-const { getChainNameByBaseDenomFromStore } = useChains();
+const { getChainNameByBaseDenom } = useChains();
 
 watch(
   () => propsRef.denom.value,
@@ -194,6 +195,10 @@ watch(
   { immediate: true },
 );
 
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+});
+
 const assetPrecision = computed(() => {
   return (
     store.getters[GlobalGetterTypes.API.getDenomPrecision]({
@@ -202,20 +207,18 @@ const assetPrecision = computed(() => {
   );
 });
 
-const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
-
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 const getTimeToString = (isodate: string) => {
   return dayjs().to(dayjs(isodate));
 };
 const unbondingBalances = computed(() => {
-  return unbondingDelegationsByChain(chainName);
+  return unbondingDelegationsByChain(chainName.value);
 });
 const operator_prefix = computed(() => {
   return store.getters[GlobalGetterTypes.API.getBech32Config]({
-    chain_name: chainName,
+    chain_name: chainName.value,
   }).val_addr;
 });
 

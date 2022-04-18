@@ -37,7 +37,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { displayDenom: 'ATOM', baseDenom: 'uatom' });
 
-const { getChainNameByBaseDenomFromStore } = useChains();
+const { getChainNameByBaseDenom } = useChains();
 const { getChainDisplayInflationByBaseDenom } = useStaking();
 
 let shouldShowBanner = ref<boolean>(false);
@@ -49,7 +49,7 @@ const onBannerClick = () => {
 const propsRef = toRefs(props);
 const apr = ref<string>('');
 
-const chain_name = computed(() => getChainNameByBaseDenomFromStore(propsRef.baseDenom.value));
+const chain_name = computed(() => getChainNameByBaseDenom(propsRef.baseDenom.value));
 
 watch(
   chain_name,
