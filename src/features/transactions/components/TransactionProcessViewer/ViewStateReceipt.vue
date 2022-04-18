@@ -275,12 +275,12 @@ import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
-import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import useDenomsFactory from '@/composables/useDenoms';
+import SwapViewDetails from '@/features/swap/SwapViewDetails.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StepTransaction } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
@@ -320,7 +320,7 @@ const previewComponentMap = {
   IBCtransferBackward: PreviewTransfer,
   IBCtransferForward: PreviewTransfer,
   transfer: PreviewTransfer,
-  swap: PreviewSwap,
+  swap: SwapViewDetails,
   stake: PreviewStake,
   multistake: PreviewStake,
   unstake: PreviewUnstake,

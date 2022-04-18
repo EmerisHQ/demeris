@@ -3,7 +3,9 @@
     <template #handler="{ isOpen, onClick }">
       <button class="w-full py-4 flex justify-between" @click="onClick">
         <span class="transition-all" :class="{ 'font-medium': isOpen }">
-          {{ title }}
+          <slot name="title">
+            <p>{{ title }}</p>
+          </slot>
         </span>
         <div class="flex items-center">
           <span class="mr-3 font-medium transition-opacity duration-300 delay-200" :class="{ 'opacity-0': isOpen }">
@@ -19,7 +21,7 @@
       </button>
     </template>
 
-    <div class="pb-4">
+    <div :class="contentClass">
       <slot />
     </div>
   </Collapse>
@@ -29,5 +31,5 @@
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-defineProps(['title']);
+defineProps(['title', 'contentClass']);
 </script>

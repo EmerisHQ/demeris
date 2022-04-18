@@ -1,28 +1,45 @@
 <template>
   <div class="flex flex-col space-y-2">
     <dl class="grid grid-cols-[auto_1fr] gap-y-6 border-y border-border py-6">
-      <dt class="font-medium">Pay</dt>
+      <dt class="font-medium -text-1">Pay</dt>
       <dd class="place-self-end">
-        <CoinDescription amount="1000" denom="uatom" chain="cosmos-hub" />
+        <CoinDescription
+          :amount="transaction.data.from.amount"
+          :denom="getBaseDenomSync(transaction.data.from.denom)"
+          :chain="transaction.data.chainName"
+        />
       </dd>
       <dt>
-        <span class="font-medium">Receive</span>
+        <span class="font-medium -text-1">Receive</span>
         <div class="-text-1 text-muted">(estimated)</div>
       </dt>
       <dd class="place-self-end">
-        <CoinDescription amount="1000" denom="uosmo" chain="osmosis" />
+        <CoinDescription
+          :amount="transaction.data.to.amount"
+          :denom="getBaseDenomSync(transaction.data.to.denom)"
+          :chain="transaction.data.chainName"
+        />
       </dd>
     </dl>
 
-    <CollapseDescription title="Price" :is-open="true">
-      <template #label> OSMO </template>
+    <CollapseDescription content-class="pb-6" is-open>
+      <template #title><span class="-text-1">Price</span></template>
+      <template #label>
+        <AmountDisplay :amount="inputAmount" /> ≈
+        <AmountDisplay :amount="exchangeAmount" />
+      </template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
         <dt class="text-muted">Exchange</dt>
         <dd class="place-self-end">
           <div class="flex items-center space-x-1">
-            <CircleSymbol :chain-status="false" size="xs" variant="chain" chain-name="osmosis" />
-            <span>{{ formatProtocolName('osmosis') }}</span>
+            <CircleSymbol
+              :chain-status="false"
+              size="xs"
+              variant="chain"
+              :chain-name="getChainFromProtocol(transaction.protocol)"
+            />
+            <span>{{ formatProtocolName(transaction.protocol) }}</span>
           </div>
         </dd>
 
@@ -30,11 +47,34 @@
         <dd class="place-self-end">2 transactions</dd>
 
         <dt class="text-muted">Limit price</dt>
-        <dd class="place-self-end">
-          <div class="text-right">
-            <AmountDisplay :amount="{ amount: '1000', denom: 'uatom' }" /> ≈
-            <AmountDisplay :amount="{ amount: '1000', denom: 'uosmo' }" />
-          </div>
+        <dd class="text-right">
+          <AmountDisplay :amount="inputAmount" /> ≈
+          <AmountDisplay :amount="exchangeAmount" />
+        </dd>
+
+        <dt class="text-muted">
+          Min. received
+          <div>(if 100% swapped)</div>
+        </dt>
+        <dd class="text-right">
+          <AmountDisplay :amount="outputAmount" />
+        </dd>
+      </dl>
+    </CollapseDescription>
+
+    <CollapseDescription content-class="pb-6" is-open>
+      <template #title><span class="-text-1">Fees (included)</span></template>
+      <template #label><AmountDisplay :amount="{ amount: '1000', denom: 'uatom' }" /></template>
+
+      <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
+        <dt class="text-muted">Transaction fee</dt>
+        <dd class="text-right">
+          <AmountDisplay v-for="fee of txFeesAmount" :key="fee.denom" :amount="fee" />
+        </dd>
+
+        <dt class="text-muted">Swap fee</dt>
+        <dd class="text-right">
+          <AmountDisplay :amount="{ amount: '1000', denom: 'uatom' }" />
         </dd>
       </dl>
     </CollapseDescription>
@@ -42,10 +82,54 @@
 </template>
 
 <script lang="tsx" setup>
+import { computed } from 'vue';
+
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import CoinDescription from './components/shared/CoinDescription.vue';
 import CollapseDescription from './components/shared/CollapseDescription.vue';
-import { formatProtocolName } from './logic';
+import {
+  amountToUnit,
+  formatProtocolName,
+  getAssetFromSwaps,
+  getChainFromProtocol,
+  getOrderPriceFromStep,
+} from './logic';
+import { useSwapStore } from './state';
+
+const props = defineProps(['step', 'fees']);
+const swapStore = useSwapStore();
+
+const transaction = computed(() => {
+  return props.step.transactions[0];
+});
+
+const inputAmount = computed(() => {
+  return amountToUnit(swapStore.sync.swaps, { amount: '1', denom: transaction.value.data.from.denom }, true);
+});
+
+const exchangeAmount = computed(() => {
+  return amountToUnit(
+    swapStore.sync.swaps,
+    { amount: getOrderPriceFromStep(transaction.value), denom: transaction.value.data.to.denom },
+    true,
+  );
+});
+
+const outputAmount = computed(() => ({
+  amount: transaction.value.data.to.amount,
+  denom: getAssetFromSwaps(swapStore.sync.swaps, transaction.value.data.to.denom),
+}));
+
+const txFeesAmount = computed(() => {
+  const amounts = [];
+  for (const [chain, fees] of Object.entries(props.fees)) {
+    for (const [denom, amount] of Object.entries(fees)) {
+      amounts.push({ denom, amount, chain });
+    }
+  }
+  return amounts;
+});
 </script>
