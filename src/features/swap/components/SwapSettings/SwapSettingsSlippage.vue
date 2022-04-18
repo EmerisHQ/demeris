@@ -1,17 +1,17 @@
 <template>
   <div class="flex flex-col space-y-7 pb-3">
     <div class="flex space-x-2" role="radiogroup">
-      <label v-for="option of slippageOptions" :key="option" class="py-[2px]">
+      <label v-for="option of slippageOptions" :key="option" class="min-w-[52px] flex-1 shrink-0 py-[2px]">
         <input v-model="data.selectedOption" name="slippage" type="radio" :value="option" class="peer sr-only" />
         <div
-          class="w-[50px] transition-all duration-300 cursor-pointer py-3 text-center shrink-0 rounded-xl text-text bg-fg peer-checked:font-medium peer-checked:theme-inverse peer-checked:bg-surface"
+          class="transition-all duration-300 cursor-pointer py-3 text-center shrink-0 rounded-xl text-text bg-fg peer-checked:font-medium peer-checked:theme-inverse peer-checked:bg-surface"
           aria-hidden
         >
           {{ option }}%
         </div>
       </label>
 
-      <div class="flex w-full relative p-[2px]">
+      <div v-if="allowCustomSlippage" class="flex w-full relative p-[2px]">
         <div
           class="relative w-full rounded-xl px-2 inline-flex items-center z-[1]"
           :class="[
@@ -66,11 +66,15 @@ import { computed, reactive, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
+import { GlobalGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
 import { amountToUnit, getOrderPrice } from '../../logic';
 import { useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
+
+const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state } = swapStore.useSwapMachine();
 
@@ -84,11 +88,21 @@ const isCustomSelected = computed(() => data.selectedOption === data.customValue
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
 const exchangeAmount = computed(() =>
-  amountToUnit({ amount: getOrderPrice(state.value.context), denom: state.value.context.outputCoin?.baseDenom }),
+  amountToUnit({
+    amount: getOrderPrice(state.value.context),
+    denom: state.value.context.outputCoin?.baseDenom,
+  }),
 );
 const outputAmount = computed(() =>
-  amountToUnit({ amount: state.value.context.outputAmount, denom: state.value.context.outputCoin?.baseDenom }),
+  amountToUnit({
+    amount: state.value.context.outputAmount,
+    denom: state.value.context.outputCoin?.baseDenom,
+  }),
 );
+
+const allowCustomSlippage = computed(() => {
+  return globalStore.getters[GlobalGetterTypes.USER.allowCustomSlippage];
+});
 
 const showCustomPlaceholder = computed(() => {
   if (isCustomInputFocused.value) return false;
