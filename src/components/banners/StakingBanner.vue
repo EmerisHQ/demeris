@@ -31,7 +31,7 @@ import useStaking from '@/composables/useStaking';
 import { event } from '@/utils/analytics';
 
 interface Props {
-  displayDenom: string;
+  displayDenom?: string;
   baseDenom?: string;
 }
 

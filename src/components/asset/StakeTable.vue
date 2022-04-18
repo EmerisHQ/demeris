@@ -13,7 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
@@ -30,13 +30,17 @@ import { getSumOfRewards } from '@/utils/basic';
 const store = useStore() as RootStoreTyped;
 const stakingRewardsData = ref<StakingRewards>(null);
 const selectedTab = ref<number>(1);
+
 const props = defineProps<{ denom: string }>();
+const propsRef = toRefs(props);
+
 const { getStakingRewardsByBaseDenom } = useStaking();
 const { stakingBalancesByChain } = useAccount();
 const { getChainNameByBaseDenomFromStore } = useChains();
 
+const chainName = getChainNameByBaseDenomFromStore(propsRef.denom.value);
+
 const stakingBalances = computed(() => {
-  const chainName = getChainNameByBaseDenomFromStore(props.denom);
   return stakingBalancesByChain(chainName).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
