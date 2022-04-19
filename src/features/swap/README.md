@@ -27,7 +27,8 @@ Folder with all the necessary methods that should be used by machine and compone
 
 ├── state/
     ├── machine.ts
-    A finite-state machine built with XState that handles all the business logic and async flow necessary to swap one denom to another, it is not responsible for UI states like showing input asset list, can also be ported to another codebase like (extension) without noise.
+    A finite-state machine built with XState that handles all the business logic and async flow necessary to swap one denom to another.
+    It is not responsible for UI states like showing input asset list, can also be ported to another codebase like (extension) without noise.
 
     └── store.ts
     A Pinia-store that handles UI related variables, like components visibility and current machine service, also cache data used across instances.
