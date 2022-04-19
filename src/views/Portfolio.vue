@@ -15,6 +15,7 @@
               <AssetsFilter
                 class="mb-8"
                 :assets-length="assetsLength"
+                :assets-staking-length="assetsStakingLength"
                 @active-filter="(value) => (activeFilter = value)"
               />
             </FeatureRunningConditional>
@@ -28,6 +29,7 @@
               :limit-rows="4"
               @row-click="openAssetPage"
             />
+            <StakeTableBanner v-if="activeFilter === 'staking' && assetsStakingLength === 0" />
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
@@ -76,6 +78,7 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
 import AssetsFilter from '@/components/assets/AssetsFilter';
 import AssetsTable from '@/components/assets/AssetsTable';
 import PortfolioStakingBanner from '@/components/banners/PortfolioStakingBanner.vue';
@@ -104,7 +107,7 @@ useMeta(
 );
 
 const router = useRouter();
-const { balances } = useAccount();
+const { balances /*, stakingBalances*/ } = useAccount(); // TODO when Mihail merge his stakingBalances update
 const { pools } = usePools();
 
 const store = useStore();
@@ -125,6 +128,10 @@ const initialLoadComplete = computed(() => {
 
 const assetsLength = computed(() => {
   return Object.keys(groupBy(balances.value, 'base_denom')).length;
+});
+
+const assetsStakingLength = computed(() => {
+  return 0; // stakingBalances.value.length;
 });
 
 const poolsInvested = computed(() => {
