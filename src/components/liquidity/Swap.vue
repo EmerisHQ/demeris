@@ -393,9 +393,7 @@ export default defineComponent({
 
       if (transactionsStore.currentId) {
         const snapshot = transactionsStore.getCurrentService()?.getSnapshot();
-        if (!snapshot) {
-          return;
-        }
+        if (!snapshot) return;
         const cursor = getTransactionOffset(snapshot.context);
         if (snapshot.matches('transacting') || (cursor && cursor.total > cursor.offset)) {
           transactionsStore.setTransactionAsPending();

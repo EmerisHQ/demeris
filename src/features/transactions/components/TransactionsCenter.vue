@@ -23,6 +23,7 @@
           @on-update="state.notifications = $event"
           @on-button1-click="undoRemoval"
           @on-button2-click="showDetails"
+          @on-dismiss="onDismiss"
         />
 
         <template v-if="pendingTransactions.length">
@@ -188,6 +189,13 @@ const undoRemoval = (id: string) => {
 const showDetails = (id: string) => {
   transactionsStore.setCurrentId(id);
   transactionsStore.toggleRemoveModal();
+};
+
+const onDismiss = (id: string) => {
+  if (transactionsStore.transactions[id]?.state?.can('ABORT')) {
+    transactionsStore.transactions[id].send('ABORT');
+  }
+  transactionsStore.removeTransaction(id);
 };
 
 const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
