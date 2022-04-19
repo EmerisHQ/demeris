@@ -90,13 +90,7 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import CoinDescription from './components/shared/CoinDescription.vue';
 import CollapseDescription from './components/shared/CollapseDescription.vue';
-import {
-  amountToUnit,
-  formatProtocolName,
-  getAssetFromSwaps,
-  getChainFromProtocol,
-  getOrderPriceFromStep,
-} from './logic';
+import { amountToUnit, formatProtocolName, getChainFromProtocol, getOrderPriceFromStep } from './logic';
 import { useSwapStore } from './state';
 
 const props = defineProps(['step', 'fees']);

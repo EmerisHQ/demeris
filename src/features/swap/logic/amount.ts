@@ -69,6 +69,10 @@ export const getOrderPrice = (context: SwapContext) => {
   return new BigNumber(context.outputAmount).dividedBy(context.inputAmount).toString();
 };
 
+export const getOrderPriceFromStep = (step: any) => {
+  return new BigNumber(step.data.to.amount).dividedBy(step.data.from.amount).toString();
+};
+
 export const getLimitPrice = (context: SwapContext) => {
   return new BigNumber(getOrderPrice(context)).multipliedBy(1 - 0.005).toString();
 };
