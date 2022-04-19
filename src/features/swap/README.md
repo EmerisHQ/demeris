@@ -12,27 +12,34 @@ And `emeris-mapper`, a library that translates an agnostic transaction to a vali
 
 ### Structure
 
-├── SwapMultiDex.vue
-│ _Entry file_
-├── SwapViewDetails.vue
-│ _This component is used to display a transaction in the `review` or `receipt` state._
-├── components
-│ _Vue components that interacts with the swap machine instance_
-├── logic
-│ _Folder with all the necessary methods that should be used by machine and components. Preferably it must be a pure function, that does not make side effects and receive the necessary data by parameters._
-└── state
-├── machine.ts
-│ _A finite-state machine built with XState that handles all the business logic and async flow necessary to swap one denom to another, it is not responsible for UI states like showing input asset list, can also be ported to another codebase like (extension) without noise._
-└── store.ts
-│ \_A Pinia-store that handles UI related variables, like components visibility and current machine service, also cache data used across instances.
+```
+├──SwapMultiDex.vue
+Entry file
+
+├──SwapViewDetails.vue
+This component is used to display a transaction in the `review` or `receipt` state.
+
+├── components/
+Vue components that interacts with the swap machine instance
+
+├── logic/
+Folder with all the necessary methods that should be used by machine and components. Preferably it must be a pure function, that does not make side effects and receive the necessary data by parameters.
+
+├── state/
+    ├── machine.ts
+    A finite-state machine built with XState that handles all the business logic and async flow necessary to swap one denom to another, it is not responsible for UI states like showing input asset list, can also be ported to another codebase like (extension) without noise.
+
+    └── store.ts
+    A Pinia-store that handles UI related variables, like components visibility and current machine service, also cache data used across instances.
+```
 
 ### Learn more
 
-[daggregation](https://github.com/EmerisHQ/daggregation)
-[dexinfo](https://github.com/EmerisHQ/emeris-dexinfo)
-[emeris-mapper](https://github.com/EmerisHQ/emeris-libraries/tree/develop/packages/mapper)
-[Pinia](https://pinia.vuejs.org/)
-[XState](https://xstate.js.org/docs/)
+- [daggregation](https://github.com/EmerisHQ/daggregation)
+- [dexinfo](https://github.com/EmerisHQ/emeris-dexinfo)
+- [emeris-mapper](https://github.com/EmerisHQ/emeris-libraries/tree/develop/packages/mapper)
+- [Pinia](https://pinia.vuejs.org/)
+- [XState](https://xstate.js.org/docs/)
 
 ### Know Issues
 
