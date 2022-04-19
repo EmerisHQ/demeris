@@ -43,8 +43,8 @@
           </div>
         </dd>
 
-        <dt class="text-muted">Route</dt>
-        <dd class="place-self-end">2 transactions</dd>
+        <dt v-if="false" class="text-muted">Route</dt>
+        <dd v-if="false" class="place-self-end">2 transactions</dd>
 
         <dt class="text-muted">Limit price</dt>
         <dd class="text-right">
@@ -64,7 +64,7 @@
 
     <CollapseDescription content-class="pb-6" is-open>
       <template #title><span class="-text-1">Fees (included)</span></template>
-      <template #label><AmountDisplay :amount="{ amount: '1000', denom: 'uatom' }" /></template>
+      <template #label><AmountDisplay :amount="{ amount: '0', denom: 'uatom' }" /></template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
         <dt class="text-muted">Transaction fee</dt>
@@ -74,7 +74,7 @@
 
         <dt class="text-muted">Swap fee</dt>
         <dd class="text-right">
-          <AmountDisplay :amount="{ amount: '1000', denom: 'uatom' }" />
+          <AmountDisplay :amount="{ amount: '0', denom: 'uatom' }" />
         </dd>
       </dl>
     </CollapseDescription>
@@ -98,6 +98,9 @@ import {
   resolveBaseDenom,
 } from './logic';
 import { useSwapStore } from './state';
+
+// NOTE: We should not interact with the current swap machine here
+// this component is used to display a transaction in the `review` or `receipt` state.
 
 const props = defineProps(['step', 'fees']);
 const swapStore = useSwapStore();

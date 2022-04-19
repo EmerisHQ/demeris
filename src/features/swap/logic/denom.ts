@@ -44,7 +44,7 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
 };
 
 export const getChainFromDenom = (context: SwapContext, denom: string) => {
-  const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
+  const chain = useStore().getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom });
   if (chain) return chain;
 
   const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
@@ -57,7 +57,7 @@ export const getChainFromDenom = (context: SwapContext, denom: string) => {
   const ctx = getAvailableDenoms(context).find((item) => item.denom === denom);
 
   if (ctx) {
-    // Background sync traces
+    // Background sync missing traces
     getBaseDenom(denom, ctx.chain);
     return ctx.chain;
   }
