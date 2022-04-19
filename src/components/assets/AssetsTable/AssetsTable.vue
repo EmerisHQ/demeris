@@ -57,7 +57,7 @@
               <Price :amount="{ denom: asset.denom, amount: null }" />
             </td>
 
-            <FeatureRunningConditional name="STAKING">
+            <FeatureRunningConditional name="STAKING_PORTFOLIO">
               <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition">
                 <div class="flex justify-end gap-x-2">
                   <Price :amount="{ denom: asset.denom, amount: `${asset.totalAmount - asset.stakedAmount}` }" />
@@ -235,7 +235,7 @@ export default defineComponent({
     const propsRef = toRefs(props);
 
     const tableColumns = ref(['35%', '20%', '35%', '10%']);
-    if (featureRunning('STAKING') && props.showAvailableAsset) {
+    if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
       tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
     }
 

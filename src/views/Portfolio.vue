@@ -11,7 +11,7 @@
         </header>
         <section class="mt-16">
           <template v-if="initialLoadComplete">
-            <FeatureRunningConditional name="STAKING">
+            <FeatureRunningConditional name="STAKING_PORTFOLIO">
               <AssetsFilter
                 class="mb-8"
                 :assets-length="assetsLength"
@@ -19,7 +19,7 @@
               />
             </FeatureRunningConditional>
             <AssetsTable
-              v-if="!featureRunning('STAKING') || activeFilter === 'all'"
+              v-if="!featureRunning('STAKING_PORTFOLIO') || activeFilter === 'all'"
               :balances="balances"
               :hide-zero-assets="true"
               variant="balance"

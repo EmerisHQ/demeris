@@ -87,7 +87,8 @@ if (featureRunning('STAKING')) {
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
   });
-
+}
+if (featureRunning('STAKING_PORTFOLIO')) {
   routes.push({
     path: '/staking/stake-asset',
     name: 'Stake Asset',
