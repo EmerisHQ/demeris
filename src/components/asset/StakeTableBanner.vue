@@ -24,10 +24,7 @@
       />
     </article>
 
-    <div
-      class="grid place-content-center w-1/2 bg-contain bg-center bg-no-repeat"
-      :style="`background-image: url(${stakeRings})`"
-    >
+    <div class="grid place-content-center w-1/2 bg-contain bg-center bg-no-repeat background-gold-rings">
       <CircleSymbol :denom="denom" size="xl" />
     </div>
   </section>
@@ -36,7 +33,6 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
-import stakeRings from '@/assets/images/stake-rings.png';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
@@ -61,3 +57,9 @@ const goToStakingPage = () => {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.background-gold-rings {
+  background-image: url('../../assets/images/stake-rings.png');
+}
+</style>
