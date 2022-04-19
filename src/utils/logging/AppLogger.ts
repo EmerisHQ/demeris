@@ -3,6 +3,9 @@
  */
 import { captureException } from '@sentry/vue';
 
+import { featureRunning } from '@/utils/FeatureManager';
+import { noopInstance } from '@/utils/logging/noopInstance';
+
 class AppLogger {
   public reportSingleError(error: Error, msg?: string) {
     if (msg) {
@@ -37,6 +40,11 @@ class AppLogger {
   }
 }
 
-const appLogger = new AppLogger();
+let appLogger: AppLogger;
+if (featureRunning('SENTRY')) {
+  appLogger = new AppLogger();
+} else {
+  appLogger = noopInstance as AppLogger; // does nothing and doesn't throw
+}
 
 export { appLogger };
