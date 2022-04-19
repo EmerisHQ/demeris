@@ -90,7 +90,13 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import CoinDescription from './components/shared/CoinDescription.vue';
 import CollapseDescription from './components/shared/CollapseDescription.vue';
-import { amountToUnit, formatProtocolName, getChainFromProtocol, getOrderPriceFromStep } from './logic';
+import {
+  amountToUnit,
+  formatProtocolName,
+  getChainFromProtocol,
+  getOrderPriceFromStep,
+  resolveBaseDenom,
+} from './logic';
 import { useSwapStore } from './state';
 
 const props = defineProps(['step', 'fees']);
@@ -101,21 +107,30 @@ const transaction = computed(() => {
 });
 
 const inputAmount = computed(() => {
-  return amountToUnit(swapStore.sync.swaps, { amount: '1', denom: transaction.value.data.from.denom }, true);
+  const denom = transaction.value.data.from.denom;
+  const { amount } = amountToUnit({ amount: '1', denom });
+  const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
+  return { amount, denom: baseDenom };
 });
 
 const exchangeAmount = computed(() => {
-  return amountToUnit(
-    swapStore.sync.swaps,
-    { amount: getOrderPriceFromStep(transaction.value), denom: transaction.value.data.to.denom },
-    true,
-  );
+  const denom = transaction.value.data.to.denom;
+  const { amount } = amountToUnit({
+    amount: getOrderPriceFromStep(transaction.value),
+    denom,
+  });
+  const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
+  return { amount, denom: baseDenom };
 });
 
-const outputAmount = computed(() => ({
-  amount: transaction.value.data.to.amount,
-  denom: getAssetFromSwaps(swapStore.sync.swaps, transaction.value.data.to.denom),
-}));
+const outputAmount = computed(() => {
+  const denom = transaction.value.data.to.denom;
+  const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
+  return {
+    amount: transaction.value.data.to.amount,
+    denom: baseDenom,
+  };
+});
 
 const txFeesAmount = computed(() => {
   const amounts = [];

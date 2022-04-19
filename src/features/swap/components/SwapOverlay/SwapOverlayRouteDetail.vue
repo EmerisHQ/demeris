@@ -14,7 +14,7 @@
     <dl class="timeline-container relative space-y-5 mt-2">
       <template v-for="(steps, index) in routeDetail" :key="index">
         <dt class="timeline-denom flex items-center space-x-4 mb-5">
-          <CircleSymbol :denom="steps[0].baseDenomIn" />
+          <CircleSymbol :display-status="false" :denom="steps[0].baseDenomIn" />
           <div>
             <span class="font-medium"><Ticker :name="steps[0].baseDenomIn" /></span>
             <span class="text-muted"> &middot; <ChainName :name="steps[0].chainIn" /></span>
@@ -36,7 +36,11 @@
       </template>
 
       <dt class="flex items-center space-x-4">
-        <CircleSymbol :denom="state.context.outputCoin?.baseDenom" :chain-name="state.context.outputCoin?.chain" />
+        <CircleSymbol
+          :display-status="false"
+          :denom="state.context.outputCoin?.baseDenom"
+          :chain-name="state.context.outputCoin?.chain"
+        />
         <div>
           <span class="font-medium"><Ticker :name="state.context.outputCoin?.denom" /></span>
           <span class="text-muted"> · <ChainName :name="state.context.outputCoin?.chain" /></span>

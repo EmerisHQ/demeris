@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import { useActor } from '@xstate/vue';
 import { defineStore } from 'pinia';
 
@@ -11,6 +12,7 @@ interface SwapStoreState {
   service: SwapService;
   sync: {
     availableDenoms: string[];
+    swaps: EmerisDEXInfo.Swaps;
   };
 }
 
@@ -23,6 +25,7 @@ export const useSwapStore = defineStore('swap', {
       service: undefined,
       sync: {
         availableDenoms: [],
+        swaps: [],
       },
     } as SwapStoreState),
 
@@ -58,6 +61,16 @@ export const useSwapStore = defineStore('swap', {
 
       const data = await logic.fetchAvailableDenoms();
       this.sync.availableDenoms = data;
+      return data;
+    },
+
+    async syncSwaps() {
+      if (this.sync.swaps.length > 0) {
+        return this.sync.swaps;
+      }
+
+      const data = await logic.fetchDexInfoSwaps();
+      this.sync.swaps = data;
       return data;
     },
 

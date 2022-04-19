@@ -1,10 +1,9 @@
 import { move } from '@/actionhandler/actions/move';
 import { Step } from '@/types/actions';
-import { getBaseDenomSync } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
-import { getChainFromDenom } from './denom';
+import { getChainFromDenom, resolveBaseDenom } from './denom';
 import { getChainFromProtocol } from './protocol';
 
 export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
@@ -98,8 +97,8 @@ export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) =>
     const data = step.data;
     const chainIn = getChainFromDenom(data.from.denom) ?? getChainFromProtocol(step.protocol);
     const chainOut = getChainFromDenom(data.to.denom) ?? getChainFromProtocol(step.protocol);
-    const baseDenomIn = getBaseDenomSync(data.from.denom);
-    const baseDenomOut = getBaseDenomSync(data.to.denom);
+    const baseDenomIn = resolveBaseDenom(data.from.denom, { context });
+    const baseDenomOut = resolveBaseDenom(data.to.denom, { context });
 
     return {
       ...step,

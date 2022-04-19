@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import axios from 'axios';
 
 import { SwapContext } from '../state';
@@ -66,6 +67,11 @@ export const fetchAvailableDenoms = async () => {
       'sifchain/rowan',
     ];
   }
+};
+
+export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
+  const { data } = await axios.get('https://dev.demeris.io/v1/dexinfo/swaps');
+  return data.swaps;
 };
 
 export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {

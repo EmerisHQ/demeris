@@ -1,3 +1,4 @@
+import { EmerisDEXInfo } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 
@@ -61,12 +62,12 @@ export const getChainFromDenom = (denom: string, protocol?: string) => {
   return undefined;
 };
 
-export const getAvailableAssets = (context: SwapContext) => {
-  const result = getAvailableDenoms(context).map(({ baseDenom, denom, chain }) => {
+export const getAvailableInputAssets = (context: SwapContext) => {
+  const denoms = getAvailableDenoms(context).filter((item) => isNative(item.denom));
+  const results = denoms.map(({ baseDenom, denom, chain }) => {
     const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
 
     const isVerified = config?.verified ?? false;
-    const isNativeDenom = isNative(denom);
     const displayName = config?.display_name;
     const totalBalance = totalDenomBalance(context, baseDenom);
     const humanBalance = amountToHuman({ amount: totalBalance, denom: baseDenom }).amount;
@@ -77,17 +78,12 @@ export const getAvailableAssets = (context: SwapContext) => {
       denom,
       displayName,
       isVerified,
-      isNativeDenom,
       totalBalance,
       humanBalance,
     };
   });
 
-  return orderBy(
-    result.filter((item) => item.isNativeDenom),
-    [(x) => +x.humanBalance, 'displayName'],
-    ['desc', 'asc'],
-  );
+  return orderBy(results, [(x) => +x.humanBalance, 'displayName'], ['desc', 'asc']);
 };
 
 export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: string) => {
@@ -118,4 +114,24 @@ export const getDefaultInputCoin = (context: SwapContext) => {
   }
 
   return coin;
+};
+
+export const getDenomPropertiesFromSwaps = (swaps: EmerisDEXInfo.Swaps, denom: string) => {
+  const result = swaps.find((item) => item.denomA.denom === denom)?.denomA;
+
+  if (result) return result;
+
+  return swaps.find((item) => item.denomB.denom === denom)?.denomB;
+};
+
+export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; swaps?: EmerisDEXInfo.Swaps }) => {
+  let swaps: EmerisDEXInfo.Swaps = [];
+  debugger;
+  if (base.swaps) swaps = base.swaps;
+  if (base.context) swaps = base.context.data.swaps;
+
+  const props = getDenomPropertiesFromSwaps(swaps, denom);
+  if (props?.baseDenom) return props.baseDenom;
+
+  return getBaseDenomSync(denom);
 };

@@ -97,6 +97,7 @@ const { state, send, service } = useMachine(swapMachine, {
   },
   services: {
     getAvailableDenoms: () => swapStore.syncAvailableDenoms(),
+    getSwaps: () => swapStore.syncSwaps(),
   },
 });
 

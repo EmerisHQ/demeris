@@ -73,8 +73,8 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
   denomBalancesPerChain,
-  getAvailableAssets,
   getAvailableChainsByDenom,
+  getAvailableInputAssets,
   getDenomFromBaseDenom,
 } from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';
@@ -96,7 +96,7 @@ const initialData = {
 
 const data = reactive({ ...initialData });
 
-const availableCoins = computed(() => getAvailableAssets(state.value.context));
+const availableCoins = computed(() => getAvailableInputAssets(state.value.context));
 
 const isInputView = computed(() => swap.selectAssetType === 'input');
 const isOutputView = computed(() => swap.selectAssetType === 'output');

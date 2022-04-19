@@ -1,4 +1,4 @@
-import { EmerisAPI } from '@emeris/types';
+import { EmerisAPI, EmerisDEXInfo } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { assign, createMachine, Interpreter, State } from 'xstate';
 
@@ -10,6 +10,7 @@ interface SwapContextData {
   availableDenoms: string[];
   routes: any[];
   steps: Step[];
+  swaps: EmerisDEXInfo.Swaps;
 }
 
 export interface SwapCoin {
@@ -41,6 +42,7 @@ const defaultContext = (): SwapContext => ({
     availableDenoms: [],
     routes: [],
     steps: [],
+    swaps: [],
   },
 });
 
@@ -130,6 +132,24 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
                   onDone: {
                     target: 'success',
                     actions: 'assignAvailableDenoms',
+                  },
+                  onError: '#unavailable',
+                },
+              },
+              success: {
+                type: 'final',
+              },
+            },
+          },
+          swaps: {
+            initial: 'pending',
+            states: {
+              pending: {
+                invoke: {
+                  src: 'getSwaps',
+                  onDone: {
+                    target: 'success',
+                    actions: 'assignSwaps',
                   },
                   onError: '#unavailable',
                 },
@@ -278,6 +298,12 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         defaultInputDenom: (_, event: any) => event.value,
       }),
       assignBalances: assign((_, event: any) => ({ balances: event.balances })),
+      assignSwaps: assign((context, event: any) => ({
+        data: {
+          ...context.data,
+          swaps: event.data,
+        },
+      })),
       assignAvailableDenoms: assign((context, event: any) => ({
         data: {
           ...context.data,
