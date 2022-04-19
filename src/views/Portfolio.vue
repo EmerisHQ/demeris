@@ -59,7 +59,7 @@
           <DexSwap />
         </FeatureRunningConditional>
         <Intro class="mt-4" />
-        <FeatureRunningConditional name="STAKING">
+        <FeatureRunningConditional v-if="!featureRunning('STAKING_PORTFOLIO')" name="STAKING">
           <PortfolioStakingBanner :balances="balances" class="mt-4" />
         </FeatureRunningConditional>
       </aside>
