@@ -1,9 +1,9 @@
 <template>
-  <div
-    class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
-  >
-    <div class="flex-1 max-w-xs">
-      <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
+  <section class="stake__banner relative border border-border rounded-2xl flex justify-between">
+    <article class="w-1/2 p-6">
+      <h3 class="text-1 font-bold">
+        {{ $t('components.stakeTable.earnRewards') }} <Ticker v-if="denom" :name="denom" />
+      </h3>
       <p class="text-muted leading-copy mt-3">
         {{ $t('components.stakeTable.lockUpAndEarnRewards') }}
         <a
@@ -14,24 +14,29 @@
           {{ $t('components.stakeTable.learnMore') }} &#x2197;
         </a>
       </p>
-    </div>
+      <Button
+        :name="
+          denom ? $t('components.stakeTable.stakeAsset', { ticker: tickerName }) : $t('components.stakingBanner.cta')
+        "
+        class="mt-8"
+        :full-width="false"
+        @click="() => goToStakingPage()"
+      />
+    </article>
 
-    <Button
-      :name="$t('components.stakeTable.stakeAsset', { ticker: tickerName })"
-      class="mt-8"
-      :full-width="false"
-      @click="() => goToStakingPage()"
-    />
-
-    <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
+    <div
+      class="grid place-content-center w-1/2 bg-contain bg-center bg-no-repeat"
+      :style="`background-image: url(${stakeRings})`"
+    >
       <CircleSymbol :denom="denom" size="xl" />
     </div>
-  </div>
+  </section>
 </template>
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
+import stakeRings from '@/assets/images/stake-rings.png';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
@@ -47,7 +52,12 @@ const props = defineProps<{ denom: string }>();
 const { tickerName } = useDenom(props.denom);
 
 const goToStakingPage = () => {
-  event('staking_entry_point', { event_label: 'Asset Page Staking Banner Click', event_category: 'banner' });
-  router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
+  if (props.denom) {
+    event('staking_entry_point', { event_label: 'Asset Page Staking Banner Click', event_category: 'banner' });
+    router.push(`/staking/${props.denom}/${StakingActions.STAKE}`);
+  } else {
+    event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });
+    router.push(`/staking/stake-asset`);
+  }
 };
 </script>
