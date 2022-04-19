@@ -97,7 +97,7 @@
 </template>
 <script lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
-import { computed, defineComponent, ref, toRaw } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -116,7 +116,14 @@ export default defineComponent({
     Icon,
   },
 
-  setup() {
+  props: {
+    selectedAirdrop: {
+      type: Object as PropType<EmerisAirdrops.Airdrop>,
+      default: null,
+    },
+  },
+
+  setup(props) {
     const typedstore = useStore() as RootStoreTyped;
 
     const isClaimModalOpen = ref(false);
@@ -127,20 +134,16 @@ export default defineComponent({
       isClaimModalOpen.value = !isClaimModalOpen.value;
     };
 
-    const selectedAirdrop = computed(() => {
-      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
-    });
-
     const isAutoDropped = computed(() => {
-      return selectedAirdrop.value.eligibility === AirdropEligibilityStatus.AUTO_DROP;
+      return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.AUTO_DROP;
     });
 
     const isClaimable = computed(() => {
-      return selectedAirdrop.value.eligibility === AirdropEligibilityStatus.CLAIMABLE;
+      return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE;
     });
 
     const goToAirdropWebsite = () => {
-      window.open(selectedAirdrop.value.projectWebsiteUrl, '_blank');
+      window.open(props.selectedAirdrop.projectWebsiteUrl, '_blank');
     };
 
     const isDemoAccount = computed(() => {
@@ -151,7 +154,7 @@ export default defineComponent({
     });
 
     const isMultipleSnapshots = computed(() => {
-      return typeof selectedAirdrop.value.snapshotDate === 'object';
+      return typeof props.selectedAirdrop.snapshotDate === 'object';
     });
 
     const toggleConnectWalletModal = () => {
@@ -162,7 +165,6 @@ export default defineComponent({
       isClaimModalOpen,
       isWalletModalOpen,
       toggleClaimModal,
-      selectedAirdrop,
       isAutoDropped,
       isClaimable,
       goToAirdropWebsite,
