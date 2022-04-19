@@ -4,7 +4,6 @@ import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
 import { getChainFromDenom, resolveBaseDenom } from './denom';
-import { getChainFromProtocol } from './protocol';
 
 export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
@@ -95,8 +94,8 @@ export const countChainsFromRoute = (context: SwapContext, routeIndex: number) =
 export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) => {
   const result = context.data.routes[routeIndex]?.steps.map((step) => {
     const data = step.data;
-    const chainIn = getChainFromDenom(data.from.denom) ?? getChainFromProtocol(step.protocol);
-    const chainOut = getChainFromDenom(data.to.denom) ?? getChainFromProtocol(step.protocol);
+    const chainIn = getChainFromDenom(context, data.from.denom);
+    const chainOut = getChainFromDenom(context, data.to.denom);
     const baseDenomIn = resolveBaseDenom(data.from.denom, { context });
     const baseDenomOut = resolveBaseDenom(data.to.denom, { context });
 
@@ -145,8 +144,8 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
           amount: step.data.from.amount,
           denom: formatToValidDenom(step.data.from.denom),
         },
-        chain_name: getChainFromDenom(step.data.from.denom, step.protocol),
-        destination_chain_name: getChainFromDenom(step.data.to.denom, step.protocol),
+        chain_name: getChainFromDenom(context, step.data.from.denom),
+        destination_chain_name: getChainFromDenom(context, step.data.to.denom),
       });
 
       txs.push({
@@ -178,7 +177,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
                 id: step.data.pool_id.split('/')[1],
                 type_id: 1,
               },
-              chainName: getChainFromDenom(step.data.from.denom),
+              chainName: getChainFromDenom(context, step.data.from.denom),
             },
           },
         ],

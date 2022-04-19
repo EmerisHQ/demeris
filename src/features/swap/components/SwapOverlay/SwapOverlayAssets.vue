@@ -76,9 +76,9 @@ import {
   getAvailableChainsByDenom,
   getAvailableInputAssets,
   getDenomFromBaseDenom,
+  resolveBaseDenom,
 } from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';
-import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
@@ -131,7 +131,7 @@ const dispatchUpdate = () => {
   const coin = {
     denom: data.selectedDenom,
     chain: data.selectedChain,
-    baseDenom: getBaseDenomSync(data.selectedDenom),
+    baseDenom: resolveBaseDenom(data.selectedDenom, { context: state.value.context }),
   };
 
   if (swap.selectAssetType === 'input') {

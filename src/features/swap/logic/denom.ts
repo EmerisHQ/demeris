@@ -3,13 +3,12 @@ import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 
 import { GlobalGetterTypes } from '@/store';
-import { getBaseDenomSync } from '@/utils/actionHandler';
+import { getBaseDenom, getBaseDenomSync } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 import { SwapCoin, SwapContext } from '../state/machine';
 import { amountToHuman, totalDenomBalance } from './amount';
-import { getChainFromProtocol } from './protocol';
 
 export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
@@ -44,7 +43,7 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
   return denom;
 };
 
-export const getChainFromDenom = (denom: string, protocol?: string) => {
+export const getChainFromDenom = (context: SwapContext, denom: string) => {
   const chain = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name === denom)?.chain_name;
   if (chain) return chain;
 
@@ -55,8 +54,12 @@ export const getChainFromDenom = (denom: string, protocol?: string) => {
     return trace.trace[0].chain_name;
   }
 
-  if (protocol) {
-    return getChainFromProtocol(protocol);
+  const ctx = getAvailableDenoms(context).find((item) => item.denom === denom);
+
+  if (ctx) {
+    // Background sync traces
+    getBaseDenom(denom, ctx.chain);
+    return ctx.chain;
   }
 
   return undefined;
@@ -126,7 +129,7 @@ export const getDenomPropertiesFromSwaps = (swaps: EmerisDEXInfo.Swaps, denom: s
 
 export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; swaps?: EmerisDEXInfo.Swaps }) => {
   let swaps: EmerisDEXInfo.Swaps = [];
-  debugger;
+
   if (base.swaps) swaps = base.swaps;
   if (base.context) swaps = base.context.data.swaps;
 

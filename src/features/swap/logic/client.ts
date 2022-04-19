@@ -4,9 +4,31 @@ import axios from 'axios';
 import { SwapContext } from '../state';
 import { amountToUnit } from './amount';
 
+export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
+  const { data } = await axios.get('https://dev.demeris.io/v1/dexinfo/swaps');
+  return data.swaps;
+};
+
+export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {
+  const payload = {
+    chainIn: context.inputCoin.chain,
+    chainOut: context.outputCoin.chain,
+    denomIn: context.inputCoin.denom,
+    denomOut: context.outputCoin.denom,
+    amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom }).amount,
+    amountOut: amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.baseDenom }).amount,
+  };
+
+  if (direction === 'input') payload.amountOut = null;
+  if (direction === 'output') payload.amountIn = null;
+
+  const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', payload);
+  return data.routes;
+};
+
 export const fetchAvailableDenoms = async () => {
   try {
-    const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/available_denoms', {});
+    const { data } = await axios.get('https://dev.demeris.io/v1/daggregation/available_denoms', {});
     return data.denoms;
   } catch {
     // Mock fallback
@@ -67,26 +89,4 @@ export const fetchAvailableDenoms = async () => {
       'sifchain/rowan',
     ];
   }
-};
-
-export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
-  const { data } = await axios.get('https://dev.demeris.io/v1/dexinfo/swaps');
-  return data.swaps;
-};
-
-export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {
-  const payload = {
-    chainIn: context.inputCoin.chain,
-    chainOut: context.outputCoin.chain,
-    denomIn: context.inputCoin.denom,
-    denomOut: context.outputCoin.denom,
-    amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom }).amount,
-    amountOut: amountToUnit({ amount: context.outputAmount, denom: context.outputCoin?.baseDenom }).amount,
-  };
-
-  if (direction === 'input') payload.amountOut = null;
-  if (direction === 'output') payload.amountIn = null;
-
-  const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', payload);
-  return data.routes;
 };
