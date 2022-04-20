@@ -17,15 +17,12 @@
         >
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <div class="flex items-center">
-              <CircleSymbol
-                :key="`${getStakableBaseDenomFromChainName(chain)}${index}`"
-                :denom="getStakableBaseDenomFromChainName(chain)"
-              />
+              <CircleSymbol :key="`${chain.stakableBaseDenom}${index}`" :denom="chain.stakableBaseDenom" />
               <div class="ml-4 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                 <span class="font-medium">
-                  <Denom :name="getStakableBaseDenomFromChainName(chain)" />
+                  <Denom :name="chain.stakableBaseDenom" />
                 </span>
-                <LPAsset :name="getStakableBaseDenomFromChainName(chain)" />
+                <LPAsset :name="chain.stakableBaseDenom" />
               </div>
             </div>
           </td>
@@ -33,20 +30,17 @@
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
             <Price
               class="font-medium"
-              :amount="{ denom: getStakableBaseDenomFromChainName(chain), amount: stakingAmountByChain(chain) + '' }"
+              :amount="{ denom: chain.stakableBaseDenom, amount: stakingAmountByChain(chain.name) + '' }"
               :label="$t('components.stakeTable.staked')"
             />
           </td>
 
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <Apr :chain="chain" />
+            <Apr :chain="chain.name" />
           </td>
 
           <td class="align-middle text-right group-hover:bg-fg transition">
-            <StakingRewardsAmountClaim
-              :denom="getStakableBaseDenomFromChainName(chain)"
-              :label="$t('components.stakeTable.toClaim')"
-            />
+            <StakingRewardsAmountClaim :denom="chain.stakableBaseDenom" :label="$t('components.stakeTable.toClaim')" />
           </td>
         </tr>
       </tbody>
@@ -83,5 +77,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const tableColumns = ref(['1', '2', '3', '4']);
 
-const stakedDenoms = computed(() => [...new Set(stakingBalances.value.map((item) => item.chain_name))]);
+const stakedDenoms = computed(() => {
+  const chainsSet = [...new Set(stakingBalances.value.map((item) => item.chain_name))];
+  return chainsSet.map((chain) => ({ name: chain, stakableBaseDenom: getStakableBaseDenomFromChainName(chain) }));
+});
 </script>
