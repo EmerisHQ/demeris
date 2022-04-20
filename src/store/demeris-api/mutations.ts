@@ -48,7 +48,6 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_TOKEN_PRICES_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_AIRDROPS_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
-  [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
   [MutationTypes.MAP_AIRDROPS_ELIGIBILITY](state: S, payload: { value: EmerisAirdrops.Airdrop[] }): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
@@ -233,9 +232,6 @@ export const mutations: MutationTree<APIState> & Mutations = {
   },
 
   //Airdrops Mutations
-  [MutationTypes.SET_SELECTED_AIRDROP](state, payload) {
-    state.selectedAirdrop = payload.value;
-  },
   [MutationTypes.SET_AIRDROPS](state, payload) {
     const tempAirdrop = payload.value;
 

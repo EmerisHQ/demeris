@@ -183,7 +183,10 @@
         "claimRewards": "Claim rewards",
         "stake": "Stake",
         "unstake": "Unstake",
-        "switchValidator": "Switch validator"
+        "switchValidator": "Switch validator",
+        "staked": "Staked",
+        "toClaim": "To claim",
+        "claim": "Claim"
       },
       "validatorTable": {
         "validator": "Validator",

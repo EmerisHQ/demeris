@@ -158,6 +158,20 @@ export default function useAccount() {
     });
   };
 
+  const stakingAmountByChain = (chain_name: string) => {
+    const staked = stakingBalancesByChain(chain_name);
+    let totalStakedAmount = 0;
+    if (Array.isArray(staked)) {
+      for (let i = 0; i < staked.length; i++) {
+        const amount = parseFloat(staked[i].amount);
+        if (amount) {
+          totalStakedAmount += amount;
+        }
+      }
+    }
+    return totalStakedAmount;
+  };
+
   const unbondingDelegations = computed(() => {
     return store.getters[GlobalGetterTypes.API.getAllUnbondingDelegations] || [];
   });
@@ -196,6 +210,7 @@ export default function useAccount() {
     stakingBalances,
     stakingBalancesByChain,
     allLoaded,
+    stakingAmountByChain,
     unbondingDelegations,
     unbondingDelegationsByChain,
   };

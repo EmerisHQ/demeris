@@ -10,6 +10,10 @@
           </div>
         </header>
         <section class="mt-16">
+          <header v-if="!featureRunning('STAKING_PORTFOLIO')" class="flex justify-between items-center mb-6 mt-6">
+            <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
+            <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
+          </header>
           <template v-if="initialLoadComplete">
             <FeatureRunningConditional name="STAKING_PORTFOLIO">
               <AssetsFilter
@@ -30,6 +34,7 @@
               @row-click="openAssetPage"
             />
             <StakeTableBanner v-if="activeFilter === 'staking' && assetsStakingLength === 0" />
+            <StakingTable v-else-if="activeFilter === 'staking'" />
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
@@ -89,6 +94,7 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import StakingTable from '@/components/stake/StakingTable/StakingTable.vue';
 import DexSwap from '@/components/swap/DexSwap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
