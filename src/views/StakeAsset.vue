@@ -52,6 +52,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes } from '@/store';
+import { StakingActions } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
@@ -92,6 +93,6 @@ const keywordFilteredAssets = computed(() => {
 });
 
 const assetSelectHandler = (asset: EmerisAPI.Balance) => {
-  router.push(`/staking/${asset.base_denom}/stake`);
+  router.push(`/staking/${asset.base_denom}/${StakingActions.STAKE}`);
 };
 </script>
