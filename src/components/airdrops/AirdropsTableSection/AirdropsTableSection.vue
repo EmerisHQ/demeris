@@ -51,7 +51,7 @@ export default {
     const router = useRouter();
 
     const sortAirdropstable = (x, y) => {
-      return x.project.localeCompare(y.project);
+      return x.project ? x.project.localeCompare(y.project) : [];
     };
 
     const airdrops = computed(() => {
