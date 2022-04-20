@@ -691,7 +691,7 @@
       "confirm": "Confirm",
       "close": "Close",
       "continue": "Continue",
-      "signLater": "Sign transaction later",
+      "signLater": "OK",
       "noFunds": "Insufficient funds",
       "insufficientAmount": "Insufficient amount",
       "filterNoResults": "No results for '{keyword}'",
