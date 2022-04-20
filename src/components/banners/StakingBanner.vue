@@ -19,9 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { ref, toRefs, watch } from 'vue';
+import { onMounted, ref, toRefs, watch } from 'vue';
 
 import stakePanel from '@/assets/images/stake-panel-ephemeris.png';
 import panelGradient from '@/assets/images/stakie-panel-gradient.png';
@@ -48,11 +47,14 @@ const onBannerClick = () => {
 
 const propsRef = toRefs(props);
 const apr = ref<string>('');
+const chainName = ref<string>(null);
 
-const chain_name = computed(() => getChainNameByBaseDenom(propsRef.baseDenom.value));
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.baseDenom.value);
+});
 
 watch(
-  chain_name,
+  chainName,
   async (newValue) => {
     if (!newValue) return;
     const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
