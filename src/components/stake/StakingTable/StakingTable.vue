@@ -42,15 +42,11 @@
             <Apr :chain="chain" />
           </td>
 
-          <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <StakingRewardsAmount
+          <td class="align-middle text-right group-hover:bg-fg transition">
+            <StakingRewardsAmountClaim
               :denom="getStakableBaseDenomFromChainName(chain)"
               :label="$t('components.stakeTable.toClaim')"
             />
-          </td>
-
-          <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <Button variant="primary" size="sm"> | {{ $t('components.stakeTable.claim') }} </Button>
           </td>
         </tr>
       </tbody>
@@ -67,8 +63,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import Apr from '@/components/stake/Apr.vue';
-import StakingRewardsAmount from '@/components/stake/StakingRewardsAmount.vue';
-import Button from '@/components/ui/Button.vue';
+import StakingRewardsAmountClaim from '@/components/stake/StakingRewardsAmountClaim.vue';
 import useAccount from '@/composables/useAccount';
 import useDenomsFactory from '@/composables/useDenoms';
 
@@ -86,7 +81,7 @@ const props = withDefaults(defineProps<Props>(), {
   hasHeaders: false,
 });
 
-const stakedDenoms = computed(() => [...new Set(stakingBalances.value.map((item) => item.chain_name))]);
-
 const tableColumns = ref(['1', '2', '3', '4']);
+
+const stakedDenoms = computed(() => [...new Set(stakingBalances.value.map((item) => item.chain_name))]);
 </script>
