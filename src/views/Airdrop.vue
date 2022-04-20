@@ -79,19 +79,18 @@
       </div>
 
       <aside class="-mt-32 flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <AirdropClaim />
-        <AirdropsCurrentBalance class="mt-8" />
+        <AirdropClaim :selected-airdrop="selectedAirdrop" />
+        <AirdropsCurrentBalance :selected-airdrop="selectedAirdrop" class="mt-8" />
       </aside>
     </div>
   </NoMarginLayout>
 </template>
 
 <script lang="ts">
-import { EmerisAirdrops } from '@emeris/types';
-import { computed, defineComponent, toRaw } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
@@ -101,7 +100,7 @@ import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
 import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
-import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 
 export default defineComponent({
@@ -127,23 +126,19 @@ export default defineComponent({
     );
 
     const router = useRouter();
+    const route = useRoute();
 
-    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
-      router.push('/airdrop');
-      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
-        params: {
-          airdrop,
-        },
-      });
-    };
+    const airdrops = computed(() => {
+      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+    });
 
     const selectedAirdrop = computed(() => {
       let projectDescription = [];
-      const airdrop = toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
-      if (airdrop.projectDescription.includes('.')) {
-        projectDescription = airdrop.projectDescription.split('.');
+      const airdrop = airdrops.value.filter((item) => item.tokenTicker === route.params.airdrop)[0];
+      if (airdrop && airdrop.projectDescription.includes('.')) {
+        projectDescription = airdrop ? airdrop.projectDescription.split('.') : [];
       } else {
-        projectDescription.push(airdrop.projectDescription);
+        projectDescription.push(airdrop ? airdrop.projectDescription : []);
       }
       return {
         ...airdrop,
@@ -155,7 +150,7 @@ export default defineComponent({
       router.push('/airdrops');
     };
 
-    return { openAirdropPage, selectedAirdrop, goBackToAirdropspage };
+    return { selectedAirdrop, goBackToAirdropspage };
   },
 });
 </script>
