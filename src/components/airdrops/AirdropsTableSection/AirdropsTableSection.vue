@@ -29,7 +29,7 @@ import { useRouter } from 'vue-router';
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import Search from '@/components/common/Search.vue';
-import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { typedstore } from '@/store/setup';
 
 export default {
@@ -51,7 +51,7 @@ export default {
     const router = useRouter();
 
     const sortAirdropstable = (x, y) => {
-      return x.project.localeCompare(y.project);
+      return x.project ? x.project.localeCompare(y.project) : [];
     };
 
     const airdrops = computed(() => {
@@ -67,11 +67,6 @@ export default {
 
     const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
       router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
-      typedstore.dispatch(GlobalActionTypes.API.SET_SELECTED_AIRDROP, {
-        params: {
-          airdrop,
-        },
-      });
     };
 
     const isDemoAccount = computed(() => {

@@ -78,7 +78,7 @@
 
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
-import { computed, defineComponent, ref, toRaw } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import claimableAirdropsHeader from '@/assets/images/claimable-airdrops-header.png';
@@ -106,10 +106,6 @@ export default defineComponent({
     const theme = useTheme();
     const typedstore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
-
-    const selectedAirdrop = computed(() => {
-      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
-    });
 
     const airdrops = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
@@ -157,7 +153,6 @@ export default defineComponent({
 
     return {
       theme,
-      selectedAirdrop,
       claimableAirdropsHeader,
       demoAccountBanner,
       isDemoAccount,

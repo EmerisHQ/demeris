@@ -154,6 +154,13 @@ const BitCanna: SymbolConfig = {
   },
 };
 
+const Crescent: SymbolConfig = {
+  colors: {
+    primary: '#FFC780',
+    secondary: '#9B504B',
+  },
+};
+
 const chains: Record<string, SymbolConfig> = {
   'cosmos-hub': Cosmos,
   akash: Akash,
@@ -171,6 +178,7 @@ const chains: Record<string, SymbolConfig> = {
   juno: Juno,
   likecoin: LikeCoin,
   bitcanna: BitCanna,
+  crescent: Crescent,
 };
 
 const denoms: Record<string, SymbolConfig> = {
@@ -193,6 +201,8 @@ const denoms: Record<string, SymbolConfig> = {
   ujuno: Juno,
   nanolike: LikeCoin,
   ubcna: BitCanna,
+  ucre: Crescent,
+  ubcre: Crescent,
 };
 
 const protocols: Record<string, SymbolConfig> = {

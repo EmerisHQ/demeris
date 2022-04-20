@@ -24,11 +24,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, toRaw } from 'vue';
-import { useStore } from 'vuex';
+import { EmerisAirdrops } from '@emeris/types';
+import { defineComponent, PropType, ref } from 'vue';
 
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
   name: 'AirdropsCurrentBalance',
@@ -36,16 +35,17 @@ export default defineComponent({
     CaretRightIcon,
   },
 
-  setup() {
-    const typedstore = useStore() as RootStoreTyped;
+  props: {
+    selectedAirdrop: {
+      type: Object as PropType<EmerisAirdrops.Airdrop>,
+      default: null,
+    },
+  },
 
+  setup() {
     let imageLoadFail = ref(false);
 
-    const selectedAirdrop = computed(() => {
-      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
-    });
-
-    return { selectedAirdrop, imageLoadFail };
+    return { imageLoadFail };
   },
 });
 </script>

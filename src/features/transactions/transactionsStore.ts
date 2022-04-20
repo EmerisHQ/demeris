@@ -186,7 +186,7 @@ export const useTransactionsStore = defineStore('transactions', {
         }
 
         // Notify all waiting services when this completes
-        if (state.done || state.matches('receipt') || state.matches('failed')) {
+        if (state.done || ['receipt', 'failed'].some(state.matches) || state.event.type === 'ABORT') {
           Object.values(allTransactions()).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
               itemService.send('VERIFY_QUEUE');

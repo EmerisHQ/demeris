@@ -158,6 +158,7 @@ const emit = defineEmits<{
   (e: 'onButton2Click', id: number | string);
   (e: 'onButton1Click', id: number | string);
   (e: 'onUpdate', messages: NotificationMessage[]);
+  (e: 'onDismiss', id: number | string);
 }>();
 
 const isStacked = ref<boolean>(true);
@@ -224,6 +225,7 @@ function expandNotifications(): void {
 }
 
 function dismissNotification(id: number | string): void {
+  emit('onDismiss', id);
   emit('onUpdate', [...notificationMessages.value.filter((tm) => tm.id !== id)]);
   if (visibleNotificationMessages.value.length === 0) isStacked.value = false;
 }

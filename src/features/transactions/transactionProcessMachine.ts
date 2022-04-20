@@ -253,7 +253,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             after: {
               5000: { target: '.pending' },
               60000: { target: '.delayed' },
-              500000: { target: '#failed.unknown' },
+              300000: { target: '#failed.unknown' },
             },
             on: {
               SET_DATA: {
