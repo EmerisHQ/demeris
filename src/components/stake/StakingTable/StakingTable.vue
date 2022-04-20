@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex flex-col">
     <!-- STAKING TABLE -->
-    <table class="assets-table -ml-6">
+    <table class="staking-table -ml-6">
       <colgroup>
         <col v-for="(span, index) in tableColumns" :key="`table--staking__col-${index}`" :span="span" />
       </colgroup>
@@ -40,7 +40,11 @@
           </td>
 
           <td class="align-middle text-right group-hover:bg-fg transition">
-            <StakingRewardsAmountClaim :denom="chain.stakableBaseDenom" :label="$t('components.stakeTable.toClaim')" />
+            <StakingRewardsAmountClaim
+              :denom="chain.stakableBaseDenom"
+              :label="$t('components.stakeTable.toClaim')"
+              has-button
+            />
           </td>
         </tr>
       </tbody>
@@ -82,3 +86,24 @@ const stakedDenoms = computed(() => {
   return chainsSet.map((chain) => ({ name: chain, stakableBaseDenom: getStakableBaseDenomFromChainName(chain) }));
 });
 </script>
+
+<style lang="scss" scoped>
+.staking-table {
+  width: calc(100% + 3rem);
+
+  td,
+  th {
+    &:first-child {
+      padding-left: 1.5rem;
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
+    }
+
+    &:last-child {
+      padding-right: 1.5rem;
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
+    }
+  }
+}
+</style>
