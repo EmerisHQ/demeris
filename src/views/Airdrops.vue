@@ -17,10 +17,18 @@
       </aside>
 
       <div class="lg:w-8/12 md:w-9/12 sm:w-full sm:mt-8 mb-16 md:mb-0">
-        <AirdropsTableSection v-if="activeFilter !== 'mine'" :active-filter="activeFilter" />
+        <AirdropsTableSection
+          v-if="activeFilter !== 'mine'"
+          :active-filter="activeFilter"
+          @active-filter="(value) => (activeFilter = value)"
+        />
 
         <div v-else>
-          <AirdropsTableSection v-if="!isDemoAccount" :active-filter="activeFilter" />
+          <AirdropsTableSection
+            v-if="!isDemoAccount"
+            :active-filter="activeFilter"
+            @active-filter="(value) => (activeFilter = value)"
+          />
           <div v-else class="w-full text-center">
             <img src="~@/assets/images/my-airdrops-wallet-not-connected.png" alt="Wallet not connected" />
             <div class="w-3/5 mx-auto">

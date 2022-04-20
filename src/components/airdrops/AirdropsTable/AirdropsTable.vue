@@ -123,7 +123,7 @@
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Claimed
             </div>
             <div v-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_AVAILABLE" class="text-muted">
-              Not available
+              Eligibility unavailable
             </div>
             <div v-if="airdrop.eligibility === AirdropEligibilityStatus.ENDED" class="text-muted">-</div>
           </td>
