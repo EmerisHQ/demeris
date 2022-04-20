@@ -14,6 +14,7 @@
           :key="`staking-${index}`"
           class="assets-table__row group cursor-pointer"
           data-cy="asset-row"
+          @click="handleClick(chain.stakableBaseDenom)"
         >
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <div class="flex items-center">
@@ -79,12 +80,18 @@ const props = withDefaults(defineProps<Props>(), {
   hasHeaders: false,
 });
 
+const emit = defineEmits(['row-click']);
+
 const tableColumns = ref(['1', '2', '3', '4']);
 
 const stakedDenoms = computed(() => {
   const chainsSet = [...new Set(stakingBalances.value.map((item) => item.chain_name))];
   return chainsSet.map((chain) => ({ name: chain, stakableBaseDenom: getStakableBaseDenomFromChainName(chain) }));
 });
+
+const handleClick = (assetName) => {
+  emit('row-click', { denom: assetName });
+};
 </script>
 
 <style lang="scss" scoped>

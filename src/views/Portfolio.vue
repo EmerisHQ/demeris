@@ -34,7 +34,7 @@
               @row-click="openAssetPage"
             />
             <StakeTableBanner v-if="activeFilter === 'staking' && assetsStakingLength === 0" />
-            <StakingTable v-else-if="activeFilter === 'staking'" />
+            <StakingTable v-else-if="activeFilter === 'staking'" @row-click="openAssetPage" />
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
