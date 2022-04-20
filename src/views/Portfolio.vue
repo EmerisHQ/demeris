@@ -107,7 +107,7 @@ useMeta(
 );
 
 const router = useRouter();
-const { balances /*, stakingBalances*/ } = useAccount(); // TODO when Mihail merge his stakingBalances update
+const { balances, stakingBalances } = useAccount();
 const { pools } = usePools();
 
 const store = useStore();
@@ -131,7 +131,7 @@ const assetsLength = computed(() => {
 });
 
 const assetsStakingLength = computed(() => {
-  return 0; // stakingBalances.value.length;
+  return Object.keys(groupBy(stakingBalances.value, 'chain_name')).length;
 });
 
 const poolsInvested = computed(() => {
