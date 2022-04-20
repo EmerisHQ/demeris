@@ -10,7 +10,8 @@
           </div>
         </header>
         <section class="mt-16">
-          <header class="flex justify-between items-center mb-6">
+          <StakingTable></StakingTable>
+          <header class="flex justify-between items-center mb-6 mt-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
             <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
           </header>
@@ -78,6 +79,7 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import StakingTable from '@/components/stake/StakingTable/StakingTable.vue';
 import DexSwap from '@/components/swap/DexSwap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
