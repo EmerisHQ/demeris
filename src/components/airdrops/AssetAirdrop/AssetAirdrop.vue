@@ -80,7 +80,7 @@ const showAirdropCard = computed(() => {
     assetAirdrop.value[0] &&
     assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.ENDED &&
     assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.NOT_ELIGIBLE &&
-    assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.NOT_AVAILABLE
+    assetAirdrop.value[0].eligibility !== AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE
   );
 });
 </script>
