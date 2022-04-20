@@ -58,11 +58,11 @@
             </td>
 
             <FeatureRunningConditional name="STAKING_PORTFOLIO">
-              <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition">
-                <div class="flex justify-end gap-x-2">
-                  <Price :amount="{ denom: asset.denom, amount: `${asset.totalAmount - asset.stakedAmount}` }" />
-                  {{ $t('context.assets.available') }}
-                </div>
+              <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition text-right">
+                <Price
+                  :amount="{ denom: asset.denom, amount: `${asset.totalAmount - asset.stakedAmount}` }"
+                  :label="$t('context.assets.available')"
+                />
               </td>
             </FeatureRunningConditional>
 
@@ -445,20 +445,16 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .assets-table {
-  width: calc(100% + 3rem);
+  @apply w-[calc(100%+3rem)];
 
   td,
   th {
     &:first-child {
-      padding-left: 1.5rem;
-      border-top-left-radius: 0.75rem;
-      border-bottom-left-radius: 0.75rem;
+      @apply pl-6 rounded-tl-xl rounded-bl-xl;
     }
 
     &:last-child {
-      padding-right: 1.5rem;
-      border-top-right-radius: 0.75rem;
-      border-bottom-right-radius: 0.75rem;
+      @apply pr-6 rounded-tr-xl rounded-br-xl;
     }
   }
 }
