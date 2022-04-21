@@ -148,6 +148,7 @@
   <SkeletonLoader v-else width="100%" height="300px" />
 </template>
 <script lang="ts" setup>
+/* eslint-disable @typescript-eslint/naming-convention */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, onMounted, ref, toRefs, watch } from 'vue';

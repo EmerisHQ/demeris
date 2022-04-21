@@ -78,6 +78,7 @@
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType } from 'vue';

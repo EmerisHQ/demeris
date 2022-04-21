@@ -81,6 +81,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 /*
  * when customSize is set glow is forced to false
  */
