@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { EmerisBase } from '@emeris/types';
 
 export enum LoadingState {
@@ -385,7 +386,7 @@ export enum AirdropEligibilityStatus {
   CLAIMABLE = 'CLAIMABLE',
   CLAIMED = 'CLAIMED',
   AUTO_DROP = 'AUTO_DROP',
-  NOT_AVAILABLE = 'NOT_AVAILABLE',
+  ELIGIBILITY_UNAVAILABLE = 'ELIGIBILITY_UNAVAILABLE',
 }
 
 export type Airdrop = {

@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-lines-per-function */
 import BigNumber from 'bignumber.js';
+import { computed, ref, watch } from 'vue';
 
 import useSafeGetters from '@/composables/useSafeGetters';
-import { GlobalActionTypes, RootStoreTyped } from '@/store';
-import { keyHashfromAddress } from '@/utils/basic';
+import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { getSumOfRewards, keyHashfromAddress } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useStaking() {
@@ -80,12 +83,33 @@ export default function useStaking() {
     }
   };
 
+  const getTotalRewardsAmount = (denom) => {
+    const stakingRewardsData = ref<StakingRewards>(null);
+
+    const isSignedIn = computed(() => {
+      return store.getters[GlobalGetterTypes.USER.isSignedIn];
+    });
+
+    watch(
+      () => isSignedIn.value,
+      async () => {
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(denom);
+      },
+      { immediate: true },
+    );
+
+    return computed(() => {
+      return getSumOfRewards(stakingRewardsData.value?.total, denom);
+    });
+  };
+
   return {
     getStakingAPR,
     getValidatorMoniker,
     getValidatorsByBaseDenom,
     getChainDisplayInflationByBaseDenom,
     getStakingRewardsByBaseDenom,
+    getTotalRewardsAmount,
   };
 }
 

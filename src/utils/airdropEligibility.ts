@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops } from '@emeris/types';
 import { Airdrop } from '@emeris/types/lib/EmerisAirdrops';
 import axios from 'axios';
@@ -13,7 +14,7 @@ export enum AirdropEligibilityStatus {
   CLAIMABLE = 'CLAIMABLE',
   CLAIMED = 'CLAIMED',
   AUTO_DROP = 'AUTO_DROP',
-  NOT_AVAILABLE = 'NOT_AVAILABLE',
+  ELIGIBILITY_UNAVAILABLE = 'ELIGIBILITY_UNAVAILABLE',
   ENDED = 'ENDED',
 }
 
@@ -44,7 +45,7 @@ export function getAirdropEligibility(airdrop: Airdrop) {
           if (err.response && err.response.status === 403) {
             eligibility = AirdropEligibilityStatus.NOT_ELIGIBLE;
           } else {
-            eligibility = AirdropEligibilityStatus.NOT_AVAILABLE;
+            eligibility = AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE;
           }
           eligibility_data = err.response ? err.response.data : null;
         }
@@ -52,7 +53,7 @@ export function getAirdropEligibility(airdrop: Airdrop) {
 
       return {
         project: airdrop.project,
-        eligibility: eligibility ? eligibility : AirdropEligibilityStatus.NOT_AVAILABLE,
+        eligibility: eligibility ? eligibility : AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE,
         eligibilityData: eligibility_data,
       };
     });
@@ -66,9 +67,9 @@ export function getAirdropEligibility(airdrop: Airdrop) {
         return res.eligibility;
       });
     } else {
-      return AirdropEligibilityStatus.NOT_AVAILABLE;
+      return AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE;
     }
   } else {
-    return AirdropEligibilityStatus.NOT_AVAILABLE;
+    return AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE;
   }
 }

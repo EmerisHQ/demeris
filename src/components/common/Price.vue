@@ -4,9 +4,13 @@
     <div v-if="showPriceDiff" class="text-0 font-normal" :class="priceDiffColor">
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
+    <span v-if="label" class="ml-1.5 lowercase">
+      {{ label }}
+    </span>
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -40,6 +44,10 @@ export default defineComponent({
     },
     priceDiffObject: {
       type: Object,
+      default: null,
+    },
+    label: {
+      type: String,
       default: null,
     },
   },

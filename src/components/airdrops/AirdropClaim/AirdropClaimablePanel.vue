@@ -56,12 +56,13 @@
     <div
       v-if="showNoAirdropsToClaimBanner"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
+      @click="goToUpcomingAirdrops"
     >
       <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
         <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
         <p class="-text-1 text-dark mb-1">
-          {{ $t('context.airdrops.claimablepanel.checkOutForEligibility')
-          }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+          {{ $t('context.airdrops.claimablepanel.checkOutForEligibility') }}
+          <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2 inline-flex" />
         </p>
       </div>
 
@@ -77,6 +78,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 
@@ -101,7 +103,8 @@ export default defineComponent({
       default: 'all',
     },
   },
-  setup(props) {
+  emits: ['active-filter'],
+  setup(props, { emit }) {
     const theme = useTheme();
     const typedstore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
@@ -147,8 +150,17 @@ export default defineComponent({
     });
 
     const showNoAirdropsToClaimBanner = computed(() => {
-      return !isDemoAccount.value && !airdropsLoading.value && noAirdropsToClaim.value;
+      return (
+        !isDemoAccount.value &&
+        !airdropsLoading.value &&
+        noAirdropsToClaim.value &&
+        (props.activeFilter === 'mine' || props.activeFilter === 'all')
+      );
     });
+
+    const goToUpcomingAirdrops = () => {
+      emit('active-filter', 'upcoming');
+    };
 
     return {
       theme,
@@ -163,6 +175,7 @@ export default defineComponent({
       showConnectWalletBanner,
       showClaimNowBanner,
       showNoAirdropsToClaimBanner,
+      goToUpcomingAirdrops,
     };
   },
 });

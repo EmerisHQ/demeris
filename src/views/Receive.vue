@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
@@ -155,7 +156,7 @@ export default {
 </script>
 
 <style lang="scss">
-.denom-select-modal::v-deep(.coin-list-fade) {
+.denom-select-modal:deep(.coin-list-fade) {
   display: none;
 }
 

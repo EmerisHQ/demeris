@@ -67,6 +67,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
 import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
