@@ -6,7 +6,7 @@ import { SwapContext } from '../state';
 import { amountToUnit } from './amount';
 
 export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
-  const { data } = await axios.get('https://dev.demeris.io/v1/dexinfo/swaps');
+  const { data } = await axios.get('https://api.dev.emeris.com/v1/dexinfo/swaps');
   return data.swaps;
 };
 
