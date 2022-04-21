@@ -152,7 +152,11 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
 
         if (data.result?.data?.value?.TxResult) {
-          return handleSuccess({ ...data.result, height: data.result.data.value.TxResult.height });
+          return handleSuccess({
+            ...data.result,
+            height: data.result.data.value.TxResult.height,
+            tx_result: data.result?.data?.value?.TxResult?.result,
+          });
         }
 
         if (data?.result?.tx_result) {
