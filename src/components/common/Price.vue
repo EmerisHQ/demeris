@@ -4,6 +4,9 @@
     <div v-if="showPriceDiff" class="text-0 font-normal" :class="priceDiffColor">
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
+    <span v-if="label" class="ml-1.5 lowercase">
+      {{ label }}
+    </span>
   </div>
 </template>
 <script lang="ts">
@@ -40,6 +43,10 @@ export default defineComponent({
     },
     priceDiffObject: {
       type: Object,
+      default: null,
+    },
+    label: {
+      type: String,
       default: null,
     },
   },

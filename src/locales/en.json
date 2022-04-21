@@ -50,6 +50,11 @@
       "asset": {
         "pooledTooltip": "Pooled assets are not added to your balance because pool ratios continuously change."
       },
+      "assetsFilter": {
+        "allAssets": "All assets",
+        "staking": "Staking",
+        "stakeAsset": "Stake asset"
+      },
       "withdrawLiquidity": {
         "title": "Withdraw liquidity",
         "navigation": {
@@ -178,7 +183,10 @@
         "claimRewards": "Claim rewards",
         "stake": "Stake",
         "unstake": "Unstake",
-        "switchValidator": "Switch validator"
+        "switchValidator": "Switch validator",
+        "staked": "Staked",
+        "toClaim": "To claim",
+        "claim": "Claim"
       },
       "validatorTable": {
         "validator": "Validator",
@@ -511,7 +519,8 @@
         "onchain": "{amount} on {chain}",
         "lastWeek": "Last 7 Days",
         "lastDay": "24h",
-        "viewAll": "View all"
+        "viewAll": "View all",
+        "available": "available"
       },
       "airdrops": {
         "title": "Airdrops",
@@ -691,7 +700,7 @@
       "confirm": "Confirm",
       "close": "Close",
       "continue": "Continue",
-      "signLater": "Sign transaction later",
+      "signLater": "OK",
       "noFunds": "Insufficient funds",
       "insufficientAmount": "Insufficient amount",
       "filterNoResults": "No results for '{keyword}'",
@@ -766,6 +775,9 @@
         "chains": "Chains"
       },
       "portfolio": {},
+      "stakeAsset": {
+        "select": "Select asset"
+      },
       "receive": {
         "select": "Select asset",
         "receive": "Receive",

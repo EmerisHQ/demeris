@@ -56,6 +56,7 @@
     <div
       v-if="showNoAirdropsToClaimBanner"
       class="mt-8 flex justify-between bg-inverse text-dark rounded-2xl shadow-card cursor-pointer border border-border"
+      @click="goToUpcomingAirdrops"
     >
       <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
         <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
@@ -77,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, toRaw } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import claimableAirdropsHeader from '@/assets/images/claimable-airdrops-header.png';
@@ -101,14 +102,11 @@ export default defineComponent({
       default: 'all',
     },
   },
-  setup(props) {
+  emits: ['active-filter'],
+  setup(props, { emit }) {
     const theme = useTheme();
     const typedstore = useStore() as RootStoreTyped;
     const isWalletModalOpen = ref(false);
-
-    const selectedAirdrop = computed(() => {
-      return toRaw(typedstore.getters[GlobalGetterTypes.API.getSelectedAirdrop]);
-    });
 
     const airdrops = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
@@ -154,9 +152,12 @@ export default defineComponent({
       return !isDemoAccount.value && !airdropsLoading.value && noAirdropsToClaim.value;
     });
 
+    const goToUpcomingAirdrops = () => {
+      emit('active-filter', 'upcoming');
+    };
+
     return {
       theme,
-      selectedAirdrop,
       claimableAirdropsHeader,
       demoAccountBanner,
       isDemoAccount,
@@ -168,6 +169,7 @@ export default defineComponent({
       showConnectWalletBanner,
       showClaimNowBanner,
       showNoAirdropsToClaimBanner,
+      goToUpcomingAirdrops,
     };
   },
 });

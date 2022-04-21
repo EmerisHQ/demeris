@@ -4,7 +4,7 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
 import { GlobalGetterTypes } from '@/store';
-import { parseCoins } from '@/utils/basic';
+import { getOwnAddress, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 import { getProtocolFromChain } from './protocol';
@@ -46,16 +46,20 @@ export const parseEncodedEvents = (events: EncodedEvents[]): Record<string, Reco
 };
 
 const fetchBlockResults = async (height: string, chainName: string): Promise<Record<string, any>> => {
-  delete axios.defaults.headers.get['X-Correlation-Id'];
-
   const endpoint = useStore().getters[GlobalGetterTypes.API.getEndpoint];
   const rpcUrl = `${endpoint}/chain/${chainName}/rpc/block_results`;
+
   const { data } = await axios.get(`${rpcUrl}?height=${height}`, {
+    transformRequest: (data, headers) => {
+      delete headers.get['X-Correlation-Id'];
+      return data;
+    },
     'axios-retry': {
       retries: 10,
       retryDelay: () => 2000,
     },
   });
+
   return data.result;
 };
 
@@ -76,9 +80,16 @@ const getOsmosisResultFromDecodedEvents = (txEvents: Record<string, any>): SwapT
   };
 };
 
-export const getGravityResultFromDecodedEvents = (endBlockEvents: Record<string, any>): SwapTransactionResult => {
+export const getGravityResultFromDecodedEvents = (
+  endBlockEvents: Record<string, any>,
+  requester?: string,
+): SwapTransactionResult | undefined => {
   const data = endBlockEvents.swap_transacted;
   if (!data) return;
+
+  if (requester) {
+    if (data.swap_requester !== requester) return undefined;
+  }
 
   return {
     remainingInputAmount: data.remaining_offer_coin_amount,
@@ -103,6 +114,7 @@ export const resolveSwapResponse = async (response: Record<string, any>, chainNa
   if (protocol === EmerisDEXInfo.DEX.Gravity) {
     const blockResults = await fetchBlockResults(height, chainName);
     const parsedEvents = parseEncodedEvents(blockResults.end_block_events);
-    return getGravityResultFromDecodedEvents(parsedEvents);
+    const requester = await getOwnAddress({ chain_name: chainName });
+    return getGravityResultFromDecodedEvents(parsedEvents, requester);
   }
 };

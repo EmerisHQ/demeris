@@ -57,6 +57,12 @@ module.exports = {
         bracketSameLine: false,
       },
     ],
+    'vue/no-static-inline-styles': [
+      'warn',
+      {
+        allowBinding: false,
+      },
+    ],
   },
   overrides: [
     {
