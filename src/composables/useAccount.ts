@@ -159,15 +159,12 @@ export default function useAccount() {
   };
 
   const stakingAmountByChain = (chain_name: string) => {
-    const staked = stakingBalancesByChain(chain_name);
+    let stakedAmount = 0;
+    const stakedAmounts = stakingBalancesByChain(chain_name);
     let totalStakedAmount = 0;
-    if (Array.isArray(staked)) {
-      for (let i = 0; i < staked.length; i++) {
-        const amount = parseFloat(staked[i].amount);
-        if (amount) {
-          totalStakedAmount += amount;
-        }
-      }
+    if (stakedAmounts.length > 0) {
+      stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+      totalStakedAmount = totalStakedAmount + stakedAmount;
     }
     return totalStakedAmount;
   };
