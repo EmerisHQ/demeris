@@ -267,6 +267,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
+import { useSwapStore } from '@/features/swap/state';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
@@ -287,6 +288,7 @@ export default defineComponent({
     const appVersion = import.meta.env.VITE_VERSION;
 
     const store = useStore();
+    const swapStore = useSwapStore();
     const theme = useTheme();
 
     const isAdvancedSettingsOpen = ref(false);
@@ -315,8 +317,8 @@ export default defineComponent({
         },
       }),
       allowCustomSlippage: computed({
-        get: () => store.getters[GlobalGetterTypes.USER.allowCustomSlippage],
-        set: (value: boolean) => updateSession('customSlippage', value),
+        get: () => swapStore.allowCustomSlippage,
+        set: (value: boolean) => (swapStore.allowCustomSlippage = value),
       }),
       viewUnverified: computed({
         get: () => store.getters[GlobalGetterTypes.USER.viewUnverified],
