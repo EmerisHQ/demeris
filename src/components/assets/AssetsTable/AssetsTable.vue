@@ -60,7 +60,10 @@
             <FeatureRunningConditional name="STAKING_PORTFOLIO">
               <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition text-right">
                 <Price
-                  :amount="{ denom: asset.denom, amount: `${asset.totalAmount - asset.stakedAmount}` }"
+                  :amount="{
+                    denom: asset.denom,
+                    amount: `${asset.totalAmount - asset.stakedAmount - asset.unstakedAmount}`,
+                  }"
                   :label="$t('context.assets.available')"
                 />
               </td>
