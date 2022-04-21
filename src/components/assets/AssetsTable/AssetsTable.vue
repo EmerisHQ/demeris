@@ -29,7 +29,7 @@
             v-if="variant === 'balance'"
             class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
           >
-            {{ $t('context.assets.amount') }}
+            {{ $t('context.assets.available') }}
           </th>
           <th
             v-if="variant === 'balance'"
