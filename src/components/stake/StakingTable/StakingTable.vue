@@ -31,7 +31,7 @@
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
             <Price
               class="font-medium"
-              :amount="{ denom: chain.stakableBaseDenom, amount: chain.stakingAmount + '' }"
+              :amount="{ denom: chain.stakableBaseDenom, amount: `${chain.stakingAmount}` }"
               :label="$t('components.stakeTable.staked')"
             />
           </td>
