@@ -24,7 +24,9 @@ import { bech32 } from 'bech32';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
+import { crescentTypes } from './crescentTypes';
 import { liquidityTypes } from './liquidityTypes';
+import { osmosisTypes } from './osmosisTypes';
 
 function createAminoTypes(prefix: string): AminoConverters {
   return {
@@ -36,6 +38,8 @@ function createAminoTypes(prefix: string): AminoConverters {
     ...createIbcAminoConverters(),
     ...createFreegrantAminoConverters(),
     ...liquidityTypes,
+    ...osmosisTypes,
+    ...crescentTypes,
   };
 }
 

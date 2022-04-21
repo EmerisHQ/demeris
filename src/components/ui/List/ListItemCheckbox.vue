@@ -50,7 +50,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.checkbox) {
+:deep(.checkbox) {
   padding: 0;
 }
 </style>

@@ -8,7 +8,7 @@
       <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
     </div>
   </header>
-  <AirdropClaimablePanel v-if="!keyword" :active-filter="activeFilter" class="mb-6" />
+  <AirdropClaimablePanel v-if="!keyword" :active-filter="activeFilter" class="mb-6" @active-filter="emitActiveFilter" />
   <section class="mt-4">
     <AirdropsTable
       :airdrops="filteredAirdrops"
@@ -45,8 +45,8 @@ export default {
       default: '',
     },
   },
-
-  setup(props) {
+  emits: ['active-filter'],
+  setup(props, { emit }) {
     const keyword = ref('');
     const router = useRouter();
 
@@ -76,6 +76,10 @@ export default {
       );
     });
 
+    const emitActiveFilter = () => {
+      emit('active-filter', 'upcoming');
+    };
+
     watch(
       () => props.activeFilter,
       () => {
@@ -90,6 +94,7 @@ export default {
       openAirdropPage,
       keyword,
       isDemoAccount,
+      emitActiveFilter,
     };
   },
 };

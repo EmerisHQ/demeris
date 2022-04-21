@@ -122,8 +122,8 @@
             >
               <Icon :name="'CheckIcon'" :icon-size="1" class="mr-2" />Claimed
             </div>
-            <div v-if="airdrop.eligibility === AirdropEligibilityStatus.NOT_AVAILABLE" class="text-muted">
-              Not available
+            <div v-if="airdrop.eligibility === AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE" class="text-muted">
+              Eligibility unavailable
             </div>
             <div v-if="airdrop.eligibility === AirdropEligibilityStatus.ENDED" class="text-muted">-</div>
           </td>
@@ -198,7 +198,7 @@ export default defineComponent({
         if (noAirdropsToClaim.value) return ['CLAIMED', 'NOT_STARTED'];
         else return ['CLAIMABLE', 'CLAIMED', 'NOT_STARTED'];
       } else if (props.activeFilter === 'upcoming') {
-        return ['ELIGIBLE', 'NOT_AVAILABLE', 'NOT_ELIGIBLE'];
+        return ['ELIGIBLE', 'ELIGIBILITY_UNAVAILABLE', 'NOT_ELIGIBLE'];
       } else if (props.activeFilter === 'live') {
         return ['ELIGIBLE', 'more_live'];
       }

@@ -50,6 +50,7 @@ export default () => {
     test: {
       globals: true,
       environment: 'jsdom',
+      setupFiles: './tests/setup',
       deps: {
         inline: ['@vespaiach/axios-fetch-adapter'],
       },

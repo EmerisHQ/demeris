@@ -16,7 +16,11 @@
                 >{{ selectedAirdrop.chainName }} {{ $t('context.airdrops.chain') }}</span
               >
             </span>
-            <span class="live-tag -text-1 ml-2 font-medium">{{ $t('context.airdrops.live') }}</span>
+            <span
+              v-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING"
+              class="live-tag -text-1 ml-2 font-medium"
+              >{{ $t('context.airdrops.live') }}</span
+            >
           </div>
         </div>
       </div>
@@ -87,6 +91,7 @@
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -150,7 +155,7 @@ export default defineComponent({
       router.push('/airdrops');
     };
 
-    return { selectedAirdrop, goBackToAirdropspage };
+    return { EmerisAirdrops, selectedAirdrop, goBackToAirdropspage };
   },
 });
 </script>

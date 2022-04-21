@@ -6,6 +6,27 @@ import { useStore } from '@/utils/useStore';
 export default function usePrice() {
   const typedstore = useStore() as RootStoreTyped;
 
+  /**
+   * getRawPrice is done in a way too hacky way because it had to be done in a rush. Needs a proper refactoring.
+   * Logic is based on component `src/components/common/Price.vue` which shouldn't have had this business logic
+   * @param denom
+   * @param amount
+   * @returns
+   */
+  function getRawPrice(denom, amount) {
+    const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom });
+    const precision =
+      typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
+        name: denom,
+      }) ?? '6';
+
+    let value = 0;
+    if (price) {
+      value = price ? (price * parseInt(amount)) / Math.pow(10, parseInt(precision)) : 0;
+    }
+    return value;
+  }
+
   function getDisplayPrice(denom, amount) {
     const formatedValue = computed(() => {
       let value = 0;
@@ -31,5 +52,5 @@ export default function usePrice() {
     return formatedValue;
   }
 
-  return { getDisplayPrice };
+  return { getDisplayPrice, getRawPrice };
 }

@@ -156,7 +156,7 @@ export default {
 </script>
 
 <style lang="scss">
-.denom-select-modal::v-deep(.coin-list-fade) {
+.denom-select-modal:deep(.coin-list-fade) {
   display: none;
 }
 
