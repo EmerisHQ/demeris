@@ -44,11 +44,7 @@
           </td>
 
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <Price
-              class="font-medium"
-              :amount="{ denom: chain.stakableBaseDenom, amount: `${chain.stakingAmount}` }"
-              :label="$t('components.stakeTable.staked')"
-            />
+            <Price class="font-medium" :amount="{ denom: chain.stakableBaseDenom, amount: `${chain.stakingAmount}` }" />
           </td>
 
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
