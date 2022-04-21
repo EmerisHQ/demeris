@@ -150,7 +150,12 @@ export default defineComponent({
     });
 
     const showNoAirdropsToClaimBanner = computed(() => {
-      return !isDemoAccount.value && !airdropsLoading.value && noAirdropsToClaim.value;
+      return (
+        !isDemoAccount.value &&
+        !airdropsLoading.value &&
+        noAirdropsToClaim.value &&
+        (props.activeFilter === 'mine' || props.activeFilter === 'all')
+      );
     });
 
     const goToUpcomingAirdrops = () => {
