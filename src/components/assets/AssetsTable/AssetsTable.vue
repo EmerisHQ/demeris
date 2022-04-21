@@ -282,6 +282,7 @@ export default defineComponent({
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
         let stakedAmount = 0;
+        let unstakedAmount = 0;
         if (denom_details.length > 0) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
@@ -289,15 +290,8 @@ export default defineComponent({
             totalAmount = totalAmount + stakedAmount;
           }
           if (featureRunning('STAKING')) {
-            const unstakedAmounts = unbondingDelegations.value
-              .filter((x) => x.chain_name == denom_details[0].chain_name)
-              .map((y) => y.entries)
-              .flat()
-              .map((z) => z.balance);
-            if (unstakedAmounts.length > 0) {
-              const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-              totalAmount = totalAmount + unstakedAmount;
-            }
+            unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom_details[0].chain_name);
+            totalAmount = totalAmount + unstakedAmount;
           }
         }
         return {
@@ -305,6 +299,7 @@ export default defineComponent({
           totalAmount,
           stakedAmount,
           chainsNames,
+          unstakedAmount,
         };
       });
       if (allBalances.value.length > 0) {
@@ -312,11 +307,13 @@ export default defineComponent({
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
             const calcStakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+            const unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom.chain_name);
             summary.push({
               chainsNames: [denom.chain_name],
               denom: denom.name,
               totalAmount: calcStakedAmount,
               stakedAmount: calcStakedAmount,
+              unstakedAmount,
             });
           }
         }
@@ -441,6 +438,17 @@ export default defineComponent({
     };
   },
 });
+
+// TODO : refactor to different file - probably will be used again somewhere else
+function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations, chainName: string) {
+  const unstakedAmounts = unbondingDelegations
+    .filter((x) => x.chain_name == chainName)
+    .map((y) => y.entries)
+    .flat()
+    .map((z) => z.balance);
+  if (unstakedAmounts.length > 0) return unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+  return 0;
+}
 </script>
 
 <style lang="scss" scoped>
