@@ -31,7 +31,7 @@
           <td class="py-5 align-middle text-right group-hover:bg-fg transition">
             <Price
               class="font-medium"
-              :amount="{ denom: chain.stakableBaseDenom, amount: stakingAmountByChain(chain.name) + '' }"
+              :amount="{ denom: chain.stakableBaseDenom, amount: chain.stakingAmount + '' }"
               :label="$t('components.stakeTable.staked')"
             />
           </td>
@@ -65,6 +65,7 @@ import Apr from '@/components/stake/Apr.vue';
 import StakingRewardsAmountClaim from '@/components/stake/StakingRewardsAmountClaim.vue';
 import useAccount from '@/composables/useAccount';
 import useDenomsFactory from '@/composables/useDenoms';
+import usePrice from '@/composables/usePrice';
 
 // Interfaces
 interface Props {
@@ -74,6 +75,7 @@ interface Props {
 // Composables
 const { stakingBalances, stakingAmountByChain } = useAccount();
 const { getStakableBaseDenomFromChainName } = useDenomsFactory();
+const { getRawPrice } = usePrice();
 
 // Props
 const props = withDefaults(defineProps<Props>(), {
@@ -85,8 +87,15 @@ const emit = defineEmits(['row-click']);
 const tableColumns = ref(['1', '2', '3', '4']);
 
 const stakedDenoms = computed(() => {
-  const chainsSet = [...new Set(stakingBalances.value.map((item) => item.chain_name))];
-  return chainsSet.map((chain) => ({ name: chain, stakableBaseDenom: getStakableBaseDenomFromChainName(chain) }));
+  const chainSet = [...new Set(stakingBalances.value.map((item) => item.chain_name))];
+  return chainSet
+    .map((chain) => ({
+      name: chain,
+      stakableBaseDenom: getStakableBaseDenomFromChainName(chain),
+      stakingAmount: stakingAmountByChain(chain),
+      stakingAmountFiat: getRawPrice(getStakableBaseDenomFromChainName(chain), stakingAmountByChain(chain)),
+    }))
+    .sort((a, b) => (a.stakingAmountFiat > b.stakingAmountFiat ? -1 : 1));
 });
 
 const handleClick = (assetName) => {
