@@ -1,0 +1,44 @@
+<template>
+  <SwapOverlay v-if="swapStore.shownSettings" @esc="swapStore.toggleSettings">
+    <template #title> Settings </template>
+    <template #actions>
+      <Button variant="link" @click="swapStore.toggleSettings">Done</Button>
+    </template>
+
+    <div class="flex flex-col">
+      <CollapseDescription :is-open="isSlippageOpen" content-class="pb-4" @update:is-open="toggleSlippage">
+        <template #title>Slippage tolerance</template>
+        <template #label>{{ slippageValue }}%</template>
+
+        <SwapSettingsSlippage />
+      </CollapseDescription>
+
+      <CollapseDescription :is-open="isExchangesOpen" content-class="pb-4" @update:is-open="toggleExchanges">
+        <template #title>Exchanges</template>
+        <div>Exchanges content</div>
+      </CollapseDescription>
+    </div>
+  </SwapOverlay>
+</template>
+
+<script lang="ts" setup>
+import { useToggle } from '@vueuse/core';
+import { computed } from 'vue';
+
+import Button from '@/components/ui/Button.vue';
+import { useSwapStore } from '@/features/swap/state';
+import { GlobalGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
+
+import CollapseDescription from '../shared/CollapseDescription.vue';
+import SwapSettingsSlippage from '../SwapSettings/SwapSettingsSlippage.vue';
+import SwapOverlay from './SwapOverlay.vue';
+
+const swapStore = useSwapStore();
+const globaStore = useStore();
+
+const [isSlippageOpen, toggleSlippage] = useToggle(false);
+const [isExchangesOpen, toggleExchanges] = useToggle(false);
+
+const slippageValue = computed(() => globaStore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5);
+</script>

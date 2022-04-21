@@ -166,8 +166,9 @@
           <template #deactivated>
             <LiquiditySwap :default-asset="nativeAsset" />
           </template>
-          <DexSwap :default-asset="nativeAsset" />
+          <SwapMultiDex :default-denom="denom" />
         </FeatureRunningConditional>
+
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <!-- Deliberately commented out - we're placing this back soon with APR
         <StakingBanner
@@ -207,9 +208,9 @@ import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
-import DexSwap from '@/components/swap/DexSwap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
+import SwapMultiDex from '@/features/swap/SwapMultiDex.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
@@ -231,16 +232,16 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    LiquiditySwap,
     Pools,
     TooltipPools,
     PoolBanner,
     BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
-    DexSwap,
-    FeatureRunningConditional,
+    SwapMultiDex,
     AssetAirdrop,
+    FeatureRunningConditional,
+    LiquiditySwap,
   },
 
   setup() {

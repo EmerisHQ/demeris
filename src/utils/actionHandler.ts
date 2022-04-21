@@ -93,7 +93,7 @@ export async function msgFromStepTransaction(
   if (stepTx.type == 'swap') {
     const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
     let isReverse = false;
-    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms[0]) {
+    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms?.[0]) {
       isReverse = true;
     }
     const price = [stepTx.data.from, stepTx.data.to].sort((a, b) => {
@@ -172,7 +172,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
 export function getBaseDenomSync(denom: string) {
   const typedstore = useStore() as RootStoreTyped;
   const traces = typedstore.getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  return traces[denom.split('/')[1]]?.base_denom ?? denom;
+  return traces[denom.split('/')[1]?.toUpperCase()]?.base_denom ?? denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const typedstore = useStore() as RootStoreTyped;

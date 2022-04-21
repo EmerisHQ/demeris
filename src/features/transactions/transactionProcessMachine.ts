@@ -6,18 +6,12 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { FeeTotals, FeeWarning, Step, StepTransaction } from '@/types/actions';
 import { TxParams, TxResponse } from '@/types/tx';
-import {
-  chainStatusForSteps,
-  ensureTraceChannel,
-  feeForStep,
-  feeForStepTransaction,
-  msgFromStepTransaction,
-  validateStepsFeeBalances,
-} from '@/utils/actionHandler';
+import { chainStatusForSteps, feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
+import { resolveSwapResponse, SwapTransactionResult } from '../swap/logic/transaction';
 import {
   DoneEventData,
   formatStepsWithFee,
@@ -51,6 +45,7 @@ export interface TransactionProcessContext {
       endBlock: any;
       transaction: StepTransaction;
       stepIndex: number;
+      result?: SwapTransactionResult;
     }
   >;
   fees: {
@@ -369,15 +364,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        let validation = {};
-        if (!context.input.isDemoAccount) {
-          validation = await validateStepsFeeBalances(
-            context.formattedSteps,
-            context.input.balances,
-            totals,
-            context.input.gasPriceLevel,
-          );
-        }
+        const validation = {};
+        // if (!context.input.isDemoAccount) {
+        //   validation = await validateStepsFeeBalances(
+        //     context.formattedSteps,
+        //     context.input.balances,
+        //     totals,
+        //     context.input.gasPriceLevel,
+        //   );
+        // }
         return { totals, validation };
       },
       validateChainStatus: async (context) => {
@@ -387,8 +382,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
         return result;
       },
-      validateTraceChannel: (context) => {
-        return ensureTraceChannel(getCurrentTransaction(context));
+      validateTraceChannel: () => {
+        return Promise.resolve(true);
+        // return ensureTraceChannel(getCurrentTransaction(context));
       },
       signTransaction: async (context) => {
         const currentTransaction = getCurrentTransaction(context);
@@ -430,6 +426,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           status: undefined,
           endBlock: undefined,
           websocket: undefined,
+          result: undefined,
         };
 
         // @ts-ignore
@@ -447,6 +444,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 endBlockEvent = await useStore().dispatch(GlobalActionTypes.API.GET_END_BLOCK_EVENTS, {
                   height: height,
                   stepType: currentStep.name,
+                  chain_name: sourceChain,
                 });
                 break;
               } catch {
@@ -583,7 +581,19 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           responseData.websocket = traceResult;
 
-          await fetchEndBlock(traceResult.height);
+          try {
+            const result = await resolveSwapResponse(traceResult, sourceChain);
+            responseData.result = result;
+          } catch {
+            return callback({
+              // @ts-ignore
+              type: 'GOT_FAILURE',
+              error: 'Failed to find swap results',
+              data: responseData,
+            });
+          }
+
+          // await fetchEndBlock(traceResult.height);
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });

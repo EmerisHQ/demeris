@@ -62,7 +62,9 @@ import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import SwapViewDetails from '@/features/swap/SwapViewDetails.vue';
 import { GlobalGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
@@ -79,7 +81,7 @@ const isDemoAccount = computed(() => store.getters[GlobalGetterTypes.USER.isDemo
 const previewComponentMap = {
   transfer: PreviewTransfer,
   move: PreviewTransfer,
-  swap: PreviewSwap,
+  swap: featureRunning('DEX_AGG') ? SwapViewDetails : PreviewSwap,
   stake: PreviewStake,
   multistake: PreviewStake,
   unstake: PreviewUnstake,
