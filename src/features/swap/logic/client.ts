@@ -23,13 +23,13 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
   if (direction === 'input') payload.amountOut = null;
   if (direction === 'output') payload.amountIn = null;
 
-  const { data } = await axios.post('https://dev.demeris.io/v1/daggregation/routing', payload);
+  const { data } = await axios.post('https://api.dev.emeris.com/v1/daggregation/routing', payload);
   return data.routes;
 };
 
 export const fetchAvailableDenoms = async () => {
   try {
-    const { data } = await axios.get('https://dev.demeris.io/v1/daggregation/available_denoms', {});
+    const { data } = await axios.get('https://api.dev.emeris.com/v1/daggregation/available_denoms', {});
     return data.denoms;
   } catch {
     // Mock fallback
