@@ -509,6 +509,7 @@
       },
       "assets": {
         "title": "Assets",
+        "total": "Total",
         "totalBalance": "Total balance",
         "asset": "Asset",
         "ticker": "Ticker",
