@@ -54,7 +54,7 @@ const setActiveFilter = (newActiveFilter: string): void => {
 
 <style lang="scss" scoped>
 .assets-filters {
-  ::v-deep .button-secondary {
+  :deep(.button-secondary) {
     @apply bg-fg-solid;
   }
 }

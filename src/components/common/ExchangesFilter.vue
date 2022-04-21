@@ -76,7 +76,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.search ::v-deep(input) {
+.search :deep(input) {
   height: 2.5rem;
 }
 </style>
