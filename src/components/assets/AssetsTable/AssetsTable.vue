@@ -33,7 +33,7 @@
           </th>
           <th
             v-if="variant === 'balance'"
-            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
+            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right assets-table__total"
           >
             {{ $t('context.assets.total') }}
           </th>
@@ -470,7 +470,7 @@ function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations,
       @apply pl-6 rounded-tl-xl rounded-bl-xl;
     }
 
-    &:last-child {
+    &:last-child:not(.assets-table__total) {
       @apply pr-6 rounded-tr-xl rounded-br-xl;
     }
   }
