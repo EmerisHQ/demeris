@@ -49,9 +49,11 @@ export default function useAccount() {
     },
     { immediate: true },
   );
+
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
   };
+
   const userAccountBalances = computed(() => {
     const sortedBalances = {
       verified: [],
@@ -68,9 +70,11 @@ export default function useAccount() {
 
     return sortedBalances;
   });
+
   const allLoaded = computed(() => {
     return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
   });
+
   const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
 
   const getNativeBalances = (
@@ -127,6 +131,21 @@ export default function useAccount() {
     );
   };
 
+  /* Account Balances that could enter the stake process */
+  const stakableBalances = computed(() => getStakableBalances({ balances }));
+
+  const getStakableBalances = (
+    { balances }: { balances?: EmerisAPI.Balances | Ref<EmerisAPI.Balances> } = {
+      balances: [],
+    },
+  ) => {
+    const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
+
+    return unref(balances).filter(
+      (balance) => verifiedDenoms.find((denom) => denom.name == balance.base_denom)?.stakable,
+    );
+  };
+
   const stakingBalances = computed(() => {
     return store.getters[GlobalGetterTypes.API.getAllStakingBalances] || [];
   });
@@ -137,6 +156,17 @@ export default function useAccount() {
         return item.chain_name === chain_name;
       }
     });
+  };
+
+  const stakingAmountByChain = (chain_name: string) => {
+    let stakedAmount = 0;
+    const stakedAmounts = stakingBalancesByChain(chain_name);
+    let totalStakedAmount = 0;
+    if (stakedAmounts.length > 0) {
+      stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+      totalStakedAmount = totalStakedAmount + stakedAmount;
+    }
+    return totalStakedAmount;
   };
 
   const unbondingDelegations = computed(() => {
@@ -166,6 +196,8 @@ export default function useAccount() {
     balances,
     nativeBalances,
     getNativeBalances,
+    stakableBalances,
+    getStakableBalances,
     allbalances,
     balancesByDenom,
     orderBalancesByPrice,
@@ -175,6 +207,7 @@ export default function useAccount() {
     stakingBalances,
     stakingBalancesByChain,
     allLoaded,
+    stakingAmountByChain,
     unbondingDelegations,
     unbondingDelegationsByChain,
   };

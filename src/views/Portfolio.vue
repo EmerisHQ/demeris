@@ -10,19 +10,31 @@
           </div>
         </header>
         <section class="mt-16">
-          <header class="flex justify-between items-center mb-6">
+          <header v-if="!featureRunning('STAKING_PORTFOLIO')" class="flex justify-between items-center mb-6 mt-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
             <router-link class="font-medium" to="/assets"> {{ $t('generic_cta.seeall') }} &rarr; </router-link>
           </header>
           <template v-if="initialLoadComplete">
+            <FeatureRunningConditional name="STAKING_PORTFOLIO">
+              <AssetsFilter
+                class="mb-8"
+                :assets-length="assetsLength"
+                :assets-staking-length="assetsStakingLength"
+                @active-filter="(value) => (activeFilter = value)"
+              />
+            </FeatureRunningConditional>
             <AssetsTable
+              v-if="!featureRunning('STAKING_PORTFOLIO') || activeFilter === 'all'"
               :balances="balances"
               :hide-zero-assets="true"
               variant="balance"
               :show-headers="false"
+              :show-available-asset="true"
               :limit-rows="4"
               @row-click="openAssetPage"
             />
+            <StakeTableBanner v-if="activeFilter === 'staking' && assetsStakingLength === 0" />
+            <StakingTable v-else-if="activeFilter === 'staking'" @row-click="openAssetPage" />
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
@@ -54,7 +66,7 @@
           <DexSwap />
         </FeatureRunningConditional>
         <Intro class="mt-4" />
-        <FeatureRunningConditional name="STAKING">
+        <FeatureRunningConditional v-if="!featureRunning('STAKING_PORTFOLIO')" name="STAKING">
           <PortfolioStakingBanner :balances="balances" class="mt-4" />
         </FeatureRunningConditional>
       </aside>
@@ -64,11 +76,15 @@
 
 <script setup lang="ts">
 import { computed } from '@vue/runtime-core';
+import groupBy from 'lodash.groupby';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
+import AssetsFilter from '@/components/assets/AssetsFilter';
 import AssetsTable from '@/components/assets/AssetsTable';
 import PortfolioStakingBanner from '@/components/banners/PortfolioStakingBanner.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
@@ -78,6 +94,7 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import StakingTable from '@/components/stake/StakingTable/StakingTable.vue';
 import DexSwap from '@/components/swap/DexSwap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
@@ -85,6 +102,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 
 const { t } = useI18n({ useScope: 'global' });
 pageview({ page_title: 'Portfolio', page_path: '/' });
@@ -95,10 +113,13 @@ useMeta(
 );
 
 const router = useRouter();
-const { balances } = useAccount();
+const { balances, stakingBalances } = useAccount();
 const { pools } = usePools();
 
 const store = useStore();
+
+const activeFilter = ref('all');
+
 const openAssetPage = (asset: Record<string, string>) => {
   router.push({ name: 'Asset', params: { denom: asset.denom } });
 };
@@ -110,11 +131,21 @@ const openPoolsPage = () => {
 const initialLoadComplete = computed(() => {
   return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
 });
+
+const assetsLength = computed(() => {
+  return Object.keys(groupBy(balances.value, 'base_denom')).length;
+});
+
+const assetsStakingLength = computed(() => {
+  return Object.keys(groupBy(stakingBalances.value, 'chain_name')).length;
+});
+
 const poolsInvested = computed(() => {
   const poolsCopy = pools.value?.slice() ?? [];
   return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
 });
 </script>
+
 <style lang="scss" scoped>
 ::v-deep(.skeleton-loader) {
   margin-top: 0;
