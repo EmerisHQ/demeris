@@ -29,7 +29,7 @@
             v-if="variant === 'balance'"
             class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
           >
-            {{ $t('context.assets.balance') }}
+            {{ $t('context.assets.amount') }}
           </th>
           <th
             v-if="variant === 'balance'"
@@ -70,7 +70,6 @@
                     denom: asset.denom,
                     amount: `${asset.totalAmount - asset.stakedAmount - asset.unstakedAmount}`,
                   }"
-                  :label="$t('context.assets.available')"
                 />
               </td>
             </FeatureRunningConditional>
