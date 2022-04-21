@@ -160,7 +160,10 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
 
         if (data?.result?.tx_result) {
-          return handleSuccess({ ...data.result, height: data.result.height });
+          if (data.result.tx_result.code === 0) {
+            return handleSuccess({ ...data.result, height: data.result.height });
+          }
+          return handleError(new Error(data.result.tx_result.log));
         }
       };
 
