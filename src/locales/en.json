@@ -509,6 +509,7 @@
       },
       "assets": {
         "title": "Assets",
+        "total": "Total",
         "totalBalance": "Total balance",
         "asset": "Asset",
         "ticker": "Ticker",
@@ -520,7 +521,13 @@
         "lastWeek": "Last 7 Days",
         "lastDay": "24h",
         "viewAll": "View all",
-        "available": "available"
+        "available": "Available"
+      },
+      "staking": {
+        "asset": "Asset",
+        "staked": "Staked",
+        "apr": "APR",
+        "claimable": "Claimable"
       },
       "airdrops": {
         "title": "Airdrops",
