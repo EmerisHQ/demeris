@@ -1,4 +1,4 @@
-import liquidityModules from '@starport/tendermint-liquidity-js';
+import liquidityModules from '@clockwork-projects/cosmos-gaia-js';
 import { Store } from 'vuex';
 
 import env from './env';
