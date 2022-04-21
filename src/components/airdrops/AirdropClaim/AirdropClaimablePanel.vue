@@ -61,8 +61,8 @@
       <div class="lg:w-1/2 md:w-1/2 w-1/2 py-8 px-6">
         <p class="lg:text-2 sm:text-0 font-bold mb-4">{{ $t('context.airdrops.claimablepanel.noAirdropsToClaim') }}</p>
         <p class="-text-1 text-dark mb-1">
-          {{ $t('context.airdrops.claimablepanel.checkOutForEligibility')
-          }}<Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+          {{ $t('context.airdrops.claimablepanel.checkOutForEligibility') }}
+          <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2 inline-flex" />
         </p>
       </div>
 
