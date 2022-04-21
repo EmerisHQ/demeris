@@ -84,7 +84,7 @@
 
       <aside class="-mt-32 flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
         <AirdropClaim :selected-airdrop="selectedAirdrop" />
-        <AirdropsCurrentBalance :selected-airdrop="selectedAirdrop" class="mt-8" />
+        <!-- <AirdropsCurrentBalance :selected-airdrop="selectedAirdrop" class="mt-8" /> -->
       </aside>
     </div>
   </NoMarginLayout>
@@ -99,7 +99,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
-import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
+// import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
 import GoBack from '@/components/common/headers/GoBack.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
@@ -114,7 +114,7 @@ export default defineComponent({
     NoMarginLayout,
     AirdropClaim,
     GoBack,
-    AirdropsCurrentBalance,
+    // AirdropsCurrentBalance,
     Divider,
     LinkIcon,
     InformationIcon,
