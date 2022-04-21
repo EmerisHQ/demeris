@@ -20,7 +20,8 @@
         { 'py-3.5 px-8': name && variant !== 'link' && size === 'md' },
         { 'py-2.5 px-5': name && variant !== 'link' && size === 'sm' },
         { 'w-full': fullWidth },
-        { 'rounded-full': rounded },
+        { '!shadow-none': !shadow },
+        { '!rounded-full': rounded }, // Was not working at all (sizes were overriding the rounded property)
         {
           'bg-surface shadow-button transform focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
             variant !== 'link',
@@ -42,15 +43,13 @@
         <Spinner :size="2.5" :variant="variant === 'link' ? 'solid' : 'gold'" style="transform: scale(0.6)" />
       </div>
 
-      <span
-        v-if="name"
-        class="inline-flex gap-x-2 items-center"
-        :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
-        ><slot /><span>{{ name }}</span
-        ><slot name="right"
-      /></span>
+      <span v-if="name" class="inline-flex gap-x-2 items-center" :class="textClasses">
+        <slot />
+        {{ name }}
+        <slot name="right" />
+      </span>
 
-      <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
+      <span v-else :class="textClasses"><slot /></span>
     </button>
     <tippy ref="buttonTooltipRef" class="h-0 block" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
@@ -73,6 +72,8 @@ export default defineComponent({
     size: { type: String, required: false, default: 'md' }, // 'sm'
     fullWidth: { type: Boolean, required: false, default: true },
     rounded: { type: Boolean, required: false },
+    capitalize: { type: Boolean, required: false },
+    shadow: { type: Boolean, required: false, default: true },
     status: { type: String, required: false, default: 'active' }, // 'loading'
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
@@ -92,6 +93,7 @@ export default defineComponent({
         }
       }
     }
+
     const alignTextStyle = computed(() => {
       if (!props.name && !props.alignText) return 'flex items-center justify-center';
       if (props.alignText === 'center') return 'flex items-center justify-center';
@@ -100,10 +102,19 @@ export default defineComponent({
       return '';
     });
 
-    return { alignTextStyle, buttonTooltipRef, toggleToolTip, emit };
+    const textClasses = computed(() => {
+      return [
+        { invisible: props.status === 'loading' },
+        { relative: props.variant === 'link' },
+        { capitalize: props.capitalize },
+      ];
+    });
+
+    return { alignTextStyle, textClasses, buttonTooltipRef, toggleToolTip, emit };
   },
 });
 </script>
+
 <style lang="scss" scoped>
 .button-primary,
 .button-secondary {

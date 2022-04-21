@@ -107,7 +107,7 @@
                 </span>
               </template>
               <template #chainName>
-                <ChainName :name="'cosmos-hub'" />
+                <ChainName :name="lastResult.chain_name" />
               </template>
             </i18n-t>
 
@@ -129,7 +129,7 @@
                 </span>
               </template>
               <template #chainName>
-                <ChainName :name="'cosmos-hub'" />
+                <ChainName :name="lastResult.chain_name" />
               </template>
             </i18n-t>
           </template>

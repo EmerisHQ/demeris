@@ -24,10 +24,6 @@ export interface AirdropActionsInterface {
     payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
   ): Promise<void>;
   [ActionTypes.AIRDROPS_ELIGIBILITY_CHECK](context: APIActionContext): void;
-  [ActionTypes.SET_SELECTED_AIRDROP](
-    context: APIActionContext,
-    payload: ActionParams<EmerisAirdrops.selectedAirdropReq>,
-  ): void;
 }
 
 export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInterface = {
@@ -77,9 +73,6 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
       });
       throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
     }
-  },
-  [ActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
-    commit(MutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
   },
   async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
     try {
