@@ -97,6 +97,8 @@
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 

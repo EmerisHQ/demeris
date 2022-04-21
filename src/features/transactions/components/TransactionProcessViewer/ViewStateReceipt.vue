@@ -260,6 +260,7 @@
 </template>
 
 <script lang="ts" setup>
+/* eslint-disable max-lines */
 import BigNumber from 'bignumber.js';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';

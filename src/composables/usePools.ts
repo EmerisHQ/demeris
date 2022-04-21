@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 

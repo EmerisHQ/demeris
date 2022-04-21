@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import { AminoMsg } from '@cosmjs/amino';
 import {
   MsgCreatePool,
   MsgDepositWithinBatch,
