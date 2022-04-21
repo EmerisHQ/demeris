@@ -37,7 +37,7 @@
       ]"
       :disabled="disabled"
       class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none text-ellipsis whitespace-nowrap outline-offset-4"
-      @click.stop="clickFunction?.($event), emit('click', $event)"
+      @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
         <Spinner :size="1" :variant="variant === 'link' ? 'solid' : 'gold'" />

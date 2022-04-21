@@ -12,8 +12,8 @@
       size="sm"
       :disabled="totalRewardsAmount <= 0"
       :name="$t('components.stakeTable.claim')"
-      :click-function="() => $router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`)"
       class="pl-4"
+      @click.stop="() => $router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`)"
     />
   </div>
 </template>
