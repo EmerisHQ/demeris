@@ -523,6 +523,12 @@
         "viewAll": "View all",
         "available": "Available"
       },
+      "staking": {
+        "asset": "Asset",
+        "staked": "Staked",
+        "apr": "APR",
+        "claimable": "Claimable"
+      },
       "airdrops": {
         "title": "Airdrops",
         "allAirdrops": "All airdrops",

@@ -3,10 +3,25 @@
     <!-- STAKING TABLE -->
     <table class="staking-table -ml-6">
       <colgroup>
-        <col v-for="(span, index) in tableColumns" :key="`table--staking__col-${index}`" :span="span" />
+        <col v-for="(width, index) in tableColumns" :key="`table--staking__col-${index}`" :width="width" />
       </colgroup>
 
-      <thead v-if="props.hasHeaders" class="hidden md:table-header-group text-muted"></thead>
+      <thead v-if="props.hasHeaders" class="hidden md:table-header-group text-muted">
+        <tr>
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-left">
+            {{ $t('context.staking.asset') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-right">
+            {{ $t('context.staking.staked') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-right">
+            {{ $t('context.staking.apr') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-right">
+            {{ $t('context.staking.claimable') }}
+          </th>
+        </tr>
+      </thead>
 
       <tbody>
         <tr
@@ -32,7 +47,6 @@
             <Price
               class="font-medium"
               :amount="{ denom: chain.stakableBaseDenom, amount: stakingAmountByChain(chain.name) + '' }"
-              :label="$t('components.stakeTable.staked')"
             />
           </td>
 
@@ -41,11 +55,7 @@
           </td>
 
           <td class="align-middle text-right group-hover:bg-fg transition">
-            <StakingRewardsAmountClaim
-              :denom="chain.stakableBaseDenom"
-              :label="$t('components.stakeTable.toClaim')"
-              has-button
-            />
+            <StakingRewardsAmountClaim :denom="chain.stakableBaseDenom" has-button />
           </td>
         </tr>
       </tbody>
@@ -82,7 +92,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['row-click']);
 
-const tableColumns = ref(['1', '2', '3', '4']);
+const tableColumns = ref(['20%', '15%', '25%', '40%']);
 
 const stakedDenoms = computed(() => {
   const chainsSet = [...new Set(stakingBalances.value.map((item) => item.chain_name))];
@@ -106,6 +116,14 @@ const handleClick = (assetName) => {
 
     &:last-child {
       @apply pr-6 rounded-tr-xl rounded-br-xl;
+    }
+  }
+
+  thead {
+    th {
+      &:last-child {
+        @apply pr-32;
+      }
     }
   }
 }
