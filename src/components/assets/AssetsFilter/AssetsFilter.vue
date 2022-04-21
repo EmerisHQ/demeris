@@ -1,6 +1,6 @@
 <template>
   <!-- Assets filter portfolio area -->
-  <div class="flex items-center gap-x-3">
+  <div class="assets-filters flex items-center gap-x-3">
     <Button
       size="sm"
       :variant="activeFilter === 'all' ? 'primary' : 'secondary'"
@@ -51,3 +51,11 @@ const setActiveFilter = (newActiveFilter: string): void => {
   emit('activeFilter', newActiveFilter);
 };
 </script>
+
+<style lang="scss" scoped>
+.assets-filters {
+  ::v-deep .button-secondary {
+    @apply bg-fg-solid;
+  }
+}
+</style>
