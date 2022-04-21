@@ -1,6 +1,6 @@
 <template>
   <div v-for="(mappedItem, mappedIndex) in mappedAirdrops" :key="mappedIndex">
-    <table v-if="mappedItem.sectionTitle !== 'all' && mappedItem.sectionTitle !== 'past'" class="assets-table w-full">
+    <table v-if="showSectionTitle(mappedItem.sectionTitle)" class="assets-table w-full">
       <tbody>
         <tr>
           <td
@@ -142,6 +142,8 @@ import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalGetterTypes } from '@/store';
+import { typedstore } from '@/store/setup';
 import { AirdropDateStatus } from '@/types/api';
 import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
@@ -192,14 +194,20 @@ export default defineComponent({
       return watchedAirdrops.value.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
     });
 
+    const isDemoAccount = computed(() => {
+      return (
+        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
+        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      );
+    });
+
     const sections = computed(() => {
       if (props.activeFilter === 'mine') {
         if (noAirdropsToClaim.value) return ['CLAIMED', 'NOT_STARTED'];
         else return ['CLAIMABLE', 'CLAIMED', 'NOT_STARTED'];
-      } else if (props.activeFilter === 'upcoming') {
-        return ['ELIGIBLE', 'ELIGIBILITY_UNAVAILABLE', 'NOT_ELIGIBLE'];
-      } else if (props.activeFilter === 'live') {
-        return ['ELIGIBLE', 'more_live'];
+      } else if (props.activeFilter === 'upcoming' || props.activeFilter === 'live') {
+        if (isDemoAccount.value) return [];
+        else return ['ELIGIBLE', 'ELIGIBILITY_UNAVAILABLE', 'NOT_ELIGIBLE'];
       }
       return [];
     });
@@ -216,6 +224,51 @@ export default defineComponent({
           shouldMinimize: false,
         };
         mappedAirdrops.value.push(mappedAirdropsObj);
+      } else if (activeFilter === 'upcoming' && sections.value.length === 0) {
+        const mappedAirdropsObj = {
+          sectionTitle: 'upcoming',
+          airdrops: watchedAirdrops.value.filter(
+            (airdropItem) =>
+              airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
+              airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED,
+          ),
+          shouldMinimize: false,
+        };
+        mappedAirdrops.value.push(mappedAirdropsObj);
+      } else if (activeFilter === 'upcoming' && sections.value.length > 0) {
+        sections.value.forEach((item) => {
+          const airdrops = watchedAirdrops.value.filter(
+            (airdropItem) =>
+              airdropItem.eligibility === item &&
+              (airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
+                airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED),
+          );
+          const mappedAirdropsObj = {
+            sectionTitle: item,
+            airdrops,
+            shouldMinimize: airdrops.length > 3,
+          };
+          mappedAirdrops.value.push(mappedAirdropsObj);
+        });
+      } else if (activeFilter === 'live' && sections.value.length === 0) {
+        const mappedAirdropsObj = {
+          sectionTitle: 'live',
+          airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ONGOING),
+          shouldMinimize: false,
+        };
+        mappedAirdrops.value.push(mappedAirdropsObj);
+      } else if (activeFilter === 'live' && sections.value.length > 0) {
+        sections.value.forEach((item) => {
+          const airdrops = watchedAirdrops.value.filter(
+            (airdropItem) => airdropItem.eligibility === item && airdropItem.dateStatus === AirdropDateStatus.ONGOING,
+          );
+          const mappedAirdropsObj = {
+            sectionTitle: item,
+            airdrops,
+            shouldMinimize: airdrops.length > 3,
+          };
+          mappedAirdrops.value.push(mappedAirdropsObj);
+        });
       } else {
         sections.value.forEach((item) => {
           const airdrops = watchedAirdrops.value.filter((airdropItem) => airdropItem.eligibility === item);
@@ -251,6 +304,12 @@ export default defineComponent({
       return title ? title.replace(/\_/g, ' ').toLowerCase() : '';
     };
 
+    const showSectionTitle = computed(() => {
+      return (title) => {
+        return title !== 'all' && title !== 'past' && title !== 'upcoming' && title !== 'live';
+      };
+    });
+
     return {
       handleClick,
       mappedAirdrops,
@@ -260,6 +319,7 @@ export default defineComponent({
       sectionTitle,
       imageLoadError,
       imageFailIndexes,
+      showSectionTitle,
     };
   },
 });
