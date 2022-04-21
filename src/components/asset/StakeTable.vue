@@ -13,8 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, onMounted, ref, toRefs } from 'vue';
 
 import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
 import StakeTableContents from '@/components/asset/StakeTableContents.vue';
@@ -22,19 +21,14 @@ import StakeTableTitle from '@/components/asset/StakeTableTitle.vue';
 import AsyncBoundary from '@/components/common/AsyncBoundary.vue';
 import useAccount from '@/composables/useAccount';
 import useChains from '@/composables/useChains';
-import useStaking, { StakingRewards } from '@/composables/useStaking';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import useStaking from '@/composables/useStaking';
 import { event } from '@/utils/analytics';
-import { getSumOfRewards } from '@/utils/basic';
 
-const store = useStore() as RootStoreTyped;
-const stakingRewardsData = ref<StakingRewards>(null);
 const selectedTab = ref<number>(1);
 
 const props = defineProps<{ denom: string }>();
 const propsRef = toRefs(props);
 
-const { getStakingRewardsByBaseDenom } = useStaking();
 const { stakingBalancesByChain } = useAccount();
 const { getChainNameByBaseDenom } = useChains();
 
@@ -52,10 +46,6 @@ const showStakingBanner = computed(() => {
   return stakingBalances.value.length === 0;
 });
 
-const isSignedIn = computed(() => {
-  return store.getters[GlobalGetterTypes.USER.isSignedIn];
-});
-
 const selectTab = (tabNumber?: number): void => {
   if (tabNumber === 2) {
     // Unstaking tab clicked
@@ -67,18 +57,8 @@ const selectTab = (tabNumber?: number): void => {
   selectedTab.value = tabNumber;
 };
 
-//  ignores denoms that are not from native chain
-const totalRewardsAmount = computed(() => {
-  return getSumOfRewards(stakingRewardsData.value?.total, props.denom);
-});
-
-watch(
-  () => isSignedIn.value,
-  async () => {
-    stakingRewardsData.value = await getStakingRewardsByBaseDenom(props.denom);
-  },
-  { immediate: true },
-);
+const { getTotalRewardsAmount } = useStaking();
+const totalRewardsAmount = getTotalRewardsAmount(props.denom);
 </script>
 <style scoped>
 * :deep(.tippy-box) {

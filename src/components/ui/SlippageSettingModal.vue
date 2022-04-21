@@ -347,7 +347,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.input) {
+:deep(.input) {
   width: v-bind(inputWidth);
   input {
     &:empty {
@@ -370,7 +370,7 @@ export default defineComponent({
   }
 }
 
-::v-deep(.input__icon) {
+:deep(.input__icon) {
   color: var(--text);
   padding: v-bind(suffixParent);
   display: flex;
@@ -378,7 +378,7 @@ export default defineComponent({
   height: inherit;
 }
 
-::v-deep(input) {
+:deep(input) {
   padding-right: 0.82rem;
   background: v-bind(inputBackground);
 }

@@ -2,8 +2,6 @@
  * @vitest-environment jsdom
  */
 
-import 'regenerator-runtime/runtime';
-
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 import VueTippy from 'vue-tippy';

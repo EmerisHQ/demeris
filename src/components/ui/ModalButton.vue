@@ -31,7 +31,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-::v-deep(.button) {
+:deep(.button) {
   --tw-shadow: none;
   background: none;
   height: 4rem;

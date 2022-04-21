@@ -90,6 +90,9 @@
           </dl>
         </section>
 
+        <!-- Token Airdrop -->
+        <AssetAirdrop :denom="denom" />
+
         <!-- Staking -->
         <template v-if="stakingEnabled">
           <section v-if="assetConfig?.stakable">
@@ -178,6 +181,7 @@ import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import AssetAirdrop from '@/components/airdrops/AssetAirdrop';
 import StakeTable from '@/components/asset/StakeTable.vue';
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -225,6 +229,7 @@ export default defineComponent({
     AreaChart,
     DexSwap,
     FeatureRunningConditional,
+    AssetAirdrop,
   },
 
   setup() {
@@ -495,5 +500,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped></style>
