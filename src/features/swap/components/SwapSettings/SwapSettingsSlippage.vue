@@ -76,7 +76,7 @@ const swapStore = useSwapStore();
 const { state } = swapStore.useSwapMachine();
 
 const data = reactive({
-  selectedOption: '0.1',
+  selectedOption: String(swapStore.slippage),
   customValue: '',
 });
 

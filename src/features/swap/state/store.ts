@@ -30,7 +30,7 @@ export const useSwapStore = defineStore('swap', {
         swaps: [],
       },
       allowCustomSlippage: false,
-      slippage: 0.1,
+      slippage: 1,
     } as SwapStoreState),
 
   getters: {

@@ -4,7 +4,7 @@
     :denom="state.context.outputCoin?.denom"
     :chain="state.context.outputCoin?.chain"
     :is-loading-amount="state.matches('updating.routes.input')"
-    @select="swap.openAssetsMenu('output')"
+    @select="swapStore.openAssetsMenu('output')"
     @update:input="send({ type: 'OUTPUT.CHANGE_AMOUNT', value: $event })"
   >
     <template #label> Receive </template>
@@ -23,7 +23,7 @@
               :expected-rate="getOrderPrice(state.context)"
               :limit-price="getLimitPrice(state.context)"
               :denom="state.context.outputCoin?.baseDenom"
-              :max-slippage="0"
+              :max-slippage="swapStore.slippage"
               :min-received="state.context.outputAmount"
             />
           </template>
@@ -51,8 +51,8 @@ import { useSwapStore } from '@/features/swap/state';
 import SwapBestPriceDetails from '../SwapBestPriceDetails.vue';
 import SwapCoin from './SwapCoin.vue';
 
-const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+const swapStore = useSwapStore();
+const { state, send } = swapStore.useSwapMachine();
 
 const currentRoute = computed(() => getCurrentRoute(state.value.context));
 const protocol = computed(() => formatProtocolName(getProtocolFromRoute(currentRoute.value)));
