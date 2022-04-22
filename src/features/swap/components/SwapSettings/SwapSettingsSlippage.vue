@@ -127,7 +127,7 @@ watch(isCustomInputFocused, () => {
 
 watch(data, () => {
   if (data.selectedOption) {
-    swapStore.slippage = data.selectedOption;
+    swapStore.setSlippage(Number(data.selectedOption));
   }
 });
 </script>
