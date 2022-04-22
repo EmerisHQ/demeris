@@ -14,7 +14,7 @@ const store = useStore();
 interface Props {
   amount: PropType<EmerisBase.Amount>;
   chain?: string;
-  trunkBigBalance?: boolean;
+  truncBigBalance?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -34,7 +34,7 @@ const displayValue = computed(() => {
 
 const displayValueTrunc = computed(() => {
   const bigBalance = displayValue.value.toFixed(0).split('').length > 2;
-  return bigBalance && props.trunkBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
+  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
 });
 
 watch(
