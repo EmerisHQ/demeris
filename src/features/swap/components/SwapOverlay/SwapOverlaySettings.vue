@@ -12,11 +12,6 @@
 
         <SwapSettingsSlippage />
       </CollapseDescription>
-
-      <!-- <CollapseDescription :is-open="isExchangesOpen" content-class="pb-4" @update:is-open="toggleExchanges">
-        <template #title>Exchanges</template>
-        <div>Exchanges content</div>
-      </CollapseDescription> -->
     </div>
   </SwapOverlay>
 </template>
@@ -35,7 +30,6 @@ import SwapOverlay from './SwapOverlay.vue';
 const swapStore = useSwapStore();
 
 const [isSlippageOpen, toggleSlippage] = useToggle(false);
-// const [isExchangesOpen, toggleExchanges] = useToggle(false);
 
 const slippageValue = computed(() => swapStore.slippage || 0.5);
 </script>

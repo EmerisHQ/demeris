@@ -78,6 +78,7 @@ const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
+
 const swapRouteSubTitle = computed(() => {
   const numberOfTransactions = countTransactiosnFromRoute(state.value.context, props.routeIndex);
   const numberOfChains = countChainsFromRoute(state.value.context, props.routeIndex);

@@ -57,7 +57,7 @@
       </dt>
       <dd class="text-right font-medium"><AmountDisplay :amount="outputAmount" /></dd>
     </dl>
-    <div v-if="alertStatus" class="px-6">
+    <div v-if="alertStatus">
       <Alert :status="alertStatus" :message="alertText" />
     </div>
   </div>

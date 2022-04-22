@@ -1,7 +1,7 @@
 <template>
   <IconButton
     v-if="canShow"
-    :data="{ type: 'custom', function: swap.toggleRoutes }"
+    :data="onClick"
     type="text"
     class="bg-surface -text-1"
     status="normal"
@@ -13,11 +13,13 @@
       </div>
       <span class="ml-5">Finding the best price</span>
     </div>
+
     <div v-else-if="numberOfExchanges >= 2" class="flex items-center">
       <CircleSymbol size="xs" variant="chain" :chain-name="protocols[0].chain" :display-status="false" />
       <span class="ml-1.5">{{ numberOfExchanges }} DEXs</span>
     </div>
-    <div v-else class="flex items-center">
+
+    <div v-else-if="protocols.length" class="flex items-center">
       <CircleSymbol size="xs" variant="chain" :chain-name="protocols[0].chain" :display-status="false" />
       <span class="ml-1.5">{{ protocols[0].name }}</span>
     </div>
@@ -37,10 +39,11 @@ import {
   getProtocolsFromRoute,
 } from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';
+import { ButtonFunctionData } from '@/types/util';
 
-const swap = useSwapStore();
+const swapStore = useSwapStore();
 
-const { state } = swap.useSwapMachine();
+const { state } = swapStore.useSwapMachine();
 
 const canShow = computed(() => {
   if (['ready.idle', 'booting', 'idle'].some(state.value.matches)) return false;
@@ -48,9 +51,15 @@ const canShow = computed(() => {
   return true;
 });
 
+const onClick = { type: 'custom', function: swapStore.toggleRoutes } as ButtonFunctionData;
+
 const numberOfExchanges = computed(() => protocols.value.length);
+
 const protocols = computed(() => {
-  const protocols = getProtocolsFromRoute(getCurrentRoute(state.value.context));
+  const route = getCurrentRoute(state.value.context);
+  if (!route) return [];
+
+  const protocols = getProtocolsFromRoute(route);
   return protocols.map((protocol) => {
     return { chain: getChainFromProtocol(protocol), name: formatProtocolName(protocol) };
   });
