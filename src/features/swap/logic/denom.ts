@@ -127,7 +127,7 @@ export const getDenomPropertiesFromSwaps = (swaps: EmerisDEXInfo.Swaps, denom: s
   return swaps.find((item) => item.denomB.denom === denom)?.denomB;
 };
 
-export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; swaps?: EmerisDEXInfo.Swaps }) => {
+export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; swaps?: EmerisDEXInfo.Swaps } = {}) => {
   let swaps: EmerisDEXInfo.Swaps = [];
 
   if (base.swaps) swaps = base.swaps;

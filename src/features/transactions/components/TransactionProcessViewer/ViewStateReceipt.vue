@@ -100,7 +100,7 @@
                 <span class="font-bold">
                   <AmountDisplay
                     :amount="{
-                      denom: getSwapResult().inputDenom,
+                      denom: getBaseDenomSync(getSwapResult().inputDenom),
                       amount: getSwapResult().remainingInputAmount,
                     }"
                   />
@@ -122,7 +122,7 @@
                 <span class="font-bold">
                   <AmountDisplay
                     :amount="{
-                      denom: getSwapResult().outputDenom,
+                      denom: getBaseDenomSync(getSwapResult().outputDenom),
                       amount: getSwapResult().outputAmount,
                     }"
                   />
@@ -139,14 +139,14 @@
               <AmountDisplay
                 :amount="{
                   amount: getSwapResult().inputAmount,
-                  denom: getSwapResult().inputDenom,
+                  denom: getBaseDenomSync(getSwapResult().inputDenom),
                 }"
               />
               &rarr;
               <AmountDisplay
                 :amount="{
                   amount: getSwapResult().outputAmount,
-                  denom: getSwapResult().outputDenom,
+                  denom: getBaseDenomSync(getSwapResult().outputDenom),
                 }"
               />
             </div>
@@ -240,7 +240,7 @@
                 <AmountDisplay
                   :amount="{
                     amount: getSwapResult().outputAmount,
-                    denom: getSwapResult().outputDenom,
+                    denom: getBaseDenomSync(getSwapResult().outputDenom),
                   }"
                 />
                 &rarr;
@@ -272,6 +272,7 @@ import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
@@ -283,6 +284,7 @@ import { StepTransaction } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { getSumOfRewards, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { getExplorerTx, getSwappedPercent, parseSwapResults, ProvideViewerKey } from '../../transactionProcessHelpers';
 
@@ -317,7 +319,7 @@ const previewComponentMap = {
   IBCtransferBackward: PreviewTransfer,
   IBCtransferForward: PreviewTransfer,
   transfer: PreviewTransfer,
-  swap: SwapViewDetails,
+  swap: featureRunning('DEX_AGG') ? SwapViewDetails : PreviewSwap,
   stake: PreviewStake,
   multistake: PreviewStake,
   unstake: PreviewUnstake,
@@ -350,7 +352,7 @@ const goToMove = () => {
 
 const goToSend = () => {
   const amount = getSwapResult().outputAmount;
-  const denom = getSwapResult().outputDenom;
+  const denom = getBaseDenomSync(getSwapResult().outputDenom);
   router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
   removeTransactionAndClose({ source: 'send-btn' });
 };
