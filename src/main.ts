@@ -49,6 +49,7 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app.use(VueApexCharts);
 
+const messageRegex = /(Network error)|(dynamically imported module)/;
 if (featureRunning('SENTRY')) {
   Sentry.init({
     app,
@@ -61,7 +62,7 @@ if (featureRunning('SENTRY')) {
     ],
     beforeSend(event) {
       if (
-        event.message.includes('Failed to fetch dynamically imported module') &&
+        messageRegex.test(event.message) &&
         Math.random() <= parseFloat(import.meta.env.VITE_SENTRY_CUSTOM_SEND_CHANCE as string)
       ) {
         return null;
