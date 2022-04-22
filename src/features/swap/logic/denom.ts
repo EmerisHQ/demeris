@@ -138,3 +138,8 @@ export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; s
 
   return getBaseDenomSync(denom);
 };
+
+export const resolveDisplayName = (baseDenom: string) => {
+  const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
+  return config?.display_name;
+};

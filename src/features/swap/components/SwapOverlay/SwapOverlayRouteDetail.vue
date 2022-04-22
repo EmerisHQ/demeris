@@ -43,7 +43,7 @@
         />
         <div>
           <span class="font-medium"><Ticker :name="state.context.outputCoin?.denom" /></span>
-          <span class="text-muted"> · <ChainName :name="state.context.outputCoin?.chain" /></span>
+          <span class="text-muted"> · <ChainName :name="getOutputChainFromRoute(state.context, routeIndex)" /></span>
         </div>
       </dt>
 
@@ -65,6 +65,7 @@ import {
   countTransactiosnFromRoute,
   formatProtocolName,
   getDetailsFromRoute,
+  getOutputChainFromRoute,
   getProtocolFromStep,
 } from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';

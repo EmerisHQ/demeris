@@ -33,11 +33,11 @@
 
         <template #label="{ item }">
           <AmountDisplay
-            v-if="swap.selectAssetType === 'input'"
+            v-if="isInputView"
             :chain="item.chain"
             :amount="{ amount: item.totalBalance, denom: item.denom }"
           />
-          <ChainName v-if="isOutputView" :name="item.chain" />
+          <span v-if="isOutputView">{{ item.displayName }}</span>
         </template>
 
         <template #actions="{ item }">
@@ -64,7 +64,6 @@ import { computed, reactive } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
 import Search from '@/components/common/Search.vue';
@@ -73,7 +72,6 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
   denomBalancesPerChain,
-  getAvailableChainsByDenom,
   getAvailableInputAssets,
   getDenomFromBaseDenom,
   resolveBaseDenom,
@@ -106,16 +104,16 @@ const getAvailableChains = (asset: any) => {
     return Object.keys(denomBalancesPerChain(state.value.context, asset.denom));
   }
 
-  return getAvailableChainsByDenom(state.value.context, asset.baseDenom);
+  return [];
 };
 
 const selectAsset = (asset: any) => {
   data.selectedDenom = asset.denom;
-  data.selectedChain = asset.chain;
   if (getAvailableChains(asset).length <= 1) {
     dispatchUpdate();
     return closeMenu();
   }
+  data.selectedChain = asset.chain;
   data.shownChainMenu = true;
 };
 

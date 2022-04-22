@@ -13,7 +13,6 @@ export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
 export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {
   const payload = {
     chainIn: context.inputCoin.chain,
-    chainOut: context.outputCoin.chain,
     denomIn: context.inputCoin.denom,
     denomOut: context.outputCoin.denom,
     amountIn: amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom }).amount,
@@ -24,6 +23,9 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
   if (direction === 'output') payload.amountIn = null;
 
   const { data } = await axios.post('https://api.dev.emeris.com/v1/daggregation/routing', payload);
+  if (data.routes?.length === 0) {
+    throw new Error('No swaps available');
+  }
   return data.routes;
 };
 
