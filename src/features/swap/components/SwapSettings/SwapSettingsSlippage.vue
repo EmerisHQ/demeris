@@ -57,14 +57,19 @@
       </dt>
       <dd class="text-right font-medium"><AmountDisplay :amount="outputAmount" /></dd>
     </dl>
+    <div v-if="alertStatus" class="px-6">
+      <Alert :status="alertStatus" :message="alertText" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useToggle } from '@vueuse/core';
 import { computed, reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 
 import { amountToUnit, getOrderPrice } from '../../logic';
@@ -74,6 +79,7 @@ const slippageOptions = ['0.1', '0.5', '1'];
 
 const swapStore = useSwapStore();
 const { state } = swapStore.useSwapMachine();
+const { t } = useI18n({ useScope: 'global' });
 
 const data = reactive({
   selectedOption: String(swapStore.slippage),
@@ -105,6 +111,22 @@ const showCustomPlaceholder = computed(() => {
   if (isCustomInputFocused.value) return false;
   if (data.customValue !== '') return false;
   return true;
+});
+
+const alertStatus = computed(() => {
+  if (Number(data.selectedOption) >= 20 && Number(data.selectedOption) <= 100) {
+    return 'warning';
+  } else {
+    return null;
+  }
+});
+
+const alertText = computed(() => {
+  if (alertStatus.value === 'warning') {
+    return t('components.slippageSettingsModal.highSlippageMessage');
+  } else {
+    return '';
+  }
 });
 
 watch(isCustomInputFocused, () => {
