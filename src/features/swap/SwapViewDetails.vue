@@ -72,8 +72,8 @@
           <AmountDisplay v-for="fee of txFeesAmount" :key="fee.denom" :amount="fee" />
         </dd>
 
-        <dt class="text-muted">Swap fee</dt>
-        <dd class="text-right">
+        <dt v-if="false" class="text-muted">Swap fee</dt>
+        <dd v-if="false" class="text-right">
           <AmountDisplay :amount="{ amount: '0', denom: 'uatom' }" />
         </dd>
       </dl>
