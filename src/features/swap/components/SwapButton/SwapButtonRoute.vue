@@ -13,9 +13,13 @@
       </div>
       <span class="ml-5">Finding the best price</span>
     </div>
-    <div v-else-if="currentProtocol" class="flex items-center">
-      <CircleSymbol size="xs" variant="chain" :chain-name="currentProtocol.chain" :display-status="false" />
-      <span class="ml-1.5">{{ currentProtocol.name }}</span>
+    <div v-else-if="numberOfExchanges >= 2" class="flex items-center">
+      <CircleSymbol size="xs" variant="chain" :chain-name="protocols[0].chain" :display-status="false" />
+      <span class="ml-1.5">{{ numberOfExchanges }} DEXs</span>
+    </div>
+    <div v-else class="flex items-center">
+      <CircleSymbol size="xs" variant="chain" :chain-name="protocols[0].chain" :display-status="false" />
+      <span class="ml-1.5">{{ protocols[0].name }}</span>
     </div>
   </IconButton>
 </template>
@@ -26,7 +30,12 @@ import { computed } from 'vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { formatProtocolName, getChainFromProtocol, getCurrentRoute, getProtocolFromRoute } from '@/features/swap/logic';
+import {
+  formatProtocolName,
+  getChainFromProtocol,
+  getCurrentRoute,
+  getProtocolsFromRoute,
+} from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';
 
 const swap = useSwapStore();
@@ -39,15 +48,11 @@ const canShow = computed(() => {
   return true;
 });
 
-const currentProtocol = computed(() => {
-  const route = getCurrentRoute(state.value.context);
-  if (!route) return;
-  const protocol = getProtocolFromRoute(route);
-  const chain = getChainFromProtocol(protocol);
-
-  return {
-    chain: chain,
-    name: formatProtocolName(protocol),
-  };
+const numberOfExchanges = computed(() => protocols.value.length);
+const protocols = computed(() => {
+  const protocols = getProtocolsFromRoute(getCurrentRoute(state.value.context));
+  return protocols.map((protocol) => {
+    return { chain: getChainFromProtocol(protocol), name: formatProtocolName(protocol) };
+  });
 });
 </script>

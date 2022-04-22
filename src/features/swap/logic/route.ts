@@ -40,6 +40,16 @@ export const getProtocolFromRoute = (route: any) => {
   return getProtocolFromStep(route?.steps?.[0]);
 };
 
+export const getProtocolsFromRoute = (route: any) => {
+  const protocols = [];
+  for (const step of route?.steps) {
+    const protocol = getProtocolFromStep(step);
+    if (protocols.includes(protocol)) continue;
+    protocols.push(protocol);
+  }
+  return protocols;
+};
+
 export const getCurrentRoute = (context: any) => {
   return context.data.routes[context.selectedRouteIndex];
 };
@@ -122,7 +132,6 @@ export const countExchangesFromRoutes = (context: SwapContext) => {
       protocols.push(step.protocol);
     }
   }
-
   return protocols.length;
 };
 

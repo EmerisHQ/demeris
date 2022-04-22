@@ -7,8 +7,7 @@
       </Button>
     </template>
     <template #caption>
-      {{ countTransactiosnFromRoute(state.context, routeIndex) }} transactions across
-      {{ countChainsFromRoute(state.context, routeIndex) }} chains
+      {{ swapRouteSubTitle }}
     </template>
 
     <dl class="timeline-container relative space-y-5 mt-2">
@@ -78,6 +77,17 @@ const swap = useSwapStore();
 const { state } = swap.useSwapMachine();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
+const swapRouteSubTitle = computed(() => {
+  const numberOfTransactions = countTransactiosnFromRoute(state.value.context, props.routeIndex);
+  const numberOfChains = countChainsFromRoute(state.value.context, props.routeIndex);
+  if (numberOfChains <= 1) {
+    return numberOfTransactions === 1 ? `1 transaction` : `${numberOfTransactions} transactions`;
+  } else {
+    return numberOfTransactions === 1
+      ? `1 transaction across ${numberOfChains} chains`
+      : `${numberOfTransactions} transactions across ${numberOfChains} chains`;
+  }
+});
 </script>
 
 <style lang="postcss" scoped>
