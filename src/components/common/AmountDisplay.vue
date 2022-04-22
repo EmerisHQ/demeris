@@ -1,5 +1,5 @@
 <template>
-  <span>{{ displayValueDecimals }} {{ ticker }}</span>
+  <span :title="`${displayValue}`">{{ displayValueTrunc }} {{ ticker }}</span>
 </template>
 <script lang="ts" setup>
 import { EmerisBase } from '@emeris/types';
@@ -14,7 +14,7 @@ const store = useStore();
 interface Props {
   amount: PropType<EmerisBase.Amount>;
   chain?: string;
-  decimals?: number;
+  trunkBigBalance?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -32,8 +32,9 @@ const displayValue = computed(() => {
   return parseInt(props.amount.amount) / Math.pow(10, precision.value);
 });
 
-const displayValueDecimals = computed(() => {
-  return props.decimals ? displayValue.value.toFixed(props.decimals) : displayValue.value;
+const displayValueTrunc = computed(() => {
+  const bigBalance = displayValue.value.toFixed(0).split('').length > 2;
+  return bigBalance && props.trunkBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
 });
 
 watch(
