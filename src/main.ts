@@ -49,7 +49,7 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app.use(VueApexCharts);
 
-const messageRegex = /(Network error)|(dynamically imported module)/;
+const messageRegex = /(Network Error)|(dynamically imported module)/;
 if (featureRunning('SENTRY')) {
   Sentry.init({
     app,
