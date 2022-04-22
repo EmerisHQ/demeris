@@ -36,7 +36,7 @@
             <StakeTableBanner v-show="activeFilter === 'staking' && assetsStakingLength === 0" />
             <StakingTable
               v-show="activeFilter === 'staking' && assetsStakingLength > 0"
-              has-headers
+              show-headers
               @row-click="openAssetPage"
             />
           </template>
