@@ -128,6 +128,10 @@ watch(isCustomInputFocused, () => {
 watch(data, () => {
   if (data.selectedOption) {
     swapStore.setSlippage(Number(data.selectedOption));
+    if (Number(data.selectedOption) >= 100) {
+      data.customValue = '100';
+      data.selectedOption = data.customValue;
+    }
   }
 });
 </script>
