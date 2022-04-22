@@ -66,15 +66,12 @@ import { computed, reactive, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
-import { GlobalGetterTypes } from '@/store';
-import { useStore } from '@/utils/useStore';
 
 import { amountToUnit, getOrderPrice } from '../../logic';
 import { useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
 
-const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state } = swapStore.useSwapMachine();
 
@@ -101,7 +98,7 @@ const outputAmount = computed(() =>
 );
 
 const allowCustomSlippage = computed(() => {
-  return globalStore.getters[GlobalGetterTypes.USER.allowCustomSlippage];
+  return swapStore.allowCustomSlippage;
 });
 
 const showCustomPlaceholder = computed(() => {
@@ -125,6 +122,12 @@ watch(isCustomInputFocused, () => {
     } else {
       data.selectedOption = '0.1';
     }
+  }
+});
+
+watch(data, () => {
+  if (data.selectedOption) {
+    swapStore.slippage = data.selectedOption;
   }
 });
 </script>

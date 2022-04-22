@@ -14,6 +14,8 @@ interface SwapStoreState {
     availableDenoms: string[];
     swaps: EmerisDEXInfo.Swaps;
   };
+  allowCustomSlippage: boolean;
+  slippage: number;
 }
 
 export const useSwapStore = defineStore('swap', {
@@ -27,6 +29,8 @@ export const useSwapStore = defineStore('swap', {
         availableDenoms: [],
         swaps: [],
       },
+      allowCustomSlippage: false,
+      slippage: 0.1,
     } as SwapStoreState),
 
   getters: {

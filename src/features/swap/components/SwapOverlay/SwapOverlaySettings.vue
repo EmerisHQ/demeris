@@ -27,18 +27,15 @@ import { computed } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import { useSwapStore } from '@/features/swap/state';
-import { GlobalGetterTypes } from '@/store';
-import { useStore } from '@/utils/useStore';
 
 import CollapseDescription from '../shared/CollapseDescription.vue';
 import SwapSettingsSlippage from '../SwapSettings/SwapSettingsSlippage.vue';
 import SwapOverlay from './SwapOverlay.vue';
 
 const swapStore = useSwapStore();
-const globaStore = useStore();
 
 const [isSlippageOpen, toggleSlippage] = useToggle(false);
 const [isExchangesOpen, toggleExchanges] = useToggle(false);
 
-const slippageValue = computed(() => globaStore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5);
+const slippageValue = computed(() => swapStore.slippage || 0.5);
 </script>
