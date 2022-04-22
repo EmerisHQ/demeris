@@ -28,33 +28,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-
-const activeFilter = ref('all');
 
 interface Props {
   assetsLength?: number;
   assetsStakingLength?: number;
+  assetFilterSelected?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   assetsLength: 0,
   assetsStakingLength: 0,
+  assetFilterSelected: 'all',
 });
 
 const emit = defineEmits(['activeFilter']);
 
+const activeFilter = computed(() => props.assetFilterSelected);
+
 const setActiveFilter = (newActiveFilter: string): void => {
-  activeFilter.value = newActiveFilter;
   emit('activeFilter', newActiveFilter);
 };
 </script>
 
 <style lang="scss" scoped>
 .assets-filters {
-  ::v-deep .button-secondary {
+  :deep(.button-secondary) {
     @apply bg-fg-solid;
   }
 }

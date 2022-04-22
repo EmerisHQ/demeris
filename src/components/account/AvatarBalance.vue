@@ -90,7 +90,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.skeleton-loader) {
+:deep(.skeleton-loader) {
   margin-top: 0;
 }
 .avatar {

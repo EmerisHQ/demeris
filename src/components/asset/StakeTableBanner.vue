@@ -43,7 +43,7 @@ import { event } from '@/utils/analytics';
 const { useDenom } = useDenoms();
 
 const router = useRouter();
-const props = defineProps<{ denom: string }>();
+const props = defineProps<{ denom?: string }>();
 
 const { tickerName } = useDenom(props.denom);
 

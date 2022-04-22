@@ -1,53 +1,52 @@
 <template>
-  <span>{{ displayValue }} {{ ticker }}</span>
+  <span :title="`${displayValue}`">{{ displayValueTrunc }} {{ ticker }}</span>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
 import { EmerisBase } from '@emeris/types';
-import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
+import { computed, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync, getTicker } from '@/utils/actionHandler';
 
-export default defineComponent({
-  name: 'AmountDisplay',
-  props: {
-    amount: { type: Object as PropType<EmerisBase.Amount>, required: true },
-    chain: {
-      type: String,
-      default: undefined,
-    },
-  },
-  setup(props) {
-    const store = useStore();
-    const propsRef = toRefs(props);
+const store = useStore();
 
-    const baseDenom = computed(() => {
-      return propsRef.amount.value.denom ? getBaseDenomSync(propsRef.amount.value.denom) : '-';
-    });
-    const precision = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
-    });
-    const ticker = ref('-');
+interface Props {
+  amount: PropType<EmerisBase.Amount>;
+  chain?: string;
+  truncBigBalance?: boolean;
+}
 
-    const displayValue = computed(() => {
-      return parseInt(props.amount.amount) / Math.pow(10, precision.value);
-    });
+const props = defineProps<Props>();
+const propsRef = toRefs(props);
 
-    watch(
-      () => props.amount,
-      async () => {
-        if (props.amount.denom !== undefined) {
-          ticker.value = await getTicker(
-            props.amount.denom,
-            props.chain || store.getters[GlobalGetterTypes.API.getDexChain],
-          );
-        }
-      },
-      { immediate: true },
-    );
-
-    return { ticker, displayValue };
-  },
+const baseDenom = computed(() => {
+  return propsRef.amount.value.denom ? getBaseDenomSync(propsRef.amount.value.denom) : '-';
 });
+const precision = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom.value }) ?? 6;
+});
+const ticker = ref('-');
+
+const displayValue = computed(() => {
+  return parseInt(props.amount.amount) / Math.pow(10, precision.value);
+});
+
+const displayValueTrunc = computed(() => {
+  const bigBalance = displayValue.value.toFixed(0).split('').length > 2;
+  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
+});
+
+watch(
+  () => props.amount,
+  async () => {
+    if (props.amount.denom !== undefined) {
+      ticker.value = await getTicker(
+        props.amount.denom,
+        props.chain || store.getters[GlobalGetterTypes.API.getDexChain],
+      );
+    }
+  },
+  { immediate: true },
+);
 </script>

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { AbstractAmount } from '@emeris/types/lib/EmerisTransactions';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';

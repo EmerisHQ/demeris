@@ -29,7 +29,13 @@
             v-if="variant === 'balance'"
             class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
           >
-            {{ $t('context.assets.balance') }}
+            {{ $t('context.assets.available') }}
+          </th>
+          <th
+            v-if="variant === 'balance'"
+            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right assets-table__total"
+          >
+            {{ $t('context.assets.total') }}
           </th>
         </tr>
       </thead>
@@ -64,7 +70,6 @@
                     denom: asset.denom,
                     amount: `${asset.totalAmount - asset.stakedAmount - asset.unstakedAmount}`,
                   }"
-                  :label="$t('context.assets.available')"
                 />
               </td>
             </FeatureRunningConditional>
@@ -72,7 +77,7 @@
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
               <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
+                <AmountDisplay :amount="{ denom: asset.denom, amount: `${asset.totalAmount}` }" trunc-big-balance />
               </div>
             </td>
 
@@ -144,6 +149,9 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
@@ -464,7 +472,7 @@ function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations,
       @apply pl-6 rounded-tl-xl rounded-bl-xl;
     }
 
-    &:last-child {
+    &:last-child:not(.assets-table__total) {
       @apply pr-6 rounded-tr-xl rounded-br-xl;
     }
   }
