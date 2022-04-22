@@ -338,10 +338,24 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
       })),
       switchCoins: assign({
-        outputCoin: (context) => context.inputCoin,
+        outputCoin: (context) => {
+          if (!context.inputCoin) return undefined;
+          return {
+            denom: context.inputCoin.baseDenom,
+            baseDenom: context.inputCoin.baseDenom,
+            chain: undefined,
+          };
+        },
         inputAmount: (context) => context.outputAmount,
         outputAmount: (context) => context.inputAmount,
-        inputCoin: (context) => context.outputCoin,
+        inputCoin: (context) => {
+          if (!context.outputCoin) return undefined;
+          return {
+            denom: context.outputCoin.baseDenom,
+            baseDenom: context.outputCoin.baseDenom,
+            chain: context.inputCoin?.chain,
+          };
+        },
       }),
       setInputCoin: assign((context, event: any) => ({
         inputCoin: event.value,
