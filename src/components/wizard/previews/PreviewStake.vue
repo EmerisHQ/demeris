@@ -63,6 +63,7 @@ import Price from '@/components/common/Price.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
@@ -101,6 +102,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
+    const { getChainNameByBaseDenom } = useChains();
     const { getValidatorsByBaseDenom } = useStaking();
     const propsRef = toRefs(props);
     const { stakingBalancesByChain } = useAccount();
@@ -114,12 +116,14 @@ export default defineComponent({
       }, new BigNumber(0))
       .toString();
 
+    let chainNameToGetStakingBalances = ref<string>(null);
     onMounted(async () => {
+      chainNameToGetStakingBalances.value = await getChainNameByBaseDenom(baseDenom);
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
 
     const stakingBalances = computed(() => {
-      return stakingBalancesByChain(chainName);
+      return stakingBalancesByChain(chainNameToGetStakingBalances.value);
     });
     const getStakingBalance = (address) => {
       return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
