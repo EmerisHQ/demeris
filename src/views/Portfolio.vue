@@ -20,6 +20,7 @@
                 class="mb-8"
                 :assets-length="assetsLength"
                 :assets-staking-length="assetsStakingLength"
+                :asset-filter-selected="activeFilter"
                 @active-filter="(value) => (activeFilter = value)"
               />
             </FeatureRunningConditional>
