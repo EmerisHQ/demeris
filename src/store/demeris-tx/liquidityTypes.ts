@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { AminoMsg } from '@cosmjs/amino';
 import {
   MsgCreatePool,
   MsgDepositWithinBatch,
   MsgSwapWithinBatch,
   MsgWithdrawWithinBatch,
 } from '@clockwork-projects/cosmos-gaia-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
+import { AminoMsg } from '@cosmjs/amino';
 import { AminoMsg } from '@cosmjs/amino';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import Long from 'long';
