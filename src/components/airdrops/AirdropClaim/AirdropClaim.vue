@@ -29,7 +29,7 @@
             <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimed') }}</p>
             <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
           </div>
-          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.ended') }}</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.ended') }}</p>
         </div>
 
         <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
@@ -52,7 +52,7 @@
           <p v-else class="-text-1 text-muted mb-2">
             {{ $t('context.airdrops.claimCard.becomeEligible') }}
           </p>
-          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.comingSoon') }}</p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.comingSoon') }}</p>
         </div>
 
         <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
