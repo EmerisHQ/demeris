@@ -40,6 +40,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import {
   AbstractIBCTransferTransactionData,
   AbstractTransferTransactionData,

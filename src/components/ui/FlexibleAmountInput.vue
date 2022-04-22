@@ -36,6 +36,7 @@
   </label>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { computed, defineComponent, nextTick, PropType, reactive, ref, watch } from 'vue';
 
 import AmountInput from './AmountInput.vue';

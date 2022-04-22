@@ -16,7 +16,11 @@
                 >{{ selectedAirdrop.chainName }} {{ $t('context.airdrops.chain') }}</span
               >
             </span>
-            <span class="live-tag -text-1 ml-2 font-medium">{{ $t('context.airdrops.live') }}</span>
+            <span
+              v-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING"
+              class="live-tag -text-1 ml-2 font-medium"
+              >{{ $t('context.airdrops.live') }}</span
+            >
           </div>
         </div>
       </div>
@@ -80,13 +84,14 @@
 
       <aside class="-mt-32 flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
         <AirdropClaim :selected-airdrop="selectedAirdrop" />
-        <AirdropsCurrentBalance :selected-airdrop="selectedAirdrop" class="mt-8" />
+        <!-- <AirdropsCurrentBalance :selected-airdrop="selectedAirdrop" class="mt-8" /> -->
       </aside>
     </div>
   </NoMarginLayout>
 </template>
 
 <script lang="ts">
+import { EmerisAirdrops } from '@emeris/types';
 import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -94,7 +99,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
-import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
+// import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
 import GoBack from '@/components/common/headers/GoBack.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
@@ -109,7 +114,7 @@ export default defineComponent({
     NoMarginLayout,
     AirdropClaim,
     GoBack,
-    AirdropsCurrentBalance,
+    // AirdropsCurrentBalance,
     Divider,
     LinkIcon,
     InformationIcon,
@@ -150,7 +155,7 @@ export default defineComponent({
       router.push('/airdrops');
     };
 
-    return { selectedAirdrop, goBackToAirdropspage };
+    return { EmerisAirdrops, selectedAirdrop, goBackToAirdropspage };
   },
 });
 </script>

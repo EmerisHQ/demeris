@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed } from 'vue';

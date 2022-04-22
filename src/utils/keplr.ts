@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';

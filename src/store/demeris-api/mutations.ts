@@ -1,3 +1,6 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops, EmerisAPI } from '@emeris/types';
 import isEqual from 'lodash.isequal';
 import { MutationTree } from 'vuex';
@@ -49,7 +52,7 @@ export type Mutations<S = APIState> = {
   [MutationTypes.SET_AIRDROPS_STATUS](state: S, payload: { value: LoadingState }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
   [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
-  [MutationTypes.MAP_AIRDROPS_ELIGIBILITY](state: S, payload: { value: EmerisAirdrops.Airdrop[] }): void;
+  [MutationTypes.RESET_AIRDROPS](state: S): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -258,9 +261,8 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
     state.airdropsStatus = payload.value;
   },
-  [MutationTypes.MAP_AIRDROPS_ELIGIBILITY](state, payload) {
+  [MutationTypes.RESET_AIRDROPS](state) {
     state.airdrops = [];
-    state.airdrops = payload.value;
   },
 
   //Coingecko Mutations

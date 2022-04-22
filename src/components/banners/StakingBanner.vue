@@ -18,6 +18,7 @@
   </a>
 </template>
 <script lang="ts">
+/* eslint-disable @typescript-eslint/naming-convention */
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';

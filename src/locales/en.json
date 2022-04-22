@@ -50,6 +50,11 @@
       "asset": {
         "pooledTooltip": "Pooled assets are not added to your balance because pool ratios continuously change."
       },
+      "assetsFilter": {
+        "allAssets": "All assets",
+        "staking": "Staking",
+        "stakeAsset": "Stake asset"
+      },
       "withdrawLiquidity": {
         "title": "Withdraw liquidity",
         "navigation": {
@@ -178,7 +183,10 @@
         "claimRewards": "Claim rewards",
         "stake": "Stake",
         "unstake": "Unstake",
-        "switchValidator": "Switch validator"
+        "switchValidator": "Switch validator",
+        "staked": "Staked",
+        "toClaim": "To claim",
+        "claim": "Claim"
       },
       "validatorTable": {
         "validator": "Validator",
@@ -501,6 +509,7 @@
       },
       "assets": {
         "title": "Assets",
+        "total": "Total",
         "totalBalance": "Total balance",
         "asset": "Asset",
         "ticker": "Ticker",
@@ -511,7 +520,14 @@
         "onchain": "{amount} on {chain}",
         "lastWeek": "Last 7 Days",
         "lastDay": "24h",
-        "viewAll": "View all"
+        "viewAll": "View all",
+        "available": "Available"
+      },
+      "staking": {
+        "asset": "Asset",
+        "staked": "Staked",
+        "apr": "APR",
+        "claimable": "Claimable"
       },
       "airdrops": {
         "title": "Airdrops",
@@ -558,11 +574,16 @@
         "claimCard": {
           "ended": "Airdrop ended",
           "comingSoon": "Airdrop coming soon",
+          "eligible": "You are Eligible for this airdrop",
+          "claimable": "Claimable",
+          "claimed": "Claimed",
+          "unavailable": "Eligibility unavailable",
+          "ongoing": "Ongoing airdrop",
           "becomeEligible": "You could become eligible for this airdrop",
           "amountTitle": "Your Airdrop amount",
           "airdropAmount": "126.54 LIKE",
           "autoDrop": "Auto-drop",
-          "notAnnounced": "Not announced",
+          "notAnnounced": "Date not announced",
           "snapshotDate": "Snapshot Date",
           "starts": "Starts",
           "ends": "Ends",
@@ -691,7 +712,7 @@
       "confirm": "Confirm",
       "close": "Close",
       "continue": "Continue",
-      "signLater": "Sign transaction later",
+      "signLater": "OK",
       "noFunds": "Insufficient funds",
       "insufficientAmount": "Insufficient amount",
       "filterNoResults": "No results for '{keyword}'",
@@ -766,6 +787,9 @@
         "chains": "Chains"
       },
       "portfolio": {},
+      "stakeAsset": {
+        "select": "Select asset"
+      },
       "receive": {
         "select": "Select asset",
         "receive": "Receive",

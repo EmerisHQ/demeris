@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 

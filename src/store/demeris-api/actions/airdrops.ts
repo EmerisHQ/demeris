@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAirdrops } from '@emeris/types';
-import { Airdrop } from '@emeris/types/lib/EmerisAirdrops';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -13,6 +13,11 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
+export type GitAirdropsListReq = {
+  airdropFileName: string;
+  checkEligibility: boolean;
+};
+
 export interface AirdropActionsInterface {
   //Airdrops Action types
   [ActionTypes.GET_GIT_AIRDROPS_LIST](
@@ -21,20 +26,20 @@ export interface AirdropActionsInterface {
   ): Promise<EmerisAirdrops.AirdropList>;
   [ActionTypes.GET_AIRDROPS](
     context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAirdrops.GitAirdropsListReq>>,
+    payload: Subscribable<ActionParams<GitAirdropsListReq>>,
   ): Promise<void>;
-  [ActionTypes.AIRDROPS_ELIGIBILITY_CHECK](context: APIActionContext): void;
+  [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
 }
 
 export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInterface = {
   /**
    * Chain Logic Action types
    */
-  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
+  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
     try {
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
-        `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
+        `https://api.github.com/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
       );
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_GIT_AIRDROPS_LIST });
@@ -45,6 +50,7 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
     }
   },
   async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+    let eligibility = null;
     commit(MutationTypes.SET_AIRDROPS_STATUS, {
       value: LoadingState.LOADING,
     });
@@ -54,9 +60,14 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
         `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
 
+      if (params.checkEligibility) {
+        eligibility = await getAirdropEligibility(response.data);
+      }
+
       commit(MutationTypes.SET_AIRDROPS, {
         value: {
           ...response.data,
+          eligibility,
         },
       });
 
@@ -74,34 +85,7 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
       throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
-  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit, getters }, { subscribe = false }) {
-    try {
-      delete axios.defaults.headers.get['X-Correlation-Id'];
-      const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
-        `${getters['getGitEndpoint']}/repos/allinbits/Emeris-Airdrop/contents/airdropList`,
-      );
-      if (subscribe) {
-        commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_GIT_AIRDROPS_LIST });
-      }
-      return response.data;
-    } catch (e) {
-      throw new EmerisError('Demeris:gitAirdropsList', 'Could not perform API query.');
-    }
-  },
-  async [ActionTypes.AIRDROPS_ELIGIBILITY_CHECK]({ commit, getters }) {
-    try {
-      const airdropsWithEligibility = [];
-      const airdrops = getters['getAirdrops'];
-      airdrops.forEach(async (data: Airdrop) => {
-        const eligibility = await getAirdropEligibility(data);
-        airdropsWithEligibility.push({ ...data, eligibility: eligibility });
-      });
-
-      commit(MutationTypes.MAP_AIRDROPS_ELIGIBILITY, {
-        value: airdropsWithEligibility,
-      });
-    } catch (e) {
-      console.error('Demeris:airdropEligibilityCheck: Could not perform API query.');
-    }
+  [ActionTypes.RESET_AIRDROPS]({ commit }) {
+    commit(MutationTypes.RESET_AIRDROPS);
   },
 };

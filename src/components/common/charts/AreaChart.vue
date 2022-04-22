@@ -30,6 +30,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
 import { computed, defineComponent, PropType, ref, toRaw, watch } from 'vue';

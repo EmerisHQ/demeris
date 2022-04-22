@@ -1,6 +1,12 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
+import { registry as gaiaRegistry } from '@clockwork-projects/cosmos-gaia-js';
+import { registry as crescentRegistry } from '@clockwork-projects/crescent-network-crescent-js';
+import { registry as osmosisRegistry } from '@clockwork-projects/osmosis-labs-osmosis-js';
 import { AminoMsg } from '@cosmjs/amino';
 import mapTransaction from '@emeris/mapper';
-import { EmerisAPI, EmerisBase, EmerisFees } from '@emeris/types';
+import { EmerisAPI, EmerisBase, EmerisDEXInfo, EmerisFees } from '@emeris/types';
 import { bech32 } from 'bech32';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -25,7 +31,6 @@ export async function msgFromStepTransaction(
 ): Promise<Actions.MsgMeta> {
   const chainName = stepTx.type == 'stake' ? stepTx.data[0].chainName : stepTx.data.chainName;
 
-  const libStore = useStore();
   const typedstore = useStore() as RootStoreTyped;
   if (stepTx.type == 'transfer') {
     const msg = await (mapTransaction({
@@ -33,8 +38,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
 
   if (stepTx.type == 'IBCtransferForward') {
@@ -43,8 +47,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
 
   if (stepTx.type == 'IBCtransferBackward') {
@@ -61,8 +64,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'addLiquidity') {
     const msg = await (mapTransaction({
@@ -70,8 +72,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'withdrawLiquidity') {
     const msg = await (mapTransaction({
@@ -79,8 +80,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'createPool') {
     const msg = await (mapTransaction({
@@ -88,8 +88,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'swap') {
     const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
@@ -115,8 +114,13 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    if (stepTx.protocol == EmerisDEXInfo.DEX.Osmosis) {
+      return { msg: msg, chain_name: chainName, registry: osmosisRegistry };
+    } else if (stepTx.protocol == EmerisDEXInfo.DEX.Gravity) {
+      return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
+    } else {
+      return { msg: msg, chain_name: chainName, registry: crescentRegistry };
+    }
   }
   if (stepTx.type == 'claim') {
     const msg = await (mapTransaction({
@@ -124,8 +128,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['cosmos.distribution.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'stake') {
     const msg = await (mapTransaction({
@@ -133,8 +136,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'unstake') {
     const msg = await (mapTransaction({
@@ -142,8 +144,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
   if (stepTx.type == 'switch') {
     const msg = await (mapTransaction({
@@ -151,8 +152,7 @@ export async function msgFromStepTransaction(
       signingAddress: await getOwnAddress({ chain_name: chainName }),
       txs: [stepTx],
     }) as Promise<AminoMsg[]>);
-    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: msg, chain_name: chainName, registry };
+    return { msg: msg, chain_name: chainName, registry: gaiaRegistry };
   }
 }
 // TODO make getter so it out updates on getFeeTokens getter

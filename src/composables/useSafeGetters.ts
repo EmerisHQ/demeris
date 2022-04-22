@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { useStore } from '@/utils/useStore';
 

@@ -21,7 +21,9 @@
         </h2>
         <div class="flex items-center justify-center">
           <div class="ml-4 bg-border rounded-md px-1.5 py-2 flex items-center justify-center">
-            <p class="-text-1">{{ apr === '' ? '--.--' : apr }}% APR</p>
+            <p class="-text-1">
+              <Apr :chain="chainName" show-label />
+            </p>
           </div>
         </div>
       </div>
@@ -46,29 +48,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRefs } from '@vue/reactivity';
+import { toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Apr from '@/components/stake/Apr.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { event } from '@/utils/analytics';
-
-const { getStakingAPR } = useStaking();
 
 const emit = defineEmits(['selectTab']);
 
 const router = useRouter();
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
-const apr = ref<string>('');
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
 const store = useStore() as RootStoreTyped;
@@ -89,15 +88,6 @@ const assetPrecision = computed(() => {
 const chainName = computed(() => {
   return store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value });
 });
-
-watch(
-  () => chainName.value,
-  async () => {
-    const ret = await getStakingAPR(chainName.value);
-    apr.value = ret;
-  },
-  { immediate: true },
-);
 
 const unbondingBalances = computed(() => {
   if (!chainName.value) return;

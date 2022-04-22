@@ -2,10 +2,7 @@
   <div class="relative flex flex-col">
     <table class="assets-table -ml-6">
       <colgroup v-if="variant === 'balance'">
-        <col width="35%" />
-        <col width="20%" />
-        <col width="35%" />
-        <col width="10%" />
+        <col v-for="(width, index) in tableColumns" :key="`col-asset-table-${index}`" :width="width" />
       </colgroup>
 
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
@@ -32,7 +29,13 @@
             v-if="variant === 'balance'"
             class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
           >
-            {{ $t('context.assets.balance') }}
+            {{ $t('context.assets.available') }}
+          </th>
+          <th
+            v-if="variant === 'balance'"
+            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right assets-table__total"
+          >
+            {{ $t('context.assets.total') }}
           </th>
         </tr>
       </thead>
@@ -60,12 +63,24 @@
               <Price :amount="{ denom: asset.denom, amount: null }" />
             </td>
 
+            <FeatureRunningConditional name="STAKING_PORTFOLIO">
+              <td v-if="showAvailableAsset" class="py-5 align-middle group-hover:bg-fg transition text-right">
+                <Price
+                  :amount="{
+                    denom: asset.denom,
+                    amount: `${asset.totalAmount - asset.stakedAmount - asset.unstakedAmount}`,
+                  }"
+                />
+              </td>
+            </FeatureRunningConditional>
+
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
               <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
+                <AmountDisplay :amount="{ denom: asset.denom, amount: `${asset.totalAmount}` }" trunc-big-balance />
               </div>
             </td>
+
             <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
               <div class="flex items-center justify-center space-x-3">
                 <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
@@ -134,6 +149,9 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
@@ -147,6 +165,7 @@ import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
@@ -177,6 +196,7 @@ export default defineComponent({
     Price,
     Ticker,
     CurrencyDisplay,
+    FeatureRunningConditional,
   },
 
   props: {
@@ -187,6 +207,10 @@ export default defineComponent({
     showHeaders: {
       type: Boolean,
       default: true,
+    },
+    showAvailableAsset: {
+      type: Boolean,
+      default: false,
     },
     showAllAssets: {
       type: Boolean,
@@ -220,6 +244,12 @@ export default defineComponent({
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
     const propsRef = toRefs(props);
+
+    const tableColumns = ref(['35%', '20%', '35%', '10%']);
+    if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
+      tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
+    }
+
     const allBalances = computed(() => {
       let balances = propsRef.balances.value;
       if (props.showAllAssets) {
@@ -262,38 +292,39 @@ export default defineComponent({
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+        let stakedAmount = 0;
+        let unstakedAmount = 0;
         if (denom_details.length > 0) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
-            const stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+            stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
             totalAmount = totalAmount + stakedAmount;
           }
           if (featureRunning('STAKING')) {
-            const unstakedAmounts = unbondingDelegations.value
-              .filter((x) => x.chain_name == denom_details[0].chain_name)
-              .map((y) => y.entries)
-              .flat()
-              .map((z) => z.balance);
-            if (unstakedAmounts.length > 0) {
-              const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-              totalAmount = totalAmount + unstakedAmount;
-            }
+            unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom_details[0].chain_name);
+            totalAmount = totalAmount + unstakedAmount;
           }
         }
         return {
           denom,
           totalAmount,
+          stakedAmount,
           chainsNames,
+          unstakedAmount,
         };
       });
       if (allBalances.value.length > 0) {
         for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
+            const calcStakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+            const unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom.chain_name);
             summary.push({
               chainsNames: [denom.chain_name],
               denom: denom.name,
-              totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
+              totalAmount: calcStakedAmount,
+              stakedAmount: calcStakedAmount,
+              unstakedAmount,
             });
           }
         }
@@ -414,27 +445,35 @@ export default defineComponent({
       getUnavailableChains,
       orderedUserBalances,
       orderedAllBalances,
+      tableColumns,
     };
   },
 });
+
+// TODO : refactor to different file - probably will be used again somewhere else
+function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations, chainName: string) {
+  const unstakedAmounts = unbondingDelegations
+    .filter((x) => x.chain_name == chainName)
+    .map((y) => y.entries)
+    .flat()
+    .map((z) => z.balance);
+  if (unstakedAmounts.length > 0) return unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+  return 0;
+}
 </script>
 
 <style lang="scss" scoped>
 .assets-table {
-  width: calc(100% + 3rem);
+  @apply w-[calc(100%+3rem)];
 
   td,
   th {
     &:first-child {
-      padding-left: 1.5rem;
-      border-top-left-radius: 0.75rem;
-      border-bottom-left-radius: 0.75rem;
+      @apply pl-6 rounded-tl-xl rounded-bl-xl;
     }
 
-    &:last-child {
-      padding-right: 1.5rem;
-      border-top-right-radius: 0.75rem;
-      border-bottom-right-radius: 0.75rem;
+    &:last-child:not(.assets-table__total) {
+      @apply pr-6 rounded-tr-xl rounded-br-xl;
     }
   }
 }

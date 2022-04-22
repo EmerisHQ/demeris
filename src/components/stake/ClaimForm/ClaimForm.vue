@@ -13,6 +13,7 @@
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
