@@ -1,5 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
+import { appLogger } from '@/utils/logging';
+
 export function axiosInit() {
   axios.interceptors.request.use(axiosIntercepter);
 }
@@ -7,7 +9,9 @@ export function axiosInit() {
 const falsyRegex = /([=/]+undefined|[=/]+null)+/;
 const axiosIntercepter = (config: AxiosRequestConfig) => {
   if (falsyRegex.test(config.url) || config.url === undefined) {
-    throw new Error(`Request url includes undefined or null - [${config.url}]`);
+    const error = new Error(`Url includes falsy value - [${config.url}]`);
+    appLogger.reportSingleError(error);
+    throw error;
   }
   return config;
 };
