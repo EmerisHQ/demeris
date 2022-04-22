@@ -21,9 +21,7 @@
         </h2>
         <div class="flex items-center justify-center">
           <div class="ml-4 bg-border rounded-md px-1.5 py-2 flex items-center justify-center">
-            <p class="-text-1">
-              <Apr :chain="chainName" />
-            </p>
+            <p class="-text-1"><Apr :chain="chainName" /> APR</p>
           </div>
         </div>
       </div>
