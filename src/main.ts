@@ -49,6 +49,7 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app.use(VueApexCharts);
 
+const messageRegex = /(Network Error)|(dynamically imported module)/;
 if (featureRunning('SENTRY')) {
   Sentry.init({
     app,
@@ -59,10 +60,25 @@ if (featureRunning('SENTRY')) {
         tracingOrigins: ['app.emeris.com'],
       }),
     ],
+    beforeSend(event) {
+      if (
+        messageRegex.test(event.message) &&
+        Math.random() <= parseFloat(import.meta.env.VITE_SENTRY_CUSTOM_SEND_CHANCE as string)
+      ) {
+        return null;
+      }
+      return event;
+    },
+
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE as string),
+
+    // Changing the error sample rate requires re-deployment.
+    // In addition, setting an SDK sample rate limits visibility into the source of events.
+    // Setting a rate limit for your project (which only drops events when volume is high) may better suit your needs.
+    sampleRate: parseFloat(import.meta.env.VITE_SENTRY_SAMPLE_RATE as string),
   });
 }
 

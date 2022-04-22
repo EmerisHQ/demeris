@@ -134,6 +134,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
 import { EmerisAirdrops } from '@emeris/types';

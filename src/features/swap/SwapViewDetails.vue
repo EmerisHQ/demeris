@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col space-y-2">
-    <dl class="grid grid-cols-[auto_1fr] gap-y-6 border-y border-border py-6">
+    <dl class="grid grid-cols-[auto_1fr] gap-y-6 py-6" :class="{ 'border-y border-border': context === 'widget' }">
       <dt class="font-medium -text-1">Pay</dt>
       <dd class="place-self-end">
         <CoinDescription
@@ -64,7 +64,7 @@
 
     <CollapseDescription content-class="pb-6" is-open>
       <template #title><span class="-text-1">Fees (included)</span></template>
-      <template #label><AmountDisplay :amount="{ amount: '0', denom: 'uatom' }" /></template>
+      <template #label><AmountDisplay v-for="fee of txFeesAmount" :key="fee.denom" :amount="fee" /></template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
         <dt class="text-muted">Transaction fee</dt>
@@ -102,7 +102,7 @@ import { useSwapStore } from './state';
 // NOTE: We should not interact with the current swap machine here
 // this component is used to display a transaction in the `review` or `receipt` state.
 
-const props = defineProps(['step', 'fees']);
+const props = defineProps(['step', 'fees', 'context']);
 const swapStore = useSwapStore();
 
 const transaction = computed(() => {

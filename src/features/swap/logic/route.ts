@@ -32,6 +32,16 @@ export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: numb
   };
 };
 
+export const getOutputChainFromRoute = (context: SwapContext, routeIndex?: number) => {
+  const index = routeIndex ?? context.selectedRouteIndex;
+  const route = context.data.routes?.[index];
+
+  if (!route?.steps) return;
+
+  const lastStep = route.steps[route.steps.length - 1];
+  return getChainFromDenom(context, lastStep.data.to.denom);
+};
+
 export const getProtocolFromStep = (step: any) => {
   return step.protocol ?? step?.data?.pool_id?.split('/')[0];
 };

@@ -704,6 +704,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       hasMoreTransactions: (context) =>
         getCurrentStep(context).transactions.length > context.currentTransactionIndex + 1,
       needsTransferToHub: (context) => {
+        if (featureRunning('DEX_AGG')) return false;
+
         if (context.input.action === 'move') {
           return true;
         }

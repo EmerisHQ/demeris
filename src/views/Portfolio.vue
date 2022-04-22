@@ -20,6 +20,7 @@
                 class="mb-8"
                 :assets-length="assetsLength"
                 :assets-staking-length="assetsStakingLength"
+                :asset-filter-selected="activeFilter"
                 @active-filter="(value) => (activeFilter = value)"
               />
             </FeatureRunningConditional>
@@ -35,7 +36,7 @@
             <StakeTableBanner v-show="activeFilter === 'staking' && assetsStakingLength === 0" />
             <StakingTable
               v-show="activeFilter === 'staking' && assetsStakingLength > 0"
-              has-headers
+              show-headers
               @row-click="openAssetPage"
             />
           </template>

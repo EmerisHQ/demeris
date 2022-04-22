@@ -2,7 +2,9 @@
   <SwapCoin
     :input="state.context.outputAmount"
     :denom="state.context.outputCoin?.denom"
-    :chain="state.context.outputCoin?.chain"
+    :chain="getOutputChainFromRoute(state.context)"
+    :chain-fallback="resolveDisplayName(state.context?.outputCoin?.baseDenom)"
+    :is-loading-chain="state.matches('updating.routes')"
     :is-loading-amount="state.matches('updating.routes.input')"
     @select="swapStore.openAssetsMenu('output')"
     @update:input="send({ type: 'OUTPUT.CHANGE_AMOUNT', value: $event })"
@@ -43,8 +45,10 @@ import {
   getCurrentRoute,
   getLimitPrice,
   getOrderPrice,
+  getOutputChainFromRoute,
   getProtocolFromRoute,
   isBestRouteSelected,
+  resolveDisplayName,
 } from '@/features/swap/logic';
 import { useSwapStore } from '@/features/swap/state';
 

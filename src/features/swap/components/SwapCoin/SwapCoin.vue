@@ -32,6 +32,9 @@
         <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap">
           <ChainName :name="chain" />
         </span>
+        <span v-else-if="chainFallback" class="text-muted -text-1 whitespace-nowrap">
+          {{ chainFallback }}
+        </span>
       </button>
 
       <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">
@@ -67,6 +70,7 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 interface Props {
   chain?: string;
+  chainFallback?: string;
   denom?: string;
   input?: string;
   isLoadingAmount?: boolean;
