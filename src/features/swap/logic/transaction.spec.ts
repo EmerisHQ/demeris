@@ -1,6 +1,4 @@
 /* eslint-disable max-lines */
-import 'regenerator-runtime/runtime';
-
 import { getGravityResultFromDecodedEvents, parseEncodedEvents, resolveSwapResponse } from './transaction';
 
 const osmosisEvents = [

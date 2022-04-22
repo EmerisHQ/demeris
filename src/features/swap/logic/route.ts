@@ -136,6 +136,17 @@ export const countExchangesFromRoutes = (context: SwapContext) => {
   return protocols.length;
 };
 
+export const removeExceedingTransactionsFromRoutes = (routes: any[]) => {
+  const result = [];
+  for (const route of routes) {
+    const lastSwapIndex = route.steps.map((item) => item.type).lastIndexOf('pool');
+    route.steps = route.steps.slice(0, lastSwapIndex + 1);
+
+    result.push(route);
+  }
+  return result;
+};
+
 export const convertRouteToSteps = async (context: SwapContext, routeIndex: number): Promise<Step[]> => {
   const route = context.data.routes[routeIndex];
   if (!route) return [];

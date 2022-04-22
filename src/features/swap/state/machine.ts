@@ -314,7 +314,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       assignRoutes: assign((context, event: any) => ({
         data: {
           ...context.data,
-          routes: event.data,
+          routes: logic.removeExceedingTransactionsFromRoutes(event.data),
         },
         selectedRouteIndex: 0,
       })),
