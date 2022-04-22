@@ -18,32 +18,124 @@
         </div>
 
         <div v-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ENDED">
-          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.ended') }}</p>
-        </div>
-
-        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
-          <p class="-text-1 text-muted mb-2">{{ $t('context.airdrops.claimCard.comingSoon') }}</p>
-          <p class="text-1 font-bold">{{ $t('context.airdrops.claimCard.becomeEligible') }}</p>
-        </div>
-
-        <div v-else-if="!isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
-          <p class="-text-1 text-muted mb-2">{{ $t('context.airdrops.claimCard.amountTitle') }}</p>
-          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.airdropAmount') }}</p>
-        </div>
-
-        <div v-else-if="isAutoDropped && selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
-          <div class="inline-flex items-center mb-2">
+          <div v-if="isAutoDropped" class="inline-flex items-center mb-2">
             <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
             <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
           </div>
-          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.airdropAmount') }}</p>
+          <div
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMED"
+            class="inline-flex items-center mb-2"
+          >
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimed') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.ended') }}</p>
         </div>
 
-        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_ANNOUNCED">
-          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.notAnnounced') }}</p>
+        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.NOT_STARTED">
+          <div v-if="isAutoDropped" class="inline-flex items-center mb-2">
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.eligible') }}
+          </p>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.unavailable') }}
+          </p>
+          <p v-else class="-text-1 text-muted mb-2">
+            {{ $t('context.airdrops.claimCard.becomeEligible') }}
+          </p>
+          <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.comingSoon') }}</p>
+        </div>
+
+        <div v-else-if="selectedAirdrop.dateStatus === EmerisAirdrops.AirdropDateStatus.ONGOING">
+          <div v-if="isAutoDropped" class="inline-flex items-center mb-2">
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.NOT_ELIGIBLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.becomeEligible') }}
+          </p>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.eligible') }}
+          </p>
+          <div
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE"
+            class="inline-flex items-center mb-2"
+          >
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimable') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <div
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMED"
+            class="inline-flex items-center mb-2"
+          >
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimed') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.unavailable') }}
+          </p>
+          <p v-else class="-text-1 text-muted mb-2">
+            {{ $t('context.airdrops.claimCard.ongoing') }}
+          </p>
+          <!-- <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.airdropAmount') }}</p> -->
         </div>
 
         <div v-else>
+          <div v-if="isAutoDropped" class="inline-flex items-center mb-2">
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.autoDrop') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.NOT_ELIGIBLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.becomeEligible') }}
+          </p>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.eligible') }}
+          </p>
+          <div
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE"
+            class="inline-flex items-center mb-2"
+          >
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimable') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <div
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMED"
+            class="inline-flex items-center mb-2"
+          >
+            <p class="-text-1 text-positive-text">{{ $t('context.airdrops.claimCard.claimed') }}</p>
+            <Icon :name="'ClaimedIcon'" :icon-size="1" class="ml-1" />
+          </div>
+          <p
+            v-else-if="selectedAirdrop.eligibility === AirdropEligibilityStatus.ELIGIBILITY_UNAVAILABLE"
+            class="-text-1 text-muted mb-2"
+          >
+            {{ $t('context.airdrops.claimCard.unavailable') }}
+          </p>
+
           <p class="text-2 font-bold">{{ $t('context.airdrops.claimCard.notAnnounced') }}</p>
         </div>
       </div>
@@ -173,6 +265,7 @@ export default defineComponent({
       toggleConnectWalletModal,
       EmerisAirdrops,
       imageLoadFail,
+      AirdropEligibilityStatus,
     };
   },
 });
