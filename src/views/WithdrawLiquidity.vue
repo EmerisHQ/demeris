@@ -190,6 +190,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, reactive, Ref, ref, unref, watch } from 'vue';

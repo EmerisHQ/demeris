@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
 import { getNativeChain } from '@/utils/actionHandler';

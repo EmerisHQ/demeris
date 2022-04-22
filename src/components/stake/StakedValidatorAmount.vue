@@ -36,6 +36,7 @@
   </div>
 </template>
 <script lang="ts">
+/* eslint-disable max-lines-per-function */
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';

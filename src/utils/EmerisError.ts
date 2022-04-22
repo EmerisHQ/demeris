@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 export default class EmerisError extends Error {
   constructor(name: string, description: string) {
     super(description);

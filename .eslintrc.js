@@ -19,8 +19,46 @@ module.exports = {
     '@vue/eslint-config-prettier',
   ],
   rules: {
-    // 'max-lines': [1, { max: 300, skipBlankLines: true, skipComments: true }],
-    // 'max-lines-per-function': [1, { max: 50, skipBlankLines: true, skipComments: true }],
+    /**
+     * Typescript naming conventions
+     * Would like to turn this on at some moment, but right now it's causing too much noise
+     */
+
+    '@typescript-eslint/naming-convention': ['warn', { selector: 'variableLike', format: ['camelCase'] }],
+    '@typescript-eslint/naming-convention': [
+      'warn',
+      {
+        selector: 'memberLike',
+        modifiers: ['private'],
+        format: ['camelCase'],
+        leadingUnderscore: 'require',
+      },
+    ],
+    '@typescript-eslint/naming-convention': [
+      'warn',
+      {
+        selector: 'variable',
+        types: ['boolean'],
+        format: ['PascalCase'],
+        prefix: ['is', 'should', 'has', 'can', 'did', 'will'],
+      },
+    ],
+    '@typescript-eslint/naming-convention': [
+      'warn',
+      {
+        selector: 'variable',
+        format: ['camelCase', 'UPPER_CASE'],
+      },
+    ],
+
+    /**
+     * Max Lines + Max Lines per function.
+     * Would like to turn this on at some moment, but right now it's causing too much noise
+     */
+
+    'max-lines': [2, { max: 300, skipBlankLines: true, skipComments: true }],
+    'max-lines-per-function': [2, { max: 50, skipBlankLines: true, skipComments: true }],
+
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     'vue/multi-word-component-names': 'off',

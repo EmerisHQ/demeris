@@ -1,3 +1,6 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/naming-convention */
 import { registry as gaiaRegistry } from '@clockwork-projects/cosmos-gaia-js';
 import { registry as crescentRegistry } from '@clockwork-projects/crescent-network-crescent-js';
 import { registry as osmosisRegistry } from '@clockwork-projects/osmosis-labs-osmosis-js';

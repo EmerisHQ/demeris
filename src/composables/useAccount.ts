@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
