@@ -30,7 +30,7 @@ export const useSwapStore = defineStore('swap', {
         swaps: [],
       },
       allowCustomSlippage: false,
-      slippage: 0.1,
+      slippage: 1,
     } as SwapStoreState),
 
   getters: {
@@ -38,6 +38,14 @@ export const useSwapStore = defineStore('swap', {
   },
 
   actions: {
+    setSlippage(slippageValue: number) {
+      if (slippageValue >= 100) {
+        this.slippage = 100;
+      } else {
+        this.slippage = slippageValue ? slippageValue : 1;
+      }
+    },
+
     openAssetsMenu(type: 'input' | 'output') {
       this.selectAssetType = type;
     },
