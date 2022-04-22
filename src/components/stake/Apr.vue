@@ -1,4 +1,7 @@
-<template>{{ apr === '' ? '--.--' : apr }}%</template>
+<template>
+  {{ apr === '' ? '--.--' : apr }}%
+  <span v-if="props.showLabel">APR</span>
+</template>
 
 <script lang="ts" setup>
 import { toRefs } from '@vue/reactivity';
@@ -8,7 +11,17 @@ import useStaking from '@/composables/useStaking';
 
 const { getStakingAPR } = useStaking();
 
-const props = defineProps<{ chain: string }>();
+// Interfaces
+interface Props {
+  showLabel: boolean;
+  chain: string;
+}
+
+// Props
+const props = withDefaults(defineProps<Props>(), {
+  showLabel: false,
+  chain: '',
+});
 const propsRef = toRefs(props);
 
 const apr = ref('');
@@ -16,8 +29,7 @@ const apr = ref('');
 watch(
   () => propsRef.chain.value,
   async () => {
-    const ret = await getStakingAPR(propsRef.chain.value);
-    apr.value = ret;
+    apr.value = await getStakingAPR(propsRef.chain.value);
   },
   { immediate: true },
 );
