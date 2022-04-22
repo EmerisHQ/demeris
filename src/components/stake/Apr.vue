@@ -1,4 +1,4 @@
-<template>{{ apr === '' ? '--.--' : apr }}% APR</template>
+<template>{{ apr === '' ? '--.--' : apr }}%</template>
 
 <script lang="ts" setup>
 import { toRefs } from '@vue/reactivity';
