@@ -77,7 +77,7 @@
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
               <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
               <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount + '' }" />
+                <AmountDisplay :amount="{ denom: asset.denom, amount: `${asset.totalAmount}` }" trunc-big-balance />
               </div>
             </td>
 
@@ -247,7 +247,7 @@ export default defineComponent({
 
     const tableColumns = ref(['35%', '20%', '35%', '10%']);
     if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
-      tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
+      tableColumns.value = ['25%', '15%', '25%', '25%', '10%'];
     }
 
     const allBalances = computed(() => {
