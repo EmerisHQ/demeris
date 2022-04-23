@@ -581,19 +581,21 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           responseData.websocket = traceResult;
 
-          try {
-            const result = await resolveSwapResponse(traceResult, sourceChain);
-            responseData.result = result;
-          } catch {
-            return callback({
-              // @ts-ignore
-              type: 'GOT_FAILURE',
-              error: 'Failed to find swap results',
-              data: responseData,
-            });
+          if (currentStep.name === 'swap') {
+            try {
+              const result = await resolveSwapResponse(traceResult, sourceChain);
+              responseData.result = result;
+            } catch {
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to find swap results',
+                data: responseData,
+              });
+            }
+          } else {
+            await fetchEndBlock(traceResult.height);
           }
-
-          // await fetchEndBlock(traceResult.height);
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });
