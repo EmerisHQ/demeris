@@ -6,7 +6,7 @@ import { Step } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
-import { calculateSlippage, getOrderPrice } from './amount';
+import { amountToHuman, calculateSlippage, getOrderPrice } from './amount';
 import { getChainFromDenom, resolveBaseDenom } from './denom';
 import { chunkBy } from './utils';
 
@@ -20,10 +20,7 @@ export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: numbe
     return { amount: '0', denom: firstStep.data.from.denom };
   }
 
-  return {
-    amount: 0,
-    ...firstStep?.data?.from,
-  };
+  return firstStep.data.from;
 };
 
 export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: number): EmerisBase.Amount => {
@@ -36,13 +33,7 @@ export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: numb
     return { amount: '0', denom: lastStep.data.to.denom };
   }
 
-  const numSwaps = countSwapsFromRoute(route);
-  const amount = calculateSlippage(lastStep.data.to.amount, +context.maxSlippage, numSwaps);
-
-  return {
-    amount,
-    denom: lastStep.data.to.denom,
-  };
+  return lastStep.data.to;
 };
 
 export const getOrderPriceFromRoute = (context: SwapContext, routeIndex?: number) => {
@@ -60,6 +51,17 @@ export const getLimitPriceFromRoute = (context: SwapContext, routeIndex?: number
   const route = context.data.routes?.[index];
 
   const amount = getOrderPriceFromRoute(context, index);
+  const numSwaps = countSwapsFromRoute(route);
+
+  return calculateSlippage(amount, +context.maxSlippage, numSwaps);
+};
+
+export const getMinAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
+  const index = routeIndex ?? context.selectedRouteIndex;
+  const route = context.data.routes?.[index];
+
+  const output = getOutputAmountFromRoute(context, index);
+  const { amount } = amountToHuman(output);
   const numSwaps = countSwapsFromRoute(route);
 
   return calculateSlippage(amount, +context.maxSlippage, numSwaps);

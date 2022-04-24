@@ -1,9 +1,3 @@
-export const composeFn =
-  <T>(...fns: Array<(arg: T) => T>) =>
-  (arg: T) => {
-    return fns.reduce((acc, fn) => fn(acc), arg);
-  };
-
 export const chunkBy = <T>(items: T[], fn: (item: T) => any): T[][] => {
   const chunks: T[][] = [];
   let chunkValue: unknown;

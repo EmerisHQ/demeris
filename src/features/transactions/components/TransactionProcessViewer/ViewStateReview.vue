@@ -22,6 +22,7 @@
           :fees="state.context.fees.totals[state.context.currentStepIndex]"
           :context="isSwapComponent ? 'widget' : 'default'"
           :class="{ '-text-1': isSwapComponent }"
+          :transaction-process-context="state.context"
         />
       </div>
       <Alert

@@ -49,13 +49,13 @@
       <dt class="text-muted">Limit price</dt>
       <dd class="text-right font-medium whitespace-nowrap">
         <AmountDisplay :amount="inputAmount" /> =
-        <AmountDisplay :amount="limitAmount" />
+        <AmountDisplay :amount="limitPrice" />
       </dd>
       <dt class="text-muted">
         Min. received
         <div class="absolute">(if 100% swapped)</div>
       </dt>
-      <dd class="text-right font-medium"><AmountDisplay :amount="outputAmount" /></dd>
+      <dd class="text-right font-medium"><AmountDisplay :amount="minOutputAmount" /></dd>
     </dl>
     <div v-if="alertStatus">
       <Alert :status="alertStatus" :message="alertText" />
@@ -72,7 +72,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 
-import { amountToUnit, getLimitPriceFromRoute } from '../../logic';
+import { amountToUnit, getLimitPriceFromRoute, getMinAmountFromRoute } from '../../logic';
 import { useSwapActor, useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
@@ -91,16 +91,16 @@ const isCustomSelected = computed(() => data.selectedOption === data.customValue
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
 
-const limitAmount = computed(() =>
+const limitPrice = computed(() =>
   amountToUnit({
     amount: getLimitPriceFromRoute(state.value.context, state.value.context.selectedRouteIndex),
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );
 
-const outputAmount = computed(() =>
+const minOutputAmount = computed(() =>
   amountToUnit({
-    amount: state.value.context.outputAmount,
+    amount: getMinAmountFromRoute(state.value.context, state.value.context.selectedRouteIndex),
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );

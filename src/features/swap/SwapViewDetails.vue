@@ -43,8 +43,10 @@
           </div>
         </dd>
 
-        <dt v-if="false" class="text-muted">Route</dt>
-        <dd v-if="false" class="place-self-end">2 transactions</dd>
+        <template v-if="transactionOffset">
+          <dt class="text-muted">Route</dt>
+          <dd class="place-self-end">{{ transactionOffset.offset }} / {{ transactionOffset.total }}</dd>
+        </template>
 
         <dt class="text-muted">Limit price</dt>
         <dd class="text-right">
@@ -88,6 +90,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
+import { getTransactionOffset } from '../transactions/transactionProcessHelpers';
 import CoinDescription from './components/shared/CoinDescription.vue';
 import CollapseDescription from './components/shared/CollapseDescription.vue';
 import {
@@ -103,7 +106,7 @@ import { useSwapStore } from './state';
 // NOTE: We should not interact with the current swap machine here
 // this component is used to display a transaction in the `review` or `receipt` state.
 
-const props = defineProps(['step', 'fees', 'context']);
+const props = defineProps(['step', 'fees', 'context', 'transactionProcessContext']);
 const swapStore = useSwapStore();
 
 const transaction = computed(() => {
@@ -147,4 +150,8 @@ const txFeesAmount = computed(() => {
   }
   return amounts;
 });
+
+const transactionOffset = computed(
+  () => props.transactionProcessContext && getTransactionOffset(props.transactionProcessContext),
+);
 </script>
