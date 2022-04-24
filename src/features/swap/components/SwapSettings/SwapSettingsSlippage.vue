@@ -45,15 +45,15 @@
       </div>
     </div>
 
-    <dl v-if="state.matches('ready.valid')" class="grid grid-cols-2 gap-y-3 -text-1 mr-1">
+    <dl v-if="state.matches('ready.valid')" class="grid grid-cols-[auto_1fr] gap-y-3 -text-1 mr-1">
       <dt class="text-muted">Limit price</dt>
-      <dd class="text-right font-medium">
+      <dd class="text-right font-medium whitespace-nowrap">
         <AmountDisplay :amount="inputAmount" /> =
-        <AmountDisplay :amount="exchangeAmount" />
+        <AmountDisplay :amount="limitAmount" />
       </dd>
       <dt class="text-muted">
         Min. received
-        <div>(if 100% swapped)</div>
+        <div class="absolute">(if 100% swapped)</div>
       </dt>
       <dd class="text-right font-medium"><AmountDisplay :amount="outputAmount" /></dd>
     </dl>
@@ -72,7 +72,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 
-import { amountToUnit, getOrderPrice } from '../../logic';
+import { amountToUnit, getLimitPriceFromRoute } from '../../logic';
 import { useSwapActor, useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
@@ -91,9 +91,9 @@ const isCustomSelected = computed(() => data.selectedOption === data.customValue
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
 
-const exchangeAmount = computed(() =>
+const limitAmount = computed(() =>
   amountToUnit({
-    amount: getOrderPrice(state.value.context),
+    amount: getLimitPriceFromRoute(state.value.context, state.value.context.selectedRouteIndex),
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );
@@ -112,7 +112,7 @@ const showCustomPlaceholder = computed(() => {
 });
 
 const alertStatus = computed(() => {
-  if (Number(data.customValue) >= 20 && Number(data.customValue) <= 100) {
+  if (Number(data.selectedOption) >= 20 && Number(data.selectedOption) <= 100) {
     return 'warning';
   } else {
     return null;
@@ -149,10 +149,11 @@ onMounted(() => {
   }
 });
 
-watch(
-  () => data.selectedOption,
-  () => {
-    send({ type: 'SLIPPAGE.CHANGE', value: data.selectedOption });
-  },
-);
+watch(data, () => {
+  send({ type: 'SLIPPAGE.CHANGE', value: data.selectedOption });
+  if (Number(data.selectedOption) >= 100) {
+    data.customValue = '100';
+    data.selectedOption = data.customValue;
+  }
+});
 </script>

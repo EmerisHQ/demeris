@@ -1,6 +1,5 @@
 <template>
   <div
-    ref="wrapperRef"
     class="absolute w-full h-full inset-0 z-[10] flex flex-col rounded-xl overflow-hidden bg-surface dark:bg-fg-solid"
   >
     <div
@@ -22,8 +21,10 @@
 
     <slot name="subheader" />
 
-    <div ref="contentRef" class="flex-1 flex flex-col px-6 pb-6 pt-2 scroll-container">
-      <slot />
+    <div ref="wrapperRef" class="scroll-container">
+      <div ref="contentRef" class="flex-1 flex flex-col px-6 pb-6 pt-2 scroll-container">
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -41,7 +42,7 @@ const { Escape } = useMagicKeys();
 
 const showShadow = computed(() => {
   if (contentScroll.arrivedState.bottom) return false;
-  return contentRef.value?.scrollHeight > wrapperRef.value?.clientHeight;
+  return contentRef.value?.scrollHeight > wrapperRef.value?.clientHeight - 5;
 });
 
 whenever(Escape, () => emit('esc'));

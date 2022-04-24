@@ -6,11 +6,11 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { Step } from '@/types/actions';
 
 import * as logic from '../logic';
+import { getAvailableChainsByDenom } from '../logic';
 
 interface SwapContextData {
   availableDenoms: string[];
   routes: any[];
-  _rawRoutes: any[];
   steps: Step[];
   swaps: EmerisDEXInfo.Swaps;
 }
@@ -45,7 +45,6 @@ const defaultContext = (): SwapContext => ({
   data: {
     availableDenoms: [],
     routes: [],
-    _rawRoutes: [],
     steps: [],
     swaps: [],
   },
@@ -104,7 +103,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         actions: 'setOutputAmount',
       },
       'SLIPPAGE.CHANGE': {
-        actions: ['setSlippage', 'recalculateRoutes', 'updateOutputAmountFromRoute'],
+        actions: ['setSlippage', 'updateOutputAmountFromRoute', 'updateSlippageSession'],
       },
     },
     states: {
@@ -326,17 +325,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           data: {
             ...context.data,
             routes,
-            _rawRoutes: routes,
           },
           selectedRouteIndex: 0,
         };
       }),
-      recalculateRoutes: assign((context) => ({
-        data: {
-          ...context.data,
-          routes: logic.recalculateAmountsFromRoutes(context),
-        },
-      })),
       assignSteps: assign((context, event: any) => ({
         data: {
           ...context.data,
@@ -377,10 +369,16 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         outputAmount: (context) => context.inputAmount,
         inputCoin: (context) => {
           if (!context.outputCoin) return undefined;
+
+          const baseDenom = context.outputCoin.baseDenom;
+          const availableChains = getAvailableChainsByDenom(context, baseDenom);
+          const hasChain = availableChains.includes(context.inputCoin?.chain);
+          const defaultChain = availableChains[0];
+
           return {
             denom: context.outputCoin.baseDenom,
             baseDenom: context.outputCoin.baseDenom,
-            chain: context.inputCoin?.chain,
+            chain: hasChain ? context.inputCoin?.chain : defaultChain,
           };
         },
       }),
@@ -467,7 +465,7 @@ function createUpdateRoutesState({ onDone, invokeSrc }: { onDone: string; invoke
           src: invokeSrc,
           onDone: {
             target: '#ready',
-            actions: ['assignRoutes', 'recalculateRoutes', onDone],
+            actions: ['assignRoutes', onDone],
           },
           onError: {
             target: '#unavailable',

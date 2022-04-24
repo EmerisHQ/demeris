@@ -30,7 +30,7 @@ import SwapOverlay from './SwapOverlay.vue';
 const swapStore = useSwapStore();
 const { state } = useSwapActor();
 
-const [isSlippageOpen, toggleSlippage] = useToggle(false);
+const [isSlippageOpen, toggleSlippage] = useToggle(true);
 
 const slippageValue = computed(() => state.value.context.maxSlippage);
 </script>

@@ -25,7 +25,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, PropType, reactive, watch } from 'vue';
+import { defineComponent, nextTick, PropType, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -58,8 +58,8 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const state = reactive({
-      height: '0',
-      isOpen: false,
+      height: 'auto',
+      isOpen: props.isOpen,
     });
 
     const toggle = () => {
@@ -81,14 +81,6 @@ export default defineComponent({
       state.height = getComputedStyle(el).height;
       setTimeout(() => (state.height = '0'), 100);
     };
-
-    watch(
-      props,
-      () => {
-        nextTick(() => (state.isOpen = props.isOpen));
-      },
-      { immediate: true },
-    );
 
     return { state, toggle, enter, afterEnter, leave };
   },

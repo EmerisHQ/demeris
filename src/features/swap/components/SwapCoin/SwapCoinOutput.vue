@@ -22,10 +22,10 @@
             <SwapBestPriceDetails
               :number-of-exchanges-searched="countExchangesFromRoutes(state.context)"
               :dex="protocol"
-              :expected-rate="getOrderPrice(state.context)"
-              :limit-price="getLimitPrice(state.context)"
+              :expected-rate="getOrderPriceFromRoute(state.context, state.context.selectedRouteIndex)"
+              :limit-price="getLimitPriceFromRoute(state.context, state.context.selectedRouteIndex)"
               :denom="state.context.outputCoin?.baseDenom"
-              :max-slippage="swapStore.slippage"
+              :max-slippage="state.context.maxSlippage"
               :min-received="state.context.outputAmount"
             />
           </template>
@@ -42,15 +42,14 @@ import Icon from '@/components/ui/Icon.vue';
 import {
   countExchangesFromRoutes,
   formatProtocolName,
-  getCurrentRoute,
-  getLimitPrice,
-  getOrderPrice,
+  getLimitPriceFromRoute,
+  getOrderPriceFromRoute,
   getOutputChainFromRoute,
   getProtocolFromRoute,
   isBestRouteSelected,
   resolveDisplayName,
 } from '@/features/swap/logic';
-import { useSwapActor, useSwapStore } from '@/features/swap/state';
+import { useCurrentSwapRoute, useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapBestPriceDetails from '../SwapBestPriceDetails.vue';
 import SwapCoin from './SwapCoin.vue';
@@ -58,6 +57,6 @@ import SwapCoin from './SwapCoin.vue';
 const swapStore = useSwapStore();
 const { state, send } = useSwapActor();
 
-const currentRoute = computed(() => getCurrentRoute(state.value.context));
+const currentRoute = useCurrentSwapRoute();
 const protocol = computed(() => formatProtocolName(getProtocolFromRoute(currentRoute.value)));
 </script>

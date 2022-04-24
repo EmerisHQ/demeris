@@ -57,7 +57,7 @@ const props = defineProps({
     required: true,
   },
   maxSlippage: {
-    type: Number,
+    type: [String, Number],
     required: true,
   },
   minReceived: {

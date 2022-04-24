@@ -32,21 +32,17 @@ import { computed } from 'vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import {
-  formatProtocolName,
-  getChainFromProtocol,
-  getCurrentRoute,
-  getProtocolsFromRoute,
-} from '@/features/swap/logic';
-import { useSwapActor, useSwapStore } from '@/features/swap/state';
+import { formatProtocolName, getChainFromProtocol, getProtocolsFromRoute } from '@/features/swap/logic';
+import { useCurrentSwapRoute, useSwapActor, useSwapStore } from '@/features/swap/state';
 import { ButtonFunctionData } from '@/types/util';
 
 const swapStore = useSwapStore();
 const { state } = useSwapActor();
+const currentRoute = useCurrentSwapRoute();
 
 const canShow = computed(() => {
   if (['ready.idle', 'booting', 'idle'].some(state.value.matches)) return false;
-  if (!state.value.matches('updating') && !getCurrentRoute(state.value.context)) return false;
+  if (!state.value.matches('updating') && !currentRoute.value) return false;
   return true;
 });
 
@@ -55,10 +51,9 @@ const onClick = { type: 'custom', function: swapStore.toggleRoutes } as ButtonFu
 const numberOfExchanges = computed(() => protocols.value.length);
 
 const protocols = computed(() => {
-  const route = getCurrentRoute(state.value.context);
-  if (!route) return [];
+  if (!currentRoute.value) return [];
 
-  const protocols = getProtocolsFromRoute(route);
+  const protocols = getProtocolsFromRoute(currentRoute.value);
   return protocols.map((protocol) => {
     return { chain: getChainFromProtocol(protocol), name: formatProtocolName(protocol) };
   });

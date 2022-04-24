@@ -1,11 +1,13 @@
 import { EmerisDEXInfo } from '@emeris/types';
 import { defineStore } from 'pinia';
 
+import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
+
 import * as logic from '../logic';
 import { SwapService } from './machine';
 
 interface SwapStoreState {
-  allowCustomSlippage: boolean;
   selectAssetType: string;
   shownSettings: boolean;
   shownRoutes: boolean;
@@ -19,7 +21,6 @@ interface SwapStoreState {
 export const useSwapStore = defineStore('swap', {
   state: () =>
     ({
-      allowCustomSlippage: false,
       selectAssetType: undefined,
       shownSettings: false,
       shownRoutes: false,
@@ -31,6 +32,7 @@ export const useSwapStore = defineStore('swap', {
     } as SwapStoreState),
 
   getters: {
+    allowCustomSlippage: () => useStore().getters[GlobalGetterTypes.USER.allowCustomSlippage],
     shownAssetMenu: (state) => !!state.selectAssetType,
   },
 
@@ -45,6 +47,16 @@ export const useSwapStore = defineStore('swap', {
 
     setService(actor: any) {
       this.service = actor;
+    },
+
+    getSlippageSession() {
+      return useStore().getters[GlobalGetterTypes.USER.getSlippagePerc];
+    },
+
+    updateSlippageSession(value: number) {
+      useStore().dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, {
+        data: { slippagePerc: value },
+      });
     },
 
     toggleSettings() {

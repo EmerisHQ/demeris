@@ -61,7 +61,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
   countChainsFromRoute,
-  countTransactiosnFromRoute,
+  countTransactionsFromRoute,
   formatProtocolName,
   getDetailsFromRoute,
   getOutputChainFromRoute,
@@ -79,7 +79,7 @@ const { state } = useSwapActor();
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 
 const swapRouteSubTitle = computed(() => {
-  const numberOfTransactions = countTransactiosnFromRoute(state.value.context, props.routeIndex);
+  const numberOfTransactions = countTransactionsFromRoute(state.value.context, props.routeIndex);
   const numberOfChains = countChainsFromRoute(state.value.context, props.routeIndex);
   if (numberOfChains <= 1) {
     return numberOfTransactions === 1 ? `1 transaction` : `${numberOfTransactions} transactions`;

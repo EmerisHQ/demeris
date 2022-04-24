@@ -100,19 +100,30 @@ const isInputView = computed(() => swap.selectAssetType === 'input');
 const isOutputView = computed(() => swap.selectAssetType === 'output');
 
 const getAvailableChains = (asset: any) => {
-  if (isInputView.value) {
-    return Object.keys(denomBalancesPerChain(state.value.context, asset.denom));
-  }
+  if (isOutputView.value) return [];
 
-  return [];
+  const balancesPerChain = denomBalancesPerChain(state.value.context, asset.denom);
+  const chains = Object.keys(balancesPerChain);
+
+  return chains;
 };
 
 const selectAsset = (asset: any) => {
   data.selectedDenom = asset.denom;
-  if (getAvailableChains(asset).length <= 1) {
+
+  if (isOutputView.value) {
     dispatchUpdate();
     return closeMenu();
   }
+
+  const availableChainsWithBalances = getAvailableChains(asset);
+
+  if (availableChainsWithBalances.length <= 1) {
+    data.selectedChain = availableChainsWithBalances.length === 1 ? availableChainsWithBalances[0] : asset.chain;
+    dispatchUpdate();
+    return closeMenu();
+  }
+
   data.selectedChain = asset.chain;
   data.shownChainMenu = true;
 };

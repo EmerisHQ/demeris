@@ -1,10 +1,12 @@
 /* eslint-disable max-lines-per-function */
+import { EmerisBase, EmerisDEXInfo } from '@emeris/types';
+
 import { move } from '@/actionhandler/actions/move';
 import { Step } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
-import { calculateSlippage } from './amount';
+import { calculateSlippage, getOrderPrice } from './amount';
 import { getChainFromDenom, resolveBaseDenom } from './denom';
 import { chunkBy } from './utils';
 
@@ -12,26 +14,55 @@ export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: numbe
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
-  if (!route?.steps) return;
-
   const firstStep = route.steps[0];
+
+  if (firstStep?.data.from.amount === undefined) {
+    return { amount: '0', denom: firstStep.data.from.denom };
+  }
+
   return {
     amount: 0,
     ...firstStep?.data?.from,
   };
 };
 
-export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
+export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: number): EmerisBase.Amount => {
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
-  if (!route?.steps) return;
-
   const lastStep = route.steps[route.steps.length - 1];
+
+  if (lastStep?.data.to.amount === undefined) {
+    return { amount: '0', denom: lastStep.data.to.denom };
+  }
+
+  const numSwaps = countSwapsFromRoute(route);
+  const amount = calculateSlippage(lastStep.data.to.amount, +context.maxSlippage, numSwaps);
+
   return {
-    amount: 0,
-    ...lastStep?.data?.to,
+    amount,
+    denom: lastStep.data.to.denom,
   };
+};
+
+export const getOrderPriceFromRoute = (context: SwapContext, routeIndex?: number) => {
+  const index = routeIndex ?? context.selectedRouteIndex;
+  const route = context.data.routes?.[index];
+
+  const firstStep = route.steps[0];
+  const lastStep = route.steps[route.steps.length - 1];
+
+  return getOrderPrice(firstStep.data.from.amount, lastStep.data.to.amount);
+};
+
+export const getLimitPriceFromRoute = (context: SwapContext, routeIndex?: number) => {
+  const index = routeIndex ?? context.selectedRouteIndex;
+  const route = context.data.routes?.[index];
+
+  const amount = getOrderPriceFromRoute(context, index);
+  const numSwaps = countSwapsFromRoute(route);
+
+  return calculateSlippage(amount, +context.maxSlippage, numSwaps);
 };
 
 export const getOutputChainFromRoute = (context: SwapContext, routeIndex?: number) => {
@@ -70,7 +101,7 @@ export const isBestRouteSelected = (context: SwapContext) => {
   return context.selectedRouteIndex === 0 && getCurrentRoute(context) !== undefined;
 };
 
-export const countTransactiosnFromRoute = (context: SwapContext, routeIndex: number) => {
+export const countTransactionsFromRoute = (context: SwapContext, routeIndex: number) => {
   const route = context.data.routes[routeIndex];
   if (!route) return;
 
@@ -114,6 +145,10 @@ export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) =>
   return chunks;
 };
 
+export const countSwapsFromRoute = (route: any) => {
+  return route?.steps?.filter((step) => step.type === EmerisDEXInfo.SwapType.Pool).length;
+};
+
 export const countExchangesFromRoutes = (context: SwapContext) => {
   const protocols = [];
   for (const route of context.data.routes) {
@@ -133,37 +168,6 @@ export const removeExceedingTransactionsFromRoutes = (routes: any[]) => {
 
     result.push(route);
   }
-  return result;
-};
-
-export const computeSlippageToRoute = (route: any, maxSlippage: number) => {
-  const result = [];
-  const clone = JSON.parse(JSON.stringify(route));
-
-  let factor = 0;
-
-  for (const step of clone.steps) {
-    step.data.from.amount = calculateSlippage(step.data.from.amount, maxSlippage, factor);
-
-    if (step.type === 'pool') {
-      factor++;
-    }
-
-    step.data.to.amount = calculateSlippage(step.data.to.amount, maxSlippage, factor);
-    result.push(step);
-  }
-
-  clone.steps = result;
-  return clone;
-};
-
-export const recalculateAmountsFromRoutes = (context: SwapContext) => {
-  const result = [];
-
-  for (const route of context.data._rawRoutes) {
-    result.push(computeSlippageToRoute(route, +context.maxSlippage));
-  }
-
   return result;
 };
 

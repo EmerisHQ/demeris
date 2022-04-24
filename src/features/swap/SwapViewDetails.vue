@@ -92,9 +92,10 @@ import CoinDescription from './components/shared/CoinDescription.vue';
 import CollapseDescription from './components/shared/CollapseDescription.vue';
 import {
   amountToUnit,
+  calculateSlippage,
   formatProtocolName,
   getChainFromProtocol,
-  getOrderPriceFromStep,
+  getOrderPrice,
   resolveBaseDenom,
 } from './logic';
 import { useSwapStore } from './state';
@@ -118,8 +119,10 @@ const inputAmount = computed(() => {
 
 const exchangeAmount = computed(() => {
   const denom = transaction.value.data.to.denom;
+  const orderPrice = getOrderPrice(transaction.value.data.from.amount, transaction.value.data.to.amount);
+
   const { amount } = amountToUnit({
-    amount: getOrderPriceFromStep(transaction.value),
+    amount: calculateSlippage(orderPrice, swapStore.getSlippageSession()),
     denom,
   });
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
@@ -130,7 +133,7 @@ const outputAmount = computed(() => {
   const denom = transaction.value.data.to.denom;
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return {
-    amount: transaction.value.data.to.amount,
+    amount: calculateSlippage(transaction.value.data.to.amount, swapStore.getSlippageSession()),
     denom: baseDenom,
   };
 });

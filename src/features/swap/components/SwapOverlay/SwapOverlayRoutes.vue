@@ -29,7 +29,7 @@
               class="opacity-60 hover:-translate-y-px transition-all text-left"
               @click.stop="showRouteDetail(index)"
             >
-              {{ countTransactiosnFromRoute(state.context, index) }} transactions
+              {{ countTransactionsFromRoute(state.context, index) }} transactions
             </button>
             <div class="opacity-60 flex text-right">~<Price :amount="getOutputAmount(index)" /></div>
           </div>
@@ -53,13 +53,13 @@ import Price from '@/components/common/Price.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
-  countTransactiosnFromRoute,
+  countTransactionsFromRoute,
   formatProtocolName,
   getOutputAmountFromRoute,
   getProtocolFromRoute,
+  resolveBaseDenom,
 } from '@/features/swap/logic';
 import { useSwapActor, useSwapStore } from '@/features/swap/state';
-import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayRouteDetail from './SwapOverlayRouteDetail.vue';
@@ -97,7 +97,7 @@ const getOutputAmount = (index: number) => {
   const output = getOutputAmountFromRoute(state.value.context, index);
   return {
     ...output,
-    denom: getBaseDenomSync(output.denom),
+    denom: resolveBaseDenom(output.denom),
   };
 };
 </script>

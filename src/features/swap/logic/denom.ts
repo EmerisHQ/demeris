@@ -67,6 +67,7 @@ export const getChainFromDenom = (context: SwapContext, denom: string) => {
 
 export const getAvailableInputAssets = (context: SwapContext) => {
   const denoms = getAvailableDenoms(context).filter((item) => isNative(item.denom));
+
   const results = denoms.map(({ baseDenom, denom, chain }) => {
     const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
 

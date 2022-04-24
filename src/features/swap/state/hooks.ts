@@ -14,6 +14,9 @@ export const useSwapMachine = (defaultInputDenom: string) => {
   const swapStore = useSwapStore();
 
   const machine = useMachine(swapMachine, {
+    actions: {
+      updateSlippageSession: (context) => swapStore.updateSlippageSession(+context.maxSlippage),
+    },
     context: {
       defaultInputDenom,
     },

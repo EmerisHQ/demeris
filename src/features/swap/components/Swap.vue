@@ -7,6 +7,7 @@
         action="swap"
         class="flex-1 flex flex-col"
         @back="send({ type: 'STEPS.CLEAR' })"
+        @close="send({ type: 'RESET' })"
         @pending="send({ type: 'RESET' })"
       />
     </template>
@@ -88,6 +89,7 @@ const setAllBalances = async () => {
 
 const startMachine = () => {
   if (!state.value.can('START')) return;
+  send({ type: 'SLIPPAGE.CHANGE', value: '1' });
   send('START');
 };
 
