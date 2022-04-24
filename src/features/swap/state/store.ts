@@ -1,11 +1,11 @@
 import { EmerisDEXInfo } from '@emeris/types';
-import { useActor } from '@xstate/vue';
 import { defineStore } from 'pinia';
 
 import * as logic from '../logic';
 import { SwapService } from './machine';
 
 interface SwapStoreState {
+  allowCustomSlippage: boolean;
   selectAssetType: string;
   shownSettings: boolean;
   shownRoutes: boolean;
@@ -14,13 +14,12 @@ interface SwapStoreState {
     availableDenoms: string[];
     swaps: EmerisDEXInfo.Swaps;
   };
-  allowCustomSlippage: boolean;
-  slippage: number;
 }
 
 export const useSwapStore = defineStore('swap', {
   state: () =>
     ({
+      allowCustomSlippage: false,
       selectAssetType: undefined,
       shownSettings: false,
       shownRoutes: false,
@@ -29,8 +28,6 @@ export const useSwapStore = defineStore('swap', {
         availableDenoms: [],
         swaps: [],
       },
-      allowCustomSlippage: false,
-      slippage: 1,
     } as SwapStoreState),
 
   getters: {
@@ -38,14 +35,6 @@ export const useSwapStore = defineStore('swap', {
   },
 
   actions: {
-    setSlippage(slippageValue: number) {
-      if (slippageValue >= 100) {
-        this.slippage = 100;
-      } else {
-        this.slippage = slippageValue ? slippageValue : 1;
-      }
-    },
-
     openAssetsMenu(type: 'input' | 'output') {
       this.selectAssetType = type;
     },
@@ -84,10 +73,6 @@ export const useSwapStore = defineStore('swap', {
       const data = await logic.fetchDexInfoSwaps();
       this.sync.swaps = data;
       return data;
-    },
-
-    useSwapMachine() {
-      return useActor(this.service as SwapService);
     },
   },
 });

@@ -38,12 +38,11 @@ import {
   getCurrentRoute,
   getProtocolsFromRoute,
 } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 import { ButtonFunctionData } from '@/types/util';
 
 const swapStore = useSwapStore();
-
-const { state } = swapStore.useSwapMachine();
+const { state } = useSwapActor();
 
 const canShow = computed(() => {
   if (['ready.idle', 'booting', 'idle'].some(state.value.matches)) return false;

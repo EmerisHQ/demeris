@@ -10,25 +10,27 @@ import * as logic from '../logic';
 interface SwapContextData {
   availableDenoms: string[];
   routes: any[];
+  _rawRoutes: any[];
   steps: Step[];
   swaps: EmerisDEXInfo.Swaps;
 }
 
 export interface SwapCoin {
-  denom: string;
-  chain: string;
   baseDenom: string;
+  chain: string;
+  denom: string;
 }
 
 export interface SwapContext {
-  inputCoin?: SwapCoin;
-  outputCoin?: SwapCoin;
-  inputAmount: string;
-  outputAmount: string;
-  defaultInputDenom?: string;
-  selectedRouteIndex?: number;
   balances: EmerisAPI.Balances;
   data: SwapContextData;
+  defaultInputDenom?: string;
+  inputAmount: string;
+  inputCoin?: SwapCoin;
+  maxSlippage: string;
+  outputAmount: string;
+  outputCoin?: SwapCoin;
+  selectedRouteIndex?: number;
 }
 
 const defaultContext = (): SwapContext => ({
@@ -39,27 +41,30 @@ const defaultContext = (): SwapContext => ({
   defaultInputDenom: undefined,
   selectedRouteIndex: undefined,
   balances: [],
+  maxSlippage: '1',
   data: {
     availableDenoms: [],
     routes: [],
+    _rawRoutes: [],
     steps: [],
     swaps: [],
   },
 });
 
 export type SwapEvents =
-  | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
-  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
-  | { type: 'ROUTE.SELECT_INDEX'; value: number }
-  | { type: 'STEPS.CLEAR' }
   | { type: 'COINS.SWITCH' }
-  | { type: 'INVALID.OVER_MAX' }
+  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INVALID.BELOW_MIN' }
-  | { type: 'START' }
+  | { type: 'INVALID.OVER_MAX' }
+  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'RESET' }
+  | { type: 'ROUTE.SELECT_INDEX'; value: number }
+  | { type: 'START' }
+  | { type: 'SLIPPAGE.CHANGE'; value: string }
+  | { type: 'STEPS.CLEAR' }
   | { type: 'SUBMIT' };
 
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
@@ -97,6 +102,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       'OUTPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.output',
         actions: 'setOutputAmount',
+      },
+      'SLIPPAGE.CHANGE': {
+        actions: ['setSlippage', 'recalculateRoutes', 'updateOutputAmountFromRoute'],
       },
     },
     states: {
@@ -311,12 +319,23 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           availableDenoms: event.data,
         },
       })),
-      assignRoutes: assign((context, event: any) => ({
+      assignRoutes: assign((context, event: any) => {
+        const routes = logic.removeExceedingTransactionsFromRoutes(event.data);
+
+        return {
+          data: {
+            ...context.data,
+            routes,
+            _rawRoutes: routes,
+          },
+          selectedRouteIndex: 0,
+        };
+      }),
+      recalculateRoutes: assign((context) => ({
         data: {
           ...context.data,
-          routes: logic.removeExceedingTransactionsFromRoutes(event.data),
+          routes: logic.recalculateAmountsFromRoutes(context),
         },
-        selectedRouteIndex: 0,
       })),
       assignSteps: assign((context, event: any) => ({
         data: {
@@ -337,6 +356,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           steps: [],
         },
       })),
+      setSlippage: assign({
+        maxSlippage: (_, event: any) => {
+          const value = event.value;
+          if (!value) return '1';
+
+          return Math.min(+event.value, 100).toString();
+        },
+      }),
       switchCoins: assign({
         outputCoin: (context) => {
           if (!context.inputCoin) return undefined;
@@ -440,7 +467,7 @@ function createUpdateRoutesState({ onDone, invokeSrc }: { onDone: string; invoke
           src: invokeSrc,
           onDone: {
             target: '#ready',
-            actions: ['assignRoutes', onDone],
+            actions: ['assignRoutes', 'recalculateRoutes', onDone],
           },
           onError: {
             target: '#unavailable',

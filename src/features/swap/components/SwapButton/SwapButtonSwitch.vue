@@ -6,19 +6,17 @@
     :type="'circle'"
     :icon-size="1"
     :status="'normal'"
-    :data="{
-      type: 'custom',
-      function: handleClick,
-    }"
+    :data="handleClick"
   />
 </template>
 
 <script lang="ts" setup>
 import IconButton from '@/components/ui/IconButton.vue';
-import { useSwapStore } from '@/features/swap/state';
+import { ButtonFunctionData } from '@/types/util';
 
-const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+import { useSwapActor } from '../../state';
 
-const handleClick = () => send('COINS.SWITCH');
+const { state, send } = useSwapActor();
+
+const handleClick = { type: 'custom', function: () => send('COINS.SWITCH') } as ButtonFunctionData;
 </script>

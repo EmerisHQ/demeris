@@ -67,15 +67,14 @@ import {
   getOutputChainFromRoute,
   getProtocolFromStep,
 } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor } from '@/features/swap/state';
 
 import SwapOverlay from './SwapOverlay.vue';
 
 const props = defineProps<{ routeIndex: number }>();
 const emit = defineEmits(['close']);
 
-const swap = useSwapStore();
-const { state } = swap.useSwapMachine();
+const { state } = useSwapActor();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 

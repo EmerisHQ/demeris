@@ -51,7 +51,7 @@ import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getAvailableChainsByDenom, totalDenomBalance } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
@@ -60,7 +60,7 @@ const props = defineProps<{ denom: string }>();
 const emit = defineEmits(['back', 'close', 'select']);
 
 const swap = useSwapStore();
-const { state } = swap.useSwapMachine();
+const { state } = useSwapActor();
 
 const chains = computed(() => getAvailableChainsByDenom(state.value.context, props.denom));
 </script>

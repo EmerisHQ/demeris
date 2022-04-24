@@ -50,13 +50,13 @@ import {
   isBestRouteSelected,
   resolveDisplayName,
 } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapBestPriceDetails from '../SwapBestPriceDetails.vue';
 import SwapCoin from './SwapCoin.vue';
 
 const swapStore = useSwapStore();
-const { state, send } = swapStore.useSwapMachine();
+const { state, send } = useSwapActor();
 
 const currentRoute = computed(() => getCurrentRoute(state.value.context));
 const protocol = computed(() => formatProtocolName(getProtocolFromRoute(currentRoute.value)));

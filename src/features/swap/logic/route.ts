@@ -4,7 +4,9 @@ import { Step } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
+import { calculateSlippage } from './amount';
 import { getChainFromDenom, resolveBaseDenom } from './denom';
+import { chunkBy } from './utils';
 
 export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
@@ -60,34 +62,12 @@ export const getProtocolsFromRoute = (route: any) => {
   return protocols;
 };
 
-export const getCurrentRoute = (context: any) => {
+export const getCurrentRoute = (context: SwapContext) => {
   return context.data.routes[context.selectedRouteIndex];
 };
 
 export const isBestRouteSelected = (context: SwapContext) => {
   return context.selectedRouteIndex === 0 && getCurrentRoute(context) !== undefined;
-};
-
-/* Aggregate related items into the same array
- */
-export const chunkBy = <T>(items: T[], fn: (item: T) => any): T[][] => {
-  const chunks: T[][] = [];
-  let chunkValue: unknown;
-
-  items.forEach((item, i) => {
-    const value = fn(item);
-
-    if (value !== chunkValue || i === 0) {
-      chunks.push([]);
-      chunkValue = value;
-    }
-
-    const chunk = chunks[chunks.length - 1];
-
-    chunk.push(item);
-  });
-
-  return chunks;
 };
 
 export const countTransactiosnFromRoute = (context: SwapContext, routeIndex: number) => {
@@ -153,6 +133,37 @@ export const removeExceedingTransactionsFromRoutes = (routes: any[]) => {
 
     result.push(route);
   }
+  return result;
+};
+
+export const computeSlippageToRoute = (route: any, maxSlippage: number) => {
+  const result = [];
+  const clone = JSON.parse(JSON.stringify(route));
+
+  let factor = 0;
+
+  for (const step of clone.steps) {
+    step.data.from.amount = calculateSlippage(step.data.from.amount, maxSlippage, factor);
+
+    if (step.type === 'pool') {
+      factor++;
+    }
+
+    step.data.to.amount = calculateSlippage(step.data.to.amount, maxSlippage, factor);
+    result.push(step);
+  }
+
+  clone.steps = result;
+  return clone;
+};
+
+export const recalculateAmountsFromRoutes = (context: SwapContext) => {
+  const result = [];
+
+  for (const route of context.data._rawRoutes) {
+    result.push(computeSlippageToRoute(route, +context.maxSlippage));
+  }
+
   return result;
 };
 

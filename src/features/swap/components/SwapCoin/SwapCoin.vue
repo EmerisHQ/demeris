@@ -65,7 +65,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { amountToUnit } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 interface Props {
@@ -80,9 +80,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(['select', 'update:input']);
 
-const swap = useSwapStore();
-
-const { state } = swap.useSwapMachine();
+const { state } = useSwapActor();
 
 const isLoadingCoin = computed(() => ['booting', 'idle'].some(state.value.matches));
 

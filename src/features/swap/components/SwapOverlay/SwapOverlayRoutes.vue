@@ -58,14 +58,14 @@ import {
   getOutputAmountFromRoute,
   getProtocolFromRoute,
 } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayRouteDetail from './SwapOverlayRouteDetail.vue';
 
 const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+const { state, send } = useSwapActor();
 
 const routeDetailIndex = ref(undefined);
 

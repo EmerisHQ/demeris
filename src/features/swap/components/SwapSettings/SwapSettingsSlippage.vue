@@ -11,7 +11,7 @@
         </div>
       </label>
 
-      <div v-if="allowCustomSlippage" class="flex w-full relative p-[2px]">
+      <div v-if="swapStore.allowCustomSlippage" class="flex w-full relative p-[2px]">
         <div
           class="relative w-full rounded-xl px-2 inline-flex items-center z-[1]"
           :class="[
@@ -65,7 +65,7 @@
 
 <script lang="ts" setup>
 import { useToggle } from '@vueuse/core';
-import { computed, reactive, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -73,16 +73,16 @@ import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 
 import { amountToUnit, getOrderPrice } from '../../logic';
-import { useSwapStore } from '../../state';
+import { useSwapActor, useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
 
 const swapStore = useSwapStore();
-const { state } = swapStore.useSwapMachine();
+const { state, send } = useSwapActor();
 const { t } = useI18n({ useScope: 'global' });
 
 const data = reactive({
-  selectedOption: String(swapStore.slippage),
+  selectedOption: String(state.value.context.maxSlippage),
   customValue: '',
 });
 
@@ -90,22 +90,20 @@ const [isCustomInputFocused, toggleCustomFocus] = useToggle();
 const isCustomSelected = computed(() => data.selectedOption === data.customValue);
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
+
 const exchangeAmount = computed(() =>
   amountToUnit({
     amount: getOrderPrice(state.value.context),
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );
+
 const outputAmount = computed(() =>
   amountToUnit({
     amount: state.value.context.outputAmount,
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );
-
-const allowCustomSlippage = computed(() => {
-  return swapStore.allowCustomSlippage;
-});
 
 const showCustomPlaceholder = computed(() => {
   if (isCustomInputFocused.value) return false;
@@ -114,7 +112,7 @@ const showCustomPlaceholder = computed(() => {
 });
 
 const alertStatus = computed(() => {
-  if (Number(data.selectedOption) >= 20 && Number(data.selectedOption) <= 100) {
+  if (Number(data.customValue) >= 20 && Number(data.customValue) <= 100) {
     return 'warning';
   } else {
     return null;
@@ -141,19 +139,20 @@ watch(isCustomInputFocused, () => {
 
     if (data.customValue) {
       data.selectedOption = data.customValue;
-    } else {
-      data.selectedOption = '0.1';
     }
   }
 });
 
-watch(data, () => {
-  if (data.selectedOption) {
-    swapStore.setSlippage(Number(data.selectedOption));
-    if (Number(data.selectedOption) >= 100) {
-      data.customValue = '100';
-      data.selectedOption = data.customValue;
-    }
+onMounted(() => {
+  if (!slippageOptions.includes(data.selectedOption)) {
+    nextTick(() => (data.customValue = data.selectedOption));
   }
 });
+
+watch(
+  () => data.selectedOption,
+  () => {
+    send({ type: 'SLIPPAGE.CHANGE', value: data.selectedOption });
+  },
+);
 </script>

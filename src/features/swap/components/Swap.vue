@@ -3,9 +3,10 @@
     <template v-if="isSignedIn && hasSubmitted">
       <TransactionProcessCreator
         :steps="state.context.data.steps"
+        :emit-back="true"
         action="swap"
         class="flex-1 flex flex-col"
-        @close="send({ type: 'INPUT.CHANGE_AMOUNT', value: state.context.inputAmount })"
+        @back="send({ type: 'STEPS.CLEAR' })"
         @pending="send({ type: 'RESET' })"
       />
     </template>
@@ -47,13 +48,12 @@
 
 <script lang="ts" setup>
 import { whenever } from '@vueuse/core';
-import { useMachine } from '@xstate/vue';
 import { computed, nextTick, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { swapMachine, useSwapStore } from '@/features/swap/state';
+import { useSwapMachine, useSwapStore } from '@/features/swap/state';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
@@ -91,17 +91,7 @@ const startMachine = () => {
   send('START');
 };
 
-const { state, send, service } = useMachine(swapMachine, {
-  context: {
-    defaultInputDenom: props.defaultDenom,
-  },
-  services: {
-    getAvailableDenoms: () => swapStore.syncAvailableDenoms(),
-    getSwaps: () => swapStore.syncSwaps(),
-  },
-});
-
-swapStore.setService(service);
+const { state, send } = useSwapMachine(props.defaultDenom);
 
 watch([isBalancesLoaded, balances], setAllBalances, { immediate: true, deep: true });
 whenever(() => props.canStart, startMachine, { immediate: true });

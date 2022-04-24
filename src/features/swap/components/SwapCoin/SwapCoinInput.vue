@@ -4,7 +4,7 @@
     :denom="state.context.inputCoin?.denom"
     :chain="state.context.inputCoin?.chain"
     :is-loading-amount="state.matches('updating.routes.output')"
-    @select="swap.openAssetsMenu('input')"
+    @select="swapStore.openAssetsMenu('input')"
     @update:input="send({ type: 'INPUT.CHANGE_AMOUNT', value: $event })"
   >
     <template #label> Pay </template>
@@ -15,11 +15,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapButtonMax from '../SwapButton/SwapButtonMax.vue';
 import SwapCoin from './SwapCoin.vue';
 
-const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+const swapStore = useSwapStore();
+const { state, send } = useSwapActor();
 </script>

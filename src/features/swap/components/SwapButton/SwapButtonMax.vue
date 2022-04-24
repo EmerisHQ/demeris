@@ -16,11 +16,11 @@ import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import { amountToHuman, getMaxInputAmount } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+import { useSwapActor } from '../../state';
+
+const { state, send } = useSwapActor();
 
 const maxAmount = computed(() => getMaxInputAmount(state.value.context));
 

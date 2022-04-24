@@ -76,14 +76,14 @@ import {
   getDenomFromBaseDenom,
   resolveBaseDenom,
 } from '@/features/swap/logic';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapMenu from '../SwapMenu.vue';
 import SwapOverlay from './SwapOverlay.vue';
 import SwapOverlayAssetsChains from './SwapOverlayAssetsChains.vue';
 
 const swap = useSwapStore();
-const { state, send } = swap.useSwapMachine();
+const { state, send } = useSwapActor();
 
 const initialData = {
   selectedDenom: undefined,

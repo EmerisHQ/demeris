@@ -76,3 +76,9 @@ export const getOrderPriceFromStep = (step: any) => {
 export const getLimitPrice = (context: SwapContext) => {
   return new BigNumber(getOrderPrice(context)).multipliedBy(1 - 0.005).toString();
 };
+
+export const calculateSlippage = (amount: string, maxSlippage: number, factor = 1) => {
+  const value = new BigNumber(amount);
+  const slippage = 1 - maxSlippage / 100;
+  return value.times(Math.pow(slippage, factor)).integerValue().toString();
+};

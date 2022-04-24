@@ -21,15 +21,16 @@ import { useToggle } from '@vueuse/core';
 import { computed } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-import { useSwapStore } from '@/features/swap/state';
+import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import CollapseDescription from '../shared/CollapseDescription.vue';
 import SwapSettingsSlippage from '../SwapSettings/SwapSettingsSlippage.vue';
 import SwapOverlay from './SwapOverlay.vue';
 
 const swapStore = useSwapStore();
+const { state } = useSwapActor();
 
 const [isSlippageOpen, toggleSlippage] = useToggle(false);
 
-const slippageValue = computed(() => swapStore.slippage || 0.5);
+const slippageValue = computed(() => state.value.context.maxSlippage);
 </script>
