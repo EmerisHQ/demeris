@@ -36,7 +36,6 @@ import { axiosInit } from '@/utils/api-settings';
 import { setStore } from '@/utils/useStore';
 
 import usePoolsFactory from './composables/usePools';
-import { LoadingState } from './types/api';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
@@ -156,16 +155,14 @@ onMounted(async () => {
     }
   });
 
-  if (featureRunning('AIRDROPS_FEATURE')) {
-    getAllAirdrops();
-  }
   if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
     await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
   }
   initialized.value = true;
 });
 
-const getAllAirdrops = async () => {
+const getAllAirdrops = async (paramObj) => {
+  typedstore.dispatch(GlobalActionTypes.API.RESET_AIRDROPS);
   const gitAirdropsList = await typedstore.dispatch(GlobalActionTypes.API.GET_GIT_AIRDROPS_LIST, {
     subscribe: false,
   });
@@ -175,18 +172,11 @@ const getAllAirdrops = async () => {
       subscribe: false,
       params: {
         airdropFileName: item.name,
+        checkEligibility: paramObj.checkEligibility,
       },
     });
   });
 };
-
-const airdrops = computed(() => {
-  return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-});
-
-const airdropsLoading = computed(() => {
-  return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
-});
 
 const isDemoAccount = computed(() => {
   return (
@@ -197,8 +187,10 @@ const isDemoAccount = computed(() => {
 watch(
   () => isDemoAccount.value,
   async (value) => {
-    if (!value && !airdropsLoading.value && airdrops.value.length > 0) {
-      typedstore.dispatch(GlobalActionTypes.API.AIRDROPS_ELIGIBILITY_CHECK);
+    if (value && featureRunning('AIRDROPS_FEATURE')) {
+      getAllAirdrops({ checkEligibility: false });
+    } else if (!value && featureRunning('AIRDROPS_FEATURE')) {
+      getAllAirdrops({ checkEligibility: true });
     }
   },
   { immediate: true },
