@@ -436,8 +436,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       hasInputParams: (context) => context.inputCoin?.denom && !!context.inputAmount,
       hasOutputParams: (context) => context.outputCoin?.denom && !!context.outputAmount,
       hasRouteParams: (context) => {
-        if (context.inputCoin?.denom && context.inputAmount && !!context.outputCoin?.denom) return true;
-        if (context.outputCoin?.denom && context.outputAmount && !!context.inputCoin?.denom) return true;
+        debugger;
+        if (context.inputCoin?.denom && +context.inputAmount && !!context.outputCoin?.denom) return true;
+        if (context.outputCoin?.denom && +context.outputAmount && !!context.inputCoin?.denom) return true;
         return false;
       },
       hasAllParams: (context) =>
