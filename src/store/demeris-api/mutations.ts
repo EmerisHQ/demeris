@@ -244,6 +244,11 @@ export const mutations: MutationTree<APIState> & Mutations = {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.NOT_STARTED;
     } else if (
       new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime() &&
+      !new Date(tempAirdrop.airdropEndDate).getTime()
+    ) {
+      tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ONGOING;
+    } else if (
+      new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime() &&
       new Date(tempAirdrop.airdropEndDate).getTime() > new Date().getTime()
     ) {
       tempAirdrop.dateStatus = EmerisAirdrops.AirdropDateStatus.ONGOING;
