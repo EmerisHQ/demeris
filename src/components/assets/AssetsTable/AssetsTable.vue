@@ -247,7 +247,7 @@ export default defineComponent({
 
     const tableColumns = ref(['35%', '20%', '35%', '10%']);
     if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
-      tableColumns.value = ['20%', '15%', '35%', '20%', '10%'];
+      tableColumns.value = ['25%', '15%', '25%', '25%', '10%'];
     }
 
     const allBalances = computed(() => {
