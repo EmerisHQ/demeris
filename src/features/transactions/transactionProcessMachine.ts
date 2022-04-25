@@ -92,6 +92,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       idle: {
         always: [
           { target: 'ibcConfirmation', cond: 'needsTransferToHub' },
+          { target: 'swapRoute', cond: 'needsToShowSwapRoute' },
           { target: 'validating', cond: 'hasSteps' },
         ],
         on: {
@@ -102,6 +103,11 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         },
       },
       ibcConfirmation: {
+        on: {
+          CONTINUE: 'validating',
+        },
+      },
+      swapRoute: {
         on: {
           CONTINUE: 'validating',
         },
@@ -730,6 +736,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
         return false;
       },
+      needsToShowSwapRoute: (context) => context.input.action === 'swap',
       hasMissingFees: (context) => context.fees?.validation?.missingFees?.length > 0,
       hasIBCFeeWarning: (context) => context.fees?.validation?.ibcWarning === true,
     },
