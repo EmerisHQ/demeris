@@ -6,7 +6,13 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { FeeTotals, FeeWarning, Step, StepTransaction } from '@/types/actions';
 import { TxParams, TxResponse } from '@/types/tx';
-import { chainStatusForSteps, feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import {
+  chainStatusForSteps,
+  ensureTraceChannel,
+  feeForStep,
+  feeForStepTransaction,
+  msgFromStepTransaction,
+} from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
@@ -382,9 +388,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
         return result;
       },
-      validateTraceChannel: () => {
-        return Promise.resolve(true);
-        // return ensureTraceChannel(getCurrentTransaction(context));
+      validateTraceChannel: (context) => {
+        return ensureTraceChannel(getCurrentTransaction(context));
       },
       signTransaction: async (context) => {
         const currentTransaction = getCurrentTransaction(context);
