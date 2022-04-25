@@ -103,7 +103,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         actions: 'setOutputAmount',
       },
       'SLIPPAGE.CHANGE': {
-        actions: ['setSlippage', 'updateOutputAmountFromRoute', 'updateSlippageSession'],
+        actions: ['setSlippage', 'updateSlippageSession'],
       },
     },
     states: {
