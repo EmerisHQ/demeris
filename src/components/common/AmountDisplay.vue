@@ -3,6 +3,7 @@
 </template>
 <script lang="ts" setup>
 import { EmerisBase } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -29,7 +30,7 @@ const precision = computed(() => {
 const ticker = ref('-');
 
 const displayValue = computed(() => {
-  return parseInt(props.amount.amount) / Math.pow(10, precision.value);
+  return new BigNumber(props.amount.amount).dividedBy(10 ** precision.value);
 });
 
 const displayValueTrunc = computed(() => {
