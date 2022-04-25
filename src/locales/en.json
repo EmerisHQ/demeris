@@ -333,8 +333,7 @@
         "tooltipNoPool": "Currently there is no pool for this pair, please select other pair",
         "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable",
         "disabledTitle": "Swap is temporarily unavailable",
-        "disabledLearnMore": "Learn more ↗",
-        "disabledCTA": "Get email updates from Emeris – Subscribe"
+        "disabledLearnMore": "Learn more ↗"
       },
       "transferToHub": {
         "swap": "Assets are swapped on the Cosmos Hub",
