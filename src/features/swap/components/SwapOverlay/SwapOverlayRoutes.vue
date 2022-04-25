@@ -19,7 +19,7 @@
         >
           <p v-if="isBestRoute(index)" class="text-positive">Best price</p>
           <div class="flex items-center justify-between w-full">
-            <span class="font-medium text-left">{{ formatProtocolName(getProtocolFromRoute(route)) }}</span>
+            <span class="font-medium text-left">{{ quoteDexText(route) }}</span>
             <span class="font-medium text-right">
               <AmountDisplay :amount="getOutputAmount(index)" />
             </span>
@@ -55,8 +55,9 @@ import Icon from '@/components/ui/Icon.vue';
 import {
   countTransactionsFromRoute,
   formatProtocolName,
+  getChainFromProtocol,
   getOutputAmountFromRoute,
-  getProtocolFromRoute,
+  getProtocolsFromRoute,
   resolveBaseDenom,
 } from '@/features/swap/logic';
 import { useSwapActor, useSwapStore } from '@/features/swap/state';
@@ -71,6 +72,23 @@ const routeDetailIndex = ref(undefined);
 
 const routes = computed(() => state.value.context.data.routes);
 const selectedRouteIndex = computed(() => state.value.context.selectedRouteIndex);
+
+const protocols = (route) => {
+  if (!route) return [];
+  const protocols = getProtocolsFromRoute(route);
+  return protocols.map((protocol) => {
+    return { chain: getChainFromProtocol(protocol), name: formatProtocolName(protocol) };
+  });
+};
+
+const quoteDexText = (route) => {
+  const allProtocols = protocols(route);
+  if (allProtocols?.length >= 2) {
+    return `${allProtocols?.length} DEXs`;
+  } else if (allProtocols?.length === 1) {
+    return allProtocols[0].name;
+  } else return 'Unknown';
+};
 
 const isBestRoute = (index: number) => index === 0;
 
