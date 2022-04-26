@@ -65,16 +65,16 @@ export const amountToUnit = ({ amount, denom }: EmerisBase.Amount) => {
   };
 };
 
-export const getOrderPrice = (input: string, output: string) => {
-  return new BigNumber(output).dividedBy(input).toString();
+export const getOrderPrice = (input: EmerisBase.Amount, output: EmerisBase.Amount) => {
+  const { amount: inputAmount } = amountToHuman(input);
+  const { amount: outputAmount } = amountToHuman(output);
+
+  return new BigNumber(outputAmount).dividedBy(inputAmount).toString();
 };
 
-export const getOrderPriceFromContext = (context: SwapContext) => {
-  return getOrderPrice(context.inputAmount, context.outputAmount);
-};
-
-export const calculateSlippage = (amount: string, maxSlippage: number, factor = 1) => {
+export const calculateSlippage = (amount: string, maxSlippage: number, options: { factor?: number } = {}) => {
   const value = new BigNumber(amount);
   const slippage = 1 - maxSlippage / 100;
-  return value.times(Math.pow(slippage, factor)).toFixed();
+  const result = value.multipliedBy(Math.pow(slippage, options.factor ?? 1)).toFixed(0, BigNumber.ROUND_CEIL);
+  return result;
 };

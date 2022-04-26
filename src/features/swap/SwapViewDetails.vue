@@ -25,8 +25,8 @@
     <CollapseDescription content-class="pb-6" is-open>
       <template #title><span class="-text-1">Price</span></template>
       <template #label>
-        <AmountDisplay :amount="inputAmount" /> ≈
-        <AmountDisplay :amount="exchangeAmount" />
+        <AmountDisplay :amount="priceInputAmount" trunc-big-balance /> ≈
+        <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
       </template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
@@ -48,18 +48,21 @@
           <dd class="place-self-end">{{ transactionOffset.offset }} / {{ transactionOffset.total }}</dd>
         </template>
 
-        <dt class="text-muted">Limit price</dt>
+        <dt class="text-muted">Expected rate</dt>
         <dd class="text-right">
-          <AmountDisplay :amount="inputAmount" /> ≈
-          <AmountDisplay :amount="exchangeAmount" />
+          <AmountDisplay :amount="priceInputAmount" /> =
+          <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
         </dd>
+
+        <dt class="text-muted">Max slippage</dt>
+        <dd class="text-right">{{ swapStore.getSlippageSession() }}%</dd>
 
         <dt class="text-muted">
           Min. received
           <div>(if 100% swapped)</div>
         </dt>
         <dd class="text-right">
-          <AmountDisplay :amount="outputAmount" />
+          <AmountDisplay :amount="minOutputAmount" trunc-big-balance />
         </dd>
       </dl>
     </CollapseDescription>
@@ -113,26 +116,23 @@ const transaction = computed(() => {
   return props.step.transactions[0];
 });
 
-const inputAmount = computed(() => {
+const expectOutputAmount = computed(() => {
+  const denom = transaction.value.data.to.denom;
+  const orderPrice = getOrderPrice(transaction.value.data.from, transaction.value.data.to);
+
+  const { amount } = amountToUnit({ amount: orderPrice, denom });
+  const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
+  return { amount, denom: baseDenom };
+});
+
+const priceInputAmount = computed(() => {
   const denom = transaction.value.data.from.denom;
   const { amount } = amountToUnit({ amount: '1', denom });
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return { amount, denom: baseDenom };
 });
 
-const exchangeAmount = computed(() => {
-  const denom = transaction.value.data.to.denom;
-  const orderPrice = getOrderPrice(transaction.value.data.from.amount, transaction.value.data.to.amount);
-
-  const { amount } = amountToUnit({
-    amount: calculateSlippage(orderPrice, swapStore.getSlippageSession()),
-    denom,
-  });
-  const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
-  return { amount, denom: baseDenom };
-});
-
-const outputAmount = computed(() => {
+const minOutputAmount = computed(() => {
   const denom = transaction.value.data.to.denom;
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return {

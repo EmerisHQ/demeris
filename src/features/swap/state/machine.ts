@@ -6,6 +6,7 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { Step } from '@/types/actions';
 
 import * as logic from '../logic';
+import { getAvailableChainsByDenom, getDenomFromBaseDenom, resolveBaseDenom } from '../logic';
 
 interface SwapContextData {
   availableDenoms: string[];
@@ -345,7 +346,21 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         outputCoin: (context) => context.inputCoin,
         inputAmount: (context) => context.outputAmount,
         outputAmount: (context) => context.inputAmount,
-        inputCoin: (context) => context.outputCoin,
+        inputCoin: (context) => {
+          if (!context.outputCoin) return undefined;
+
+          const baseDenom = context.outputCoin.baseDenom;
+          const availableChains = getAvailableChainsByDenom(context, baseDenom);
+          const hasChain = availableChains.includes(context.inputCoin?.chain);
+          const newChain = hasChain ? context.inputCoin?.chain : availableChains[0];
+          const newDenom = getDenomFromBaseDenom(baseDenom, newChain);
+
+          return {
+            denom: newDenom,
+            baseDenom: baseDenom,
+            chain: newChain,
+          };
+        },
       }),
       setInputCoin: assign((context, event: any) => ({
         inputCoin: event.value,
@@ -389,8 +404,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             return '0';
           }
 
-          const expectedAmount = logic.getOutputAmountFromRoute(context);
-          return logic.amountToHuman(expectedAmount)?.amount;
+          const { amount, denom } = logic.getOutputAmountFromRoute(context);
+          const baseDenom = resolveBaseDenom(denom, { context });
+          return logic.amountToHuman({ denom: baseDenom, amount: amount })?.amount;
         },
       }),
       loadDefaultInputCoin: assign((context) => ({
@@ -401,8 +417,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       hasInputParams: (context) => context.inputCoin?.denom && !!context.inputAmount,
       hasOutputParams: (context) => context.outputCoin?.denom && !!context.outputAmount,
       hasRouteParams: (context) => {
-        if (context.inputCoin?.denom && context.inputAmount && !!context.outputCoin?.denom) return true;
-        if (context.outputCoin?.denom && context.outputAmount && !!context.inputCoin?.denom) return true;
+        if (context.inputCoin?.denom && +context.inputAmount && !!context.outputCoin?.denom) return true;
+        if (context.outputCoin?.denom && +context.outputAmount && !!context.inputCoin?.denom) return true;
         return false;
       },
       hasAllParams: (context) =>

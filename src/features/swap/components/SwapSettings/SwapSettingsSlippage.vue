@@ -72,7 +72,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 
-import { amountToUnit, getLimitPriceFromRoute, getMinAmountFromRoute } from '../../logic';
+import { amountToUnit, getLimitPriceFromRoute, getMinOutputAmountFromRoute } from '../../logic';
 import { useSwapActor, useSwapStore } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
@@ -100,7 +100,7 @@ const limitPrice = computed(() =>
 
 const minOutputAmount = computed(() =>
   amountToUnit({
-    amount: getMinAmountFromRoute(state.value.context, state.value.context.selectedRouteIndex),
+    amount: getMinOutputAmountFromRoute(state.value.context, state.value.context.selectedRouteIndex),
     denom: state.value.context.outputCoin?.baseDenom,
   }),
 );
