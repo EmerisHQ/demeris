@@ -30,7 +30,7 @@ const precision = computed(() => {
 const ticker = ref('-');
 
 const displayValue = computed(() => {
-  return new BigNumber(parseInt(props.amount.amount)).dividedBy(10 ** parseInt(precision.value));
+  return new BigNumber(parseFloat(props.amount.amount)).dividedBy(10 ** parseInt(precision.value));
 });
 
 const displayValueTrunc = computed(() => {

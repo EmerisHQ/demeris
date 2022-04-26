@@ -73,7 +73,7 @@ export default defineComponent({
 
       if (props.amount.amount) {
         value = price.value
-          ? new BigNumber(price.value * parseInt(props.amount.amount)).dividedBy(10 ** parseInt(precision))
+          ? new BigNumber(price.value * parseFloat(props.amount.amount)).dividedBy(10 ** parseInt(precision))
           : 0;
       } else if (!props.showZero) {
         value = price.value;
