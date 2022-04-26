@@ -180,6 +180,7 @@
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -309,7 +310,9 @@ export default defineComponent({
     const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
-      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
+      return assets.value
+        .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
+        .toString();
     });
 
     const stakingBalance = computed(() => {

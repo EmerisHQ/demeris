@@ -4,7 +4,7 @@
 <script lang="ts" setup>
 import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, PropType, ref, toRefs, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes } from '@/store';
@@ -13,7 +13,7 @@ import { getBaseDenomSync, getTicker } from '@/utils/actionHandler';
 const store = useStore();
 
 interface Props {
-  amount: PropType<EmerisBase.Amount>;
+  amount: EmerisBase.Amount;
   chain?: string;
   truncBigBalance?: boolean;
 }
@@ -30,7 +30,7 @@ const precision = computed(() => {
 const ticker = ref('-');
 
 const displayValue = computed(() => {
-  return new BigNumber(parseFloat(props.amount.amount)).dividedBy(10 ** parseInt(precision.value));
+  return new BigNumber(propsRef.amount.value.amount ?? 0).dividedBy(10 ** parseInt(precision.value));
 });
 
 const displayValueTrunc = computed(() => {
