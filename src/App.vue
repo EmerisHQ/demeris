@@ -30,6 +30,7 @@ import MoonpayModal from '@/components/common/MoonpayModal.vue';
 import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
+import { initializeExtension } from '@/features/extension/init';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { axiosInit } from '@/utils/api-settings';
@@ -145,15 +146,8 @@ onMounted(async () => {
       typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     }
   }
-  window.addEventListener('keplr_keystorechange', async () => {
-    window.localStorage.setItem('lastEmerisSession', '');
-    if (
-      typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
-      !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-    ) {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-    }
-  });
+
+  initializeExtension();
 
   if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
     await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
