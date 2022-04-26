@@ -151,7 +151,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -164,6 +164,7 @@ import DropdownMenu from '@/components/ui/DropdownMenu.vue';
 import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
@@ -180,6 +181,9 @@ const assetStakingAPY = ref<number | string>('-');
 const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
+let chainName = ref<string>(null);
+
+const { getChainNameByBaseDenom } = useChains();
 
 watch(
   () => propsRef.denom.value,
@@ -192,6 +196,10 @@ watch(
   { immediate: true },
 );
 
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+});
+
 const assetPrecision = computed(() => {
   return (
     store.getters[GlobalGetterTypes.API.getDenomPrecision]({
@@ -199,24 +207,19 @@ const assetPrecision = computed(() => {
     }) ?? 6
   );
 });
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 const getTimeToString = (isodate: string) => {
   return dayjs().to(dayjs(isodate));
 };
 const unbondingBalances = computed(() => {
-  return unbondingDelegationsByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  );
+  return unbondingDelegationsByChain(chainName.value);
 });
 const operator_prefix = computed(() => {
   return store.getters[GlobalGetterTypes.API.getBech32Config]({
-    chain_name: store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({
-      denom: propsRef.denom.value,
-    }),
+    chain_name: chainName.value,
   }).val_addr;
 });
 

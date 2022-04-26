@@ -17,69 +17,53 @@
     </div>
   </a>
 </template>
-<script lang="ts">
-/* eslint-disable @typescript-eslint/naming-convention */
+
+<script setup lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import { onMounted, ref, toRefs, watch } from 'vue';
 
 import stakePanel from '@/assets/images/stake-panel-ephemeris.png';
 import panelGradient from '@/assets/images/stakie-panel-gradient.png';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
-import { GlobalGetterTypes } from '@/store';
 import { event } from '@/utils/analytics';
 
-export default defineComponent({
-  name: 'StakingBanner',
-  components: {
-    CircleSymbol,
-  },
-  props: {
-    displayDenom: {
-      type: String,
-      default: 'ATOM',
-    },
-    baseDenom: {
-      type: String,
-      default: 'uatom',
-    },
-  },
-  setup(props) {
-    const { getChainDisplayInflationByBaseDenom } = useStaking();
-    const store = useStore();
-    let shouldShowBanner = ref<boolean>(false);
+interface Props {
+  displayDenom?: string;
+  baseDenom?: string;
+}
 
-    const onBannerClick = () => {
-      event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });
-    };
+const props = withDefaults(defineProps<Props>(), { displayDenom: 'ATOM', baseDenom: 'uatom' });
 
-    const propsRef = toRefs(props);
-    const apr = ref<string>('');
+const { getChainNameByBaseDenom } = useChains();
+const { getChainDisplayInflationByBaseDenom } = useStaking();
 
-    const chain_name = computed(() =>
-      store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.baseDenom.value }),
-    );
-    watch(
-      chain_name,
-      async (newValue) => {
-        if (!newValue) return;
-        const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
-        if (inflation === null || isNaN(inflation)) return;
-        apr.value = inflation > 0 ? new BigNumber(inflation).toFixed(2) : '-.-';
-        shouldShowBanner.value = true;
-      },
-      { immediate: true },
-    );
-    return {
-      shouldShowBanner,
-      apr,
-      onBannerClick,
-      panelGradient,
-      stakePanel,
-    };
-  },
+let shouldShowBanner = ref<boolean>(false);
+
+const onBannerClick = () => {
+  event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });
+};
+
+const propsRef = toRefs(props);
+const apr = ref<string>('');
+const chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.baseDenom.value);
 });
+
+watch(
+  chainName,
+  async (newValue) => {
+    if (!newValue) return;
+    const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
+    if (inflation === null || isNaN(inflation)) return;
+    apr.value = inflation > 0 ? new BigNumber(inflation).toFixed(2) : '-.-';
+    shouldShowBanner.value = true;
+  },
+  { immediate: true },
+);
 </script>
 <style lang="scss">
 .staking-banner {
