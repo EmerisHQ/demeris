@@ -154,18 +154,23 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
 
         if (data.result?.data?.value?.TxResult) {
-          return handleSuccess({
-            ...data.result,
-            height: data.result.data.value.TxResult.height,
-            tx_result: data.result?.data?.value?.TxResult?.result,
-          });
+          const txResult = data.result.data.value.TxResult;
+          if (txResult.result.code === 0) {
+            return handleSuccess({
+              ...data.result,
+              height: txResult.height,
+              tx_result: txResult.result,
+            });
+          }
+          return handleError(new Error(txResult.result.log));
         }
 
         if (data?.result?.tx_result) {
-          if (data.result.tx_result.code === 0) {
+          const txResult = data.result.tx_result;
+          if (txResult.code === 0) {
             return handleSuccess({ ...data.result, height: data.result.height });
           }
-          return handleError(new Error(data.result.tx_result.log));
+          return handleError(new Error(txResult.log));
         }
       };
 
