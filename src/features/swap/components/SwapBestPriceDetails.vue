@@ -14,19 +14,19 @@
     <div class="px-5 pt-4 pb-5">
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.expectedRate') }}
-        <span class="ml-auto text-text font-medium">~<AmountDisplay :amount="expectedAmount" /></span>
+        <span class="ml-auto text-text font-medium text-right">~<AmountDisplay :amount="expectedAmount" /></span>
       </div>
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.limitPrice')
-        }}<span class="ml-auto text-text font-medium">~<AmountDisplay :amount="limitAmount" /></span>
+        }}<span class="ml-auto text-text font-medium text-right">~<AmountDisplay :amount="limitAmount" /></span>
       </div>
       <div class="flex text-muted mb-3">
         {{ $t('components.bestPrice.maxSlippage')
-        }}<span class="ml-auto text-text font-medium">{{ maxSlippage }}%</span>
+        }}<span class="ml-auto text-text font-medium text-right">{{ maxSlippage }}%</span>
       </div>
       <div class="flex text-muted">
         {{ $t('components.bestPrice.minReceived') }}<br />{{ $t('components.bestPrice.fullSwapped')
-        }}<span class="ml-auto text-text font-medium"> <AmountDisplay :amount="minAmount" /></span>
+        }}<span class="ml-auto text-text font-medium text-right"> <AmountDisplay :amount="minAmount" /></span>
       </div>
     </div>
   </div>

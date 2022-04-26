@@ -29,10 +29,10 @@ export const getAvailableDenoms = (context: SwapContext) => {
   });
 };
 
-export const getDenomFromBaseDenom = (denom: string, chain: string) => {
+export const getDenomFromBaseDenom = (baseDenom: string, chain: string) => {
   const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
   for (const trace of Object.values(traces)) {
-    if (trace.base_denom === denom) {
+    if (trace.base_denom === baseDenom) {
       for (const item of trace.trace) {
         if (item.chain_name === chain) {
           return trace.ibc_denom;
@@ -40,7 +40,7 @@ export const getDenomFromBaseDenom = (denom: string, chain: string) => {
       }
     }
   }
-  return denom;
+  return baseDenom;
 };
 
 export const getChainFromDenom = (context: SwapContext, denom: string) => {

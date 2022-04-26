@@ -26,7 +26,7 @@
               :limit-price="getLimitPriceFromRoute(state.context, state.context.selectedRouteIndex)"
               :denom="state.context.outputCoin?.baseDenom"
               :max-slippage="state.context.maxSlippage"
-              :min-received="getMinAmountFromRoute(state.context, state.context.selectedRouteIndex)"
+              :min-received="getMinOutputAmountFromRoute(state.context, state.context.selectedRouteIndex)"
             />
           </template>
         </tippy>
@@ -43,7 +43,7 @@ import {
   countExchangesFromRoutes,
   formatProtocolName,
   getLimitPriceFromRoute,
-  getMinAmountFromRoute,
+  getMinOutputAmountFromRoute,
   getOrderPriceFromRoute,
   getOutputChainFromRoute,
   getProtocolFromRoute,

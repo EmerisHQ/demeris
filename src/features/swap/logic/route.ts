@@ -1,5 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import { EmerisBase, EmerisDEXInfo } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 
 import { move } from '@/actionhandler/actions/move';
 import { Step } from '@/types/actions';
@@ -43,28 +44,39 @@ export const getOrderPriceFromRoute = (context: SwapContext, routeIndex?: number
   const firstStep = route.steps[0];
   const lastStep = route.steps[route.steps.length - 1];
 
-  return getOrderPrice(firstStep.data.from.amount, lastStep.data.to.amount);
+  const from = {
+    denom: resolveBaseDenom(firstStep.data.from.denom, { context }),
+    amount: firstStep.data.from.amount,
+  };
+
+  const to = {
+    denom: resolveBaseDenom(lastStep.data.to.denom, { context }),
+    amount: lastStep.data.to.amount,
+  };
+
+  return getOrderPrice(from, to);
 };
 
 export const getLimitPriceFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
-  const amount = getOrderPriceFromRoute(context, index);
+  const amount = new BigNumber(getOrderPriceFromRoute(context, index)).shiftedBy(4).toString();
   const numSwaps = countSwapsFromRoute(route);
 
-  return calculateSlippage(amount, +context.maxSlippage, numSwaps);
+  const output = calculateSlippage(amount, +context.maxSlippage, { factor: numSwaps });
+  return new BigNumber(output).shiftedBy(-4).toString();
 };
 
-export const getMinAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
+export const getMinOutputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
   const index = routeIndex ?? context.selectedRouteIndex;
   const route = context.data.routes?.[index];
 
-  const output = getOutputAmountFromRoute(context, index);
-  const { amount } = amountToHuman(output);
+  const { amount, denom } = getOutputAmountFromRoute(context, index);
   const numSwaps = countSwapsFromRoute(route);
+  const output = calculateSlippage(amount, +context.maxSlippage, { factor: numSwaps });
 
-  return calculateSlippage(amount, +context.maxSlippage, numSwaps);
+  return amountToHuman({ amount: output, denom }).amount;
 };
 
 export const getOutputChainFromRoute = (context: SwapContext, routeIndex?: number) => {

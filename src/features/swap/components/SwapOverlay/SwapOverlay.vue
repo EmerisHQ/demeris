@@ -22,7 +22,7 @@
     <slot name="subheader" />
 
     <div ref="wrapperRef" class="scroll-container">
-      <div ref="contentRef" class="flex-1 flex flex-col px-6 pb-6 pt-2 scroll-container">
+      <div ref="contentRef" class="flex-1 flex flex-col px-6 pb-6 pt-2">
         <slot />
       </div>
     </div>
@@ -37,12 +37,12 @@ const emit = defineEmits(['esc']);
 const contentRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 
-const contentScroll = useScroll(contentRef);
+const contentScroll = useScroll(wrapperRef);
 const { Escape } = useMagicKeys();
 
 const showShadow = computed(() => {
   if (contentScroll.arrivedState.bottom) return false;
-  return contentRef.value?.scrollHeight > wrapperRef.value?.clientHeight - 5;
+  return contentRef.value?.scrollHeight > wrapperRef.value?.clientHeight;
 });
 
 whenever(Escape, () => emit('esc'));
@@ -57,10 +57,10 @@ whenever(Escape, () => emit('esc'));
 }
 
 .dark .scroll-shadow {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.44), transparent);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.15), transparent);
 }
 
 .light .scroll-shadow {
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.75), transparent);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.6), transparent);
 }
 </style>
