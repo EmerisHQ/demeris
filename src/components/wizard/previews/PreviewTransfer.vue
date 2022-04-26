@@ -260,7 +260,7 @@ export default defineComponent({
         if (!detail.from.address) {
           displayFrom.value = await getOwnAddress({ chain_name: detail.from.chain });
         }
-        if (detail.to.chain && detail.to.address) {
+        if (detail.to.address) {
           displayTo.value = detail.to.address;
         }
         if (detail.to.chain && !detail.to.address) {
