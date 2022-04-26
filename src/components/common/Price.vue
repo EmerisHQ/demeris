@@ -13,7 +13,7 @@
 /* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, nextTick, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
@@ -55,31 +55,33 @@ export default defineComponent({
   emits: ['displayPrice'],
   setup(props, { emit }) {
     const store = useStore();
-    const denom = ref(props.amount.denom);
+    const propsRef = toRefs(props);
     const isLoaded = ref(false);
     const theme = useTheme();
     const price = ref();
 
     const priceObserver = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getPrice]({ denom: denom.value });
+      return store.getters[GlobalGetterTypes.API.getPrice]({ denom: propsRef.amount.value.denom });
     });
 
     const displayPrice = computed(() => {
       const precision =
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: denom.value,
+          name: propsRef.amount.value.denom,
         }) ?? '6';
-      let value = 0;
+      let value = new BigNumber(0);
 
-      if (props.amount.amount) {
+      if (propsRef.amount.value.amount) {
         value = price.value
-          ? new BigNumber(price.value * parseFloat(props.amount.amount)).dividedBy(10 ** parseInt(precision))
-          : 0;
+          ? new BigNumber(price.value)
+              .multipliedBy(new BigNumber(propsRef.amount.value.amount))
+              .dividedBy(10 ** parseInt(precision))
+          : new BigNumber(0);
       } else if (!props.showZero) {
-        value = price.value;
+        value = new BigNumber(price.value);
       }
 
-      return value;
+      return value.toFixed(parseInt(precision));
     });
 
     watch(
