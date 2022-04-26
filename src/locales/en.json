@@ -331,7 +331,9 @@
         "swap": "Swap",
         "tooltipSwapLimit": "You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.",
         "tooltipNoPool": "Currently there is no pool for this pair, please select other pair",
-        "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable"
+        "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable",
+        "disabledTitle": "Swap is temporarily unavailable",
+        "disabledLearnMore": "Learn more ↗"
       },
       "transferToHub": {
         "swap": "Assets are swapped on the Cosmos Hub",
