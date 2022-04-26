@@ -2,7 +2,7 @@
   <SwapOverlay>
     <template #title> Swap route </template>
     <template #actions>
-      <Button v-if="!state.matches('ready.swapRoute')" variant="link" size="sm" @click="emit('close')">
+      <Button variant="link" size="sm" @click="emit('close')">
         <Icon name="CloseIcon" :icon-size="1.5" />
       </Button>
     </template>
@@ -48,7 +48,8 @@
 
       <span hidden class="absolute top-0 left-4 transform -translate-x-1/2 w-[2px] h-full bg-border block -z-[1]" />
     </dl>
-    <Button v-if="state.matches('ready.swapRoute')" class="pt-8" name="Continue" @click="onContinue" />
+
+    <Button v-if="state.matches('ready.confirming')" class="pt-8" name="Continue" @click="onConfirm" />
   </SwapOverlay>
 </template>
 
@@ -79,8 +80,8 @@ const { state, send } = useSwapActor();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 
-const onContinue = () => {
-  send('SHOW_SWAP_ROUTE.CONTINUE');
+const onConfirm = () => {
+  send('CONFIRM');
 };
 
 const swapRouteSubTitle = computed(() => {

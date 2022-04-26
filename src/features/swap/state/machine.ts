@@ -16,20 +16,21 @@ interface SwapContextData {
 }
 
 export interface SwapCoin {
-  denom: string;
-  chain: string;
   baseDenom: string;
+  chain: string;
+  denom: string;
 }
 
 export interface SwapContext {
-  inputCoin?: SwapCoin;
-  outputCoin?: SwapCoin;
-  inputAmount: string;
-  outputAmount: string;
-  defaultInputDenom?: string;
-  selectedRouteIndex?: number;
   balances: EmerisAPI.Balances;
   data: SwapContextData;
+  defaultInputDenom?: string;
+  inputAmount: string;
+  inputCoin?: SwapCoin;
+  maxSlippage?: string;
+  outputAmount: string;
+  outputCoin?: SwapCoin;
+  selectedRouteIndex?: number;
 }
 
 const defaultContext = (): SwapContext => ({
@@ -49,20 +50,23 @@ const defaultContext = (): SwapContext => ({
 });
 
 export type SwapEvents =
-  | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
-  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
-  | { type: 'ROUTE.SELECT_INDEX'; value: number }
-  | { type: 'STEPS.CLEAR' }
   | { type: 'COINS.SWITCH' }
-  | { type: 'INVALID.OVER_MAX' }
+  | { type: 'CONFIRM' }
+  | { type: 'CANCEL' }
+  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INVALID.BELOW_MIN' }
-  | { type: 'START' }
+  | { type: 'INVALID.OVER_MAX' }
+  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'RESET' }
-  | { type: 'SUBMIT' }
-  | { type: 'SHOW_SWAP_ROUTE.CONTINUE' };
+  | { type: 'ROUTE.SELECT_INDEX'; value: number }
+  | { type: 'SHOW_SWAP_ROUTE.CONTINUE' }
+  | { type: 'SLIPPAGE.CHANGE'; value: string }
+  | { type: 'START' }
+  | { type: 'STEPS.CLEAR' }
+  | { type: 'SUBMIT' };
 
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
@@ -99,6 +103,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       'OUTPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.output',
         actions: 'setOutputAmount',
+      },
+      'SLIPPAGE.CHANGE': {
+        actions: ['setSlippage', 'updateSlippageSession'],
       },
     },
     states: {
@@ -210,14 +217,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             invoke: {
               src: 'handleSubmit',
               onDone: {
-                target: 'swapRoute',
+                target: 'confirming',
                 actions: 'assignSteps',
               },
               onError: 'invalid',
             },
           },
-          swapRoute: {
-            on: { 'SHOW_SWAP_ROUTE.CONTINUE': '#submitted' },
+          confirming: {
+            on: { CONFIRM: '#submitted', CANCEL: 'valid' },
           },
           invalid: {
             initial: 'unknown',
@@ -294,7 +301,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         return Promise.resolve(true);
       },
       handleSubmit: async (context) => {
-        return Promise.resolve(logic.convertRouteToSteps(context, context.selectedRouteIndex));
+        return logic.convertRouteToSteps(context, context.selectedRouteIndex);
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
@@ -342,8 +349,23 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           steps: [],
         },
       })),
+      setSlippage: assign({
+        maxSlippage: (_, event: any) => {
+          const value = event.value;
+          if (!value) return '1';
+
+          return Math.min(+event.value, 100).toString();
+        },
+      }),
       switchCoins: assign({
-        outputCoin: (context) => context.inputCoin,
+        outputCoin: (context) => {
+          if (!context.inputCoin) return undefined;
+          return {
+            denom: context.inputCoin.baseDenom,
+            baseDenom: context.inputCoin.baseDenom,
+            chain: undefined,
+          };
+        },
         inputAmount: (context) => context.outputAmount,
         outputAmount: (context) => context.inputAmount,
         inputCoin: (context) => {

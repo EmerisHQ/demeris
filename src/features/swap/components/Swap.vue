@@ -1,8 +1,9 @@
 <template>
   <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel flex flex-col bg-surface dark:bg-fg">
-    <template v-if="showSwapRoute">
-      <SwapOverlayRouteDetail :route-index="selectedRouteIndex" @close="send('SHOW_SWAP_ROUTE.CONTINUE')" />
+    <template v-if="showConfirming">
+      <SwapOverlayRouteDetail :route-index="selectedRouteIndex" class="!relative" @close="send('CANCEL')" />
     </template>
+
     <template v-else-if="isSignedIn && hasSubmitted">
       <TransactionProcessCreator
         :steps="state.context.data.steps"
@@ -82,7 +83,7 @@ const isBalancesLoaded = computed(() => {
 });
 const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
 const hasSubmitted = computed(() => state.value.matches('submitted'));
-const showSwapRoute = computed(() => state.value.matches('ready.swapRoute'));
+const showConfirming = computed(() => state.value.matches('ready.confirming'));
 const selectedRouteIndex = computed(() => state.value.context.selectedRouteIndex);
 
 const setAllBalances = async () => {

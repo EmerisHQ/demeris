@@ -8,12 +8,6 @@
       class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
-    <SwapOverlayRouteDetail
-      v-if="showSwapRouteReviewState"
-      :step-id="stepId"
-      :route-index="selectedRouteIndex"
-      @close="send('CONTINUE')"
-    />
     <ViewStateReview v-else-if="showReviewState" />
     <ViewStateSigning v-else-if="showSigningState" />
     <ViewStateTransacting v-else-if="showTransactingState" />
@@ -49,8 +43,6 @@ import { computed, nextTick, provide, watch } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
-import SwapOverlayRouteDetail from '@/features/swap/components/SwapOverlay/SwapOverlayRouteDetail.vue';
-import { useSwapActor } from '@/features/swap/state';
 
 import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
@@ -77,13 +69,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'minimize', 'previous', 'onReceiptState', 'undo']);
 
 const transactionsStore = useTransactionsStore();
-const { state: swapState } = useSwapActor();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
 const isSwapComponent = computed(
   () =>
     isSwapAction(state.value.context) && !transactionsStore.isViewerModalOpen && !transactionsStore.isPendingModalOpen,
 );
-const selectedRouteIndex = computed(() => swapState.value.context.selectedRouteIndex);
 
 const actor = useActor(transactionService);
 const { state, send } = actor;
@@ -110,9 +100,6 @@ watch(
 );
 
 const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'));
-const showSwapRouteReviewState = computed(
-  () => state.value.matches('swapRoute') && selectedRouteIndex.value !== undefined,
-);
 const showReviewState = computed(() => state.value.matches('review'));
 const showSigningState = computed(() => state.value.matches('signing'));
 const showTransactingState = computed(() => state.value.matches('transacting'));
