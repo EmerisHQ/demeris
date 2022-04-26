@@ -1,6 +1,10 @@
 <template>
   <div class="w-[320px] min-h-[432px] relative rounded-xl shadow-panel flex flex-col bg-surface dark:bg-fg">
-    <template v-if="isSignedIn && hasSubmitted">
+    <template v-if="showConfirming">
+      <SwapOverlayRouteDetail :route-index="selectedRouteIndex" class="!relative" @close="send('CANCEL')" />
+    </template>
+
+    <template v-else-if="isSignedIn && hasSubmitted">
       <TransactionProcessCreator
         :steps="state.context.data.steps"
         :emit-back="true"
@@ -64,13 +68,14 @@ import SwapButtonSwitch from './SwapButton/SwapButtonSwitch.vue';
 import SwapCoinInput from './SwapCoin/SwapCoinInput.vue';
 import SwapCoinOutput from './SwapCoin/SwapCoinOutput.vue';
 import SwapOverlayAssets from './SwapOverlay/SwapOverlayAssets.vue';
+import SwapOverlayRouteDetail from './SwapOverlay/SwapOverlayRouteDetail.vue';
 import SwapOverlayRoutes from './SwapOverlay/SwapOverlayRoutes.vue';
 import SwapOverlaySettings from './SwapOverlay/SwapOverlaySettings.vue';
 
 const props = defineProps(['canStart', 'defaultDenom']);
 const globalStore = useStore();
 const swapStore = useSwapStore();
-
+const { state, send } = useSwapMachine(props.defaultDenom);
 const { balances, isValidatingBalances } = useAccount();
 
 const isBalancesLoaded = computed(() => {
@@ -78,6 +83,8 @@ const isBalancesLoaded = computed(() => {
 });
 const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
 const hasSubmitted = computed(() => state.value.matches('submitted'));
+const showConfirming = computed(() => state.value.matches('ready.confirming'));
+const selectedRouteIndex = computed(() => state.value.context.selectedRouteIndex);
 
 const setAllBalances = async () => {
   if (!isBalancesLoaded.value) return;
@@ -92,8 +99,6 @@ const startMachine = () => {
   send({ type: 'SLIPPAGE.CHANGE', value: '1' });
   send('START');
 };
-
-const { state, send } = useSwapMachine(props.defaultDenom);
 
 watch([isBalancesLoaded, balances], setAllBalances, { immediate: true, deep: true });
 whenever(() => props.canStart, startMachine, { immediate: true });

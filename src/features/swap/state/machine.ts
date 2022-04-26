@@ -53,6 +53,8 @@ const defaultContext = (): SwapContext => ({
 export type SwapEvents =
   | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
   | { type: 'COINS.SWITCH' }
+  | { type: 'CONFIRM' }
+  | { type: 'CANCEL' }
   | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INVALID.BELOW_MIN' }
@@ -61,8 +63,9 @@ export type SwapEvents =
   | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'RESET' }
   | { type: 'ROUTE.SELECT_INDEX'; value: number }
-  | { type: 'START' }
+  | { type: 'SHOW_SWAP_ROUTE.CONTINUE' }
   | { type: 'SLIPPAGE.CHANGE'; value: string }
+  | { type: 'START' }
   | { type: 'STEPS.CLEAR' }
   | { type: 'SUBMIT' };
 
@@ -215,11 +218,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             invoke: {
               src: 'handleSubmit',
               onDone: {
-                target: '#submitted',
+                target: 'confirming',
                 actions: 'assignSteps',
               },
               onError: 'invalid',
             },
+          },
+          confirming: {
+            on: { CONFIRM: '#submitted', CANCEL: 'valid' },
           },
           invalid: {
             initial: 'unknown',

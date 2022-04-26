@@ -48,6 +48,8 @@
 
       <span hidden class="absolute top-0 left-4 transform -translate-x-1/2 w-[2px] h-full bg-border block -z-[1]" />
     </dl>
+
+    <Button v-if="state.matches('ready.confirming')" class="pt-8" name="Continue" @click="onConfirm" />
   </SwapOverlay>
 </template>
 
@@ -74,9 +76,13 @@ import SwapOverlay from './SwapOverlay.vue';
 const props = defineProps<{ routeIndex: number }>();
 const emit = defineEmits(['close']);
 
-const { state } = useSwapActor();
+const { state, send } = useSwapActor();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
+
+const onConfirm = () => {
+  send('CONFIRM');
+};
 
 const swapRouteSubTitle = computed(() => {
   const numberOfTransactions = countTransactionsFromRoute(state.value.context, props.routeIndex);
