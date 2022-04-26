@@ -78,7 +78,7 @@ export default defineComponent({
               .dividedBy(10 ** parseInt(precision))
           : new BigNumber(0);
       } else if (!props.showZero) {
-        value = price.value;
+        value = price.value ?? new BigNumber(0);
       }
 
       return value.toFixed(parseInt(precision));
