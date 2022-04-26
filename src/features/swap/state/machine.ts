@@ -83,7 +83,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
         {
           target: 'updating.routes.output',
-          actions: ['setOutputCoin'],
+          actions: ['setInputCoin'],
         },
       ],
       'OUTPUT.CHANGE_COIN': [
