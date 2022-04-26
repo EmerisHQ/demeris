@@ -312,7 +312,7 @@ export default defineComponent({
     const availableAmount = computed(() => {
       return assets.value
         .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
-        .toFixed(0);
+        .toString();
     });
 
     const stakingBalance = computed(() => {
@@ -332,31 +332,31 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      let totalStakedAmount = new BigNumber(0);
+      let totalStakedAmount = 0;
       if (Array.isArray(staked)) {
         for (let i = 0; i < staked.length; i++) {
-          let amount = new BigNumber(staked[i].amount);
+          let amount = parseFloat(staked[i].amount);
           if (amount) {
-            totalStakedAmount = totalStakedAmount.plus(amount);
+            totalStakedAmount += amount;
           }
         }
       }
-      return totalStakedAmount.toFixed(0);
+      return totalStakedAmount;
     });
 
     const unstakedAmount = computed(() => {
-      let totalUnstakedAmount = new BigNumber(0);
+      let totalUnstakedAmount = 0;
       if (unbondingDelegation.value.length > 0) {
         const unstakedAmounts = unbondingDelegation.value
           .map((y) => y.entries)
           .flat()
           .map((z) => z.balance);
         if (unstakedAmounts.length > 0) {
-          const unstakedAmount = unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item)), new BigNumber(0));
-          totalUnstakedAmount = totalUnstakedAmount.plus(unstakedAmount);
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
         }
       }
-      return totalUnstakedAmount.toFixed(0);
+      return totalUnstakedAmount;
     });
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
@@ -412,10 +412,7 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return new BigNumber(availableAmount.value)
-        .plus(new BigNumber(stakedAmount.value))
-        .plus(new BigNumber(unstakedAmount.value))
-        .toFixed(0);
+      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
