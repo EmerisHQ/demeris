@@ -27,7 +27,7 @@ export interface SwapContext {
   defaultInputDenom?: string;
   inputAmount: string;
   inputCoin?: SwapCoin;
-  maxSlippage?: string;
+  maxSlippage: string;
   outputAmount: string;
   outputCoin?: SwapCoin;
   selectedRouteIndex?: number;
@@ -41,6 +41,7 @@ const defaultContext = (): SwapContext => ({
   defaultInputDenom: undefined,
   selectedRouteIndex: undefined,
   balances: [],
+  maxSlippage: '1',
   data: {
     availableDenoms: [],
     routes: [],
@@ -323,13 +324,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           availableDenoms: event.data,
         },
       })),
-      assignRoutes: assign((context, event: any) => ({
-        data: {
-          ...context.data,
-          routes: event.data,
-        },
-        selectedRouteIndex: 0,
-      })),
+      assignRoutes: assign((context, event: any) => {
+        const routes = logic.removeExceedingTransactionsFromRoutes(event.data);
+
+        return {
+          data: {
+            ...context.data,
+            routes,
+          },
+          selectedRouteIndex: 0,
+        };
+      }),
       assignSteps: assign((context, event: any) => ({
         data: {
           ...context.data,
