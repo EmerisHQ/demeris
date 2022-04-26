@@ -132,7 +132,7 @@ export default defineComponent({
           const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
           return {
             ...item,
-            amount: parseCoins(item.amount)[0].amount,
+            amount: item.amount ? parseCoins(item.amount)[0].amount : '0',
             unavailableChains,
             isFullAmountUnavailable: !!unavailableChains.length,
           };
