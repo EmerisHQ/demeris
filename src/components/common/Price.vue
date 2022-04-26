@@ -69,17 +69,19 @@ export default defineComponent({
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: denom.value,
         }) ?? '6';
-      let value = 0;
+      let value = new BigNumber(0);
 
       if (props.amount.amount) {
         value = price.value
-          ? new BigNumber(price.value * parseFloat(props.amount.amount)).dividedBy(10 ** parseInt(precision))
-          : 0;
+          ? new BigNumber(price.value)
+              .multipliedBy(new BigNumber(props.amount.amount))
+              .dividedBy(10 ** parseInt(precision))
+          : new BigNumber(0);
       } else if (!props.showZero) {
         value = price.value;
       }
 
-      return value;
+      return value.toFixed(parseInt(precision));
     });
 
     watch(

@@ -14,7 +14,7 @@
               </div>
               <Price
                 v-tippy
-                :amount="{ amount: 0, denom }"
+                :amount="{ amount: '0', denom }"
                 :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
@@ -312,7 +312,7 @@ export default defineComponent({
     const availableAmount = computed(() => {
       return assets.value
         .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
-        .toString();
+        .toFixed(0);
     });
 
     const stakingBalance = computed(() => {
@@ -332,31 +332,31 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      let totalStakedAmount = 0;
+      let totalStakedAmount = new BigNumber(0);
       if (Array.isArray(staked)) {
         for (let i = 0; i < staked.length; i++) {
-          let amount = parseFloat(staked[i].amount);
+          let amount = new BigNumber(staked[i].amount);
           if (amount) {
-            totalStakedAmount += amount;
+            totalStakedAmount = totalStakedAmount.plus(amount);
           }
         }
       }
-      return totalStakedAmount;
+      return totalStakedAmount.toFixed(0);
     });
 
     const unstakedAmount = computed(() => {
-      let totalUnstakedAmount = 0;
+      let totalUnstakedAmount = new BigNumber(0);
       if (unbondingDelegation.value.length > 0) {
         const unstakedAmounts = unbondingDelegation.value
           .map((y) => y.entries)
           .flat()
           .map((z) => z.balance);
         if (unstakedAmounts.length > 0) {
-          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item)), new BigNumber(0));
+          totalUnstakedAmount = totalUnstakedAmount.plus(unstakedAmount);
         }
       }
-      return totalUnstakedAmount;
+      return totalUnstakedAmount.toFixed(0);
     });
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
@@ -393,7 +393,7 @@ export default defineComponent({
     });
 
     const pooledAmount = computed(() => {
-      let assetPooledAmount = 0;
+      let assetPooledAmount = new BigNumber(0);
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
@@ -404,7 +404,7 @@ export default defineComponent({
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
         if (assetBalanceInPool) {
-          assetPooledAmount += assetBalanceInPool.amount;
+          assetPooledAmount = assetPooledAmount.plus(new BigNumber(assetBalanceInPool.amount));
         }
       }
 
@@ -412,7 +412,10 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
+      return new BigNumber(availableAmount.value)
+        .plus(new BigNumber(stakedAmount.value))
+        .plus(new BigNumber(unstakedAmount.value))
+        .toFixed(0);
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
