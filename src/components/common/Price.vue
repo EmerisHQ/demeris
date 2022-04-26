@@ -71,7 +71,7 @@ export default defineComponent({
         }) ?? '6';
       let value = new BigNumber(0);
 
-      if (props.amount.amount) {
+      if (props.amount.amount && props.amount.amount != '0') {
         value = price.value
           ? new BigNumber(price.value)
               .multipliedBy(new BigNumber(props.amount.amount))
