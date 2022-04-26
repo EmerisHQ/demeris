@@ -13,26 +13,33 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { useStore } from 'vuex';
+import { computed, onMounted, ref, toRefs } from 'vue';
 
 import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
 import StakeTableContents from '@/components/asset/StakeTableContents.vue';
 import StakeTableTitle from '@/components/asset/StakeTableTitle.vue';
 import AsyncBoundary from '@/components/common/AsyncBoundary.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
-import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event } from '@/utils/analytics';
 
-const store = useStore() as RootStoreTyped;
 const selectedTab = ref<number>(1);
+
 const props = defineProps<{ denom: string }>();
+const propsRef = toRefs(props);
+
 const { stakingBalancesByChain } = useAccount();
+const { getChainNameByBaseDenom } = useChains();
+
+let chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+});
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const showStakingBanner = computed(() => {

@@ -48,9 +48,8 @@
 </template>
 
 <script lang="ts" setup>
-import { toRefs } from '@vue/reactivity';
 import BigNumber from 'bignumber.js';
-import { computed } from 'vue';
+import { computed, onMounted, ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -60,6 +59,7 @@ import Apr from '@/components/stake/Apr.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useChains from '@/composables/useChains';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { event } from '@/utils/analytics';
@@ -71,10 +71,16 @@ const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmou
 const propsRef = toRefs(props);
 const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
 const store = useStore() as RootStoreTyped;
+const { getChainNameByBaseDenom } = useChains();
+
+let chainName = ref<string>(null);
+
+onMounted(async () => {
+  chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);
+});
+
 const stakingBalances = computed(() => {
-  return stakingBalancesByChain(
-    store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-  ).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
+  return stakingBalancesByChain(chainName.value).filter((x) => Math.floor(parseFloat(x.amount)) > 0);
 });
 
 const assetPrecision = computed(() => {
@@ -83,10 +89,6 @@ const assetPrecision = computed(() => {
       name: propsRef.denom.value,
     }) ?? 6
   );
-});
-
-const chainName = computed(() => {
-  return store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value });
 });
 
 const unbondingBalances = computed(() => {

@@ -3,18 +3,18 @@
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
-import useSafeGetters from '@/composables/useSafeGetters';
+import useChains from '@/composables/useChains';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getSumOfRewards, keyHashfromAddress } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useStaking() {
   const store = useStore() as RootStoreTyped;
-  const { getChainName } = useSafeGetters();
+  const { getChainNameByBaseDenom } = useChains();
 
   const getValidatorsByBaseDenom = async (base_denom: string) => {
     //TODO: have our own curated DB for validator list
-    const chain_name = await getChainName(base_denom);
+    const chain_name = await getChainNameByBaseDenom(base_denom);
     const rawValidators = await store.dispatch(GlobalActionTypes.API.GET_VALIDATORS, {
       subscribe: false,
       params: { chain_name },
@@ -25,7 +25,7 @@ export default function useStaking() {
   };
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
-    const chain_name = await getChainName(base_denom);
+    const chain_name = await getChainNameByBaseDenom(base_denom);
     try {
       const inflation = await store.dispatch(GlobalActionTypes.API.GET_INFLATION, {
         subscribe: false,
@@ -39,7 +39,7 @@ export default function useStaking() {
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<StakingRewards> => {
     try {
-      const chain_name = await getChainName(base_denom);
+      const chain_name = await getChainNameByBaseDenom(base_denom);
       const rewards = await store.dispatch(GlobalActionTypes.API.GET_STAKING_REWARDS, {
         subscribe: false,
         params: { chain_name },

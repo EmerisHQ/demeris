@@ -20,6 +20,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import { actionHandler } from '@/actionhandler';
+import useChains from '@/composables/useChains';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -56,6 +57,7 @@ export default defineComponent({
     const store = useStore() as RootStoreTyped;
     const router = useRouter();
 
+    const { getChainNameByBaseDenom } = useChains();
     const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
 
     const propsRef = toRefs(props);
@@ -79,7 +81,7 @@ export default defineComponent({
     };
     onMounted(async () => {
       const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-      const chainName = store.getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
+      const chainName = await getChainNameByBaseDenom(baseDenom);
       const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
         reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
         return reward;
