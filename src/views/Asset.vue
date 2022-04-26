@@ -120,17 +120,39 @@
               <div class="w-1/3 ml-4 text-muted text-right">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                  :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                  :amount="{
+                    amount: new BigNumber(parseCoins(asset.amount)[0].amount)
+                      .plus(new BigNumber(stakedAmount))
+                      .toFixed(assetConfig.precision),
+                    denom,
+                  }"
                 />
-                <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
+                <AmountDisplay
+                  v-else
+                  :amount="{
+                    amount: new BigNumber(parseCoins(asset.amount)[0].amount).toFixed(assetConfig.precision),
+                    denom,
+                  }"
+                />
               </div>
               <div class="flex items-center justify-end w-1/3 ml-4">
                 <span class="text-right font-medium">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                    :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                    :amount="{
+                      amount: new BigNumber(parseCoins(asset.amount)[0].amount)
+                        .plus(new BigNumber(stakedAmount))
+                        .toFixed(assetConfig.precision),
+                      denom,
+                    }"
                   />
-                  <Price v-else :amount="{ amount: asset.amount, denom }" />
+                  <Price
+                    v-else
+                    :amount="{
+                      amount: new BigNumber(parseCoins(asset.amount)[0].amount).toFixed(assetConfig.precision),
+                      denom,
+                    }"
+                  />
                 </span>
                 <ChainDownWarning
                   v-if="unavailableChains[asset.on_chain]"
@@ -484,6 +506,8 @@ export default defineComponent({
     return {
       nativeAsset,
       assetConfig,
+      BigNumber,
+      parseCoins,
       denom,
       assets,
       unavailableChains,

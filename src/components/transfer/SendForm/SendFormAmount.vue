@@ -340,7 +340,7 @@ export default defineComponent({
     };
 
     const setCurrentAsset = async (asset: Record<string, unknown>) => {
-      state.currentAsset = asset;
+      state.currentAsset = { ...asset, amount: parseCoins(asset.amount as string)[0].amount };
 
       if (asset) {
         form.balance.denom = parseCoins(asset.amount as string)[0].denom;

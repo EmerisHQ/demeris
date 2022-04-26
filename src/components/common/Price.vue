@@ -87,7 +87,7 @@ export default defineComponent({
     watch(
       () => displayPrice.value,
       async (value) => {
-        emit('displayPrice', value);
+        emit('displayPrice', parseFloat(value));
       },
       { immediate: true },
     );

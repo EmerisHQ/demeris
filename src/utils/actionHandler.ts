@@ -172,7 +172,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
 export function getBaseDenomSync(denom: string) {
   const typedstore = useStore() as RootStoreTyped;
   const traces = typedstore.getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  return traces[denom.split('/')[1]]?.base_denom ?? denom;
+  return isNative(denom) ? denom : traces[denom.split('/')[1]]?.base_denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const typedstore = useStore() as RootStoreTyped;
