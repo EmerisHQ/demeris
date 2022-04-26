@@ -54,7 +54,7 @@ import { useI18n } from 'vue-i18n';
 export default defineComponent({
   props: {
     value: {
-      type: [String, Number],
+      type: [String, Number, BigNumber],
       required: false,
       default: '',
     },

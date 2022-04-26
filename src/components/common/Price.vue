@@ -12,6 +12,7 @@
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -68,14 +69,14 @@ export default defineComponent({
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: denom.value,
         }) ?? '6';
-      let value;
+      let value = 0;
 
       if (props.amount.amount) {
-        value = price.value ? (price.value * parseInt(props.amount.amount)) / Math.pow(10, parseInt(precision)) : 0;
+        value = price.value
+          ? new BigNumber(price.value * parseInt(props.amount.amount)).dividedBy(10 ** parseInt(precision))
+          : 0;
       } else if (!props.showZero) {
         value = price.value;
-      } else {
-        value = 0;
       }
 
       return value;

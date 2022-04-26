@@ -13,7 +13,7 @@ const { getStakingAPR } = useStaking();
 
 // Interfaces
 interface Props {
-  showLabel: boolean;
+  showLabel?: boolean;
   chain: string;
 }
 

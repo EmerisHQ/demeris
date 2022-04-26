@@ -26,9 +26,8 @@ import { StakingActions } from '@/types/actions';
 
 interface Props {
   denom: string;
-  label: string;
+  label?: string;
   hasButton: boolean;
-  buttonAction: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
