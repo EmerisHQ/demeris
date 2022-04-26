@@ -26,7 +26,13 @@
       </span>
     </template>
   </i18n-n>
-  <i18n-n v-else tag="span" :value="inputValue" :format="{ key: 'currency', maximumFractionDigits }" :i18n="i18n">
+  <i18n-n
+    v-else
+    tag="span"
+    :value="Number(inputValue.toFixed(15))"
+    :format="{ key: 'currency', maximumFractionDigits }"
+    :i18n="i18n"
+  >
     <template #currency="slotProps">
       <span>{{ slotProps.currency }}</span>
     </template>
@@ -77,8 +83,10 @@ export default defineComponent({
   },
   setup(props) {
     const maximumFractionDigits = ref(2);
-    const inputValue = computed(() => Number(props.value));
-    const hasValue = computed(() => !isNaN(inputValue.value) && isFinite(inputValue.value) && inputValue.value > 0);
+    const inputValue = computed(() => new BigNumber(props.value));
+    const hasValue = computed(
+      () => !inputValue.value.isNaN() && inputValue.value.isFinite() && inputValue.value.isGreaterThan(0),
+    );
     const i18n = useI18n({ useScope: 'global' });
     watch(
       () => [props.value, props.precision],
