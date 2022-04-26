@@ -2,7 +2,7 @@
   <SwapOverlay>
     <template #title> Swap route </template>
     <template #actions>
-      <Button v-if="!stepId" variant="link" size="sm" @click="emit('close')">
+      <Button v-if="!state.matches('ready.swapRoute')" variant="link" size="sm" @click="emit('close')">
         <Icon name="CloseIcon" :icon-size="1.5" />
       </Button>
     </template>
@@ -48,13 +48,12 @@
 
       <span hidden class="absolute top-0 left-4 transform -translate-x-1/2 w-[2px] h-full bg-border block -z-[1]" />
     </dl>
-    <Button v-if="transactionState?.matches('swapRoute')" class="pt-8" name="Continue" @click="onContinue" />
+    <Button v-if="state.matches('ready.swapRoute')" class="pt-8" name="Continue" @click="onContinue" />
   </SwapOverlay>
 </template>
 
 <script lang="ts" setup>
-import { useActor } from '@xstate/vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -70,24 +69,18 @@ import {
   getProtocolFromStep,
 } from '@/features/swap/logic';
 import { useSwapActor } from '@/features/swap/state';
-import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 
 import SwapOverlay from './SwapOverlay.vue';
 
-const props = defineProps<{ routeIndex: number; stepId?: string }>();
+const props = defineProps<{ routeIndex: number }>();
 const emit = defineEmits(['close']);
 
-const { state } = useSwapActor();
-const transactionsStore = useTransactionsStore();
-const transactionService = computed(() => transactionsStore?.transactions?.[props?.stepId]);
-const actor = ref(null);
-const transactionState = ref(null);
-const transactionSend = ref(null);
+const { state, send } = useSwapActor();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
 
 const onContinue = () => {
-  transactionSend.value('CONTINUE');
+  send('SHOW_SWAP_ROUTE.CONTINUE');
 };
 
 const swapRouteSubTitle = computed(() => {
@@ -99,15 +92,6 @@ const swapRouteSubTitle = computed(() => {
     return numberOfTransactions === 1
       ? `1 transaction across ${numberOfChains} chains`
       : `${numberOfTransactions} transactions across ${numberOfChains} chains`;
-  }
-});
-
-onMounted(() => {
-  if (transactionService.value) {
-    actor.value = useActor(transactionService);
-    const { state, send } = actor.value;
-    transactionState.value = state;
-    transactionSend.value = send;
   }
 });
 </script>

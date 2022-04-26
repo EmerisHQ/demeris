@@ -6,7 +6,6 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { Step } from '@/types/actions';
 
 import * as logic from '../logic';
-import { getAvailableChainsByDenom } from '../logic';
 
 interface SwapContextData {
   availableDenoms: string[];
@@ -16,21 +15,20 @@ interface SwapContextData {
 }
 
 export interface SwapCoin {
-  baseDenom: string;
-  chain: string;
   denom: string;
+  chain: string;
+  baseDenom: string;
 }
 
 export interface SwapContext {
+  inputCoin?: SwapCoin;
+  outputCoin?: SwapCoin;
+  inputAmount: string;
+  outputAmount: string;
+  defaultInputDenom?: string;
+  selectedRouteIndex?: number;
   balances: EmerisAPI.Balances;
   data: SwapContextData;
-  defaultInputDenom?: string;
-  inputAmount: string;
-  inputCoin?: SwapCoin;
-  maxSlippage: string;
-  outputAmount: string;
-  outputCoin?: SwapCoin;
-  selectedRouteIndex?: number;
 }
 
 const defaultContext = (): SwapContext => ({
@@ -41,7 +39,6 @@ const defaultContext = (): SwapContext => ({
   defaultInputDenom: undefined,
   selectedRouteIndex: undefined,
   balances: [],
-  maxSlippage: '1',
   data: {
     availableDenoms: [],
     routes: [],
@@ -51,20 +48,20 @@ const defaultContext = (): SwapContext => ({
 });
 
 export type SwapEvents =
-  | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
-  | { type: 'COINS.SWITCH' }
-  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'INVALID.BELOW_MIN' }
-  | { type: 'INVALID.OVER_MAX' }
-  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
-  | { type: 'RESET' }
+  | { type: 'INPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
+  | { type: 'BALANCES.SET'; balances?: EmerisAPI.Balances }
   | { type: 'ROUTE.SELECT_INDEX'; value: number }
-  | { type: 'START' }
-  | { type: 'SLIPPAGE.CHANGE'; value: string }
   | { type: 'STEPS.CLEAR' }
-  | { type: 'SUBMIT' };
+  | { type: 'COINS.SWITCH' }
+  | { type: 'INVALID.OVER_MAX' }
+  | { type: 'INVALID.BELOW_MIN' }
+  | { type: 'START' }
+  | { type: 'RESET' }
+  | { type: 'SUBMIT' }
+  | { type: 'SHOW_SWAP_ROUTE.CONTINUE' };
 
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
@@ -101,9 +98,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       'OUTPUT.CHANGE_AMOUNT': {
         target: 'updating.routes.output',
         actions: 'setOutputAmount',
-      },
-      'SLIPPAGE.CHANGE': {
-        actions: ['setSlippage', 'updateSlippageSession'],
       },
     },
     states: {
@@ -215,11 +209,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             invoke: {
               src: 'handleSubmit',
               onDone: {
-                target: '#submitted',
+                target: 'swapRoute',
                 actions: 'assignSteps',
               },
               onError: 'invalid',
             },
+          },
+          swapRoute: {
+            on: { 'SHOW_SWAP_ROUTE.CONTINUE': '#submitted' },
           },
           invalid: {
             initial: 'unknown',
@@ -296,7 +293,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         return Promise.resolve(true);
       },
       handleSubmit: async (context) => {
-        return logic.convertRouteToSteps(context, context.selectedRouteIndex);
+        return Promise.resolve(logic.convertRouteToSteps(context, context.selectedRouteIndex));
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
@@ -318,17 +315,13 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           availableDenoms: event.data,
         },
       })),
-      assignRoutes: assign((context, event: any) => {
-        const routes = logic.removeExceedingTransactionsFromRoutes(event.data);
-
-        return {
-          data: {
-            ...context.data,
-            routes,
-          },
-          selectedRouteIndex: 0,
-        };
-      }),
+      assignRoutes: assign((context, event: any) => ({
+        data: {
+          ...context.data,
+          routes: event.data,
+        },
+        selectedRouteIndex: 0,
+      })),
       assignSteps: assign((context, event: any) => ({
         data: {
           ...context.data,
@@ -348,39 +341,11 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           steps: [],
         },
       })),
-      setSlippage: assign({
-        maxSlippage: (_, event: any) => {
-          const value = event.value;
-          if (!value) return '1';
-
-          return Math.min(+event.value, 100).toString();
-        },
-      }),
       switchCoins: assign({
-        outputCoin: (context) => {
-          if (!context.inputCoin) return undefined;
-          return {
-            denom: context.inputCoin.baseDenom,
-            baseDenom: context.inputCoin.baseDenom,
-            chain: undefined,
-          };
-        },
+        outputCoin: (context) => context.inputCoin,
         inputAmount: (context) => context.outputAmount,
         outputAmount: (context) => context.inputAmount,
-        inputCoin: (context) => {
-          if (!context.outputCoin) return undefined;
-
-          const baseDenom = context.outputCoin.baseDenom;
-          const availableChains = getAvailableChainsByDenom(context, baseDenom);
-          const hasChain = availableChains.includes(context.inputCoin?.chain);
-          const defaultChain = availableChains[0];
-
-          return {
-            denom: context.outputCoin.baseDenom,
-            baseDenom: context.outputCoin.baseDenom,
-            chain: hasChain ? context.inputCoin?.chain : defaultChain,
-          };
-        },
+        inputCoin: (context) => context.outputCoin,
       }),
       setInputCoin: assign((context, event: any) => ({
         inputCoin: event.value,
@@ -436,8 +401,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       hasInputParams: (context) => context.inputCoin?.denom && !!context.inputAmount,
       hasOutputParams: (context) => context.outputCoin?.denom && !!context.outputAmount,
       hasRouteParams: (context) => {
-        if (context.inputCoin?.denom && +context.inputAmount && !!context.outputCoin?.denom) return true;
-        if (context.outputCoin?.denom && +context.outputAmount && !!context.inputCoin?.denom) return true;
+        if (context.inputCoin?.denom && context.inputAmount && !!context.outputCoin?.denom) return true;
+        if (context.outputCoin?.denom && context.outputAmount && !!context.inputCoin?.denom) return true;
         return false;
       },
       hasAllParams: (context) =>
