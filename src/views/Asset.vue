@@ -162,12 +162,7 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <FeatureRunningConditional name="DEX_AGG">
-          <template #deactivated>
-            <LiquiditySwap :default-asset="nativeAsset" />
-          </template>
-          <DexSwap :default-asset="nativeAsset" />
-        </FeatureRunningConditional>
+        <Swap :native-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
@@ -193,13 +188,11 @@ import ChainName from '@/components/common/ChainName.vue';
 import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
-import DexSwap from '@/components/swap/DexSwap.vue';
+import Swap from '@/components/swap/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -214,6 +207,8 @@ export default defineComponent({
   name: 'Asset',
 
   components: {
+    Swap,
+    // StakingBanner,
     AmountDisplay,
     ChainName,
     Denom,
@@ -222,15 +217,12 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    LiquiditySwap,
     Pools,
     TooltipPools,
     PoolBanner,
     BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
-    DexSwap,
-    FeatureRunningConditional,
     AssetAirdrop,
   },
 

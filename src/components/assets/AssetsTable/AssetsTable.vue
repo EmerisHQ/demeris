@@ -5,7 +5,7 @@
         <col v-for="(width, index) in tableColumns" :key="`col-asset-table-${index}`" :width="width" />
       </colgroup>
 
-      <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
+      <thead v-if="showHeaders && orderedUserBalances.length !== 0" class="hidden md:table-header-group text-muted">
         <tr>
           <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-left">
             {{ $t('context.assets.asset') }}
