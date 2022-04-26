@@ -486,7 +486,7 @@ export default defineComponent({
         (chain) => chain.chain_name !== dexChain,
       );
 
-      state.currentAsset = asset;
+      state.currentAsset = { ...asset, amount: parseCoins(asset.amount as string)[0].amount };
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       if (location.search) {
         form.on_chain = dexChain;
