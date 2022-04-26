@@ -150,13 +150,13 @@ export default defineComponent({
             return;
           }
           denomNameObejct[denom.base_denom].amount = new BigNumber(denomNameObejct[denom.base_denom].amount)
-            .plus(new BigNumber(parseCoins(denom.amount)[0].amount))
+            .plus(new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0))
             .toString();
         } else {
           denomNameObejct[denom.base_denom] = denom;
           const unavailableChains = getUnavailableChains(denom);
           const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
-          let amount = new BigNumber(parseCoins(denom.amount)[0].amount).toString();
+          let amount = new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0).toString();
 
           // Remove from available amount if chain is down
           if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
