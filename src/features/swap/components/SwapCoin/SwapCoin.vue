@@ -41,6 +41,7 @@
         <SkeletonLoader v-if="isLoadingAmount" height="20px" width="82px" />
         <template v-else>
           <AmountInput
+            ref="inputRef"
             v-model="value"
             class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
           />
@@ -65,7 +66,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { amountToUnit } from '@/features/swap/logic';
-import { useSwapActor } from '@/features/swap/state';
+import { useSwapActor, useSwapRefs } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 interface Props {
@@ -75,12 +76,14 @@ interface Props {
   input?: string;
   isLoadingAmount?: boolean;
   isLoadingChain?: boolean;
+  refKey: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['select', 'update:input']);
 
 const { state } = useSwapActor();
+const inputRef = useSwapRefs()[props.refKey];
 
 const isLoadingCoin = computed(() => ['booting', 'idle'].some(state.value.matches));
 

@@ -21,7 +21,7 @@
 
     <slot name="subheader" />
 
-    <div ref="wrapperRef" class="scroll-container">
+    <div ref="wrapperRef" class="flex-1 flex flex-col scroll-container">
       <div ref="contentRef" class="flex-1 flex flex-col px-6 pb-6 pt-2">
         <slot />
       </div>

@@ -1,5 +1,6 @@
 <template>
   <SwapCoin
+    ref-key="outputAmountRef"
     :input="state.context.outputAmount"
     :denom="state.context.outputCoin?.denom"
     :chain="getOutputChainFromRoute(state.context)"

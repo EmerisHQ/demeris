@@ -77,24 +77,24 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
     on: {
       'INPUT.CHANGE_COIN': [
         {
-          target: 'updating.routes.input',
-          actions: 'setInputCoin',
+          target: '#ready',
+          actions: ['setInputCoin', 'clearRoutes', 'focusInputAmount'],
           cond: 'hasInputParams',
         },
         {
           target: 'updating.routes.output',
-          actions: 'setInputCoin',
+          actions: ['setOutputCoin'],
         },
       ],
       'OUTPUT.CHANGE_COIN': [
         {
-          target: 'updating.routes.output',
-          actions: 'setOutputCoin',
+          target: '#ready',
+          actions: ['setOutputCoin', 'clearRoutes', 'focusOutputAmount'],
           cond: 'hasOutputParams',
         },
         {
           target: 'updating.routes.input',
-          actions: 'setOutputCoin',
+          actions: ['setOutputCoin'],
         },
       ],
       'INPUT.CHANGE_AMOUNT': {
@@ -185,7 +185,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           },
           'COINS.SWITCH': {
             target: 'updating.routes.input',
-            actions: 'switchCoins',
+            actions: ['switchCoins', 'focusInputAmount'],
           },
         },
         states: {
@@ -371,8 +371,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             chain: undefined,
           };
         },
-        inputAmount: (context) => context.outputAmount,
-        outputAmount: (context) => context.inputAmount,
+        inputAmount: (_) => undefined,
+        outputAmount: (_) => undefined,
         inputCoin: (context) => {
           if (!context.outputCoin) return undefined;
 
@@ -391,15 +391,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       }),
       setInputCoin: assign((context, event: any) => ({
         inputCoin: event.value,
+        inputAmount: undefined,
         outputCoin: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputCoin,
-        outputAmount: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputAmount,
+        outputAmount: undefined,
       })),
       setInputAmount: assign((_, event: any) => ({ inputAmount: event.value })),
       setOutputAmount: assign((_, event: any) => ({ outputAmount: event.value })),
       setOutputCoin: assign((context, event: any) => ({
         outputCoin: event.value,
+        outputAmount: undefined,
         inputCoin: event.value?.baseDenom === context.inputCoin?.baseDenom ? undefined : context.inputCoin,
-        inputAmount: event.value?.baseDenom === context.inputCoin?.baseDenom ? undefined : context.inputAmount,
+        inputAmount: +context.outputAmount ? undefined : context.inputAmount,
       })),
       setSelectedRouteIndex: assign({
         selectedRouteIndex: (_, event: any) => event.value,
@@ -449,7 +451,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         return false;
       },
       hasAllParams: (context) =>
-        context.inputCoin?.denom && context.inputAmount && context.outputCoin?.denom && !!context.outputAmount,
+        context.inputCoin?.denom && +context.inputAmount && context.outputCoin?.denom && !!+context.outputAmount,
     },
   },
 );
@@ -465,7 +467,7 @@ function createUpdateRoutesState({ onDone, invokeSrc }: { onDone: string; invoke
             target: 'debounce',
             cond: 'hasRouteParams',
           },
-          { target: '#ready' },
+          { target: '#ready', actions: ['clearRoutes'] },
         ],
       },
       run: {
