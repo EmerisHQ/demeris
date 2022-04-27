@@ -32,6 +32,7 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
 export const fetchAvailableDenoms = async () => {
   try {
     const { data } = await axios.get('https://api.dev.emeris.com/v1/daggregation/available_denoms', {});
+
     return data.denoms;
   } catch {
     // Mock fallback
