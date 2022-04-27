@@ -88,9 +88,10 @@ const selectedRouteIndex = computed(() => state.value.context.selectedRouteIndex
 
 const setAllBalances = async () => {
   if (!isBalancesLoaded.value) return;
-  if (!state.value.can({ type: 'BALANCES.SET' })) return;
 
   await nextTick();
+
+  if (!state.value.can({ type: 'BALANCES.SET' })) return;
   send({ type: 'BALANCES.SET', balances: balances.value });
 };
 
