@@ -6,13 +6,15 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { ActionTree, DispatchOptions } from 'vuex';
 
+import { WALLET_METHOD } from '@/features/extension/Wallet';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
 import { SessionParams } from '@/types/user';
 import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
-import { hashObject } from '@/utils/basic';
-import { fromHexString, keyHashfromAddress } from '@/utils/basic';
+import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 import { addChain } from '@/utils/keplr';
 
 import { USERStore } from '.';
@@ -165,6 +167,9 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       if (!isCypress) {
         for (const chain in chains) {
           await addChain(chain);
+          if (featureRunning('USE_EMERIS_EXTENSION')) {
+            // TODO : implement addChain for Emeris extension and apply as well
+          }
         }
 
         await window.keplr['enable'](
@@ -187,8 +192,13 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       let keyData;
       let signer;
       if (!isCypress) {
-        await window.keplr.enable(dexchain.node_info.chain_id);
-        keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
+        if (featureRunning('USE_EMERIS_EXTENSION')) {
+          await walletActionHandler.call(WALLET_METHOD.enable, [dexchain.node_info.chain_id], true);
+          keyData = await walletActionHandler.call(WALLET_METHOD.getKey, [dexchain.node_info.chain_id], true);
+        } else {
+          await window.keplr.enable(dexchain.node_info.chain_id);
+          keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
+        }
       } else {
         signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
           prefix: dexchain.node_info.bech32_config.main_prefix,
@@ -213,8 +223,14 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
         if (!isCypress) {
-          await window.keplr.enable(chain.node_info.chain_id);
-          const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+          let otherKey;
+          if (featureRunning('USE_EMERIS_EXTENSION')) {
+            await walletActionHandler.call(WALLET_METHOD.enable, [dexchain.node_info.chain_id], true);
+            otherKey = await walletActionHandler.call(WALLET_METHOD.getKey, [dexchain.node_info.chain_id], true);
+          } else {
+            await window.keplr.enable(chain.node_info.chain_id);
+            otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+          }
           commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {
           const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {

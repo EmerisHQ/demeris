@@ -1,6 +1,6 @@
 export enum SupportedWallets {
-  KEPLR = 'keplr',
-  EMERIS = 'emeris',
+  KEPLR = 'KEPLR',
+  EMERIS = 'EMERIS',
 }
 
 // TODO : maps wallet functionality which will be used in the future.
@@ -8,18 +8,10 @@ export enum SupportedWallets {
 export interface WalletFeatureMap {
   sign: string;
   send: string;
+  someFeature: string;
 }
 
-interface WalletData {
+export interface WalletData {
   isKeplrCompatible: boolean;
   featureMap?: WalletFeatureMap;
 }
-
-export const supportedWalletsData: Record<SupportedWallets, WalletData> = {
-  [SupportedWallets.KEPLR]: {
-    isKeplrCompatible: true,
-  },
-  [SupportedWallets.EMERIS]: {
-    isKeplrCompatible: true,
-  },
-};

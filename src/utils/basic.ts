@@ -6,8 +6,11 @@ import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
 
+import { WALLET_METHOD } from '@/features/extension/Wallet';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 export function fromHexString(hexString) {
@@ -71,7 +74,12 @@ export async function getOwnAddress({ chain_name }) {
       };
       return key.bech32Address;
     } else {
-      const key = await window.keplr.getKey(chain.node_info.chain_id);
+      let key;
+      if (featureRunning('USE_EMERIS_EXTENSION')) {
+        key = await walletActionHandler.call(WALLET_METHOD.getKey, [chain.node_info.chain_id], true);
+      } else {
+        key = await window.keplr.getKey(chain.node_info.chain_id);
+      }
       return key.bech32Address;
     }
   }

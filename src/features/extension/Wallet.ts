@@ -4,12 +4,17 @@ import every from 'lodash.every';
 import { WalletFeatureMap } from '@/features/extension/types';
 
 export class EmerisWallet {
-  //  remove Partial from below when feature map is properly implemented
   private readonly featureMap: WalletFeatureMap;
   private keplrWallet: KeplrWallet;
   public readonly isKeplrCompatible;
   private walletObj: any;
 
+  /**
+   *
+   * @param walletObj - the object attached to the window by the extension
+   * @param isKeplrCompatible - whether basic Keplr methods are available in the extension
+   * @param featureMap
+   */
   constructor(walletObj: any, isKeplrCompatible = false, featureMap?: WalletFeatureMap) {
     this.walletObj = walletObj;
     if (featureMap) this.featureMap = featureMap;
@@ -23,14 +28,14 @@ export class EmerisWallet {
     }
 
     if (isKeplrCompatible) {
-      if (walletObj?.keplr && checkIsValidKeplrWallet(walletObj.keplr)) {
-        this.keplrWallet = walletObj.keplr;
+      if (walletObj && EmerisWallet.checkHasRequiredFeatures(walletObj)) {
+        this.keplrWallet = walletObj;
         this.isKeplrCompatible = isKeplrCompatible;
       } else {
         console.error(
-          `Wallet is not keplr-compatible - it's missing one or more of the following methods - [${keplrMethods.join(
-            ', ',
-          )}]`,
+          `Wallet is not keplr-compatible - it's missing one or more of the following methods - [${Object.keys(
+            WALLET_METHOD,
+          ).join(', ')}]`,
         );
         this.isKeplrCompatible = false;
       }
@@ -39,39 +44,61 @@ export class EmerisWallet {
     }
   }
 
-  //  for defaultOptions
-  public setKeplrValue(property: string, value: any) {
-    this.keplrWallet[property] = value;
+  //  for defaultOptions - unused for current implementation(https://github.com/EmerisHQ/emeris-extension/issues/29#issuecomment-1110542041)
+  // public setKeplrValue(property: string, value: any) {
+  //   this.keplrWallet[property] = value;
+  // }
+
+  /**
+   * Calls a Keplr method
+   * @param methodName
+   * @param params
+   */
+  public async callKeplrMethod(methodName: WALLET_METHOD, ...params: any[]) {
+    if (!this.isKeplrCompatible) throw new Error('Attempted to call Keplr method to a Keplr uncompatible Wallet');
+    return new Promise(async (resolve, reject) => {
+      let result;
+      try {
+        switch (methodName) {
+          case WALLET_METHOD.enable:
+            if (typeof params[0] !== 'string') throw new TypeError('String param required');
+            result = await this.keplrWallet.enable(params[0]);
+            break;
+
+          case WALLET_METHOD.getKey:
+            if (typeof params[0] !== 'string') throw new TypeError('String param required');
+            result = await this.keplrWallet.getKey(params[0]);
+            break;
+
+          case WALLET_METHOD.getOfflineSigner:
+            if (typeof params[0] !== 'string') throw new TypeError('String param required');
+            result = this.keplrWallet.getOfflineSigner(params[0]);
+            break;
+          default:
+            throw new Error(`Missing switch case - unknown method [${methodName}]`);
+        }
+      } catch (ex) {
+        console.error(`Error while calling keplr method - [${methodName}]`);
+        reject(ex);
+      }
+      resolve(result);
+    });
   }
 
-  public async callKeplrMethod(methodName: string, ...params: any[]) {
-    if (!this.isKeplrCompatible) throw new Error('Attempted to call Keplr method to a Keplr uncompatible Wallet');
-    if (keplrMethods.includes(methodName))
-      throw new Error(`Attempted to call method [${methodName}] which is not a Keplr method`);
-    return new Promise((resolve, reject) => {
-      const result = this.keplrWallet[methodName](...params);
-      // return value is promise
-      if (typeof result?.then === 'function') {
-        result
-          .then((res) => {
-            resolve(res);
-          })
-          .catch((ex) => {
-            console.error(`Error while calling keplr method - [${methodName}]`);
-            reject(ex);
-          });
-      }
-    });
+  //  static functions
+  static checkHasRequiredFeatures(object: unknown): object is KeplrWallet {
+    return every(WALLET_METHOD, (method) => Object.prototype.hasOwnProperty.call(object, method));
   }
 }
 
 // TODO : add more methods as required by the app
-export const keplrMethods = ['enable', 'getKey', 'getOfflineSigner'];
-function checkIsValidKeplrWallet(object: unknown): object is KeplrWallet {
-  return every(keplrMethods, (method) => Object.prototype.hasOwnProperty.call(object, method));
+export enum WALLET_METHOD {
+  enable = 'enable',
+  getKey = 'getKey',
+  getOfflineSigner = 'getOfflineSigner',
 }
 
 function checkIsKeplr(object: unknown): object is KeplrWallet {
   const prototype = Object.getPrototypeOf(object);
-  return every(keplrMethods, (method) => Object.prototype.hasOwnProperty.call(prototype, method));
+  return EmerisWallet.checkHasRequiredFeatures(prototype);
 }
