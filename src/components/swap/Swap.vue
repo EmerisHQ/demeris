@@ -5,7 +5,7 @@
         <template #deactivated>
           <LiquiditySwap :default-asset="nativeAsset" />
         </template>
-        <DexSwap :default-asset="nativeAsset" />
+        <SwapMultiDex :default-denom="defaultDenom" />
       </FeatureRunningConditional>
     </template>
     <SwapDisabled />
@@ -14,16 +14,17 @@
 
 <script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { defineProps, toRefs } from 'vue';
+import { defineProps } from 'vue';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import DexSwap from '@/components/swap/DexSwap.vue';
 import SwapDisabled from '@/components/swap/SwapDisabled.vue';
+import SwapMultiDex from '@/features/swap/SwapMultiDex.vue';
 
 interface SwapProps {
   nativeAsset?: EmerisAPI.Balance;
+  defaultDenom?: string;
 }
-const props = defineProps<SwapProps>();
-const { nativeAsset } = toRefs(props);
+
+defineProps<SwapProps>();
 </script>

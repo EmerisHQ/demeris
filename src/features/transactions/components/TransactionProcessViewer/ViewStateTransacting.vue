@@ -143,8 +143,8 @@
 
         <template v-if="transaction.type === 'swap'">
           <p class="font-medium">
-            <Ticker :name="transaction.data.from.denom" /> &rarr;
-            <Ticker :name="transaction.data.to.denom" />
+            <Ticker :name="getBaseDenomSync(transaction.data.from.denom)" /> &rarr;
+            <Ticker :name="getBaseDenomSync(transaction.data.to.denom)" />
           </p>
         </template>
 

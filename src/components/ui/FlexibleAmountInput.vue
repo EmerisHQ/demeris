@@ -17,15 +17,17 @@
         >
         <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
           <AmountInput
+            ref="inputComponentRef"
             v-model="model"
             :placeholder="inputProps.placeholder"
             :style="inputProps.style"
             :class="inputProps.class"
             :width="inputProps.width"
             type="text"
+            v-bind="$attrs"
           />
         </slot>
-        <span ref="suffixElementRef" class="flexible-input__suffix whitespace-nowrap">
+        <span ref="suffixElementRef" class="flexible-input__suffix whitespace-nowrap" :class="{ '!m-0': compact }">
           <slot name="suffix">
             {{ suffix }}
           </slot>
@@ -67,6 +69,10 @@ export default defineComponent({
       type: String as PropType<string>,
       default: undefined,
     },
+    compact: {
+      type: Boolean,
+      default: false,
+    },
     placeholder: {
       type: String as PropType<string>,
       default: undefined,
@@ -79,6 +85,8 @@ export default defineComponent({
     const sizeElementRef = ref(null);
     const prefixElementRef = ref(null);
     const suffixElementRef = ref(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const inputComponentRef = ref(null);
 
     const model = computed({
       get: () => props.modelValue,
@@ -102,12 +110,12 @@ export default defineComponent({
           const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
           const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
           const fullWidth = width + extraWidth;
-          const maxWidth = containerEl?.offsetWidth;
+          const maxWidth = Math.max(props.minWidth, containerEl?.offsetWidth);
 
           const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
 
           state.width = width;
-          state.maxWidth = maxWidth;
+          state.maxWidth = `${maxWidth}px`;
           state.scale = scale;
         });
       },
