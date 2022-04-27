@@ -166,9 +166,10 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       };
       if (!isCypress) {
         for (const chain in chains) {
-          await addChain(chain);
           if (featureRunning('USE_EMERIS_EXTENSION')) {
             // TODO : implement addChain for Emeris extension and apply as well
+          } else {
+            await addChain(chain);
           }
         }
 
