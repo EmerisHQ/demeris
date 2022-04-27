@@ -59,13 +59,16 @@ A potential way of solving this in the future would be if we provide 2 ways of r
 
 ### Automated testing - Playwright (e2e testing)
 
-Before you are able to run our automated tests locally, ensure you configured your `.env.local` file with a mnemonic with ATOM.
+Before you are able to run our automated tests locally, ensure you configured your `.env.local` file with a mnemonic with ATOM and AKT.
 
 Test commands:
 
 ```
 # Run all tests in headless mode
 npm run dev && npm run e2e
+
+# Run one specific (failing) test in debug mode
+PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts
 
 ```
 
