@@ -2,8 +2,12 @@
   <div class="w-72 bg-surface rounded-2xl theme-inverse dark:theme-inverse text-text -text-1">
     <div class="px-5 pt-5 pb-4">
       <div class="flex items-start text-muted mb-1">
-        <!-- TODO: handle case when 1 exchange is searched. (without the s) -->
-        {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }}
+        {{ numberOfExchangesSearched }}
+        {{
+          numberOfExchangesSearched <= 1
+            ? $t('components.bestPrice.exchangeSearched')
+            : $t('components.bestPrice.exchangeSearched')
+        }}
         <StarIcon class="ml-auto text-[1rem]" />
       </div>
       <div class="font-medium text-0">

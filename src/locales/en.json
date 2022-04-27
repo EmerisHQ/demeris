@@ -482,6 +482,7 @@
         "transactionFailed": "Transaction failed. Please refresh this page."
       },
       "bestPrice": {
+        "exchangeSearched": "exchange searched",
         "exchangesSearched": "exchanges searched",
         "bestPriceFrom": "Emeris found the best price from ",
         "expectedRate": "Expected rate ",
