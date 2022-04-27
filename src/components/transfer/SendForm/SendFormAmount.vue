@@ -277,9 +277,9 @@ export default defineComponent({
         return false;
       }
 
-      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+      const totalAmount = new BigNumber(state.currentAsset.amount);
 
-      return +totalAmount > 0;
+      return totalAmount.isGreaterThan(new BigNumber(0));
     });
 
     const openAssetPage = () => {
@@ -310,7 +310,7 @@ export default defineComponent({
       const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
       const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
-      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
+      return amount.plus(fee).isLessThanOrEqualTo(state.currentAsset.amount);
     });
 
     const isValid = computed(() => {
@@ -409,7 +409,7 @@ export default defineComponent({
         if (state.isMaximumAmountChecked) {
           const precision =
             typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+          const assetAmount = new BigNumber(state.currentAsset.amount);
           const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
           form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
           return;
