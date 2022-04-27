@@ -15,7 +15,7 @@ test.describe('Check availability of Assets page elements', () => {
     await expect(atomRow).toBeVisible();
     // const aktRow = await page.locator('tr', { hasText: 'AKT' });
     // await expect(aktRow).toBeVisible();
-    const osmosisRow = await page.locator('tr', { hasText: 'Osmosis' });
-    await expect(osmosisRow).toBeVisible();
+    const persistenceRow = await page.locator('tr', { hasText: 'Persistence' });
+    await expect(persistenceRow).toBeVisible();
   });
 });
