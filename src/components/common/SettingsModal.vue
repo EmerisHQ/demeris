@@ -318,7 +318,7 @@ export default defineComponent({
       }),
       allowCustomSlippage: computed({
         get: () => store.getters[GlobalGetterTypes.USER.allowCustomSlippage],
-        set: (value: boolean) => updateSession('customSlippage', value),
+        set: (value: boolean) => updateSession('allowCustomSlippage', value),
       }),
       viewUnverified: computed({
         get: () => store.getters[GlobalGetterTypes.USER.viewUnverified],

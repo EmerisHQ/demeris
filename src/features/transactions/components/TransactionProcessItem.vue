@@ -268,7 +268,8 @@ const getIconAssets = () => {
 
   if (name === 'swap') {
     const denom = transaction.value.data.to.denom;
-    assets.push({ denom });
+    const chainName = getSourceChainFromTransaction(transaction.value);
+    assets.push({ denom, chainName });
   }
 
   if (name === 'addLiquidity') {
