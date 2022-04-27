@@ -96,7 +96,6 @@ export default defineComponent({
 
     const displayNameAddedList = ref([]);
     const displayNameAddedOtherList = ref([]);
-
     watch(
       () => props.assets,
       async () => {

@@ -51,7 +51,7 @@
             <Ticker v-if="type === 'receive'" :name="coin.base_denom" />
           </FeatureRunningConditional>
           <template v-else>
-            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <AmountDisplay :amount="parseCoins(coin.amount)[0]" />
             <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
               {{ $t('components.coinList.available') }}
             </span>
@@ -132,7 +132,7 @@ export default defineComponent({
           const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
           return {
             ...item,
-            amount: item.amount ? parseCoins(item.amount)[0].amount : '0',
+            amount: item.amount ? item.amount : '0' + item.base_denom,
             unavailableChains,
             isFullAmountUnavailable: !!unavailableChains.length,
           };
@@ -149,9 +149,10 @@ export default defineComponent({
           if (denomNameObejct[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
             return;
           }
-          denomNameObejct[denom.base_denom].amount = new BigNumber(denomNameObejct[denom.base_denom].amount)
-            .plus(new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0))
-            .toString();
+          denomNameObejct[denom.base_denom].amount =
+            new BigNumber(parseCoins(denomNameObejct[denom.base_denom].amount)[0].amount)
+              .plus(new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0))
+              .toString() + denom.base_denom;
         } else {
           denomNameObejct[denom.base_denom] = denom;
           const unavailableChains = getUnavailableChains(denom);
@@ -162,7 +163,7 @@ export default defineComponent({
           if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
             amount = '0';
           }
-
+          amount = amount + denom.base_denom;
           denomNameObejct[denom.base_denom] = {
             ...denom,
             amount,
@@ -206,7 +207,7 @@ export default defineComponent({
     const coinsByType = computed(() => {
       return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });
-    return { setWordColorByKeyword, coinsByType };
+    return { setWordColorByKeyword, coinsByType, parseCoins };
   },
 });
 </script>
