@@ -2,7 +2,7 @@
   <tippy
     v-if="chainName && chainDown"
     max-width="280px"
-    class="status absolute z-50 top-0 left-0"
+    class="status absolute z-10 top-0 left-0"
     :class="`status--${size}`"
     name="tooltipTrigger"
   >

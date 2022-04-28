@@ -4,12 +4,6 @@
     :style="[customSize && `height:${customSize};width:${customSize}`]"
     :class="[customSize === '' && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
-    <CircleSymbolStatus
-      v-if="assetConfig?.chain_name && displayStatus"
-      :chain-name="assetConfig.chain_name"
-      :denom="denom"
-      :size="size"
-    />
     <template v-if="variant === 'chain'">
       <div
         class="circle-symbol__ring absolute w-full h-full rounded-full z-0 shrink-0 shadow-none"
@@ -77,6 +71,12 @@
         </defs>
       </svg>
     </template>
+    <CircleSymbolStatus
+      v-if="assetConfig?.chain_name && displayStatus"
+      :chain-name="assetConfig.chain_name"
+      :denom="denom"
+      :size="size"
+    />
   </div>
 </template>
 
