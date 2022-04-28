@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "emeris-hq"
+  },
+  "targets": {
+    "emeris-hq": {
+      "hosting": {
+        "prod": [
+          "emeris-app"
+        ]
+      }
+    }
+  }
+}
