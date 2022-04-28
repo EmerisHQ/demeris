@@ -68,24 +68,26 @@ export const getChainFromDenom = (context: SwapContext, denom: string) => {
 export const getAvailableInputAssets = (context: SwapContext) => {
   const denoms = getAvailableDenoms(context).filter((item) => isNative(item.denom));
 
-  const results = denoms.map(({ baseDenom, denom, chain }) => {
-    const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
+  const results = denoms
+    .map(({ baseDenom, denom, chain }) => {
+      const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
 
-    const isVerified = config?.verified ?? false;
-    const displayName = config?.display_name;
-    const totalBalance = totalDenomBalance(context, baseDenom);
-    const humanBalance = amountToHuman({ amount: totalBalance, denom: baseDenom }).amount;
+      const isVerified = config?.verified ?? false;
+      const displayName = config?.display_name;
+      const totalBalance = totalDenomBalance(context, baseDenom);
+      const humanBalance = amountToHuman({ amount: totalBalance, denom: baseDenom }).amount;
 
-    return {
-      baseDenom,
-      chain,
-      denom,
-      displayName,
-      isVerified,
-      totalBalance,
-      humanBalance,
-    };
-  });
+      return {
+        baseDenom,
+        chain,
+        denom,
+        displayName,
+        isVerified,
+        totalBalance,
+        humanBalance,
+      };
+    })
+    .filter((x) => !x.baseDenom.startsWith('pool'));
 
   return orderBy(results, [(x) => +x.humanBalance, 'displayName'], ['desc', 'asc']);
 };
