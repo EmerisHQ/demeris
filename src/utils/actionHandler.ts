@@ -321,7 +321,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let error: Error;
 
   let denoms = [];
-  const chain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+  const chain = transaction.data.chainName ?? typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
   switch (transaction.type) {
     case 'addLiquidity':

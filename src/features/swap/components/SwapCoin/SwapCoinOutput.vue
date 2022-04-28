@@ -2,6 +2,7 @@
   <SwapCoin
     ref-key="outputAmountRef"
     :input="state.context.outputAmount"
+    :base-denom="state.context.outputCoin?.baseDenom"
     :denom="state.context.outputCoin?.denom"
     :chain="getOutputChainFromRoute(state.context)"
     :chain-fallback="resolveDisplayName(state.context?.outputCoin?.baseDenom)"
