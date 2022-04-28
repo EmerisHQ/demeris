@@ -21,9 +21,9 @@ test.describe('Pools location and availibility', function () {
     await expect(searchField).toHaveValue('test');
   });
 
-  test('Add liquidity button usage', async ({ page, baseURL }) => {
-    const addLiquidityButton = await page.locator('.add-liquidity', { hasText: 'Add liquidity' });
-    await addLiquidityButton.click();
-    await expect(page).toHaveURL(baseURL + '/pools/add');
-  });
+  // test('Add liquidity button usage', async ({ page, baseURL }) => {
+  //   const addLiquidityButton = await page.locator('.add-liquidity', { hasText: 'Add liquidity' });
+  //   await addLiquidityButton.click();
+  //   await expect(page).toHaveURL(baseURL + '/pools/add');
+  // });
 });
