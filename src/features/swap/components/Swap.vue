@@ -101,6 +101,6 @@ const startMachine = () => {
   send('START');
 };
 
-watch([isBalancesLoaded, balances], setAllBalances, { immediate: true, deep: true });
+watch([isBalancesLoaded, balances, isSignedIn], setAllBalances, { immediate: true, deep: true });
 whenever(() => props.canStart, startMachine, { immediate: true });
 </script>

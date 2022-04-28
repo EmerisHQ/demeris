@@ -173,8 +173,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
         const response: AxiosResponse<EmerisAPI.VerifyTraceResponse> = await axios.get(
           getters['getEndpoint'] + '/chain/' + params.chain_name + '/denom/verify_trace/' + params.hash,
         );
-        if (response && response.data && response.data.verify_trace) {
+        if (response?.data?.verify_trace?.trace) {
           commit(MutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
+        } else {
+          console.error('Demeris:GetVerifyTrace', response.data.verify_trace.cause);
         }
         if (subscribe) {
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_VERIFY_TRACE, payload: { params } });

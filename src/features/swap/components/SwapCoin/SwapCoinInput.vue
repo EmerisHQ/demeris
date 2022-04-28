@@ -3,6 +3,7 @@
     ref-key="inputAmountRef"
     :input="state.context.inputAmount"
     :denom="state.context.inputCoin?.denom"
+    :base-denom="state.context.inputCoin?.baseDenom"
     :chain="state.context.inputCoin?.chain"
     :is-loading-amount="state.matches('updating.routes.output')"
     @select="swapStore.openAssetsMenu('input')"

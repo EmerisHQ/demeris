@@ -46,7 +46,7 @@
             class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
           />
           <span class="text-muted -text-1">
-            <Price :amount="amountToUnit({ denom, amount: value })" show-zero />
+            <Price :amount="amountToUnit({ denom: baseDenom, amount: value })" show-zero />
           </span>
         </template>
       </div>
@@ -70,6 +70,7 @@ import { useSwapActor, useSwapRefs } from '@/features/swap/state';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 interface Props {
+  baseDenom?: string;
   chain?: string;
   chainFallback?: string;
   denom?: string;
