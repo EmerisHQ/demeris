@@ -229,7 +229,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
     if (step.type === 'ibc') {
       const result = await move({
         amount: {
-          amount: step.data.from.amount,
+          amount: Math.abs(Number(step.data.from.amount)).toString(),
           denom: formatToValidDenom(step.data.from.denom),
         },
         chain_name: getChainFromDenom(context, step.data.from.denom),

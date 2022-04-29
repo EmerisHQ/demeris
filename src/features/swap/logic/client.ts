@@ -12,10 +12,7 @@ export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
 
 export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {
   const inputDex = context.inputCoinDex;
-
-  if (!inputDex) {
-    throw new Error('No swaps available');
-  }
+  if (!inputDex) throw new Error('No swaps available');
 
   const payload = {
     chainIn: inputDex.chain,
