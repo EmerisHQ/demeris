@@ -299,7 +299,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       receipt: {
         on: {
           CONTINUE: {
-            target: 'review',
+            target: 'validating.traceChannel',
             actions: 'goNextTransaction',
           },
           SIGN: {

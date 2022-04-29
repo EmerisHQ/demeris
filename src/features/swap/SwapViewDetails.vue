@@ -26,7 +26,7 @@
       <template #title><span class="-text-1">Price</span></template>
       <template #label>
         <AmountDisplay :amount="priceInputAmount" trunc-big-balance /> ≈
-        <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
+        <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
       </template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
