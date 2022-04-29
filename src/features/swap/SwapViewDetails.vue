@@ -26,7 +26,7 @@
       <template #title><span class="-text-1">Price</span></template>
       <template #label>
         <AmountDisplay :amount="priceInputAmount" trunc-big-balance /> ≈
-        <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
+        <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
       </template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
@@ -51,7 +51,7 @@
         <dt class="text-muted">Expected rate</dt>
         <dd class="text-right">
           <AmountDisplay :amount="priceInputAmount" /> =
-          <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
+          <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
         </dd>
 
         <dt class="text-muted">Max slippage</dt>
@@ -62,7 +62,7 @@
           <div>(if 100% swapped)</div>
         </dt>
         <dd class="text-right">
-          <AmountDisplay :amount="minOutputAmount" trunc-big-balance />
+          <AmountDisplay :amount="minOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
         </dd>
       </dl>
     </CollapseDescription>
