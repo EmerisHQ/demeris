@@ -51,7 +51,7 @@
         <dt class="text-muted">Expected rate</dt>
         <dd class="text-right">
           <AmountDisplay :amount="priceInputAmount" /> =
-          <AmountDisplay :amount="expectOutputAmount" trunc-big-balance />
+          <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
         </dd>
 
         <dt class="text-muted">Max slippage</dt>
@@ -62,7 +62,7 @@
           <div>(if 100% swapped)</div>
         </dt>
         <dd class="text-right">
-          <AmountDisplay :amount="minOutputAmount" trunc-big-balance />
+          <AmountDisplay :amount="minOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
         </dd>
       </dl>
     </CollapseDescription>
