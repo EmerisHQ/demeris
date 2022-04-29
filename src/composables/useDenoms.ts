@@ -14,15 +14,18 @@ function useDenoms() {
   });
   const useDenomInstances = {};
 
-  const useDenomFactory = (base_denom) => {
+  const useDenomFactory = (base_denom: string, chain?: string) => {
     const price = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: base_denom });
     });
     const displayName = ref('-');
     const tickerName = ref('-');
     const updateDenom = async () => {
-      tickerName.value = await getTicker(base_denom, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
-      displayName.value = await getDisplayName(base_denom, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+      tickerName.value = await getTicker(base_denom, chain ?? typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+      displayName.value = await getDisplayName(
+        base_denom,
+        chain ?? typedstore.getters[GlobalGetterTypes.API.getDexChain],
+      );
     };
 
     watch(verifiedDenoms, updateDenom, { immediate: true });
