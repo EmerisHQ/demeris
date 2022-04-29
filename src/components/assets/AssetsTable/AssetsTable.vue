@@ -153,6 +153,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
+import { filter } from 'lodash';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
@@ -174,7 +175,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import { checkPoolDenom, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 import getPrice from '@/utils/getPrice';
 
@@ -405,7 +406,11 @@ export default defineComponent({
     };
 
     const orderedUserBalances = computed(() => {
-      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+      let tokens = filter(
+        orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']),
+        (balance) => !checkPoolDenom(balance.denom),
+      );
+      console.log('orderedUserBalances >>>> ', tokens);
       return tokens.slice(0, currentLimit.value);
     });
 

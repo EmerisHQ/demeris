@@ -237,6 +237,14 @@ export function getProperUrl(str: string) {
   return str;
 }
 
+// regex based on gdex pool denom name below. 48, 36 are instinctive threshold choices based on 0 research
+// "poolE71FE13681A283B7015E4E4C4852B0EDA72CC97A5CDE2ECA2A6C8C06C86AC775"
+// did not check for 'pool' since other pools might not go with that naming but will probably have a multi-character hex hash
+const longHashTest = /[0-9A-F]{36,}/;
+export function checkPoolDenom(str: string) {
+  return str.length > 48 && longHashTest.test(str);
+}
+
 // ignores denoms that are not of baseDenom
 export function getSumOfRewards(totalValue: string, baseDenom: string) {
   if (!totalValue || !baseDenom) return 0;
