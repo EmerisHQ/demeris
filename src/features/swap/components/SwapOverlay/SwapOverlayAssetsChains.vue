@@ -42,6 +42,7 @@
 </template>
 
 <script lang="ts" setup>
+// TODO: Use DenomSelect component to display available chains/balances
 import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';

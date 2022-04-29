@@ -71,7 +71,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import {
-  denomBalancesPerChain,
+  getAvailableChainsByDenom,
   getAvailableInputAssets,
   getDenomFromBaseDenom,
   resolveBaseDenom,
@@ -102,10 +102,7 @@ const isOutputView = computed(() => swap.selectAssetType === 'output');
 const getAvailableChains = (asset: any) => {
   if (isOutputView.value) return [];
 
-  const balancesPerChain = denomBalancesPerChain(state.value.context, asset.denom);
-  const chains = Object.keys(balancesPerChain);
-
-  return chains;
+  return getAvailableChainsByDenom(state.value.context, asset.denom);
 };
 
 const selectAsset = (asset: any) => {

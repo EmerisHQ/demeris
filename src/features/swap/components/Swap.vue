@@ -76,7 +76,7 @@ const props = defineProps(['canStart', 'defaultDenom']);
 const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state, send } = useSwapMachine(props.defaultDenom);
-const { balances, isValidatingBalances } = useAccount();
+const { allbalances, isValidatingBalances } = useAccount();
 
 const isBalancesLoaded = computed(() => {
   return globalStore.getters[GlobalGetterTypes.USER.isAllBalancesLoaded] && !isValidatingBalances.value;
@@ -92,7 +92,7 @@ const setAllBalances = async () => {
   await nextTick();
 
   if (!state.value.can({ type: 'BALANCES.SET' })) return;
-  send({ type: 'BALANCES.SET', balances: balances.value });
+  send({ type: 'BALANCES.SET', balances: allbalances.value });
 };
 
 const startMachine = () => {
@@ -101,6 +101,6 @@ const startMachine = () => {
   send('START');
 };
 
-watch([isBalancesLoaded, balances, isSignedIn], setAllBalances, { immediate: true, deep: true });
+watch([isBalancesLoaded, allbalances, isSignedIn], setAllBalances, { immediate: true, deep: true });
 whenever(() => props.canStart, startMachine, { immediate: true });
 </script>

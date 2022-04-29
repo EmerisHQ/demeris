@@ -3,8 +3,7 @@ import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 
 import { GlobalGetterTypes } from '@/store';
-import { getBaseDenom, getBaseDenomSync } from '@/utils/actionHandler';
-import { isNative } from '@/utils/basic';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
 import { SwapCoin, SwapContext } from '../state/machine';
@@ -13,20 +12,6 @@ import { amountToHuman, totalDenomBalance } from './amount';
 export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
   return groupBy(balances, 'on_chain');
-};
-
-export const getAvailableDenoms = (context: SwapContext) => {
-  return context.data.availableDenoms?.map((item) => {
-    const [chain, ...rest] = item.split('/');
-    const denom = rest.join('/');
-    const baseDenom = getBaseDenomSync(denom);
-
-    return {
-      baseDenom,
-      chain,
-      denom,
-    };
-  });
 };
 
 export const getDenomFromBaseDenom = (baseDenom: string, chain: string) => {
@@ -54,19 +39,47 @@ export const getChainFromDenom = (context: SwapContext, denom: string) => {
     return trace.trace[0].chain_name;
   }
 
-  const ctx = getAvailableDenoms(context).find((item) => item.denom === denom);
-
-  if (ctx) {
-    // Background sync missing traces
-    getBaseDenom(denom, ctx.chain);
-    return ctx.chain;
-  }
-
   return undefined;
 };
 
+export const getVerifiedDenoms = () => {
+  const verifiedDenoms = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms];
+  return verifiedDenoms.map((denom) => ({ denom: denom.name, baseDenom: denom.name, chain: denom.chain_name }));
+};
+
+// TODO: Remove after daggregation returns all correct steps
+export const getAvailableDenoms = (context: SwapContext) => {
+  return context.data.availableDenoms?.map((item) => {
+    const [chain, ...rest] = item.split('/');
+    const denom = rest.join('/');
+    const baseDenom = getBaseDenomSync(denom);
+
+    return {
+      baseDenom,
+      chain,
+      denom,
+    };
+  });
+};
+
+export const resolveCoinToSupportedDex = (context: SwapContext, coin: SwapCoin) => {
+  if (!coin) return;
+  const inputKey = [coin.chain, coin.denom].join('/');
+
+  if (context.data.availableDenoms.indexOf(inputKey) === -1) {
+    const defaultDexChain = EmerisDEXInfo.DEX.Osmosis;
+    return {
+      denom: getDenomFromBaseDenom(coin.baseDenom, defaultDexChain),
+      chain: defaultDexChain,
+      baseDenom: coin.baseDenom,
+    };
+  }
+
+  return coin;
+};
+
 export const getAvailableInputAssets = (context: SwapContext) => {
-  const denoms = getAvailableDenoms(context).filter((item) => isNative(item.denom));
+  const denoms = getVerifiedDenoms();
 
   const results = denoms
     .map(({ baseDenom, denom, chain }) => {
@@ -93,19 +106,15 @@ export const getAvailableInputAssets = (context: SwapContext) => {
 };
 
 export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: string) => {
-  return getAvailableDenoms(context)
-    .filter((item) => item.baseDenom === baseDenom)
-    .map((item) => item.chain);
+  return Object.keys(denomBalancesPerChain(context, baseDenom));
 };
 
 export const getDefaultInputCoin = (context: SwapContext) => {
   let coin: SwapCoin;
-  const availableAssets = getAvailableDenoms(context);
+  const availableAssets = getVerifiedDenoms();
   const defaultDenom = context.defaultInputDenom;
 
   if (defaultDenom) {
-    coin = availableAssets.find((item) => item.denom === defaultDenom);
-
     if (!coin) {
       coin = availableAssets.find((item) => item.baseDenom === defaultDenom);
     }

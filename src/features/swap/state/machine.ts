@@ -6,7 +6,12 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { Step } from '@/types/actions';
 
 import * as logic from '../logic';
-import { getAvailableChainsByDenom, getDenomFromBaseDenom, resolveBaseDenom } from '../logic';
+import {
+  getAvailableChainsByDenom,
+  getDenomFromBaseDenom,
+  resolveBaseDenom,
+  resolveCoinToSupportedDex,
+} from '../logic';
 
 interface SwapContextData {
   availableDenoms: string[];
@@ -26,6 +31,7 @@ export interface SwapContext {
   data: SwapContextData;
   defaultInputDenom?: string;
   inputAmount: string;
+  inputCoinDex?: SwapCoin;
   inputCoin?: SwapCoin;
   maxSlippage: string;
   outputAmount: string;
@@ -35,6 +41,7 @@ export interface SwapContext {
 
 const defaultContext = (): SwapContext => ({
   inputCoin: undefined,
+  inputCoinDex: undefined,
   outputCoin: undefined,
   inputAmount: undefined,
   outputAmount: undefined,
@@ -74,16 +81,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
     id: 'swap',
     initial: 'idle',
     context: defaultContext(),
+    preserveActionOrder: true,
     on: {
       'INPUT.CHANGE_COIN': [
         {
           target: '#ready',
-          actions: ['setInputCoin', 'clearRoutes', 'focusInputAmount'],
+          actions: ['setInputCoin', 'updateInputCoinDex', 'clearRoutes', 'focusInputAmount'],
           cond: 'hasInputParams',
         },
         {
           target: 'updating.routes.output',
-          actions: ['setInputCoin'],
+          actions: ['setInputCoin', 'updateInputCoinDex'],
         },
       ],
       'OUTPUT.CHANGE_COIN': [
@@ -185,7 +193,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           },
           'COINS.SWITCH': {
             target: 'updating.routes.input',
-            actions: ['switchCoins', 'focusInputAmount'],
+            actions: ['switchCoins', 'updateInputCoinDex', 'focusInputAmount'],
           },
         },
         states: {
@@ -325,7 +333,11 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
       })),
       assignRoutes: assign((context, event: any) => {
-        const routes = logic.removeExceedingTransactionsFromRoutes(event.data);
+        let routes = logic.removeExceedingStepsFromRoutes(event.data);
+
+        if (context.inputCoin.chain !== context.inputCoinDex.chain) {
+          routes = logic.prependAdditionalStepsToRoutes(routes, context.inputCoin, context.inputCoinDex);
+        }
 
         return {
           data: {
@@ -389,12 +401,17 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           };
         },
       }),
-      setInputCoin: assign((context, event: any) => ({
-        inputCoin: event.value,
-        inputAmount: undefined,
-        outputCoin: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputCoin,
-        outputAmount: undefined,
-      })),
+      setInputCoin: assign((context, event: any) => {
+        return {
+          inputCoin: event.value,
+          inputAmount: undefined,
+          outputCoin: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputCoin,
+          outputAmount: undefined,
+        };
+      }),
+      updateInputCoinDex: assign({
+        inputCoinDex: (context) => resolveCoinToSupportedDex(context, context.inputCoin),
+      }),
       setInputAmount: assign((_, event: any) => ({ inputAmount: event.value })),
       setOutputAmount: assign((_, event: any) => ({ outputAmount: event.value })),
       setOutputCoin: assign((context, event: any) => ({
