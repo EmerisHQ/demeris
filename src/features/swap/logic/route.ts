@@ -4,11 +4,11 @@ import BigNumber from 'bignumber.js';
 
 import { move } from '@/actionhandler/actions/move';
 import { Step } from '@/types/actions';
-import { isNative } from '@/utils/basic';
 
 import { SwapContext } from '../state/machine';
 import { amountToHuman, calculateSlippage, getOrderPrice } from './amount';
-import { getChainFromDenom, resolveBaseDenom } from './denom';
+import { getChainFromDenom, normalizeDenom, resolveBaseDenom } from './denom';
+import { getChainFromProtocol } from './protocol';
 import { chunkBy } from './utils';
 
 export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: number) => {
@@ -154,9 +154,7 @@ export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) =>
     };
   });
 
-  const chunks = chunkBy<any>(result, (item) => item.baseDenomIn);
-
-  return chunks;
+  return aggregateRouteSteps(result);
 };
 
 export const countSwapsFromRoute = (route: any) => {
@@ -183,6 +181,15 @@ export const removeExceedingStepsFromRoutes = (routes: any[]) => {
     result.push(route);
   }
   return result;
+};
+
+export const aggregateRouteSteps = (steps: any[]) => {
+  return chunkBy<any>(steps, (step) => {
+    if (step.protocol === EmerisDEXInfo.DEX.Osmosis) {
+      return step.type === EmerisDEXInfo.SwapType.Pool;
+    }
+    return false;
+  });
 };
 
 // Include a new step to transfer funds from a chain to the DEX chain before other steps
@@ -213,24 +220,69 @@ export const prependAdditionalStepsToRoutes = (routes: any[], inputCoin: any, ta
   return result;
 };
 
-export const convertRouteToSteps = async (context: SwapContext, routeIndex: number): Promise<Step[]> => {
+export const prepareRouteToSign = async (context: SwapContext, routeIndex: number): Promise<Step[]> => {
   const route = context.data.routes[routeIndex];
   if (!route) return [];
 
   const txs: Step[] = [];
 
-  const formatToValidDenom = (denom: string) => {
-    if (isNative(denom)) return denom;
-    const [prefix, hash] = denom.split('/');
-    return `${prefix}/${hash.toUpperCase()}`;
+  const createSwapTx = ({ stepFrom, stepTo, routes }): Step => {
+    return {
+      name: 'swap',
+      description: '',
+      transactions: [
+        {
+          status: 'pending',
+          type: 'swap',
+          protocol: stepFrom.protocol,
+          data: {
+            routes: routes?.map((step) => {
+              return {
+                pool: {
+                  id: step.data.pool_id.split('/')[1],
+                },
+                to: step.data.to,
+              };
+            }),
+            from: {
+              amount: stepFrom.data.from.amount,
+              denom: normalizeDenom(stepFrom.data.from.denom),
+            },
+            to: {
+              amount: stepTo.data.to.amount,
+              denom: normalizeDenom(stepTo.data.to.denom),
+            },
+            pool: {
+              id: stepTo.data.pool_id.split('/')[1],
+              type_id: 1,
+            },
+            chainName: getChainFromProtocol(stepTo.protocol),
+          },
+        },
+      ],
+    } as unknown as Step;
   };
 
-  for (const step of route.steps) {
+  for (const steps of aggregateRouteSteps(route.steps)) {
+    // multi-hop swap
+    if (steps.length > 1 && steps[0].type === EmerisDEXInfo.SwapType.Pool) {
+      const stepFrom = steps[0];
+      const stepTo = steps[steps.length - 1];
+
+      const routes = steps.slice(0, steps.length - 1);
+
+      txs.push(createSwapTx({ stepFrom, stepTo, routes }));
+
+      continue;
+    }
+
+    const step = steps[0];
+
     if (step.type === 'ibc') {
       const result = await move({
         amount: {
-          amount: Math.abs(Number(step.data.from.amount)).toString(),
-          denom: formatToValidDenom(step.data.from.denom),
+          amount: step.data.from.amount,
+          denom: normalizeDenom(step.data.from.denom),
         },
         chain_name: getChainFromDenom(context, step.data.from.denom),
         destination_chain_name: getChainFromDenom(context, step.data.to.denom),
@@ -244,32 +296,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
     }
 
     if (step.type === 'pool') {
-      txs.push({
-        name: 'swap',
-        description: '',
-        transactions: [
-          {
-            status: 'pending',
-            type: 'swap',
-            protocol: step.protocol,
-            data: {
-              from: {
-                amount: step.data.from.amount,
-                denom: formatToValidDenom(step.data.from.denom),
-              },
-              to: {
-                amount: step.data.to.amount,
-                denom: formatToValidDenom(step.data.to.denom),
-              },
-              pool: {
-                id: step.data.pool_id.split('/')[1],
-                type_id: 1,
-              },
-              chainName: getChainFromDenom(context, step.data.from.denom),
-            },
-          },
-        ],
-      });
+      txs.push(createSwapTx({ stepFrom: step, stepTo: step, routes: [] }));
     }
   }
 

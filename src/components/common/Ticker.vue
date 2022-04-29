@@ -10,7 +10,6 @@ export default defineComponent({
   name: 'Ticker',
   props: {
     name: { type: String, required: true },
-    chain: { type: String, default: undefined },
   },
   setup(props) {
     let ticker = ref('-');
@@ -20,7 +19,7 @@ export default defineComponent({
       () => props.name,
       (denomName, oldDenomName) => {
         if (denomName != oldDenomName || !loaded) {
-          const { tickerName } = useDenom(denomName, props.chain);
+          const { tickerName } = useDenom(denomName);
           watch(
             () => tickerName.value,
             (newName) => {

@@ -1,0 +1,23 @@
+diff --git a/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js b/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
+index 96b2d0c..bc5fac7 100644
+--- a/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
++++ b/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
+@@ -4,13 +4,17 @@ const index_1 = require("../index");
+ class OsmosisAminoMessageMapper extends index_1.default {
+     swap(transaction, signing_address) {
+         const pool = transaction.pool;
++        const routes = (transaction.routes || []).map((route) => ({
++          poolId: route.pool.id, tokenOutDenom: route.to.denom
++        }));
++
+         return {
+             type: "osmosis/gamm/swap-exact-amount-in",
+             value: {
+                 sender: signing_address,
+                 tokenIn: transaction.from,
+                 tokenOutMinAmount: transaction.to.amount,
+-                routes: [{ poolId: pool.id, tokenOutDenom: transaction.to.denom }]
++                routes: [...routes, { poolId: pool.id, tokenOutDenom: transaction.to.denom }]
+             }
+         };
+     }

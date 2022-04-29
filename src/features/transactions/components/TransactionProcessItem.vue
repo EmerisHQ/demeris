@@ -56,11 +56,7 @@
                 transactionAction.type === 'IBCtransferForward')
             "
           >
-            Send
-            <Ticker
-              :name="getBaseDenomSync(transactionAction.data.amount.denom)"
-              :chain="transactionAction.data.chainName"
-            />
+            Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
           </template>
           <template
             v-if="
@@ -70,23 +66,11 @@
                 transactionAction.type === 'IBCtransferForward')
             "
           >
-            Move
-            <Ticker
-              :name="getBaseDenomSync(transactionAction.data.amount.denom)"
-              :chain="transactionAction.data.chainName"
-            />
+            Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
           </template>
           <template v-if="action == 'swap' && transactionAction.type === 'swap'">
-            Swap
-            <Ticker
-              :name="getBaseDenomSync(transactionAction.data.from.denom)"
-              :chain="transactionAction.data.chainName"
-            />
-            &rarr;
-            <Ticker
-              :name="getBaseDenomSync(transactionAction.data.to.denom)"
-              :chain="transactionAction.data.chainName"
-            />
+            Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
+            <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
           </template>
           <template v-if="action == 'addliquidity' && transactionAction.type === 'addLiquidity'">
             Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·

@@ -4,6 +4,7 @@ import orderBy from 'lodash.orderby';
 
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
+import { isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 import { SwapCoin, SwapContext } from '../state/machine';
@@ -26,16 +27,8 @@ export const getDenomFromBaseDenom = (context: SwapContext, baseDenom: string, c
     }
   }
 
-  const availableDenom = getAvailableDenoms(context).find(
-    (item) => item.baseDenom === baseDenom && item.chain === chain,
-  )?.denom;
-
-  if (availableDenom) return availableDenom;
-
-  const swaps = context.data.swaps.find((item) => item.chainId === chain && item.denomA.baseDenom === baseDenom)?.denomA
-    .denom;
-
-  return swaps ?? baseDenom;
+  const denom = getAvailableDenoms(context).find((item) => item.baseDenom === baseDenom && item.chain === chain)?.denom;
+  return denom ?? baseDenom;
 };
 
 export const getChainFromDenom = (context: SwapContext, denom: string) => {
@@ -164,4 +157,10 @@ export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; s
 export const resolveDisplayName = (baseDenom: string) => {
   const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
   return config?.display_name;
+};
+
+export const normalizeDenom = (denom: string) => {
+  if (isNative(denom)) return denom;
+  const [prefix, hash] = denom.split('/');
+  return `${prefix}/${hash.toUpperCase()}`;
 };

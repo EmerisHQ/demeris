@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
-import { removeExceedingStepsFromRoutes } from './route';
+import { aggregateRouteSteps, removeExceedingStepsFromRoutes } from './route';
 
 const routes = [
   {
@@ -396,6 +396,90 @@ it('should return routes without last ibc transfer', () => {
           },
         ],
       },
+    ]
+  `);
+});
+
+it('should aggregate route steps based in protocol and type', () => {
+  expect(aggregateRouteSteps(routes[1].steps)).toMatchInlineSnapshot(`
+    [
+      [
+        {
+          "data": {
+            "from": {
+              "amount": "1880293",
+              "denom": "uatom",
+            },
+            "pool_id": "gravity/11",
+            "to": {
+              "amount": "144208567",
+              "denom": "ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7",
+            },
+          },
+          "protocol": "gravity",
+          "type": "pool",
+        },
+        {
+          "data": {
+            "from": {
+              "amount": "144208567",
+              "denom": "ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7",
+            },
+            "to": {
+              "amount": "144208567",
+              "denom": "uixo",
+            },
+          },
+          "protocol": "gravity",
+          "type": "ibc",
+        },
+        {
+          "data": {
+            "from": {
+              "amount": "144208567",
+              "denom": "uixo",
+            },
+            "to": {
+              "amount": "144208567",
+              "denom": "ibc/F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B",
+            },
+          },
+          "protocol": "osmosis",
+          "type": "ibc",
+        },
+      ],
+      [
+        {
+          "data": {
+            "from": {
+              "amount": "144208567",
+              "denom": "ibc/F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B",
+            },
+            "pool_id": "osmosis/557",
+            "to": {
+              "amount": "8016909",
+              "denom": "uosmo",
+            },
+          },
+          "protocol": "osmosis",
+          "type": "pool",
+        },
+        {
+          "data": {
+            "from": {
+              "amount": "8016909",
+              "denom": "uosmo",
+            },
+            "pool_id": "osmosis/9",
+            "to": {
+              "amount": "10840462285",
+              "denom": "ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
+            },
+          },
+          "protocol": "osmosis",
+          "type": "pool",
+        },
+      ],
     ]
   `);
 });
