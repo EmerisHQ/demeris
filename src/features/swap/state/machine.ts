@@ -181,7 +181,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
         onDone: {
           target: 'ready',
-          actions: ['loadDefaultInputCoin'],
+          actions: ['loadDefaultInputCoin', 'updateInputCoinDex'],
         },
       },
       ready: {
@@ -275,7 +275,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         on: {
           'COINS.SWITCH': {
             target: 'updating.routes.input',
-            actions: 'switchCoins',
+            actions: ['switchCoins', 'updateInputCoinDex', 'focusInputAmount'],
           },
         },
       },
@@ -392,7 +392,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           const availableChains = getAvailableChainsByDenom(context, baseDenom);
           const hasChain = availableChains.includes(context.inputCoin?.chain);
           const newChain = hasChain ? context.inputCoin?.chain : availableChains[0];
-          const newDenom = getDenomFromBaseDenom(baseDenom, newChain);
+          const newDenom = getDenomFromBaseDenom(context, baseDenom, newChain);
 
           return {
             denom: newDenom,
@@ -414,12 +414,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       }),
       setInputAmount: assign((_, event: any) => ({ inputAmount: event.value })),
       setOutputAmount: assign((_, event: any) => ({ outputAmount: event.value })),
-      setOutputCoin: assign((context, event: any) => ({
-        outputCoin: event.value,
-        outputAmount: undefined,
-        inputCoin: event.value?.baseDenom === context.inputCoin?.baseDenom ? undefined : context.inputCoin,
-        inputAmount: +context.outputAmount ? undefined : context.inputAmount,
-      })),
+      setOutputCoin: assign((context, event: any) => {
+        return {
+          outputCoin: event.value,
+          outputAmount: undefined,
+          inputCoin: event.value?.baseDenom === context.inputCoin?.baseDenom ? undefined : context.inputCoin,
+          inputAmount: context.outputAmount ? undefined : context.inputAmount,
+        };
+      }),
       setSelectedRouteIndex: assign({
         selectedRouteIndex: (_, event: any) => event.value,
       }),

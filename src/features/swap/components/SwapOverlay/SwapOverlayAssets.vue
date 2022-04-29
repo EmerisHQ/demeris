@@ -24,7 +24,7 @@
         @select="selectAsset($event)"
       >
         <template #symbol="{ item }">
-          <CircleSymbol :display-status="false" :denom="item.denom" :chain-name="item.chain" />
+          <CircleSymbol :display-status="true" :denom="item.denom" :chain-name="item.chain" />
         </template>
 
         <template #title="{ item }">
@@ -70,12 +70,7 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import {
-  getAvailableChainsByDenom,
-  getAvailableInputAssets,
-  getDenomFromBaseDenom,
-  resolveBaseDenom,
-} from '@/features/swap/logic';
+import { getAvailableChainsByDenom, getAvailableInputAssets, resolveBaseDenom } from '@/features/swap/logic';
 import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapMenu from '../SwapMenu.vue';
@@ -125,9 +120,9 @@ const selectAsset = (asset: any) => {
   data.shownChainMenu = true;
 };
 
-const selectChain = (chain: string) => {
-  data.selectedDenom = getDenomFromBaseDenom(data.selectedDenom, chain);
-  data.selectedChain = chain;
+const selectChain = (value: any) => {
+  data.selectedDenom = value.denom;
+  data.selectedChain = value.chain;
   data.shownChainMenu = false;
   dispatchUpdate();
   closeMenu();

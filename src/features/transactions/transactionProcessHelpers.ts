@@ -75,7 +75,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
             const amount = parseCoins(balance.amount)[0];
             return (
               amount.denom === (transaction.data as EmerisTransactions.AbstractTransferTransactionData).amount.denom &&
-              balance.base_denom === transaction.feeToAdd[0].denom
+              balance.base_denom === transaction.feeToAdd[0]?.denom
             );
           });
 
@@ -97,7 +97,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           const baseDenomBalance = balances.find((balance) => {
             const amount = parseCoins(balance.amount)[0];
-            return amount.denom == balance.base_denom && balance.base_denom == transaction.feeToAdd[0].denom;
+            return amount.denom == balance.base_denom && balance.base_denom == transaction.feeToAdd[0]?.denom;
           });
 
           if (baseDenomBalance) {

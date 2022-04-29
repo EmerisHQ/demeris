@@ -14,7 +14,7 @@ export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   return groupBy(balances, 'on_chain');
 };
 
-export const getDenomFromBaseDenom = (baseDenom: string, chain: string) => {
+export const getDenomFromBaseDenom = (context: SwapContext, baseDenom: string, chain: string) => {
   const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
   for (const trace of Object.values(traces)) {
     if (trace.base_denom === baseDenom) {
@@ -25,7 +25,9 @@ export const getDenomFromBaseDenom = (baseDenom: string, chain: string) => {
       }
     }
   }
-  return baseDenom;
+
+  const denom = getAvailableDenoms(context).find((item) => item.baseDenom === baseDenom && item.chain === chain)?.denom;
+  return denom ?? baseDenom;
 };
 
 export const getChainFromDenom = (context: SwapContext, denom: string) => {
@@ -39,7 +41,7 @@ export const getChainFromDenom = (context: SwapContext, denom: string) => {
     return trace.trace[0].chain_name;
   }
 
-  return undefined;
+  return getAvailableDenoms(context).find((item) => item.denom === denom)?.chain;
 };
 
 export const getVerifiedDenoms = () => {
@@ -69,7 +71,7 @@ export const resolveCoinToSupportedDex = (context: SwapContext, coin: SwapCoin) 
   if (context.data.availableDenoms.indexOf(inputKey) === -1) {
     const defaultDexChain = EmerisDEXInfo.DEX.Osmosis;
     return {
-      denom: getDenomFromBaseDenom(coin.baseDenom, defaultDexChain),
+      denom: getDenomFromBaseDenom(context, coin.baseDenom, defaultDexChain),
       chain: defaultDexChain,
       baseDenom: coin.baseDenom,
     };
