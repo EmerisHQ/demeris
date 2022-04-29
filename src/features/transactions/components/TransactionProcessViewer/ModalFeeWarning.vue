@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { computed, inject, nextTick } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -94,9 +94,10 @@ const goMoon = () => {
   }
 };
 
-const cancel = () => {
-  transactionsStore.removeTransaction(stepId);
+const cancel = async () => {
   emits('close');
+  await nextTick();
+  transactionsStore.removeTransaction(stepId);
 };
 const proceed = () => send('PROCEED_FEE');
 </script>
