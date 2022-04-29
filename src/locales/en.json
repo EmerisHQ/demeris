@@ -325,6 +325,7 @@
         "swapLimit": "Swap limit reached",
         "insufficentFunds": "Insufficent funds",
         "inputBelowMin": "Below Min. Amount",
+        "inputOverMax": "Over Max. Amount",
         "unAvailable": "Swap unavailable",
         "updatePrice": "Update prices",
         "review": "Review",
