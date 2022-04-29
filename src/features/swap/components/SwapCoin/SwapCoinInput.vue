@@ -14,6 +14,12 @@
       <SwapButtonMax />
     </template>
   </SwapCoin>
+  <span v-if="state.matches('ready.invalid.belowMin')" class="text-negative">{{
+    $t('components.swap.inputBelowMin')
+  }}</span>
+  <span v-if="state.matches('ready.invalid.overMax')" class="text-negative">{{
+    $t('components.swap.inputOverMax')
+  }}</span>
 </template>
 
 <script lang="ts" setup>
