@@ -115,7 +115,7 @@ const getOutputAmount = (index: number) => {
   const output = getOutputAmountFromRoute(state.value.context, index);
   return {
     ...output,
-    denom: resolveBaseDenom(output.denom),
+    denom: resolveBaseDenom(output.denom, { context: state.value.context }),
   };
 };
 </script>
