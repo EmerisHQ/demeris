@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
-import { removeExceedingTransactionsFromRoutes } from './route';
+import { removeExceedingStepsFromRoutes } from './route';
 
 const routes = [
   {
@@ -221,7 +221,7 @@ const routes = [
 ];
 
 it('should return routes without last ibc transfer', () => {
-  expect(removeExceedingTransactionsFromRoutes(routes)).toMatchInlineSnapshot(`
+  expect(removeExceedingStepsFromRoutes(routes)).toMatchInlineSnapshot(`
     [
       {
         "steps": [
