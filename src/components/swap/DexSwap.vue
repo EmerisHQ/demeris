@@ -664,8 +664,8 @@ function setChildModalOpenStatus(payload) {
 
 async function getRoutes({ denomIn, denomOut, amountIn, amountOut, chainIn, chainOut }) {
   try {
-    //TODO: change url
-    const response = await axios.post('https://dev.demeris.io/v1' + '/daggregation/routing', {
+    const endpoint = useStore().getters[GlobalGetterTypes.API.getEndpoint];
+    const response = await axios.post(`${endpoint}/daggregation/routing`, {
       denomIn: denomIn,
       denomOut: denomOut,
       amountIn: amountIn,

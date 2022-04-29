@@ -2,15 +2,20 @@
 import { EmerisDEXInfo } from '@emeris/types';
 import axios from 'axios';
 
+import { GlobalGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
+
 import { SwapContext } from '../state';
 import { amountToUnit } from './amount';
 
 export const fetchDexInfoSwaps = async (): Promise<EmerisDEXInfo.Swaps> => {
-  const { data } = await axios.get('https://api.dev.emeris.com/v1/dexinfo/swaps');
+  const endpoint = useStore().getters[GlobalGetterTypes.API.getEndpoint];
+  const { data } = await axios.get(`${endpoint}/dexinfo/swaps`);
   return data.swaps;
 };
 
 export const fetchSwapRoutes = async (context: SwapContext, direction?: string) => {
+  const endpoint = useStore().getters[GlobalGetterTypes.API.getEndpoint];
   const inputDex = context.inputCoinDex;
   if (!inputDex) throw new Error('No swaps available');
 
@@ -25,7 +30,7 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
   if (direction === 'input') payload.amountOut = null;
   if (direction === 'output') payload.amountIn = null;
 
-  const { data } = await axios.post('https://api.dev.emeris.com/v1/daggregation/routing', payload);
+  const { data } = await axios.post(`${endpoint}/daggregation/routing`, payload);
   if (data.routes?.length === 0) {
     throw new Error('No swaps available');
   }
@@ -33,7 +38,8 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
 };
 
 export const fetchAvailableDenoms = async () => {
-  const { data } = await axios.get('https://api.dev.emeris.com/v1/daggregation/available_denoms', {});
+  const endpoint = useStore().getters[GlobalGetterTypes.API.getEndpoint];
+  const { data } = await axios.get(`${endpoint}/daggregation/available_denoms`, {});
 
   return data.denoms;
 };
