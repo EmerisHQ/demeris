@@ -35,15 +35,7 @@
         <SwapCoinOutput />
       </div>
 
-      <Button v-if="state.matches('unavailable')" disabled>Swap unavailable</Button>
-      <Button
-        v-else
-        :status="state.matches('ready.submitting') ? 'loading' : 'active'"
-        :disabled="!state.can('SUBMIT')"
-        @click="send('SUBMIT')"
-      >
-        Swap
-      </Button>
+      <SwapButtonSwap :state="state" :send="send" />
     </div>
 
     <SwapOverlaySettings />
@@ -59,6 +51,7 @@ import { computed, nextTick, watch } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import SwapButtonSwap from '@/features/swap/components/SwapButton/SwapButtonSwap.vue';
 import { useSwapMachine, useSwapStore } from '@/features/swap/state';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes } from '@/store';
