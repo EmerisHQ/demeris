@@ -335,7 +335,9 @@
         "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable",
         "disabledTitle": "Swap is temporarily unavailable",
         "disabledMessage": "Swapping is about to get even more powerful. Watch this space!",
-        "disabledLearnMore": "Learn more ↗"
+        "disabledLearnMore": "Learn more ↗",
+        "transaction": "1 transaction | {txs} transactions",
+        "transactionAcrossChains": "1 transaction across {chains} chains | {txs} transactions across {chains} chains"
       },
       "transferToHub": {
         "swap": "Assets are swapped on the Cosmos Hub",

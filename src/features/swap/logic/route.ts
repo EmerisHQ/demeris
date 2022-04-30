@@ -119,7 +119,7 @@ export const countTransactionsFromRoute = (context: SwapContext, routeIndex: num
   const route = context.data.routes[routeIndex];
   if (!route) return;
 
-  return route.steps.length;
+  return aggregateRouteSteps(route.steps).length;
 };
 
 export const countChainsFromRoute = (context: SwapContext, routeIndex: number) => {

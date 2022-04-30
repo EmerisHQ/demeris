@@ -57,6 +57,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -78,6 +79,7 @@ import SwapOverlay from './SwapOverlay.vue';
 const props = defineProps<{ routeIndex: number }>();
 const emit = defineEmits(['close']);
 
+const { t } = useI18n({ useScope: 'global' });
 const { state, send } = useSwapActor();
 
 const routeDetail = computed(() => getDetailsFromRoute(state.value.context, props.routeIndex));
@@ -89,12 +91,16 @@ const onConfirm = () => {
 const swapRouteSubTitle = computed(() => {
   const numberOfTransactions = countTransactionsFromRoute(state.value.context, props.routeIndex);
   const numberOfChains = countChainsFromRoute(state.value.context, props.routeIndex);
+
   if (numberOfChains <= 1) {
-    return numberOfTransactions === 1 ? `1 transaction` : `${numberOfTransactions} transactions`;
+    return t('components.swap.transaction', { txs: numberOfTransactions }, numberOfTransactions);
   } else {
-    return numberOfTransactions === 1
-      ? `1 transaction across ${numberOfChains} chains`
-      : `${numberOfTransactions} transactions across ${numberOfChains} chains`;
+    // @ts-ignore
+    return t(
+      'components.swap.transactionAcrossChains',
+      { chains: numberOfChains, txs: numberOfTransactions },
+      numberOfTransactions,
+    );
   }
 });
 </script>

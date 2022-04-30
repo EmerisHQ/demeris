@@ -14,7 +14,7 @@ function useDenoms() {
   });
   const useDenomInstances = {};
 
-  const useDenomFactory = (base_denom, chain?: string) => {
+  const useDenomFactory = (base_denom: string, chain?: string) => {
     const price = computed(() => {
       return typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: base_denom });
     });
