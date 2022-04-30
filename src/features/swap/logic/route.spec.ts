@@ -401,47 +401,61 @@ it('should return routes without last ibc transfer', () => {
 });
 
 it('should aggregate route steps based in protocol and type', () => {
-  expect(aggregateRouteSteps(routes[1].steps)).toMatchInlineSnapshot(`
+  expect(
+    aggregateRouteSteps([
+      {
+        type: 'ibc',
+        data: {
+          from: { denom: 'ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66', amount: '15191204' },
+          to: { denom: 'ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0', amount: '15191204' },
+        },
+        protocol: 'osmosis',
+      },
+      {
+        type: 'pool',
+        protocol: 'osmosis',
+        data: {
+          from: { denom: 'ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0', amount: '15191204' },
+          to: { denom: 'uosmo', amount: '169774' },
+          fees: { 'osmosis/ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0': 30383 },
+          pool_id: 'osmosis/7',
+        },
+      },
+      {
+        type: 'pool',
+        protocol: 'osmosis',
+        data: {
+          from: { denom: 'uosmo', amount: '169774' },
+          to: { denom: 'ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525', amount: '82025224633' },
+          fees: { 'osmosis/uosmo': 340 },
+          pool_id: 'osmosis/553',
+        },
+      },
+      {
+        type: 'ibc',
+        protocol: 'osmosis',
+        data: {
+          from: {
+            denom: 'ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525',
+            amount: '82025224633',
+          },
+          to: { denom: 'nanolike', amount: '82025224633' },
+          fees: null,
+        },
+      },
+    ]),
+  ).toMatchInlineSnapshot(`
     [
       [
         {
           "data": {
             "from": {
-              "amount": "1880293",
-              "denom": "uatom",
-            },
-            "pool_id": "gravity/11",
-            "to": {
-              "amount": "144208567",
-              "denom": "ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7",
-            },
-          },
-          "protocol": "gravity",
-          "type": "pool",
-        },
-        {
-          "data": {
-            "from": {
-              "amount": "144208567",
-              "denom": "ibc/B2B5AEE174062FA7804AC95223D8169852F8F58962C51C66391C272C838258B7",
+              "amount": "15191204",
+              "denom": "ibc/12DA42304EE1CE96071F712AA4D58186AD11C3165C0DCDA71E017A54F3935E66",
             },
             "to": {
-              "amount": "144208567",
-              "denom": "uixo",
-            },
-          },
-          "protocol": "gravity",
-          "type": "ibc",
-        },
-        {
-          "data": {
-            "from": {
-              "amount": "144208567",
-              "denom": "uixo",
-            },
-            "to": {
-              "amount": "144208567",
-              "denom": "ibc/F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B",
+              "amount": "15191204",
+              "denom": "ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
             },
           },
           "protocol": "osmosis",
@@ -451,13 +465,16 @@ it('should aggregate route steps based in protocol and type', () => {
       [
         {
           "data": {
-            "from": {
-              "amount": "144208567",
-              "denom": "ibc/F3FF7A84A73B62921538642F9797C423D2B4C4ACB3C7FCFFCE7F12AA69909C4B",
+            "fees": {
+              "osmosis/ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0": 30383,
             },
-            "pool_id": "osmosis/557",
+            "from": {
+              "amount": "15191204",
+              "denom": "ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+            },
+            "pool_id": "osmosis/7",
             "to": {
-              "amount": "8016909",
+              "amount": "169774",
               "denom": "uosmo",
             },
           },
@@ -466,18 +483,38 @@ it('should aggregate route steps based in protocol and type', () => {
         },
         {
           "data": {
+            "fees": {
+              "osmosis/uosmo": 340,
+            },
             "from": {
-              "amount": "8016909",
+              "amount": "169774",
               "denom": "uosmo",
             },
-            "pool_id": "osmosis/9",
+            "pool_id": "osmosis/553",
             "to": {
-              "amount": "10840462285",
-              "denom": "ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
+              "amount": "82025224633",
+              "denom": "ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525",
             },
           },
           "protocol": "osmosis",
           "type": "pool",
+        },
+      ],
+      [
+        {
+          "data": {
+            "fees": null,
+            "from": {
+              "amount": "82025224633",
+              "denom": "ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525",
+            },
+            "to": {
+              "amount": "82025224633",
+              "denom": "nanolike",
+            },
+          },
+          "protocol": "osmosis",
+          "type": "ibc",
         },
       ],
     ]

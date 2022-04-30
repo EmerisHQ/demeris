@@ -27,8 +27,16 @@ export const getDenomFromBaseDenom = (context: SwapContext, baseDenom: string, c
     }
   }
 
-  const denom = getAvailableDenoms(context).find((item) => item.baseDenom === baseDenom && item.chain === chain)?.denom;
-  return denom ?? baseDenom;
+  const availableDenom = getAvailableDenoms(context).find(
+    (item) => item.baseDenom === baseDenom && item.chain === chain,
+  )?.denom;
+
+  if (availableDenom) return availableDenom;
+
+  const swaps = context.data.swaps.find((item) => item.chainId === chain && item.denomA.baseDenom === baseDenom)?.denomA
+    .denom;
+
+  return swaps ?? baseDenom;
 };
 
 export const getChainFromDenom = (context: SwapContext, denom: string) => {

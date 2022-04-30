@@ -276,27 +276,27 @@ export const prepareRouteToSign = async (context: SwapContext, routeIndex: numbe
       continue;
     }
 
-    const step = steps[0];
+    for (const step of steps) {
+      if (step.type === 'ibc') {
+        const result = await move({
+          amount: {
+            amount: step.data.from.amount,
+            denom: normalizeDenom(step.data.from.denom),
+          },
+          chain_name: getChainFromDenom(context, step.data.from.denom),
+          destination_chain_name: getChainFromDenom(context, step.data.to.denom),
+        });
 
-    if (step.type === 'ibc') {
-      const result = await move({
-        amount: {
-          amount: step.data.from.amount,
-          denom: normalizeDenom(step.data.from.denom),
-        },
-        chain_name: getChainFromDenom(context, step.data.from.denom),
-        destination_chain_name: getChainFromDenom(context, step.data.to.denom),
-      });
+        txs.push({
+          name: 'move',
+          description: '',
+          transactions: result.steps,
+        });
+      }
 
-      txs.push({
-        name: 'move',
-        description: '',
-        transactions: result.steps,
-      });
-    }
-
-    if (step.type === 'pool') {
-      txs.push(createSwapTx({ stepFrom: step, stepTo: step, routes: [] }));
+      if (step.type === 'pool') {
+        txs.push(createSwapTx({ stepFrom: step, stepTo: step, routes: [] }));
+      }
     }
   }
 
