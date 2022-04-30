@@ -13,6 +13,7 @@
         @back="send({ type: 'STEPS.CLEAR' })"
         @close="send({ type: 'RESET' })"
         @pending="send({ type: 'RESET' })"
+        @previous="send({ type: 'STEPS.CLEAR' })"
       />
     </template>
 
