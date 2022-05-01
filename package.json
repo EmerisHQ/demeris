@@ -55,7 +55,6 @@
     "isomorphic-ws": "^4.0.1",
     "lodash.groupby": "^4.6.0",
     "lodash.isequal": "^4.5.0",
-    "lodash.isstring": "^4.0.1",
     "lodash.maxby": "^4.6.0",
     "lodash.minby": "^4.6.0",
     "lodash.noop": "^3.0.1",
