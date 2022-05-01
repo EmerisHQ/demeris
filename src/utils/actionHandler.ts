@@ -22,6 +22,7 @@ import {
   isNative,
   keyHashfromAddress,
   parseCoins,
+  truncateMiddle,
 } from './basic';
 import { featureRunning } from './FeatureManager';
 
@@ -430,6 +431,10 @@ export async function getTicker(name, chain_name = null) {
         ));
       return await getTicker(verifyTrace.base_denom);
     } catch (e) {
+      if (name && name.startsWith('ibc/')) {
+        const split = name.split('/');
+        return `ibc/${truncateMiddle(split[1])}(unverified)`;
+      }
       return name + '(unverified)';
     }
   }
