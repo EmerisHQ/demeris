@@ -9,7 +9,7 @@ import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import { useTotalPortfolioBalance } from '@/composables/useTotalPortfolioBalance';
 
 interface Props {
-  smallDecimals: boolean;
+  smallDecimals?: boolean;
 }
 withDefaults(defineProps<Props>(), { smallDecimals: false });
 const displayPrice = useTotalPortfolioBalance();
