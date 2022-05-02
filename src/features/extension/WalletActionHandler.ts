@@ -1,18 +1,18 @@
-import { SupportedWallets, WalletData, WalletFeatureMap } from '@/features/extension/types';
+import { SupportedWallet, WalletData, WalletFeatureMap } from '@/features/extension/types';
 import { EmerisWallet, WALLET_METHOD } from '@/features/extension/Wallet';
 
-export const supportedWalletsData: Record<SupportedWallets, WalletData> = {
-  [SupportedWallets.KEPLR]: {
+export const SupportedWalletData: Record<SupportedWallet, WalletData> = {
+  [SupportedWallet.KEPLR]: {
     isKeplrCompatible: true,
   },
-  [SupportedWallets.EMERIS]: {
+  [SupportedWallet.EMERIS]: {
     isKeplrCompatible: true,
   },
 };
 
 class WalletActionHandler {
-  private currentWallet: SupportedWallets;
-  private walletMap = new Map<SupportedWallets, EmerisWallet>();
+  private currentWallet: SupportedWallet;
+  private walletMap = new Map<SupportedWallet, EmerisWallet>();
 
   /**
    * @desc adds a supported wallet throws on failure, returns true on success
@@ -20,7 +20,7 @@ class WalletActionHandler {
    * @param walletObj
    * @param isKeplrCompatible
    */
-  public add(wallet: SupportedWallets, walletObj: any, isKeplrCompatible = false, featureMap?: WalletFeatureMap) {
+  public add(wallet: SupportedWallet, walletObj: any, isKeplrCompatible = false, featureMap?: WalletFeatureMap) {
     try {
       this.walletMap.set(wallet, new EmerisWallet(walletObj, isKeplrCompatible, featureMap));
       return true;
@@ -30,7 +30,7 @@ class WalletActionHandler {
     }
   }
 
-  public isAvailable(wallet: SupportedWallets) {
+  public isAvailable(wallet: SupportedWallet) {
     return this.walletMap.has(wallet);
   }
 
@@ -38,7 +38,7 @@ class WalletActionHandler {
     return this.walletMap.has(this.currentWallet);
   }
 
-  public connect(wallet: SupportedWallets) {
+  public connect(wallet: SupportedWallet) {
     if (!this.walletMap.has(wallet)) throw new Error(`Wallet[${wallet}] is unavailable, needs to be added first`);
     this.currentWallet = wallet;
   }

@@ -1,4 +1,4 @@
-export enum SupportedWallets {
+export enum SupportedWallet {
   KEPLR = 'KEPLR',
   EMERIS = 'EMERIS',
 }

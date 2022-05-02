@@ -1,11 +1,11 @@
-import { Keplr as KeplrWallet } from '@keplr-wallet/types';
 import every from 'lodash.every';
+import isArray from 'lodash.isarray';
 
 import { WalletFeatureMap } from '@/features/extension/types';
 
 export class EmerisWallet {
   private readonly featureMap: WalletFeatureMap;
-  private keplrWallet: KeplrWallet;
+  private keplrWallet: CustomKeplr;
   public readonly isKeplrCompatible;
   private walletObj: any;
 
@@ -28,8 +28,8 @@ export class EmerisWallet {
     }
 
     if (isKeplrCompatible) {
-      if (walletObj && EmerisWallet.checkHasRequiredFeatures(walletObj)) {
-        this.keplrWallet = walletObj;
+      if (walletObj?.keplr && EmerisWallet.checkHasRequiredFeatures(walletObj.keplr)) {
+        this.keplrWallet = walletObj.keplr;
         this.isKeplrCompatible = isKeplrCompatible;
       } else {
         console.error(
@@ -61,7 +61,8 @@ export class EmerisWallet {
       try {
         switch (methodName) {
           case WALLET_METHOD.enable:
-            if (typeof params[0] !== 'string') throw new TypeError('String param required');
+            if (typeof params[0] !== 'string' && !(isArray(params[0]) && every(params[0], (v) => typeof v == 'string')))
+              throw new TypeError('String or Array of strings param required');
             result = await this.keplrWallet.enable(params[0]);
             break;
 
@@ -86,7 +87,7 @@ export class EmerisWallet {
   }
 
   //  static functions
-  static checkHasRequiredFeatures(object: unknown): object is KeplrWallet {
+  static checkHasRequiredFeatures(object: unknown): object is CustomKeplr {
     return every(WALLET_METHOD, (method) => Object.prototype.hasOwnProperty.call(object, method));
   }
 }
@@ -98,7 +99,7 @@ export enum WALLET_METHOD {
   getOfflineSigner = 'getOfflineSigner',
 }
 
-function checkIsKeplr(object: unknown): object is KeplrWallet {
+function checkIsKeplr(object: unknown): object is CustomKeplr {
   const prototype = Object.getPrototypeOf(object);
   return EmerisWallet.checkHasRequiredFeatures(prototype);
 }

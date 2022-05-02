@@ -828,6 +828,7 @@
           "title": "Connect your wallet",
           "text": "Connect your Keplr wallet via the Keplr browser extension to use Emeris.",
           "button": "Connect Keplr",
+          "buttonEmeris": "Connect Emeris",
           "demo": "Try the demo",
           "needHelp": "Need help?",
           "opening": "Opening Keplr",
