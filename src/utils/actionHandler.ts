@@ -8,6 +8,7 @@ import { AminoMsg } from '@cosmjs/amino';
 import mapTransaction from '@emeris/mapper';
 import { EmerisAPI, EmerisBase, EmerisDEXInfo, EmerisFees } from '@emeris/types';
 import { bech32 } from 'bech32';
+import BigNumber from 'bignumber.js';
 
 import { calculateSlippage } from '@/features/swap/logic';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -1230,6 +1231,7 @@ export async function validateStepFeeBalances(
 }
 
 export async function validateStepsFeeBalances(
+  action: string,
   steps: Actions.Step[],
   balances: EmerisAPI.Balances,
   allFees: Actions.FeeTotals[],
@@ -1248,6 +1250,8 @@ export async function validateStepsFeeBalances(
   };
   let i = 0;
   for (const step of steps) {
+    if (action === 'swap' && feeWarning.missingFees.length) break;
+
     const fees = allFees[i];
     for (const stepTx of step.transactions) {
       if (stepTx.type == 'addLiquidity') {
@@ -1362,6 +1366,9 @@ export async function validateStepsFeeBalances(
       }
       if (stepTx.type == 'IBCtransferBackward') {
         const data = stepTx.data;
+
+        if (new BigNumber(stepTx.data.amount.amount).isLessThanOrEqualTo(0)) break;
+
         const ibcBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
           if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
@@ -1427,6 +1434,9 @@ export async function validateStepsFeeBalances(
       }
       if (stepTx.type == 'IBCtransferForward') {
         const data = stepTx.data;
+
+        if (new BigNumber(stepTx.data.amount.amount).isLessThanOrEqualTo(0)) break;
+
         const ibcBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
           if (amount.denom == data.amount.denom && x.on_chain == data.chainName) {
@@ -1523,14 +1533,38 @@ export async function validateStepsFeeBalances(
         } else {
           throw new Error('Insufficient balance: ' + data.from.denom);
         }
-        const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+        // const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
         const swapFee = {
-          amount: Math.ceil((parseInt(data.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          // amount: Math.ceil((parseInt(data.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          amount: '0',
           denom: data.from.denom,
         };
         const newSwapAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(swapFee.amount);
         if (newSwapAmount >= 0) {
           balance.amount = newSwapAmount + parseCoins(balance.amount)[0].denom;
+
+          const toBalance = balances.find((x) => {
+            const amount = parseCoins(x.amount)[0];
+            return amount.denom == data.to.denom && x.on_chain == data.chainName;
+          });
+
+          if (toBalance) {
+            const newToAmount = parseInt(parseCoins(toBalance.amount)[0].amount) + parseInt(data.to.amount);
+            toBalance.amount = newToAmount + data.to.denom;
+          } else {
+            const newSwapBalance = {
+              address: balance.address,
+              amount: data.to.amount + data.to.denom,
+              base_denom: await getBaseDenom(data.to.denom, data.chainName),
+              ibc: {
+                path: '',
+                hash: data.to.denom.replace('ibc/', ''),
+              },
+              on_chain: data.chainName,
+              verified: true,
+            };
+            balances.push(newSwapBalance);
+          }
         } else {
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
