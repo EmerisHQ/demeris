@@ -168,7 +168,7 @@ export const useTransactionsStore = defineStore('transactions', {
       service.start();
       service.send({
         type: 'SET_DATA',
-        balances,
+        balances: JSON.parse(JSON.stringify(balances)),
         action,
         steps,
         isDemoAccount: globalStore.getters[GlobalGetterTypes.USER.isDemoAccount],

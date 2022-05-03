@@ -15,7 +15,6 @@ import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 
 interface SwapButtonProps {
-  defaultDenom: string;
   send: any;
   state: any;
 }
