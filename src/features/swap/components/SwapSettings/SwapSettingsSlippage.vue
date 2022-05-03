@@ -23,7 +23,7 @@
           <FlexibleAmountInput
             ref="customInputRef"
             v-model="data.customValue"
-            :min-width="10"
+            :min-width="30"
             :suffix="showCustomPlaceholder ? '' : '%'"
             class="max-w-full"
             :placeholder="showCustomPlaceholder ? '' : '0'"
