@@ -23,6 +23,7 @@ import {
   isNative,
   keyHashfromAddress,
   parseCoins,
+  truncateMiddle,
 } from './basic';
 import { featureRunning } from './FeatureManager';
 
@@ -383,40 +384,15 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 }
 
 export async function getDisplayName(name, chain_name = null) {
-  const typedstore = useStore() as RootStoreTyped;
-  if (isNative(name)) {
-    const displayName =
-      typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.display_name ?? null;
-    if (displayName) {
-      return displayName;
-    }
-
-    return name;
-  } else {
-    let verifyTrace;
-    try {
-      verifyTrace =
-        typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({ chain_name, hash: name.split('/')[1] }) ??
-        (await typedstore.dispatch(
-          GlobalActionTypes.API.GET_VERIFY_TRACE,
-          { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
-          { root: true },
-        ));
-    } catch (e) {
-      //console.error(e);
-      return name + '(unverified)';
-    }
-
-    return await getDisplayName(verifyTrace.base_denom);
-  }
+  return await getTicker(name, chain_name, 'display_name');
 }
-export async function getTicker(name, chain_name = null) {
+export async function getTicker(name, chain_name = null, getValue = 'ticker') {
   const typedstore = useStore() as RootStoreTyped;
   if (isNative(name)) {
-    const ticker =
-      typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.ticker ?? null;
-    if (ticker) {
-      return ticker;
+    const value =
+      typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.[getValue] ?? null;
+    if (value) {
+      return value;
     }
     return name;
   } else {
@@ -429,10 +405,13 @@ export async function getTicker(name, chain_name = null) {
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
-      return await getTicker(verifyTrace.base_denom);
     } catch (e) {
+      if (name && name.startsWith('ibc/')) {
+        return `ibc/${truncateMiddle(name.split('/')[1])}(unverified)`;
+      }
       return name + '(unverified)';
     }
+    return await getTicker(verifyTrace.base_denom);
   }
 }
 

@@ -245,3 +245,9 @@ export function getSumOfRewards(totalValue: string, baseDenom: string) {
     .reduce((prevValue, currentValue) => BigNumber.sum(prevValue, currentValue).toString());
   return parseFloat(total ?? '0');
 }
+
+export const truncateMiddle = (str: string, left = 3, right = 3): string => {
+  if (typeof str !== 'string') return '';
+  if (str.length <= left + right) return str;
+  return str.slice(0, left) + '...' + str.slice(str.length - right, str.length);
+};
