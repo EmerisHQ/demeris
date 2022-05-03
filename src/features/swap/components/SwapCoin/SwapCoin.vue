@@ -5,36 +5,38 @@
       <slot v-if="denom" name="header" />
     </div>
     <div class="flex items-center space-x-3">
-      <div>
-        <template v-if="isLoadingCoin">
-          <CircleSymbol size="sm" />
-        </template>
-        <CircleSymbol v-else :denom="denom ? getBaseDenomSync(denom) : ''" size="sm" :display-status="false" />
-      </div>
-
-      <button class="flex flex-col" :disabled="isLoadingCoin" @click="emit('select')">
-        <div class="flex items-center">
+      <button class="flex items-center space-x-3" :disabled="isLoadingCoin" @click="emit('select')">
+        <div>
           <template v-if="isLoadingCoin">
-            <SkeletonLoader height="16px" width="48px" />
+            <CircleSymbol size="sm" />
           </template>
-          <template v-else>
-            <span class="text-0 font-medium whitespace-nowrap">
-              <Ticker v-if="denom" :name="getBaseDenomSync(denom)" />
-              <span v-else>Select asset</span>
-            </span>
-            <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
-          </template>
+          <CircleSymbol v-else :denom="denom ? getBaseDenomSync(denom) : ''" size="sm" :display-status="false" />
         </div>
 
-        <template v-if="isLoadingCoin || isLoadingChain">
-          <div><SkeletonLoader height="12px" width="96px" /></div>
-        </template>
-        <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap">
-          <ChainName :name="chain" />
-        </span>
-        <span v-else-if="chainFallback" class="text-muted -text-1 whitespace-nowrap">
-          {{ chainFallback }}
-        </span>
+        <div class="flex flex-col">
+          <div class="flex items-center">
+            <template v-if="isLoadingCoin">
+              <SkeletonLoader height="16px" width="48px" />
+            </template>
+            <template v-else>
+              <span class="text-0 font-medium whitespace-nowrap">
+                <Ticker v-if="denom" :name="getBaseDenomSync(denom)" />
+                <span v-else>Select asset</span>
+              </span>
+              <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
+            </template>
+          </div>
+
+          <template v-if="isLoadingCoin || isLoadingChain">
+            <div><SkeletonLoader height="12px" width="96px" /></div>
+          </template>
+          <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap text-left">
+            <ChainName :name="chain" />
+          </span>
+          <span v-else-if="chainFallback" class="text-muted -text-1 whitespace-nowrap text-left">
+            {{ chainFallback }}
+          </span>
+        </div>
       </button>
 
       <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">

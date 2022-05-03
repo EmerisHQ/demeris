@@ -24,16 +24,16 @@
 
     <SwapMenu :items="chains" class="mt-3" @select="emit('select', $event)">
       <template #symbol="{ item }">
-        <CircleSymbol :display-status="false" variant="chain" :chain-name="item" />
+        <CircleSymbol :display-status="true" variant="chain" :chain-name="item.chain" />
       </template>
 
       <template #title="{ item }">
-        <ChainName :name="item" />
+        <ChainName :name="item.chain" />
       </template>
 
       <template #label="{ item }">
         <AmountDisplay
-          :amount="{ amount: totalDenomBalance(state.context, denom, item), denom: denom }"
+          :amount="{ amount: totalDenomBalance(state.context, denom, item.chain), denom: denom }"
           :chain="item"
         />
       </template>
@@ -42,6 +42,7 @@
 </template>
 
 <script lang="ts" setup>
+// TODO: Use DenomSelect component to display available chains/balances
 import { computed } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -50,7 +51,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { getAvailableChainsByDenom, totalDenomBalance } from '@/features/swap/logic';
+import { denomBalancesPerChain, totalDenomBalance } from '@/features/swap/logic';
 import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapMenu from '../SwapMenu.vue';
@@ -62,5 +63,11 @@ const emit = defineEmits(['back', 'close', 'select']);
 const swap = useSwapStore();
 const { state } = useSwapActor();
 
-const chains = computed(() => getAvailableChainsByDenom(state.value.context, props.denom));
+const chains = computed(() => {
+  const balances = denomBalancesPerChain(state.value.context, props.denom);
+  return Object.entries(balances).map(([chain, balance]) => ({
+    chain,
+    denom: balance[0].ibc.hash ? `ibc/${balance[0].ibc.hash}` : balance[0].base_denom,
+  }));
+});
 </script>

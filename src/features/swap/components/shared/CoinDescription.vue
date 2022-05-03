@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center space-x-4 text-right">
     <div>
-      <AmountDisplay :amount="{ amount, denom }" class="font-medium text-0" trunc-big-balance />
+      <AmountDisplay :amount="{ amount, denom }" :chain="chain" class="font-medium text-0" trunc-big-balance />
       <div class="text-muted -text-1">
         <ChainName :name="chain" class="text-1" />
       </div>

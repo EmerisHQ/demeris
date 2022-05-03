@@ -299,7 +299,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       receipt: {
         on: {
           CONTINUE: {
-            target: 'review',
+            target: 'validating.traceChannel',
             actions: 'goNextTransaction',
           },
           SIGN: {
@@ -372,8 +372,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
         let validation = {};
-        // TODO: Revisit this logic once we have a better way to handle swap fees
-        if (!context.input.isDemoAccount && context.input.action !== 'swap') {
+        if (!context.input.isDemoAccount) {
           validation = await validateStepsFeeBalances(
             context.formattedSteps,
             context.input.balances,

@@ -13,6 +13,7 @@
         @back="send({ type: 'STEPS.CLEAR' })"
         @close="send({ type: 'RESET' })"
         @pending="send({ type: 'RESET' })"
+        @previous="send({ type: 'STEPS.CLEAR' })"
       />
     </template>
 
@@ -34,15 +35,7 @@
         <SwapCoinOutput />
       </div>
 
-      <Button v-if="state.matches('unavailable')" disabled>Swap unavailable</Button>
-      <Button
-        v-else
-        :status="state.matches('ready.submitting') ? 'loading' : 'active'"
-        :disabled="!state.can('SUBMIT')"
-        @click="send('SUBMIT')"
-      >
-        Swap
-      </Button>
+      <SwapButtonSwap :state="state" :send="send" />
     </div>
 
     <SwapOverlaySettings />
@@ -58,6 +51,7 @@ import { computed, nextTick, watch } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import SwapButtonSwap from '@/features/swap/components/SwapButton/SwapButtonSwap.vue';
 import { useSwapMachine, useSwapStore } from '@/features/swap/state';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalGetterTypes } from '@/store';
@@ -76,7 +70,7 @@ const props = defineProps(['canStart', 'defaultDenom']);
 const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state, send } = useSwapMachine(props.defaultDenom);
-const { balances, isValidatingBalances } = useAccount();
+const { allbalances, isValidatingBalances } = useAccount();
 
 const isBalancesLoaded = computed(() => {
   return globalStore.getters[GlobalGetterTypes.USER.isAllBalancesLoaded] && !isValidatingBalances.value;
@@ -92,7 +86,7 @@ const setAllBalances = async () => {
   await nextTick();
 
   if (!state.value.can({ type: 'BALANCES.SET' })) return;
-  send({ type: 'BALANCES.SET', balances: balances.value });
+  send({ type: 'BALANCES.SET', balances: allbalances.value });
 };
 
 const startMachine = () => {
@@ -101,6 +95,6 @@ const startMachine = () => {
   send('START');
 };
 
-watch([isBalancesLoaded, balances, isSignedIn], setAllBalances, { immediate: true, deep: true });
+watch([isBalancesLoaded, allbalances, isSignedIn], setAllBalances, { immediate: true, deep: true });
 whenever(() => props.canStart, startMachine, { immediate: true });
 </script>

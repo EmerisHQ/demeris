@@ -174,12 +174,40 @@ export const countExchangesFromRoutes = (context: SwapContext) => {
   return protocols.length;
 };
 
-export const removeExceedingTransactionsFromRoutes = (routes: any[]) => {
+export const removeExceedingStepsFromRoutes = (routes: any[]) => {
   const result = [];
   for (const route of routes) {
     const lastSwapIndex = route.steps.map((item) => item.type).lastIndexOf('pool');
     route.steps = route.steps.slice(0, lastSwapIndex + 1);
 
+    result.push(route);
+  }
+  return result;
+};
+
+// Include a new step to transfer funds from a chain to the DEX chain before other steps
+// TODO: This is a temporary solution until daggregation returns all correct steps
+export const prependAdditionalStepsToRoutes = (routes: any[], inputCoin: any, targetCoin: any) => {
+  const result = [];
+  for (const route of routes) {
+    const steps = [
+      {
+        type: 'ibc',
+        data: {
+          from: {
+            denom: inputCoin.denom,
+            amount: route.steps[0].data.from.amount,
+          },
+          to: {
+            denom: targetCoin.denom,
+            amount: route.steps[0].data.from.amount,
+          },
+        },
+        protocol: targetCoin.chain,
+      },
+    ];
+
+    route.steps = steps.concat(route.steps);
     result.push(route);
   }
   return result;
@@ -201,7 +229,7 @@ export const convertRouteToSteps = async (context: SwapContext, routeIndex: numb
     if (step.type === 'ibc') {
       const result = await move({
         amount: {
-          amount: step.data.from.amount,
+          amount: Math.abs(Number(step.data.from.amount)).toString(),
           denom: formatToValidDenom(step.data.from.denom),
         },
         chain_name: getChainFromDenom(context, step.data.from.denom),
