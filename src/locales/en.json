@@ -78,7 +78,7 @@
         }
       },
       "chainSelect": {
-        "text1": "You have {asset} on {chainNo} {chains}.",
+        "text1": "You have {asset} on {chainNo} chains.",
         "text2": "Select the chain you wish to use."
       },
       "coinList": {
@@ -325,6 +325,7 @@
         "swapLimit": "Swap limit reached",
         "insufficentFunds": "Insufficent funds",
         "inputBelowMin": "Below Min. Amount",
+        "inputOverMax": "Over Max. Amount",
         "unAvailable": "Swap unavailable",
         "updatePrice": "Update prices",
         "review": "Review",
@@ -333,6 +334,7 @@
         "tooltipNoPool": "Currently there is no pool for this pair, please select other pair",
         "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable",
         "disabledTitle": "Swap is temporarily unavailable",
+        "disabledMessage": "Swapping is about to get even more powerful. Watch this space!",
         "disabledLearnMore": "Learn more ↗"
       },
       "transferToHub": {
@@ -482,6 +484,7 @@
         "transactionFailed": "Transaction failed. Please refresh this page."
       },
       "bestPrice": {
+        "exchangeSearched": "exchange searched",
         "exchangesSearched": "exchanges searched",
         "bestPriceFrom": "Emeris found the best price from ",
         "expectedRate": "Expected rate ",

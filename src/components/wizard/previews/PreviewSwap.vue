@@ -58,6 +58,7 @@
 
       <!-- limit price -->
       <ListItem
+        v-if="limitPrice"
         :size="size"
         :description="$t('components.previews.swap.limitPriceLbl')"
         :hint="$t('components.previews.swap.limitPriceLblHint')"
@@ -132,6 +133,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
+import { getChainFromProtocol } from '@/features/swap/logic';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
@@ -170,7 +172,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { getReserveBalances, getReserveBaseDenoms } = usePools();
+    const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
     const { getSwapPrice } = useCalculation();
     const swapFeeRate = computed(() => {
       const feeRate =
@@ -182,9 +184,15 @@ export default defineComponent({
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
 
+    const protocol = computed(() => {
+      return (props.step as Actions.Step).transactions[0].protocol;
+    });
+
     //for receive coin chain_name(always cosmos hub)
     const dexChainName = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getDexChain];
+      if (!protocol.value) store.getters[GlobalGetterTypes.API.getDexChain];
+
+      return getChainFromProtocol(protocol.value);
     });
 
     // minReceivedAmount & limit price
@@ -197,7 +205,15 @@ export default defineComponent({
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
       },
       async () => {
-        const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
+        if (protocol.value !== 'gravity') {
+          return;
+        }
+
+        let pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
+
+        if (!pool.reserve_coin_denoms) {
+          pool = getPoolById(pool.id);
+        }
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await getReserveBalances(pool);
         const inputAmount = parseInt(String(Number(data.value.from.amount)));
@@ -276,7 +292,7 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[store.getters[GlobalGetterTypes.API.getDexChain]]['uatom'];
+      return props.fees[dexChainName.value]?.['uatom'];
     });
 
     const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';

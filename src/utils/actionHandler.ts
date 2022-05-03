@@ -9,6 +9,7 @@ import mapTransaction from '@emeris/mapper';
 import { EmerisAPI, EmerisBase, EmerisDEXInfo, EmerisFees } from '@emeris/types';
 import { bech32 } from 'bech32';
 
+import { calculateSlippage } from '@/features/swap/logic';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import * as Actions from '@/types/actions';
 import { useStore } from '@/utils/useStore';
@@ -22,6 +23,7 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
+import { featureRunning } from './FeatureManager';
 
 // Action-handler / action composing using the blocks above
 
@@ -92,23 +94,32 @@ export async function msgFromStepTransaction(
   }
   if (stepTx.type == 'swap') {
     const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
-    let isReverse = false;
-    if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms[0]) {
-      isReverse = true;
-    }
-    const price = [stepTx.data.from, stepTx.data.to].sort((a, b) => {
-      if (a.denom < b.denom) return -1;
-      if (a.denom > b.denom) return 1;
-      return 0;
-    });
-    const orderPrice =
-      (parseInt(price[0].amount) / parseInt(price[1].amount)) * (isReverse ? 1 - slippage : 1 + slippage);
-    const newToAmount =
-      price[0].denom == stepTx.data.from.denom
-        ? parseInt(stepTx.data.from.amount) / orderPrice
-        : parseInt(stepTx.data.from.amount) * orderPrice;
 
-    stepTx.data.to.amount = Math.ceil(newToAmount).toString();
+    if (featureRunning('DEX_AGG')) {
+      stepTx.data.to.amount = calculateSlippage(stepTx.data.to.amount, slippage * 100);
+    } else {
+      let isReverse = false;
+      const price = [stepTx.data.from, stepTx.data.to];
+
+      if (stepTx.data.from.denom !== stepTx.data.pool.reserve_coin_denoms?.[0]) {
+        isReverse = true;
+      }
+      price.sort((a, b) => {
+        if (a.denom < b.denom) return -1;
+        if (a.denom > b.denom) return 1;
+        return 0;
+      });
+
+      const orderPrice =
+        (parseInt(price[0].amount) / parseInt(price[1].amount)) * (isReverse ? 1 - slippage : 1 + slippage);
+      const newToAmount =
+        price[0].denom == stepTx.data.from.denom
+          ? parseInt(stepTx.data.from.amount) / orderPrice
+          : parseInt(stepTx.data.from.amount) * orderPrice;
+
+      stepTx.data.to.amount = Math.ceil(newToAmount).toString();
+    }
+
     const msg = await (mapTransaction({
       chainName,
       signingAddress: await getOwnAddress({ chain_name: chainName }),
@@ -172,7 +183,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
 export function getBaseDenomSync(denom: string) {
   const typedstore = useStore() as RootStoreTyped;
   const traces = typedstore.getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  return isNative(denom) ? denom : traces[denom.split('/')[1]]?.base_denom;
+  return isNative(denom) ? denom : traces[denom.split('/')[1]?.toUpperCase()]?.base_denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const typedstore = useStore() as RootStoreTyped;
@@ -310,7 +321,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let error: Error;
 
   let denoms = [];
-  const chain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+  const chain = transaction.data.chainName ?? typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
   switch (transaction.type) {
     case 'addLiquidity':

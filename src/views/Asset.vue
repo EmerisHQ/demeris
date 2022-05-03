@@ -184,7 +184,7 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <Swap :native-asset="nativeAsset" />
+        <Swap :native-asset="nativeAsset" :default-denom="denom" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>

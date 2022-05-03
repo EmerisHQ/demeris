@@ -40,7 +40,7 @@
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
-        <Spinner :size="1" :variant="variant === 'link' ? 'solid' : 'gold'" />
+        <Spinner :size="2.5" :variant="variant === 'link' ? 'solid' : 'gold'" style="transform: scale(0.6)" />
       </div>
 
       <span v-if="name" class="inline-flex gap-x-2 items-center" :class="textClasses">
@@ -142,6 +142,16 @@ export default defineComponent({
 
 .button:active {
   transition-duration: 0s;
+}
+
+.light .button:not(.loading):disabled {
+  background: rgba(0, 0, 0, 0.33);
+  @apply text-text shadow-none;
+}
+
+.dark .button:not(.loading):disabled {
+  background: rgba(255, 255, 255, 0.44);
+  @apply text-text shadow-none;
 }
 
 .button-link {

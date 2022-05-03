@@ -12,7 +12,7 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, nextTick, PropType, ref } from 'vue';
 
 export default defineComponent({
   name: 'AmountInput',
@@ -78,7 +78,12 @@ export default defineComponent({
         inputRef.value.value = formatted;
       },
     });
-    return { inputRef, format, model };
+
+    const focus = () => {
+      nextTick(() => inputRef.value?.focus());
+    };
+
+    return { inputRef, format, model, focus };
   },
 });
 </script>

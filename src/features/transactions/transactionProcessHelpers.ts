@@ -13,6 +13,7 @@ import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
+import { getGravityResultFromDecodedEvents, SwapTransactionResult } from '../swap/logic/transaction';
 import {
   TransactionProcessContext,
   TransactionProcessEvents,
@@ -74,7 +75,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
             const amount = parseCoins(balance.amount)[0];
             return (
               amount.denom === (transaction.data as EmerisTransactions.AbstractTransferTransactionData).amount.denom &&
-              balance.base_denom === transaction.feeToAdd[0].denom
+              balance.base_denom === transaction.feeToAdd[0]?.denom
             );
           });
 
@@ -96,7 +97,7 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
 
           const baseDenomBalance = balances.find((balance) => {
             const amount = parseCoins(balance.amount)[0];
-            return amount.denom == balance.base_denom && balance.base_denom == transaction.feeToAdd[0].denom;
+            return amount.denom == balance.base_denom && balance.base_denom == transaction.feeToAdd[0]?.denom;
           });
 
           if (baseDenomBalance) {
@@ -131,12 +132,19 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
   });
 };
 
-export const getSwappedPercent = (endBlock: EmerisBase.SwapEndBlockResponse) => {
-  return (
-    (Number(endBlock.exchanged_offer_coin_amount) /
-      (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
-    100
-  );
+export const parseSwapResults = ({ endBlock, result }: any): SwapTransactionResult => {
+  if (endBlock) {
+    return getGravityResultFromDecodedEvents({ swap_transacted: endBlock });
+  }
+
+  return result;
+};
+
+export const getSwappedPercent = (results: Record<string, any>) => {
+  const { inputAmount, remainingInputAmount } = parseSwapResults(results);
+  if ((results as EmerisBase.SwapEndBlockResponse)?.offer_coin_denom) {
+    return (Number(inputAmount) / (Number(remainingInputAmount) + Number(inputAmount))) * 100;
+  }
 };
 
 export const logAmountVolume = (context: TransactionProcessContext) => {
@@ -202,12 +210,12 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult.endBlock)) / 100),
+        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult)) / 100),
       });
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' -> ' + toDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult.endBlock)) / 100),
+        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult)) / 100),
       });
       break;
     case 'createPool':

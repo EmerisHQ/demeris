@@ -100,14 +100,14 @@
                 <span class="font-bold">
                   <AmountDisplay
                     :amount="{
-                      denom: lastResult.endBlock?.offer_coin_denom,
-                      amount: String(lastResult.endBlock?.remaining_offer_coin_amount),
+                      denom: getBaseDenomSync(getSwapResult().inputDenom),
+                      amount: getSwapResult().remainingInputAmount,
                     }"
                   />
                 </span>
               </template>
               <template #chainName>
-                <ChainName :name="'cosmos-hub'" />
+                <ChainName :name="lastResult.chain_name" />
               </template>
             </i18n-t>
 
@@ -122,18 +122,14 @@
                 <span class="font-bold">
                   <AmountDisplay
                     :amount="{
-                      denom: lastResult.endBlock?.demand_coin_denom,
-                      amount: String(
-                        lastResult.endBlock?.exchanged_demand_coin_amount > 0
-                          ? lastResult.endBlock?.exchanged_demand_coin_amount
-                          : 0,
-                      ),
+                      denom: getBaseDenomSync(getSwapResult().outputDenom),
+                      amount: getSwapResult().outputAmount,
                     }"
                   />
                 </span>
               </template>
               <template #chainName>
-                <ChainName :name="'cosmos-hub'" />
+                <ChainName :name="lastResult.chain_name" />
               </template>
             </i18n-t>
           </template>
@@ -142,15 +138,15 @@
             <div class="text-1 font-bold">
               <AmountDisplay
                 :amount="{
-                  amount: lastResult.endBlock?.exchanged_offer_coin_amount,
-                  denom: lastResult.endBlock?.offer_coin_denom,
+                  amount: getSwapResult().inputAmount,
+                  denom: getBaseDenomSync(getSwapResult().inputDenom),
                 }"
               />
               &rarr;
               <AmountDisplay
                 :amount="{
-                  amount: lastResult.endBlock?.exchanged_demand_coin_amount,
-                  denom: lastResult.endBlock?.demand_coin_denom,
+                  amount: getSwapResult().outputAmount,
+                  denom: getBaseDenomSync(getSwapResult().outputDenom),
                 }"
               />
             </div>
@@ -243,8 +239,8 @@
               <template #amount>
                 <AmountDisplay
                   :amount="{
-                    amount: lastResult.endBlock?.exchanged_demand_coin_amount,
-                    denom: lastResult.endBlock?.demand_coin_denom,
+                    amount: getSwapResult().outputAmount,
+                    denom: getBaseDenomSync(getSwapResult().outputDenom),
                   }"
                 />
                 &rarr;
@@ -282,13 +278,15 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import useDenomsFactory from '@/composables/useDenoms';
+import SwapViewDetails from '@/features/swap/SwapViewDetails.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { StepTransaction } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { getSumOfRewards, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
-import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { getExplorerTx, getSwappedPercent, parseSwapResults, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { actor, isSwapComponent, minimizeModal, removeTransactionAndClose } = inject(ProvideViewerKey);
 
@@ -321,7 +319,7 @@ const previewComponentMap = {
   IBCtransferBackward: PreviewTransfer,
   IBCtransferForward: PreviewTransfer,
   transfer: PreviewTransfer,
-  swap: PreviewSwap,
+  swap: featureRunning('DEX_AGG') ? SwapViewDetails : PreviewSwap,
   stake: PreviewStake,
   multistake: PreviewStake,
   unstake: PreviewUnstake,
@@ -353,8 +351,8 @@ const goToMove = () => {
 };
 
 const goToSend = () => {
-  const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
-  const denom = lastResult.value.endBlock?.demand_coin_denom;
+  const amount = getSwapResult().outputAmount;
+  const denom = getBaseDenomSync(getSwapResult().outputDenom);
   router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
   removeTransactionAndClose({ source: 'send-btn' });
 };
@@ -407,7 +405,8 @@ const getWithdrawTotal = () => {
   return total.toNumber();
 };
 
-const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock);
+const getSwapResult = () => parseSwapResults(lastResult.value);
+const getSwapPercent = () => getSwappedPercent(lastResult.value);
 </script>
 
 <style scoped>

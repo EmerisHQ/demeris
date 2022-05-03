@@ -18,6 +18,7 @@ import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
+import { resolveSwapResponse, SwapTransactionResult } from '../swap/logic/transaction';
 import {
   DoneEventData,
   formatStepsWithFee,
@@ -51,6 +52,7 @@ export interface TransactionProcessContext {
       endBlock: any;
       transaction: StepTransaction;
       stepIndex: number;
+      result?: SwapTransactionResult;
     }
   >;
   fees: {
@@ -297,7 +299,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       receipt: {
         on: {
           CONTINUE: {
-            target: 'review',
+            target: 'validating.traceChannel',
             actions: 'goNextTransaction',
           },
           SIGN: {
@@ -430,6 +432,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           status: undefined,
           endBlock: undefined,
           websocket: undefined,
+          result: undefined,
         };
 
         // @ts-ignore
@@ -447,6 +450,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 endBlockEvent = await useStore().dispatch(GlobalActionTypes.API.GET_END_BLOCK_EVENTS, {
                   height: height,
                   stepType: currentStep.name,
+                  chain_name: sourceChain,
                 });
                 break;
               } catch {
@@ -583,7 +587,21 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           responseData.websocket = traceResult;
 
-          await fetchEndBlock(traceResult.height);
+          if (currentStep.name === 'swap') {
+            try {
+              const result = await resolveSwapResponse(traceResult, sourceChain);
+              responseData.result = result;
+            } catch {
+              return callback({
+                // @ts-ignore
+                type: 'GOT_FAILURE',
+                error: 'Failed to find swap results',
+                data: responseData,
+              });
+            }
+          } else {
+            await fetchEndBlock(traceResult.height);
+          }
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });
@@ -694,6 +712,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       hasMoreTransactions: (context) =>
         getCurrentStep(context).transactions.length > context.currentTransactionIndex + 1,
       needsTransferToHub: (context) => {
+        if (featureRunning('DEX_AGG')) return false;
+
         if (context.input.action === 'move') {
           return true;
         }

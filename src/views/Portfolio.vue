@@ -33,12 +33,14 @@
               :limit-rows="4"
               @row-click="openAssetPage"
             />
-            <StakeTableBanner v-show="activeFilter === 'staking' && assetsStakingLength === 0" />
-            <StakingTable
-              v-show="activeFilter === 'staking' && assetsStakingLength > 0"
-              show-headers
-              @row-click="openAssetPage"
-            />
+            <FeatureRunningConditional name="STAKING_PORTFOLIO">
+              <StakeTableBanner v-show="activeFilter === 'staking' && assetsStakingLength === 0" />
+              <StakingTable
+                v-show="activeFilter === 'staking' && assetsStakingLength > 0"
+                show-headers
+                @row-click="openAssetPage"
+              />
+            </FeatureRunningConditional>
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />

@@ -154,15 +154,18 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
         }
 
         if (data.result?.data?.value?.TxResult) {
+          // Subscription response
           const txResult = data.result.data.value.TxResult;
-          if (txResult.result.code === 0) {
-            return handleSuccess({
-              ...data.result,
-              height: txResult.height,
-              tx_result: txResult.result,
-            });
+
+          if (txResult.result.code) {
+            return handleError(new Error(txResult.result.log));
           }
-          return handleError(new Error(txResult.result.log));
+
+          return handleSuccess({
+            ...data.result,
+            height: txResult.height,
+            tx_result: txResult.result,
+          });
         }
 
         if (data?.result?.tx_result) {

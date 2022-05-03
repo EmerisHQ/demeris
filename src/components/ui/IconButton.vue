@@ -10,20 +10,22 @@
     class="icon-button"
     @click="clickFunction"
   >
-    <Icon v-if="isIcon" :name="name" :icon-size="iconSize" />
-    <div v-else>
-      <div style="display: flex" class="-text-1">
-        <div
-          v-if="buttonName.includes('Max')"
-          style="max-width: 11.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-        >
-          {{ buttonName?.split('Max')[0] }}
+    <slot>
+      <Icon v-if="isIcon" :name="name" :icon-size="iconSize" />
+      <div v-else>
+        <div style="display: flex" class="-text-1">
+          <div
+            v-if="buttonName.includes('Max')"
+            style="max-width: 11.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+          >
+            {{ buttonName?.split('Max')[0] }}
+          </div>
+          <span v-if="buttonName.includes('Max')"> &nbsp;Max</span>
+          <span v-else>{{ buttonName }}</span>
         </div>
-        <span v-if="buttonName.includes('Max')"> &nbsp;Max</span>
-        <span v-else>{{ buttonName }}</span>
       </div>
-    </div>
-    <div v-if="showBadge" class="icon-button__badge" />
+      <div v-if="showBadge" class="icon-button__badge" />
+    </slot>
   </button>
 </template>
 <script lang="ts">
@@ -37,7 +39,7 @@ export default defineComponent({
   name: 'IconButton',
   components: { Icon },
   props: {
-    name: { type: String, required: true },
+    name: { type: String, default: '' },
     iconSize: { type: Number, required: false, default: 1.5 },
     data: { type: Object as PropType<ButtonFunctionData>, default: undefined },
     type: {
@@ -46,7 +48,7 @@ export default defineComponent({
         return '';
       },
     },
-    status: { type: String, required: true },
+    status: { type: String, default: '' },
     showBadge: { type: Boolean, default: false },
   },
   emits: ['click'],

@@ -1,15 +1,17 @@
 <template>
   <div class="collapse flex flex-col items-stretch gap-y-4">
-    <Button variant="link" :name="showLabel ? (state.isOpen ? labelHide : labelOpen) : null" :click-function="toggle">
-      <template #right>
-        <Icon
-          :name="'CaretDownIcon'"
-          :icon-size="1"
-          class="transform transition-transform -ml-2"
-          :class="{ 'rotate-180': state.isOpen }"
-        />
-      </template>
-    </Button>
+    <slot name="handler" :is-open="state.isOpen" :on-click="toggle">
+      <Button variant="link" :name="showLabel ? (state.isOpen ? labelHide : labelOpen) : null" :click-function="toggle">
+        <template #right>
+          <Icon
+            :name="'CaretDownIcon'"
+            :icon-size="1"
+            class="transform transition-transform -ml-2"
+            :class="{ 'rotate-180': state.isOpen }"
+          />
+        </template>
+      </Button>
+    </slot>
 
     <Transition name="collapse__transition" mode="out-in" @enter="enter" @afterEnter="afterEnter" @leave="leave">
       <div
@@ -23,7 +25,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, PropType, reactive, watch } from 'vue';
+import { defineComponent, nextTick, PropType, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -56,7 +58,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const state = reactive({
-      height: '0',
+      height: 'auto',
       isOpen: props.isOpen,
     });
 
@@ -80,9 +82,6 @@ export default defineComponent({
       setTimeout(() => (state.height = '0'), 100);
     };
 
-    watch(props, () => {
-      state.isOpen = props.isOpen;
-    });
     return { state, toggle, enter, afterEnter, leave };
   },
 });

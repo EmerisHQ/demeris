@@ -89,6 +89,7 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
           commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_BALANCES, payload: { params } });
         }
       } catch (e) {
+        commit(MutationTypes.SET_BALANCES, { params, value: null });
         commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {

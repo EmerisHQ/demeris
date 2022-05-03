@@ -25,6 +25,7 @@ export type Getters = {
   [GetterTypes.getKeplrAddress](state): string;
   [GetterTypes.theme](state: USERState): string;
   [GetterTypes.getPreferredGasPriceLevel](state: USERState): EmerisFees.GasPriceLevel;
+  [GetterTypes.isAllBalancesLoaded](state: USERState): boolean;
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisUSER'>;
@@ -94,5 +95,14 @@ export const getters: GetterTree<USERState, RootState> & Getters = {
   },
   [GetterTypes.getGasLimit]: (state) => {
     return state.gas_limit;
+  },
+  [GetterTypes.isAllBalancesLoaded]: (_, getters, rootState) => {
+    const keyHashes = getters[GetterTypes.getKeyhashes] || [];
+    if (!keyHashes.length) return false;
+
+    const balances = rootState?.demerisAPI?.balances || [];
+    const keys = Object.keys(balances);
+
+    return keyHashes.every((keyhash) => keys.includes(keyhash));
   },
 };

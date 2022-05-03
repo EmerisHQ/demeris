@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+import { computed, defineComponent, PropType, toRefs, unref } from 'vue';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -55,9 +55,10 @@ export default defineComponent({
   setup(props) {
     const store = useStore() as RootStoreTyped;
     const propsRef = toRefs(props);
+
     const filteredBalances = computed(() => {
       return (
-        propsRef.balances.value
+        unref(propsRef.balances)
           ?.filter((item) => item.base_denom === props.denom)
           .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1)) ?? []
       );
