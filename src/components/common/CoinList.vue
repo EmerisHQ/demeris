@@ -46,7 +46,7 @@
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
           <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
           <template v-else>
-            <AmountDisplay :amount="parseCoins(coin.amount)[0]" />
+            <AmountDisplay :amount="{ denom: coin.base_denom, amount: `${parseCoins(coin.amount)[0].amount}` }" />
             <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
               {{ $t('components.coinList.available') }}
             </span>
