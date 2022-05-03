@@ -5,7 +5,6 @@ import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
-import isString from 'lodash/isstring';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
@@ -248,7 +247,7 @@ export function getSumOfRewards(totalValue: string, baseDenom: string) {
 }
 
 export const truncateMiddle = (str: string, left = 3, right = 3): string => {
-  if (!isString(str)) return '';
+  if (typeof str !== 'string') return '';
   if (str.length <= left + right) return str;
   return str.slice(0, left) + '...' + str.slice(str.length - right, str.length);
 };
