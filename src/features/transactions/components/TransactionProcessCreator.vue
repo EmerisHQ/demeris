@@ -57,12 +57,12 @@ const emit = defineEmits(['back', 'pending', 'close', 'previous', 'onReceiptStat
 
 const transactionsStore = useTransactionsStore();
 
-const { balances } = useAccount();
+const { allbalances } = useAccount();
 
 const [stepId, service] = transactionsStore.createTransaction({
   action: props.action,
   steps: props.steps,
-  balances: balances.value,
+  balances: allbalances.value,
 });
 const isPending = computed(() => transactionsStore.isPending(stepId));
 

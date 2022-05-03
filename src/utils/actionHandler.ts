@@ -1523,14 +1523,38 @@ export async function validateStepsFeeBalances(
         } else {
           throw new Error('Insufficient balance: ' + data.from.denom);
         }
-        const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+        // const swapFeeRate = typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
         const swapFee = {
-          amount: Math.ceil((parseInt(data.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          // amount: Math.ceil((parseInt(data.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          amount: '0',
           denom: data.from.denom,
         };
         const newSwapAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(swapFee.amount);
         if (newSwapAmount >= 0) {
           balance.amount = newSwapAmount + parseCoins(balance.amount)[0].denom;
+
+          const toBalance = balances.find((x) => {
+            const amount = parseCoins(x.amount)[0];
+            return amount.denom == data.to.denom && x.on_chain == data.chainName;
+          });
+
+          if (toBalance) {
+            const newToAmount = parseInt(parseCoins(toBalance.amount)[0].amount) + parseInt(data.to.amount);
+            toBalance.amount = newToAmount + data.to.denom;
+          } else {
+            const newSwapBalance = {
+              address: balance.address,
+              amount: data.to.amount + data.to.denom,
+              base_denom: await getBaseDenom(data.to.denom, data.chainName),
+              ibc: {
+                path: '',
+                hash: data.to.denom.replace('ibc/', ''),
+              },
+              on_chain: data.chainName,
+              verified: true,
+            };
+            balances.push(newSwapBalance);
+          }
         } else {
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
