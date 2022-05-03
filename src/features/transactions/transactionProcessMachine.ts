@@ -374,6 +374,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         let validation = {};
         if (!context.input.isDemoAccount) {
           validation = await validateStepsFeeBalances(
+            context.input.action,
             context.formattedSteps,
             context.input.balances,
             totals,
