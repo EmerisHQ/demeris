@@ -88,7 +88,14 @@ export class EmerisWallet {
 
   //  static functions
   static checkHasRequiredFeatures(object: unknown): object is CustomKeplr {
-    return every(WALLET_METHOD, (method) => Object.prototype.hasOwnProperty.call(object, method));
+    return every(WALLET_METHOD, (method) => {
+      const result = Object.prototype.hasOwnProperty.call(object, method);
+      if (!result) {
+        console.log('Missing feature >>', method);
+        return false;
+      }
+      return true;
+    });
   }
 }
 
