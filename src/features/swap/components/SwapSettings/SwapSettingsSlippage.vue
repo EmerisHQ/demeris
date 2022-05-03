@@ -16,7 +16,8 @@
           class="relative w-full rounded-xl px-2 inline-flex items-center z-[1]"
           :class="[
             isCustomInputFocused ? 'bg-bg' : 'bg-fg dark:bg-fg',
-            isCustomSelected ? 'theme-inverse text-text font-medium !bg-surface' : '',
+            isCustomSelected && alertStatus !== 'error' ? 'theme-inverse text-text font-medium !bg-surface' : '',
+            alertStatus === 'error' ? 'error-border' : '',
           ]"
         >
           <FlexibleAmountInput
@@ -114,6 +115,8 @@ const showCustomPlaceholder = computed(() => {
 const alertStatus = computed(() => {
   if (Number(data.selectedOption) >= 20 && Number(data.selectedOption) <= 100) {
     return 'warning';
+  } else if (Number(data.selectedOption) === 0 || Number(data.selectedOption) > 100) {
+    return 'error';
   } else {
     return null;
   }
@@ -122,6 +125,8 @@ const alertStatus = computed(() => {
 const alertText = computed(() => {
   if (alertStatus.value === 'warning') {
     return t('components.slippageSettingsModal.highSlippageMessage');
+  } else if (alertStatus.value === 'error') {
+    return t('components.slippageSettingsModal.slippageValueError');
   } else {
     return '';
   }
@@ -151,9 +156,11 @@ onMounted(() => {
 
 watch(data, () => {
   send({ type: 'SLIPPAGE.CHANGE', value: data.selectedOption });
-  if (Number(data.selectedOption) >= 100) {
-    data.customValue = '100';
-    data.selectedOption = data.customValue;
-  }
 });
 </script>
+<style lang="postcss" scoped>
+.error-border {
+  border: var(--negative);
+  border-style: solid;
+}
+</style>
