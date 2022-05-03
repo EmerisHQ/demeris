@@ -406,8 +406,7 @@ export async function getTicker(name, chain_name = null, getValue = 'ticker') {
         ));
     } catch (e) {
       if (name && name.startsWith('ibc/')) {
-        const split = name.split('/');
-        return `ibc/${truncateMiddle(split[1])}(unverified)`;
+        return `ibc/${truncateMiddle(name.split('/')[1])}(unverified)`;
       }
       return name + '(unverified)';
     }
