@@ -10,6 +10,8 @@ import { useStore } from 'vuex';
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync, getTicker } from '@/utils/actionHandler';
 
+BigNumber.config({ EXPONENTIAL_AT: [-20, 20] });
+
 const store = useStore();
 
 interface Props {
