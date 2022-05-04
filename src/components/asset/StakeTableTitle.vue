@@ -35,7 +35,7 @@
           <a
             href="https://support.emeris.com/en/articles/6161577-can-i-liquid-stake-on-emeris"
             :alt="$t('components.stakeTable.learnMore')"
-            class="font-medium hover:underline"
+            class="font-bold hover:underline"
             target="_blank"
           >
             {{ $t('components.stakeTable.learnMore') }}&nbsp; ↗️
