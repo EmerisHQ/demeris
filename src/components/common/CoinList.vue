@@ -68,7 +68,7 @@
       </template>
     </div>
     <div v-else-if="showBalance" class="text-muted text-right">
-      <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+      <AmountDisplay :amount="{ amount: parseCoins(coin.amount)[0].amount, denom: coin.base_denom }" />
     </div>
   </div>
 </template>
