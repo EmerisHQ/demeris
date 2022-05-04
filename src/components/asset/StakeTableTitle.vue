@@ -30,7 +30,17 @@
       <!-- TODO: a separate check for liquid staking? -->
       <div v-if="denom === 'ucre'" class="flex items-center gap-2 mt-3">
         <InformationIcon class="w-5 h-5" />
-        <p class="text-muted -text-1">{{ $t('components.stakeTable.noLiquidStaking') }}</p>
+        <p class="text-muted -text-1">
+          {{ $t('components.stakeTable.noLiquidStaking') }}
+          <a
+            href="https://support.emeris.com/en/articles/6161577-can-i-liquid-stake-on-emeris"
+            :alt="$t('components.stakeTable.learnMore')"
+            class="font-medium hover:underline"
+            target="self"
+          >
+            {{ $t('components.stakeTable.learnMore') }}&nbsp;↗️
+          </a>
+        </p>
       </div>
     </div>
 
