@@ -1,14 +1,5 @@
-import { SupportedWallet, WalletData, WalletFeatureMap } from '@/features/extension/types';
+import { SupportedWallet, WalletFeatureMap } from '@/features/extension/types';
 import { EmerisWallet, WALLET_METHOD } from '@/features/extension/Wallet';
-
-export const SupportedWalletData: Record<SupportedWallet, WalletData> = {
-  [SupportedWallet.KEPLR]: {
-    isKeplrCompatible: true,
-  },
-  [SupportedWallet.EMERIS]: {
-    isKeplrCompatible: true,
-  },
-};
 
 class WalletActionHandler {
   private currentWallet: SupportedWallet;
@@ -18,11 +9,10 @@ class WalletActionHandler {
    * @desc adds a supported wallet throws on failure, returns true on success
    * @param wallet
    * @param walletObj
-   * @param isKeplrCompatible
    */
-  public add(wallet: SupportedWallet, walletObj: any, isKeplrCompatible = false, featureMap?: WalletFeatureMap) {
+  public add(wallet: SupportedWallet, walletObj: any, featureMap: WalletFeatureMap) {
     try {
-      this.walletMap.set(wallet, new EmerisWallet(walletObj, isKeplrCompatible, featureMap));
+      this.walletMap.set(wallet, new EmerisWallet(walletObj, featureMap));
       return true;
     } catch (ex) {
       console.error(`failed to set wallet - ${wallet}`, ex);

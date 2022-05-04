@@ -3,15 +3,19 @@ export enum SupportedWallet {
   EMERIS = 'EMERIS',
 }
 
-// TODO : maps wallet functionality which will be used in the future.
-//  Not for current implementation where only Keplr + Keplr compatible wallets are targeted
-export interface WalletFeatureMap {
-  sign: string;
-  send: string;
-  someFeature: string;
-}
+type UnsubscribeableListener = (callback: (...params: any[]) => void) => () => void;
+export type NestedMap = Record<string, string | Record<string, unknown>>;
+
+//  map of wallet features that must be supplied to the app to work
+export type WalletFeatureMap = {
+  connect: string;
+  getAccount: string;
+  getOfflineSigner: string;
+  subscribe: {
+    accountChange: UnsubscribeableListener;
+  };
+};
 
 export interface WalletData {
-  isKeplrCompatible: boolean;
   featureMap?: WalletFeatureMap;
 }

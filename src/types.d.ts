@@ -22,6 +22,7 @@ declare global {
     Vue: any;
     keplr: CustomKeplr;
   }
+  // TODO : add emeris extension as global when integration is ready
 }
 declare module '@vue/runtime-core' {
   // Declare your own store states.
