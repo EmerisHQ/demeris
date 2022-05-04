@@ -342,8 +342,7 @@ export default defineComponent({
 
       if (balances.length > 0) {
         balances.map((b) => {
-          let value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
-          (b as any).value = value;
+          (b as any).value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
         });
       }
       return balances;
@@ -405,7 +404,7 @@ export default defineComponent({
     };
 
     const orderedUserBalances = computed(() => {
-      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+      let tokens = orderBy(balancesWithName.value, [(x) => +x.value.value, 'name'], ['desc', 'asc']);
       return tokens.slice(0, currentLimit.value);
     });
 

@@ -1,4 +1,5 @@
 import { EmerisBase } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -9,7 +10,7 @@ export default function (
   amount: EmerisBase.ChainAmount | EmerisBase.Amount,
   showZero?: boolean,
   autoUpdate?: boolean,
-): ComputedRef<number> {
+): ComputedRef<BigNumber> {
   const store = useStore() as RootStoreTyped;
   const denom = ref(amount.denom);
   const isLoaded = ref(false);
@@ -25,12 +26,10 @@ export default function (
       store.getters[GlobalGetterTypes.API.getDenomPrecision]({
         name: denom.value,
       }) ?? 6;
-    let value;
+    let value = new BigNumber(0);
 
     if (amount.amount) {
-      value = (price.value * parseInt(amount.amount)) / Math.pow(10, precision);
-    } else {
-      value = 0;
+      value = new BigNumber(price.value).multipliedBy(parseFloat(amount.amount)).dividedBy(10 ** parseInt(precision));
     }
 
     return value;
