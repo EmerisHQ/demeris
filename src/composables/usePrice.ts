@@ -22,11 +22,11 @@ export default function usePrice() {
       }) ?? '6';
 
     let value = new BigNumber(0);
+
     if (price) {
-      value = price
-        ? new BigNumber(price).multipliedBy(parseInt(amount)).dividedBy(10 ** parseInt(precision))
-        : new BigNumber(0);
+      value = new BigNumber(price * parseInt(amount)).dividedBy(10 ** parseInt(precision));
     }
+
     return value;
   }
 
