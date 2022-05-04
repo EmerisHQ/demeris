@@ -23,7 +23,7 @@ export default function usePrice() {
 
     let value = new BigNumber(0);
     if (price) {
-      value = new BigNumber(price)
+      value = price
         ? new BigNumber(price).multipliedBy(parseInt(amount)).dividedBy(10 ** parseInt(precision))
         : new BigNumber(0);
     }
