@@ -1,9 +1,14 @@
+import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
+import { Key } from '@keplr-wallet/types';
+import { noop } from 'lodash';
+
 import { SupportedWallet, WalletFeatureMap } from '@/features/extension/types';
-import { EmerisWallet, WALLET_METHOD } from '@/features/extension/Wallet';
+import { EmerisWallet } from '@/features/extension/Wallet';
 
 class WalletActionHandler {
   private currentWallet: SupportedWallet;
   private walletMap = new Map<SupportedWallet, EmerisWallet>();
+  private unsubscribeWalletEvents: () => void = noop; // array of functions to call when switching connected wallet in order to unsub
 
   /**
    * @desc adds a supported wallet throws on failure, returns true on success
@@ -12,12 +17,22 @@ class WalletActionHandler {
    */
   public add(wallet: SupportedWallet, walletObj: any, featureMap: WalletFeatureMap) {
     try {
-      this.walletMap.set(wallet, new EmerisWallet(walletObj, featureMap));
+      this.walletMap.set(wallet, new EmerisWallet(wallet, walletObj, featureMap));
       return true;
     } catch (ex) {
       console.error(`failed to set wallet - ${wallet}`, ex);
       throw new Error(ex);
     }
+  }
+
+  private cleanupWalletEvents() {
+    this.unsubscribeWalletEvents();
+    this.unsubscribeWalletEvents = noop;
+  }
+
+  private get wallet() {
+    if (!this.isConnected) throw new Error(`Wallet is not currently connected`);
+    return this.walletMap.get(this.currentWallet);
   }
 
   public isAvailable(wallet: SupportedWallet) {
@@ -28,30 +43,33 @@ class WalletActionHandler {
     return this.walletMap.has(this.currentWallet);
   }
 
-  public connect(wallet: SupportedWallet) {
+  private subscribeWalletEvents() {
+    if (!this.isConnected) throw new Error('No wallet connected but attempted to subscribe to wallet events');
+    this.unsubscribeWalletEvents = this.wallet.subscribeWalletEvents();
+  }
+
+  public disconnect() {
+    this.cleanupWalletEvents();
+    this.currentWallet = null;
+  }
+
+  //  wallet methods
+  public connect(wallet: SupportedWallet): boolean {
     if (!this.walletMap.has(wallet)) throw new Error(`Wallet[${wallet}] is unavailable, needs to be added first`);
+    this.cleanupWalletEvents();
     this.currentWallet = wallet;
+    this.subscribeWalletEvents();
+    return true;
   }
 
-  get wallet() {
-    if (!this.isConnected) throw new Error(`Wallet is not currently connected`);
-    return this.walletMap.get(this.currentWallet);
+  public async enable(chainId: string | string[]): Promise<boolean> {
+    return await this.wallet.enable(chainId);
   }
-
-  public async call(method: WALLET_METHOD, params: any[], isKeplrMethod = true) {
-    if (!this.isConnected) throw new Error('wallet not loaded');
-    if (Object.values(WALLET_METHOD).includes(method) && isKeplrMethod) {
-      if (!this.wallet.isKeplrCompatible) throw new Error('currentWallet is not keplr compatible');
-      return new Promise(async (resolve, reject) => {
-        try {
-          const res = await this.wallet.callKeplrMethod(method, ...params);
-          resolve(res);
-        } catch (ex) {
-          reject(ex);
-        }
-      });
-    }
-    throw new Error('non-keplr methods are not implemented yet');
+  public async getAccount(chainId: string): Promise<Key> {
+    return await this.wallet.getAccount(chainId);
+  }
+  public async getOfflineSigner(chainId: string): Promise<OfflineSigner & OfflineDirectSigner> {
+    return await this.wallet.getOfflineSigner(chainId);
   }
 }
 

@@ -28,7 +28,7 @@
               />
               <Button
                 :name="$t('wallet.connect.modal1.buttonEmeris')"
-                @click="() => tryWalletSignIn(SupportedWallet.KEPLR)"
+                @click="() => tryWalletSignIn(SupportedWallet.EMERIS)"
               />
             </div>
           </FeatureRunningConditional>
@@ -127,15 +127,11 @@ export default defineComponent({
 
     const trySignIn = () => {
       if (isWarningAgreed.value) {
-        signIn();
+        store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+        isConnecting.value = true;
       } else {
         emit('warning');
       }
-    };
-
-    const signIn = () => {
-      store.dispatch(GlobalActionTypes.USER.SIGN_IN);
-      isConnecting.value = true;
     };
 
     onMounted(() => {
@@ -158,7 +154,6 @@ export default defineComponent({
       emitCancel,
       cancel,
       keplrWalletLogo,
-      signIn,
       trySignIn,
       signInDemo,
       tryWalletSignIn,

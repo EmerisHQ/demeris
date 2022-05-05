@@ -3,12 +3,12 @@ export enum SupportedWallet {
   EMERIS = 'EMERIS',
 }
 
-type UnsubscribeableListener = (callback: (...params: any[]) => void) => () => void;
+export type UnsubscribeableListener = (callback?: (...params: any[]) => void) => () => void;
 export type NestedMap = Record<string, string | Record<string, unknown>>;
 
 //  map of wallet features that must be supplied to the app to work
 export type WalletFeatureMap = {
-  connect: string;
+  enable: string;
   getAccount: string;
   getOfflineSigner: string;
   subscribe: {
@@ -16,6 +16,21 @@ export type WalletFeatureMap = {
   };
 };
 
+export enum WalletMethods {
+  enable = 'enable',
+  getAccount = 'getAccount',
+  getOfflineSigner = 'getOfflineSigner',
+  subscribeAccountChange = 'subscribe.accountChange',
+}
+
 export interface WalletData {
   featureMap?: WalletFeatureMap;
+}
+
+export default class WalletError extends Error {
+  constructor(wallet: string, description: string) {
+    super(description);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = wallet;
+  }
 }

@@ -8,7 +8,6 @@ import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { ActionTree, DispatchOptions } from 'vuex';
 
 import { SupportedWallet } from '@/features/extension/types';
-import { WALLET_METHOD } from '@/features/extension/Wallet';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
 import { SessionParams } from '@/types/user';
@@ -307,7 +306,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         //   // TODO : implement addChain for Emeris extension and apply as well
         // }
         const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
-        await walletActionHandler.call(WALLET_METHOD.enable, [chainIds], true);
+        await walletActionHandler.enable(chainIds);
       }
       const paths = new Set();
       const toQuery = [];
@@ -325,8 +324,8 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       let keyData;
       let signer;
       if (!isCypress) {
-        await walletActionHandler.call(WALLET_METHOD.enable, [dexchain.node_info.chain_id], true);
-        keyData = await walletActionHandler.call(WALLET_METHOD.getKey, [dexchain.node_info.chain_id], true);
+        await walletActionHandler.enable(dexchain.node_info.chain_id);
+        keyData = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
       } else {
         signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
           prefix: dexchain.node_info.bech32_config.main_prefix,
@@ -352,8 +351,8 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
         if (!isCypress) {
-          await walletActionHandler.call(WALLET_METHOD.enable, [dexchain.node_info.chain_id], true);
-          const otherKey = await walletActionHandler.call(WALLET_METHOD.getKey, [dexchain.node_info.chain_id], true);
+          await walletActionHandler.enable(dexchain.node_info.chain_id);
+          const otherKey = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
           commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {
           const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {

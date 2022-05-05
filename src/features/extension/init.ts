@@ -1,3 +1,4 @@
+import { keyStoreChangeHandler, supportedWalletData } from '@/features/extension/SupportedWallets';
 import { SupportedWallet } from '@/features/extension/types';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -5,16 +6,23 @@ import { featureRunning } from '@/utils/FeatureManager';
 export function initializeExtension() {
   if (featureRunning('USE_EMERIS_EXTENSION')) {
     if (window?.keplr) {
-      walletActionHandler.add(SupportedWallet.KEPLR, window.keplr, true);
+      walletActionHandler.add(
+        SupportedWallet.KEPLR,
+        window.keplr,
+        supportedWalletData[SupportedWallet.KEPLR].featureMap,
+      );
     }
 
     if ((window as unknown as any)?.emeris) {
-      walletActionHandler.add(SupportedWallet.EMERIS, (window as unknown as any).emeris, true);
+      walletActionHandler.add(
+        SupportedWallet.EMERIS,
+        (window as unknown as any).emeris,
+        supportedWalletData[SupportedWallet.EMERIS].featureMap,
+      );
+    } else {
+      console.error('emeris wallet is not installed / detected');
     }
-  }
-
-  window.addEventListener('keplr_keystorechange', keyStoreChangeHandler);
-  if (featureRunning('USE_EMERIS_EXTENSION')) {
-    window.addEventListener('emeris_account_changed', keyStoreChangeHandler);
+  } else {
+    window.addEventListener('keplr_keystorechange', keyStoreChangeHandler);
   }
 }

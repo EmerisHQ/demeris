@@ -2,10 +2,10 @@ import { SupportedWallet, WalletData } from '@/features/extension/types';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
-export const SupportedWalletData: Record<SupportedWallet, WalletData> = {
+export const supportedWalletData: Record<SupportedWallet, WalletData> = {
   [SupportedWallet.KEPLR]: {
     featureMap: {
-      connect: 'connect',
+      enable: 'enable',
       getAccount: 'getKey',
       getOfflineSigner: 'getOfflineSigner',
       subscribe: {
@@ -19,7 +19,7 @@ export const SupportedWalletData: Record<SupportedWallet, WalletData> = {
   },
   [SupportedWallet.EMERIS]: {
     featureMap: {
-      connect: 'connect',
+      enable: 'enable',
       getAccount: 'getActiveAccount',
       getOfflineSigner: 'getOfflineSigner',
       subscribe: {
@@ -34,7 +34,7 @@ export const SupportedWalletData: Record<SupportedWallet, WalletData> = {
   },
 };
 
-async function keyStoreChangeHandler() {
+export async function keyStoreChangeHandler() {
   window.localStorage.setItem('lastEmerisSession', '');
   const typedstore = useStore();
   if (

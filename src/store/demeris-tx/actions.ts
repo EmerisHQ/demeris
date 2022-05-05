@@ -5,7 +5,6 @@ import { stringToPath } from '@cosmjs/crypto';
 import axios from 'axios';
 import { ActionTree } from 'vuex';
 
-import { WALLET_METHOD } from '@/features/extension/Wallet';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
 import { SignParams, TxParams, TxResponse } from '@/types/tx';
@@ -62,7 +61,7 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
 
       if (!isCypress) {
         if (featureRunning('USE_EMERIS_EXTENSION')) {
-          await walletActionHandler.call(WALLET_METHOD.enable, [chain.node_info.chain_id], true);
+          await walletActionHandler.enable(chain.node_info.chain_id);
         } else {
           await window.keplr.enable(chain.node_info.chain_id);
         }
