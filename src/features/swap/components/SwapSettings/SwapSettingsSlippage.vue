@@ -11,7 +11,7 @@
         </div>
       </label>
 
-      <div v-if="swapStore.allowCustomSlippage" class="flex w-full relative p-[2px]">
+      <div v-if="allowCustomSlippage" class="flex w-full relative p-[2px]">
         <div
           class="relative w-full rounded-xl px-2 inline-flex items-center z-[1]"
           :class="[
@@ -68,17 +68,19 @@
 import { useToggle } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
+import { GlobalGetterTypes } from '@/store';
 
 import { amountToUnit, getLimitPriceFromRoute, getMinOutputAmountFromRoute } from '../../logic';
-import { useSwapActor, useSwapStore } from '../../state';
+import { useSwapActor } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
 
-const swapStore = useSwapStore();
+const store = useStore();
 const { state, send } = useSwapActor();
 const { t } = useI18n({ useScope: 'global' });
 
@@ -89,6 +91,7 @@ const data = reactive({
 
 const [isCustomInputFocused, toggleCustomFocus] = useToggle();
 const isCustomSelected = computed(() => data.selectedOption === data.customValue);
+const allowCustomSlippage = computed(() => store.getters[GlobalGetterTypes.USER.allowCustomSlippage]);
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
 
