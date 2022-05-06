@@ -2,6 +2,7 @@
   <div class="flex items-center justify-end gap-x-4">
     <Price
       :amount="{ denom: props.denom, amount: `${totalRewardsAmount}` }"
+      :show-zero="true"
       :show-dash="false"
       :label="props.label"
       :class="{ 'text-muted': totalRewardsAmount <= 0 }"
