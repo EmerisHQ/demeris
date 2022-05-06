@@ -37,7 +37,7 @@ const displayValue = computed(() => {
 
 const displayValueTrunc = computed(() => {
   const bigBalance = displayValue.value.toFixed(0).split('').length > 2;
-  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
+  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value.precision(6);
 });
 
 watch(
