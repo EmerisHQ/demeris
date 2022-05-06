@@ -163,12 +163,12 @@ export default function useAccount() {
   };
 
   const stakingAmountByChain = (chain_name: string) => {
-    let stakedAmount = 0;
+    let stakedAmount = new BigNumber(0);
     const stakedAmounts = stakingBalancesByChain(chain_name);
-    let totalStakedAmount = 0;
+    let totalStakedAmount = new BigNumber(0);
     if (stakedAmounts.length > 0) {
-      stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
-      totalStakedAmount = totalStakedAmount + stakedAmount;
+      stakedAmount = stakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item.amount)), new BigNumber(0));
+      totalStakedAmount = totalStakedAmount.plus(stakedAmount);
     }
     return totalStakedAmount;
   };

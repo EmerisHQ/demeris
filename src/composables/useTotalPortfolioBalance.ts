@@ -1,9 +1,11 @@
 /* eslint-disable max-lines-per-function */
+import BigNumber from 'bignumber.js';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
+import { parseCoins } from '@/utils/basic';
 
 export function useTotalPortfolioBalance() {
   const { balances } = useAccount();
@@ -17,17 +19,18 @@ export function useTotalPortfolioBalance() {
       return balances.value.reduce((total, balance) => {
         if (balance.verified) {
           if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: balance.base_denom })) {
-            const totalValue =
-              parseInt(balance.amount) * store.getters[GlobalGetterTypes.API.getPrice]({ denom: balance.base_denom });
+            const totalValue = new BigNumber(parseCoins(balance.amount)[0].amount).multipliedBy(
+              new BigNumber(store.getters[GlobalGetterTypes.API.getPrice]({ denom: balance.base_denom })),
+            );
             const precision = Math.pow(
               10,
               store.getters[GlobalGetterTypes.API.getDenomPrecision]({
                 name: balance.base_denom,
               }) || 6,
             );
-            const value = totalValue / precision;
+            const value = totalValue.dividedBy(precision);
             if (value) {
-              return total + value;
+              return total.plus(value);
             } else {
               return total;
             }
@@ -37,9 +40,9 @@ export function useTotalPortfolioBalance() {
         } else {
           return total;
         }
-      }, 0);
+      }, new BigNumber(0));
     } else {
-      return 0;
+      return new BigNumber(0);
     }
   });
   const stakedValue = computed(() => {
@@ -47,18 +50,18 @@ export function useTotalPortfolioBalance() {
       const stakedDenom = verifiedDenoms.value.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
       if (stakedDenom.length > 0) {
         if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: stakedDenom[0].name })) {
-          const totalValue =
-            parseInt(stakingBalance.amount) *
-              store.getters[GlobalGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0;
+          const totalValue = new BigNumber(parseCoins(stakingBalance.amount)[0].amount).multipliedBy(
+            new BigNumber(store.getters[GlobalGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0),
+          );
           const precision = Math.pow(
             10,
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: stakedDenom[0].name,
             }) || 6,
           );
-          const value = totalValue / precision;
+          const value = totalValue.dividedBy(precision);
           if (value) {
-            return total + value;
+            return total.plus(value);
           } else {
             return total;
           }
@@ -68,7 +71,7 @@ export function useTotalPortfolioBalance() {
       } else {
         return total;
       }
-    }, 0);
+    }, new BigNumber(0));
   });
   const unstakingValue = computed(() => {
     return unbondingDelegations.value.reduce((total, unstakingBalance) => {
@@ -77,24 +80,27 @@ export function useTotalPortfolioBalance() {
       );
 
       if (unstakedDenom.length > 0) {
-        let unstakedAmount;
+        let unstakedAmount = new BigNumber(0);
         const unstakedAmounts = unstakingBalance.entries.map((z) => z.balance);
         if (unstakedAmounts.length > 0) {
-          unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+          unstakedAmount = unstakedAmounts.reduce(
+            (acc, item) => acc.plus(new BigNumber(parseInt(item))),
+            new BigNumber(0),
+          );
         }
         if (store.getters[GlobalGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name })) {
-          const totalValue =
-            parseInt(unstakedAmount) *
-              store.getters[GlobalGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0;
+          const totalValue = unstakedAmount.multipliedBy(
+            new BigNumber(store.getters[GlobalGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0),
+          );
           const precision = Math.pow(
             10,
             store.getters[GlobalGetterTypes.API.getDenomPrecision]({
               name: unstakedDenom[0].name,
             }) || 6,
           );
-          const value = totalValue / precision;
+          const value = totalValue.dividedBy(precision);
           if (value) {
-            return total + value;
+            return total.plus(value);
           } else {
             return total;
           }
@@ -104,11 +110,11 @@ export function useTotalPortfolioBalance() {
       } else {
         return total;
       }
-    }, 0);
+    }, new BigNumber(0));
   });
   const displayPrice = computed(() => {
-    const value = liquidValue.value + stakedValue.value + unstakingValue.value;
-    return Number.isFinite(value) ? value : 0;
+    const value = liquidValue.value.plus(stakedValue.value).plus(unstakingValue.value);
+    return value.isFinite() ? value : new BigNumber(0);
   });
 
   return displayPrice;
