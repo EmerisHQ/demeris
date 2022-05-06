@@ -140,7 +140,6 @@ onMounted(async () => {
         console.error('Could not load denom supply: ' + e);
       });
     });
-  initializeExtension();
 
   if (autoLogin()) {
     if (featureRunning('USE_EMERIS_EXTENSION')) {
@@ -153,6 +152,20 @@ onMounted(async () => {
     if (autoLoginDemo()) {
       typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     }
+  }
+
+  if (featureRunning('USE_EMERIS_EXTENSION')) {
+    initializeExtension();
+  } else {
+    window.addEventListener('keplr_keystorechange', () => {
+      window.localStorage.setItem('lastEmerisSession', '');
+      if (
+        typedstore.getters[GlobalGetterTypes.USER.isSignedIn] &&
+        !typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+      ) {
+        typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      }
+    });
   }
 
   if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
