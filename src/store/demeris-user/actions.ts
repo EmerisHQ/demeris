@@ -187,7 +187,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       let signer;
       if (!isCypress) {
         await window.keplr.enable(dexchain.node_info.chain_id);
-        console.count('getKey call');
         keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
       } else {
         signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
@@ -214,7 +213,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       for (const chain of toQuery) {
         if (!isCypress) {
           await window.keplr.enable(chain.node_info.chain_id);
-          console.count('getKey call');
           const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
           commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {

@@ -71,7 +71,6 @@ export async function getOwnAddress({ chain_name }) {
       };
       return key.bech32Address;
     } else {
-      console.count('getKey call');
       const key = await window.keplr.getKey(chain.node_info.chain_id);
       return key.bech32Address;
     }
