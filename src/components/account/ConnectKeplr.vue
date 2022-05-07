@@ -137,11 +137,15 @@ export default defineComponent({
 
     const trySignIn = () => {
       if (isWarningAgreed.value) {
-        store.dispatch(GlobalActionTypes.USER.SIGN_IN);
-        isConnecting.value = true;
+        signIn();
       } else {
         emit('warning');
       }
+    };
+
+    const signIn = () => {
+      store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      isConnecting.value = true;
     };
 
     onMounted(() => {
@@ -170,6 +174,7 @@ export default defineComponent({
       SupportedWallet,
       connectingWallet,
       capitalize,
+      signIn,
     };
   },
 });
