@@ -9,6 +9,7 @@ class WalletActionHandler {
   private currentWallet: SupportedWallet;
   private walletMap = new Map<SupportedWallet, EmerisWallet>();
   private unsubscribeWalletEvents: () => void = noop; // array of functions to call when switching connected wallet in order to unsub
+  private debugMode = process.env.NODE_ENV === 'development';
 
   /**
    * @desc adds a supported wallet throws on failure, returns true on success
@@ -63,12 +64,16 @@ class WalletActionHandler {
   }
 
   public async enable(chainId: string | string[]): Promise<boolean> {
+    if (this.debugMode) console.count('WAH >> enable request');
     return await this.wallet.enable(chainId);
   }
+  // TODO : figure out which methods are cacheable(like getAccount) and return the cached result accordingly
   public async getAccount(chainId: string): Promise<Key> {
+    if (this.debugMode) console.count('WAH >> getAccount request');
     return await this.wallet.getAccount(chainId);
   }
   public async getOfflineSigner(chainId: string): Promise<OfflineSigner & OfflineDirectSigner> {
+    if (this.debugMode) console.count('WAH >> getOfflineSigner request');
     return await this.wallet.getOfflineSigner(chainId);
   }
 }

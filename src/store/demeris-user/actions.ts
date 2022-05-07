@@ -341,7 +341,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
           address: fromHexString(keyHashfromAddress(account.address)),
         };
       }
-      console.log('sign_in keyData >>>>', keyData);
       const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
       commit(MutationTypes.SET_CORRELATION_ID, encryptedUID);
       commit(MutationTypes.SET_KEPLR, keyData);

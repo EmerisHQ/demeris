@@ -832,6 +832,7 @@
           "demo": "Try the demo",
           "needHelp": "Need help?",
           "opening": "Opening Keplr",
+          "openingWallet": "Opening",
           "connecting": "Connecting",
           "connectingHelp": "Stuck connecting? Make sure you have created an account in Keplr first."
         },

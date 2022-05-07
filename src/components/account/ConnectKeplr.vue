@@ -54,7 +54,14 @@
       <div v-else class="flex flex-col items-center justify-center h-full w-full">
         <div class="flex-1 flex flex-col items-center justify-center">
           <Spinner :size="3" />
-          <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.opening') }}</span>
+          <FeatureRunningConditional name="USE_EMERIS_EXTENSION">
+            <template #deactivated>
+              <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.opening') }}</span>
+            </template>
+            <span class="mt-6 text-muted"
+              >{{ $t('wallet.connect.modal1.openingWallet') }} {{ capitalize(connectingWallet) }}</span
+            >
+          </FeatureRunningConditional>
           <p class="text-3 font-bold mt-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
           <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.connectingHelp') }}</span>
         </div>
@@ -65,6 +72,7 @@
 </template>
 
 <script lang="ts">
+import { capitalize } from 'lodash';
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
 import keplrWalletLogo from '@/assets/images/keplr-wallet-logo.png';
@@ -101,6 +109,7 @@ export default defineComponent({
     const isConnecting = ref(false);
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);
+    const connectingWallet = ref<SupportedWallet>(null);
 
     const emitCancel = () => {
       cancel();
@@ -117,6 +126,7 @@ export default defineComponent({
 
     const tryWalletSignIn = (walletType: SupportedWallet) => {
       if (!featureRunning('USE_EMERIS_EXTENSION')) throw new Error('should not be run with USE_EMERIS_EXTENSION off');
+      connectingWallet.value = walletType;
       if (isWarningAgreed.value) {
         store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
         isConnecting.value = true;
@@ -158,6 +168,8 @@ export default defineComponent({
       signInDemo,
       tryWalletSignIn,
       SupportedWallet,
+      connectingWallet,
+      capitalize,
     };
   },
 });

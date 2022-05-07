@@ -141,19 +141,6 @@ onMounted(async () => {
       });
     });
 
-  if (autoLogin()) {
-    if (featureRunning('USE_EMERIS_EXTENSION')) {
-      // Keplr by default for the time being
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType: SupportedWallet.KEPLR });
-    } else {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
-    }
-  } else {
-    if (autoLoginDemo()) {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-    }
-  }
-
   if (featureRunning('USE_EMERIS_EXTENSION')) {
     initializeExtension();
   } else {
@@ -168,6 +155,18 @@ onMounted(async () => {
     });
   }
 
+  if (autoLogin()) {
+    if (featureRunning('USE_EMERIS_EXTENSION')) {
+      // Keplr by default for the time being
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType: SupportedWallet.KEPLR });
+    } else {
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
+    }
+  } else {
+    if (autoLoginDemo()) {
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
+    }
+  }
   if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
     await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
   }
