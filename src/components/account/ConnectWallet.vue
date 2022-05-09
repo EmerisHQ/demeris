@@ -88,7 +88,7 @@ import { useStore } from '@/utils/useStore';
 import Spinner from '../ui/Spinner.vue';
 
 export default defineComponent({
-  name: 'ConnectKeplr',
+  name: 'ConnectWallet',
 
   components: {
     FeatureRunningConditional,
