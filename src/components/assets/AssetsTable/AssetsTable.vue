@@ -416,17 +416,17 @@ export default defineComponent({
           const denom = item.denom;
           const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
           const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
-          const result = new BigNumber(item.totalAmount).multipliedBy(price).shiftedBy(-precision).toNumber();
+          const result = new BigNumber(item.totalAmount).multipliedBy(price).shiftedBy(-precision);
           return { ...item, price: result };
         })
         .sort((a, b) => {
-          if (isNaN(a.price)) {
+          if (a.price.isNaN()) {
             return 1;
           }
-          if (isNaN(b.price)) {
+          if (b.price.isNaN()) {
             return -1;
           }
-          return b.price - a.price;
+          return a.price > b.price ? -1 : 1;
         });
       return tokens.slice(0, currentLimit.value);
     });
