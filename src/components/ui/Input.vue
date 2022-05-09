@@ -3,7 +3,11 @@
     <div
       class="input__wrapper relative flex-1 w-full h-12 text-inactive hover:text-muted focus-within:text-muted transition-colors"
     >
-      <div v-if="hasStartSlot" class="input__icon absolute z-20 top-0 left-0 p-4 pointer-events-none">
+      <div
+        v-if="hasStartSlot"
+        class="input__icon absolute z-20 top-0 left-0 p-4"
+        :class="{ 'pointer-events-none': !startSlotClickable }"
+      >
         <slot name="start" />
       </div>
       <input
@@ -14,7 +18,11 @@
         @focus="$emit('focus:value', ($event.target as HTMLInputElement).value)"
         @blur="$emit('blur:value', ($event.target as HTMLInputElement).value)"
       />
-      <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4">
+      <div
+        v-if="hasEndSlot"
+        class="input__icon absolute z-20 top-0 right-0 p-4"
+        :class="{ 'pointer-events-none': !endSlotClickable }"
+      >
         <slot name="end" />
       </div>
 
@@ -60,6 +68,8 @@ export default defineComponent({
     borderColour: { type: String, default: null },
     forceBorderVisible: { type: Boolean, default: false },
     valueFormatter: { type: Function, default: null },
+    endSlotClickable: { type: Boolean, default: false },
+    startSlotClickable: { type: Boolean, default: false },
   },
 
   emits: ['update:modelValue', 'focus:value', 'blur:value'],
