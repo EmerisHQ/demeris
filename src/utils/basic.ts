@@ -55,7 +55,7 @@ export async function getOwnAddress({ chain_name }) {
     return demoAddresses[chain_name];
   } else {
     await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-      subscribe: featureRunning('USE_NEW_CHAINS_API'),
+      subscribe: !featureRunning('USE_NEW_CHAINS_API'),
       params: { chain_name },
     });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
