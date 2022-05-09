@@ -63,7 +63,9 @@
             >
           </FeatureRunningConditional>
           <p class="text-3 font-bold mt-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
-          <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.connectingHelp') }}</span>
+          <span class="mt-6 text-muted">{{
+            $t('wallet.connect.modal1.connectingHelp', { extension: capitalize(connectingWallet) })
+          }}</span>
         </div>
         <Button variant="link" :name="$t('generic_cta.cancel')" :click-function="cancel" class="mt-12" />
       </div>

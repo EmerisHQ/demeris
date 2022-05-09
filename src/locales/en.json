@@ -834,7 +834,7 @@
           "opening": "Opening Keplr",
           "openingWallet": "Opening",
           "connecting": "Connecting",
-          "connectingHelp": "Stuck connecting? Make sure you have created an account in Keplr first."
+          "connectingHelp": "Stuck connecting? Make sure you have created an account in {extension} first."
         },
         "modal2": {
           "title": "Keplr is required",
