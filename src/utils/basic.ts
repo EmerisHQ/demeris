@@ -8,6 +8,7 @@ import findIndex from 'lodash/findIndex';
 
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 export function fromHexString(hexString) {
@@ -53,7 +54,10 @@ export async function getOwnAddress({ chain_name }) {
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, { subscribe: true, params: { chain_name } });
+    await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+      subscribe: featureRunning('USE_NEW_CHAINS_API'),
+      params: { chain_name },
+    });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
