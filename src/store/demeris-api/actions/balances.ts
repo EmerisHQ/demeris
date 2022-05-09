@@ -8,6 +8,7 @@ import { GlobalActionTypes, GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, Subscribable } from '@/types/util';
 import { hashObject } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ActionTypes } from '../action-types';
 import { MutationTypes } from '../mutation-types';
@@ -150,16 +151,18 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
       const chains =
         getters['getChains'] ??
         (await dispatch(ActionTypes.GET_CHAINS, {
-          subscribe: false,
+          subscribe: featureRunning('USE_NEW_CHAINS_API'),
         }));
-      for (const chain in chains) {
-        if (!chains[chain].primary_channel)
-          chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          });
+      if (!featureRunning('USE_NEW_CHAINS_API')) {
+        for (const chain in chains) {
+          if (!chains[chain].primary_channel)
+            chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            });
+        }
       }
       for (const keyHash of keyHashes) {
         balanceLoads.push(dispatch(ActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
