@@ -14,7 +14,7 @@
         @focus="$emit('focus:value', ($event.target as HTMLInputElement).value)"
         @blur="$emit('blur:value', ($event.target as HTMLInputElement).value)"
       />
-      <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4 pointer-events-none">
+      <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4">
         <slot name="end" />
       </div>
 
