@@ -54,7 +54,7 @@
             >
               <template #default="inputProps">
                 <USDInput
-                  :model-value="form.balance.amount"
+                  :model-value="form.balance.amount ? form.balance.amount : '0'"
                   :denom="state.currentAsset?.base_denom || ''"
                   :class="[inputProps.class]"
                   :style="inputProps.style"
@@ -100,7 +100,7 @@
             <AmountDisplay
               v-if="state.isUSDInputChecked"
               :amount="{
-                amount: form.balance.amount ? parseInt(form.balance.amount) * denomDecimals + '' : '0',
+                amount: form.balance.amount ? `${Number(form.balance.amount) * denomDecimals}` : '0',
                 denom: state.currentAsset?.base_denom,
               }"
             />
@@ -226,12 +226,12 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
+import { computed, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -254,318 +254,278 @@ import { GasPriceLevel, MoveAssetsForm, Step } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'MoveFormAmount',
-
-  components: {
-    FlexibleAmountInput,
-    AmountDisplay,
-    Button,
-    Denom,
-    DenomSelectModal,
-    ChainSelectModal,
-    ChainName,
-    CircleSymbol,
-    Icon,
-    Price,
-    USDInput,
-    FeeLevelSelector,
-    CurrencyDisplay,
+const props = defineProps({
+  balances: {
+    type: Array as PropType<EmerisAPI.Balances>,
+    required: true,
   },
-
-  props: {
-    balances: {
-      type: Array as PropType<EmerisAPI.Balances>,
-      required: true,
-    },
-    steps: {
-      type: Array as PropType<Step[]>,
-      default: () => [],
-    },
-  },
-
-  emits: ['next'],
-
-  setup(props, { emit }) {
-    const store = useStore() as RootStoreTyped;
-    const form = inject<MoveAssetsForm>('moveForm');
-    const router = useRouter();
-
-    const { nativeBalances, orderBalancesByPrice } = useAccount();
-
-    const state = reactive({
-      currentAsset: undefined,
-      assetTicker: undefined,
-      isMaximumAmountChecked: false,
-      isUSDInputChecked: false,
-      isDenomModalOpen: false,
-      isChainsModalOpen: false,
-      chainsModalSource: 'from',
-      usdValue: '',
-      fees: {},
-      gasPrice: '',
-    });
-
-    const feesAmount = computed(() => {
-      const result = {};
-
-      if (state.fees) {
-        for (const [, obj] of Object.entries(state.fees)) {
-          for (const [denom, value] of Object.entries(obj)) {
-            result[denom] = value;
-          }
-        }
-      }
-
-      return result;
-    });
-
-    const hasPrice = computed(() => {
-      if (!state.currentAsset) {
-        return false;
-      }
-
-      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
-
-      return !!price;
-    });
-
-    const denomDecimals = computed(() => {
-      if (state.currentAsset) {
-        const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: state.currentAsset.base_denom,
-        });
-
-        return Math.pow(10, precision);
-      } else {
-        return 1;
-      }
-    });
-
-    const availableBalances = computed(() => {
-      if (props.balances.length) {
-        return props.balances;
-      }
-
-      return nativeBalances.value;
-    });
-
-    const availableChains = computed(() => {
-      const chains = store.getters[GlobalGetterTypes.API.getChains];
-      let results = [];
-
-      if (state.chainsModalSource === 'to') {
-        results = Object.values(chains)
-          .map((item) => {
-            const balance = props.balances.find(
-              (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
-            );
-
-            return {
-              amount: balance?.amount || '0' + state.currentAsset.base_denom,
-              base_denom: state.currentAsset.base_denom,
-              on_chain: item.chain_name,
-            };
-          })
-          .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
-      } else {
-        if (props.balances.length) {
-          results = props.balances;
-        } else {
-          const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
-          results = [
-            {
-              amount: '0' + state.currentAsset.base_denom,
-              base_denom: state.currentAsset.base_denom,
-              on_chain: dexChain,
-            },
-          ];
-        }
-      }
-
-      results.sort((a, b) => {
-        const coinA = parseCoins(a.amount)[0];
-        const coinB = parseCoins(b.amount)[0];
-        return +coinB.amount - +coinA.amount;
-      });
-
-      return results;
-    });
-
-    const hasFunds = computed(() => {
-      if (!state.currentAsset) {
-        return false;
-      }
-
-      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
-
-      return +totalAmount > 0;
-    });
-
-    const hasSufficientFunds = computed(() => {
-      if (!state.currentAsset) {
-        return true;
-      }
-
-      if (!hasFunds.value) {
-        return false;
-      }
-
-      const precision =
-        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
-      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
-
-      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
-    });
-
-    const isValid = computed(() => {
-      const value = new BigNumber(form.balance.amount);
-
-      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
-        return false;
-      }
-
-      if (!hasSufficientFunds.value) {
-        return false;
-      }
-
-      if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
-        return false;
-      }
-
-      return true;
-    });
-
-    const toggleDenomModal = (asset?: Record<string, unknown>) => {
-      if (asset) {
-        setCurrentAsset(asset);
-      }
-      state.isDenomModalOpen = !state.isDenomModalOpen;
-    };
-
-    const toggleChainsModal = (asset?: Record<string, unknown>, source = state.chainsModalSource) => {
-      if (asset) {
-        if (state.chainsModalSource === 'to') {
-          form.to_chain = asset.on_chain as string;
-        } else {
-          setCurrentAsset(asset);
-        }
-      }
-
-      state.chainsModalSource = source;
-      state.isChainsModalOpen = !state.isChainsModalOpen;
-    };
-
-    const onSubmit = () => {
-      emit('next');
-    };
-
-    const openAssetPage = () => {
-      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
-    };
-
-    const findDefaultDestinationChain = () => {
-      if (state.chainsModalSource === 'from') {
-        const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
-        const nativeChain = nativeBalances.value.find(
-          (item) => item.base_denom === state.currentAsset?.base_denom,
-        )?.on_chain;
-
-        if (form.on_chain === nativeChain && nativeChain !== dexChain) {
-          form.to_chain = dexChain;
-        } else if (form.on_chain !== nativeChain) {
-          form.to_chain = nativeChain;
-        }
-      }
-    };
-
-    const setCurrentAsset = async (asset: Record<string, unknown>) => {
-      const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
-      const targetChains = Object.values(store.getters[GlobalGetterTypes.API.getChains]).filter(
-        (chain) => chain.chain_name !== dexChain,
-      );
-
-      state.currentAsset = asset;
-      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-      if (location.search) {
-        form.on_chain = dexChain;
-      } else {
-        form.on_chain = asset.on_chain as string;
-      }
-      form.to_chain = asset.on_chain !== dexChain ? dexChain : targetChains[0].chain_name;
-
-      findDefaultDestinationChain();
-      state.assetTicker = await getTicker(asset.base_denom, dexChain);
-    };
-
-    onMounted(() => {
-      state.gasPrice = store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
-    });
-
-    // TODO: Select chain based in user option
-    watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
-      () => {
-        if (state.isMaximumAmountChecked) {
-          const precision =
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
-          const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
-
-          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          return;
-        }
-      },
-    );
-
-    watch(
-      () => props.balances,
-      (newVal) => {
-        if (newVal.length > 0 && !state.currentAsset) {
-          let asset;
-          if (location.search) {
-            const params = new URL(location.href).searchParams;
-            form.balance.denom = params.get('base_denom');
-            const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: form.balance.denom }) ?? 6;
-            form.balance.amount = new BigNumber(params.get('amount') ?? 0).shiftedBy(-precision).toString();
-          }
-
-          if (form.balance.denom) {
-            asset = props.balances.find((item) => {
-              const balance = parseCoins(item.amount)[0];
-              return balance.denom === form.balance.denom;
-            });
-          }
-
-          if (!asset) {
-            asset = orderBalancesByPrice(props.balances)[0];
-          }
-
-          setCurrentAsset(asset);
-        }
-      },
-      { immediate: true },
-    );
-
-    return {
-      availableBalances,
-      form,
-      hasFunds,
-      onSubmit,
-      hasPrice,
-      state,
-      setCurrentAsset,
-      hasSufficientFunds,
-      isValid,
-      denomDecimals,
-      toggleDenomModal,
-      toggleChainsModal,
-      openAssetPage,
-      availableChains,
-    };
+  steps: {
+    type: Array as PropType<Step[]>,
+    default: () => [],
   },
 });
+
+const emit = defineEmits(['next']);
+const store = useStore() as RootStoreTyped;
+const form = inject<MoveAssetsForm>('moveForm');
+const router = useRouter();
+
+const { nativeBalances, orderBalancesByPrice } = useAccount();
+
+const state = reactive({
+  currentAsset: undefined,
+  assetTicker: undefined,
+  isMaximumAmountChecked: false,
+  isUSDInputChecked: false,
+  isDenomModalOpen: false,
+  isChainsModalOpen: false,
+  chainsModalSource: 'from',
+  usdValue: '',
+  fees: {},
+  gasPrice: '',
+});
+
+const feesAmount = computed(() => {
+  const result = {};
+
+  if (state.fees) {
+    for (const [, obj] of Object.entries(state.fees)) {
+      for (const [denom, value] of Object.entries(obj)) {
+        result[denom] = value;
+      }
+    }
+  }
+
+  return result;
+});
+
+const hasPrice = computed(() => {
+  if (!state.currentAsset) {
+    return false;
+  }
+
+  const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
+
+  return !!price;
+});
+
+const denomDecimals = computed(() => {
+  if (state.currentAsset) {
+    const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: state.currentAsset.base_denom,
+    });
+
+    return Math.pow(10, precision);
+  } else {
+    return 1;
+  }
+});
+
+const availableBalances = computed(() => {
+  if (props.balances.length) {
+    return props.balances;
+  }
+
+  return nativeBalances.value;
+});
+
+const availableChains = computed(() => {
+  const chains = store.getters[GlobalGetterTypes.API.getChains];
+  let results = [];
+
+  if (state.chainsModalSource === 'to') {
+    results = Object.values(chains)
+      .map((item) => {
+        const balance = props.balances.find(
+          (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
+        );
+
+        return {
+          amount: balance?.amount || '0' + state.currentAsset.base_denom,
+          base_denom: state.currentAsset.base_denom,
+          on_chain: item.chain_name,
+        };
+      })
+      .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+  } else {
+    if (props.balances.length) {
+      results = props.balances;
+    } else {
+      const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
+      results = [
+        {
+          amount: '0' + state.currentAsset.base_denom,
+          base_denom: state.currentAsset.base_denom,
+          on_chain: dexChain,
+        },
+      ];
+    }
+  }
+
+  results.sort((a, b) => {
+    const coinA = parseCoins(a.amount)[0];
+    const coinB = parseCoins(b.amount)[0];
+    return +coinB.amount - +coinA.amount;
+  });
+
+  return results;
+});
+
+const hasFunds = computed(() => {
+  if (!state.currentAsset) {
+    return false;
+  }
+
+  const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+
+  return +totalAmount > 0;
+});
+
+const hasSufficientFunds = computed(() => {
+  if (!state.currentAsset) {
+    return true;
+  }
+
+  if (!hasFunds.value) {
+    return false;
+  }
+
+  const precision =
+    store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
+  const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
+  const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+
+  return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
+});
+
+const isValid = computed(() => {
+  const value = new BigNumber(form.balance.amount);
+
+  if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+    return false;
+  }
+
+  if (!hasSufficientFunds.value) {
+    return false;
+  }
+
+  if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
+    return false;
+  }
+
+  return true;
+});
+
+const toggleDenomModal = (asset?: Record<string, unknown>) => {
+  if (asset) {
+    setCurrentAsset(asset);
+  }
+  state.isDenomModalOpen = !state.isDenomModalOpen;
+};
+
+const toggleChainsModal = (asset?: Record<string, unknown>, source = state.chainsModalSource) => {
+  if (asset) {
+    if (state.chainsModalSource === 'to') {
+      form.to_chain = asset.on_chain as string;
+    } else {
+      setCurrentAsset(asset);
+    }
+  }
+
+  state.chainsModalSource = source;
+  state.isChainsModalOpen = !state.isChainsModalOpen;
+};
+
+const onSubmit = () => {
+  emit('next');
+};
+
+const openAssetPage = () => {
+  router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+};
+
+const findDefaultDestinationChain = () => {
+  if (state.chainsModalSource === 'from') {
+    const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
+    const nativeChain = nativeBalances.value.find(
+      (item) => item.base_denom === state.currentAsset?.base_denom,
+    )?.on_chain;
+
+    if (form.on_chain === nativeChain && nativeChain !== dexChain) {
+      form.to_chain = dexChain;
+    } else if (form.on_chain !== nativeChain) {
+      form.to_chain = nativeChain;
+    }
+  }
+};
+
+const setCurrentAsset = async (asset: Record<string, unknown>) => {
+  const dexChain = store.getters[GlobalGetterTypes.API.getDexChain];
+  const targetChains = Object.values(store.getters[GlobalGetterTypes.API.getChains]).filter(
+    (chain) => chain.chain_name !== dexChain,
+  );
+
+  state.currentAsset = asset;
+  form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+  if (location.search) {
+    form.on_chain = dexChain;
+  } else {
+    form.on_chain = asset.on_chain as string;
+  }
+  form.to_chain = asset.on_chain !== dexChain ? dexChain : targetChains[0].chain_name;
+
+  findDefaultDestinationChain();
+  state.assetTicker = await getTicker(asset.base_denom, dexChain);
+};
+
+onMounted(() => {
+  state.gasPrice = store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
+});
+
+// TODO: Select chain based in user option
+watch(
+  () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
+  () => {
+    if (state.isMaximumAmountChecked) {
+      const precision =
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
+      const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+
+      form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
+      return;
+    }
+  },
+);
+
+watch(
+  () => props.balances,
+  (newVal) => {
+    if (newVal.length > 0 && !state.currentAsset) {
+      let asset;
+      if (location.search) {
+        const params = new URL(location.href).searchParams;
+        form.balance.denom = params.get('base_denom');
+        const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: form.balance.denom }) ?? 6;
+        form.balance.amount = new BigNumber(params.get('amount') ?? 0).shiftedBy(-precision).toString();
+      }
+
+      if (form.balance.denom) {
+        asset = props.balances.find((item) => {
+          const balance = parseCoins(item.amount)[0];
+          return balance.denom === form.balance.denom;
+        });
+      }
+
+      if (!asset) {
+        asset = orderBalancesByPrice(props.balances)[0];
+      }
+
+      setCurrentAsset(asset);
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>
