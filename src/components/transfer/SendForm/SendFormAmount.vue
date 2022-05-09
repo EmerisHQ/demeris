@@ -39,7 +39,7 @@
           >
             <template #default="inputProps">
               <USDInput
-                :model-value="form.balance.amount ? form.balance.amount : 0"
+                :model-value="form.balance.amount ? form.balance.amount : '0'"
                 :denom="state.currentAsset?.base_denom || ''"
                 :class="[inputProps.class]"
                 :style="inputProps.style"
@@ -81,7 +81,7 @@
           <AmountDisplay
             v-if="state.isUSDInputChecked"
             :amount="{
-              amount: form.balance.amount ? form.balance.amount * denomDecimals + '' : '0',
+              amount: form.balance.amount ? `${Number(form.balance.amount) * denomDecimals}` : '0',
               denom: state.currentAsset?.base_denom,
             }"
           />
@@ -158,14 +158,14 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -186,258 +186,221 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { GasPriceLevel, SendAddressForm, Step } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
-
-export default defineComponent({
-  name: 'SendFormAmount',
-
-  components: {
-    AmountDisplay,
-    ChainName,
-    CircleSymbol,
-    CurrencyDisplay,
-    Denom,
-    FeeLevelSelector,
-    Button,
-    Icon,
-    DenomSelectModal,
-    Price,
-    USDInput,
-    FlexibleAmountInput,
+const props = defineProps({
+  balances: {
+    type: Array as PropType<EmerisAPI.Balances>,
+    required: true,
   },
-
-  props: {
-    balances: {
-      type: Array as PropType<EmerisAPI.Balances>,
-      required: true,
-    },
-    fees: {
-      type: Object,
-      default: undefined,
-    },
-    steps: {
-      type: Array as PropType<Step[]>,
-      default: () => [],
-    },
+  fees: {
+    type: Object,
+    default: undefined,
   },
-
-  emits: ['next'],
-
-  setup(props, { emit }) {
-    const typedstore = useStore() as RootStoreTyped;
-    const router = useRouter();
-    const form = inject<SendAddressForm>('transferForm');
-    const { nativeBalances } = useAccount();
-    const propsRef = toRefs(props);
-    const availableBalances = computed(() => {
-      if (propsRef.balances.value.length) {
-        return propsRef.balances.value;
-      }
-
-      return nativeBalances.value;
-    });
-
-    const state = reactive({
-      currentAsset: undefined,
-      assetTicker: undefined,
-      isMaximumAmountChecked: false,
-      isUSDInputChecked: false,
-      isSelectModalOpen: false,
-      usdValue: '',
-      gasPrice: undefined,
-      fees: {},
-    });
-
-    const feesAmount = computed(() => {
-      const result = {};
-      if (state.fees) {
-        for (const [, obj] of Object.entries(state.fees)) {
-          for (const [denom, value] of Object.entries(obj)) {
-            result[denom] = value;
-          }
-        }
-      }
-
-      return result;
-    });
-
-    const denomDecimals = computed(() => {
-      if (state.currentAsset) {
-        const precision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
-          name: state.currentAsset.base_denom,
-        });
-
-        return Math.pow(10, precision);
-      } else {
-        return 1;
-      }
-    });
-
-    const hasFunds = computed(() => {
-      if (!state.currentAsset) {
-        return false;
-      }
-
-      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
-
-      return +totalAmount > 0;
-    });
-
-    const openAssetPage = () => {
-      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
-    };
-
-    const hasPrice = computed(() => {
-      if (!state.currentAsset) {
-        return false;
-      }
-
-      const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
-
-      return !!price;
-    });
-
-    const hasSufficientFunds = computed(() => {
-      if (!state.currentAsset) {
-        return true;
-      }
-
-      if (!hasFunds.value) {
-        return false;
-      }
-
-      const precision =
-        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
-      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
-
-      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
-    });
-
-    const isValid = computed(() => {
-      const value = new BigNumber(form.balance.amount);
-
-      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
-        return false;
-      }
-
-      if (!hasSufficientFunds.value) {
-        return false;
-      }
-
-      if (!form.chain_name) {
-        return false;
-      }
-
-      return true;
-    });
-
-    const onSubmit = () => {
-      if (!isValid.value) {
-        return;
-      }
-
-      emit('next');
-    };
-
-    const setCurrentAsset = async (asset: Record<string, unknown>) => {
-      state.currentAsset = asset;
-
-      if (asset) {
-        form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-        form.chain_name = asset.on_chain as string;
-        state.assetTicker = await getTicker(asset.base_denom, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
-      }
-    };
-
-    const toggleSelectModal = (asset?: Record<string, unknown>) => {
-      if (asset) {
-        setCurrentAsset(asset);
-      }
-      state.isSelectModalOpen = !state.isSelectModalOpen;
-    };
-
-    const findDefaultAsset = () => {
-      const sortedBalances = [...availableBalances.value].sort((a, b) =>
-        +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
-      );
-
-      const chains: EmerisAPI.Chain[] = Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]);
-
-      try {
-        const prefix = bech32.decode(form.recipient).prefix;
-        const chain = chains.find((item) => item.node_info.bech32_config.prefix_account === prefix);
-
-        if (!chain) {
-          setCurrentAsset(sortedBalances[0]);
-          return;
-        }
-
-        const availableAssets = [];
-        const sortedDenoms = orderBy(chain.denoms, (item) => (item.name.startsWith('pool') ? 1 : -1));
-        for (const nativeDenom of sortedDenoms) {
-          let asset = sortedBalances.find(
-            (item) => item.on_chain === chain.chain_name && item.base_denom === nativeDenom.name,
-          );
-          // Find native denom from current chain in another
-          if (!asset) {
-            asset = sortedBalances.find((item) => item.base_denom === nativeDenom.name);
-          }
-          if (asset) {
-            availableAssets.push(asset);
-          }
-        }
-
-        if (!availableAssets.length) {
-          setCurrentAsset(sortedBalances[0]);
-          return;
-        }
-
-        setCurrentAsset(availableAssets[0]);
-      } catch (e) {
-        setCurrentAsset(sortedBalances[0]);
-      }
-    };
-
-    onMounted(() => {
-      state.gasPrice = typedstore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
-    });
-
-    // TODO: Select chain based in user option
-    watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
-      () => {
-        if (state.isMaximumAmountChecked) {
-          const precision =
-            typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
-          const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
-          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          return;
-        }
-      },
-    );
-
-    // Select defaut asset based in address prefix
-    if (!state.currentAsset) {
-      findDefaultAsset();
-    }
-
-    return {
-      hasFunds,
-      availableBalances,
-      state,
-      form,
-      hasPrice,
-      hasSufficientFunds,
-      denomDecimals,
-      isValid,
-      openAssetPage,
-      onSubmit,
-      setCurrentAsset,
-      toggleSelectModal,
-    };
+  steps: {
+    type: Array as PropType<Step[]>,
+    default: () => [],
   },
 });
+
+const emit = defineEmits(['next']);
+
+const typedstore = useStore() as RootStoreTyped;
+const router = useRouter();
+const form = inject<SendAddressForm>('transferForm');
+const { nativeBalances } = useAccount();
+const propsRef = toRefs(props);
+const availableBalances = computed(() => {
+  if (propsRef.balances.value.length) {
+    return propsRef.balances.value;
+  }
+
+  return nativeBalances.value;
+});
+
+const state = reactive({
+  currentAsset: undefined,
+  assetTicker: undefined,
+  isMaximumAmountChecked: false,
+  isUSDInputChecked: false,
+  isSelectModalOpen: false,
+  usdValue: '',
+  gasPrice: undefined,
+  fees: {},
+});
+
+const feesAmount = computed(() => {
+  const result = {};
+  if (state.fees) {
+    for (const [, obj] of Object.entries(state.fees)) {
+      for (const [denom, value] of Object.entries(obj)) {
+        result[denom] = value;
+      }
+    }
+  }
+
+  return result;
+});
+
+const denomDecimals = computed(() => {
+  if (state.currentAsset) {
+    const precision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: state.currentAsset.base_denom,
+    });
+
+    return Math.pow(10, precision);
+  } else {
+    return 1;
+  }
+});
+
+const hasFunds = computed(() => {
+  if (!state.currentAsset) {
+    return false;
+  }
+
+  const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+
+  return +totalAmount > 0;
+});
+
+const openAssetPage = () => {
+  router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+};
+
+const hasPrice = computed(() => {
+  if (!state.currentAsset) {
+    return false;
+  }
+
+  const price = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
+
+  return !!price;
+});
+
+const hasSufficientFunds = computed(() => {
+  if (!state.currentAsset) {
+    return true;
+  }
+
+  if (!hasFunds.value) {
+    return false;
+  }
+
+  const precision =
+    typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
+  const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
+  const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+
+  return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
+});
+
+const isValid = computed(() => {
+  const value = new BigNumber(form.balance.amount);
+
+  if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+    return false;
+  }
+
+  if (!hasSufficientFunds.value) {
+    return false;
+  }
+
+  if (!form.chain_name) {
+    return false;
+  }
+
+  return true;
+});
+
+const onSubmit = () => {
+  if (!isValid.value) {
+    return;
+  }
+
+  emit('next');
+};
+
+const setCurrentAsset = async (asset: Record<string, unknown>) => {
+  state.currentAsset = asset;
+
+  if (asset) {
+    form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+    form.chain_name = asset.on_chain as string;
+    state.assetTicker = await getTicker(asset.base_denom, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+  }
+};
+
+const toggleSelectModal = (asset?: Record<string, unknown>) => {
+  if (asset) {
+    setCurrentAsset(asset);
+  }
+  state.isSelectModalOpen = !state.isSelectModalOpen;
+};
+
+const findDefaultAsset = () => {
+  const sortedBalances = [...availableBalances.value].sort((a, b) =>
+    +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
+  );
+
+  const chains: EmerisAPI.Chain[] = Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]);
+
+  try {
+    const prefix = bech32.decode(form.recipient).prefix;
+    const chain = chains.find((item) => item.node_info.bech32_config.prefix_account === prefix);
+
+    if (!chain) {
+      setCurrentAsset(sortedBalances[0]);
+      return;
+    }
+
+    const availableAssets = [];
+    const sortedDenoms = orderBy(chain.denoms, (item) => (item.name.startsWith('pool') ? 1 : -1));
+    for (const nativeDenom of sortedDenoms) {
+      let asset = sortedBalances.find(
+        (item) => item.on_chain === chain.chain_name && item.base_denom === nativeDenom.name,
+      );
+      // Find native denom from current chain in another
+      if (!asset) {
+        asset = sortedBalances.find((item) => item.base_denom === nativeDenom.name);
+      }
+      if (asset) {
+        availableAssets.push(asset);
+      }
+    }
+
+    if (!availableAssets.length) {
+      setCurrentAsset(sortedBalances[0]);
+      return;
+    }
+
+    setCurrentAsset(availableAssets[0]);
+  } catch (e) {
+    setCurrentAsset(sortedBalances[0]);
+  }
+};
+
+onMounted(() => {
+  state.gasPrice = typedstore.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
+});
+
+// TODO: Select chain based in user option
+watch(
+  () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
+  () => {
+    if (state.isMaximumAmountChecked) {
+      const precision =
+        typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
+      const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+      form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
+      return;
+    }
+  },
+);
+
+// Select defaut asset based in address prefix
+if (!state.currentAsset) {
+  findDefaultAsset();
+}
 </script>
 
 <style lang="scss" scoped>
