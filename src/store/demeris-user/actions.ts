@@ -88,7 +88,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       commit(MutationTypes.SET_SESSION_DATA, newData);
     } else {
       const newData = {
-        customSlippage: false,
+        allowCustomSlippage: false,
         viewUnverified: false,
         viewLPAssetPools: false,
         gasPriceLevel: EmerisFees.GasPriceLevel.Average,
