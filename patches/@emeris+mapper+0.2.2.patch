@@ -1,5 +1,5 @@
 diff --git a/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js b/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
-index 96b2d0c..b2123a5 100644
+index 96b2d0c..ab18bed 100644
 --- a/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
 +++ b/node_modules/@emeris/mapper/lib/implementations/cosmos/osmosis/index.js
 @@ -2,17 +2,22 @@
@@ -7,11 +7,7 @@ index 96b2d0c..b2123a5 100644
  const index_1 = require("../index");
  class OsmosisAminoMessageMapper extends index_1.default {
 -    swap(transaction, signing_address) {
-+  swap(transactions, signing_address) {
-+    let routes = [];
-+    for (let i = 0; i < transactions.length; i++) {
-+        const transaction = transactions[i];
-         const pool = transaction.pool;
+-        const pool = transaction.pool;
 -        return {
 -            type: "osmosis/gamm/swap-exact-amount-in",
 -            value: {
@@ -21,17 +17,22 @@ index 96b2d0c..b2123a5 100644
 -                routes: [{ poolId: pool.id, tokenOutDenom: transaction.to.denom }]
 -            }
 -        };
-+        routes.push({ poolId: pool.id, tokenOutDenom: transaction.to.denom });
++    swap(transactions, signing_address) {
++      let routes = [];
++      for (let i = 0; i < transactions.length; i++) {
++          const transaction = transactions[i];
++          const pool = transaction.pool;
++          routes.push({ poolId: pool.id, tokenOutDenom: transaction.to.denom });
++      }
++      return {
++          type: "osmosis/gamm/swap-exact-amount-in",
++          value: {
++              sender: signing_address,
++              tokenIn: transactions[0].from,
++              tokenOutMinAmount: transactions[transactions.length-1].to.amount,
++              routes
++          }
++      }
      }
-+    return {
-+        type: "osmosis/gamm/swap-exact-amount-in",
-+        value: {
-+            sender: signing_address,
-+            tokenIn: transactions[0].from,
-+            tokenOutMinAmount: transactions[transactions.length-1].to.amount,
-+            routes
-+        }
-+    }
-+  }
  }
  exports.default = OsmosisAminoMessageMapper;

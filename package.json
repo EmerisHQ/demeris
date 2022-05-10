@@ -33,7 +33,7 @@
     "@cosmjs/stream": "0.28.0",
     "@cosmjs/tendermint-rpc": "0.28.0",
     "@cosmjs/utils": "0.28.0",
-    "@emeris/mapper": "^0.2.1",
+    "@emeris/mapper": "^0.2.2",
     "@sentry/tracing": "^6.19.2",
     "@sentry/vue": "^6.19.2",
     "@starport/vuex": "^0.1.58",
