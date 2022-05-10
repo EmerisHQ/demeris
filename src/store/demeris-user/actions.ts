@@ -308,16 +308,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
         await walletActionHandler.enable(chainIds);
       }
-      // const paths = new Set();
-      // const toQuery = [];
-      // for (const chain_name in chains) {
-      //   const chain = chains[chain_name];
-      //   if (paths.has(chain.derivation_path)) {
-      //     continue;
-      //   }
-      //   paths.add(chain.derivation_path);
-      //   toQuery.push(chain);
-      // }
       const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
       });
