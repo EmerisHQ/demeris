@@ -5,8 +5,8 @@ test.beforeEach(async ({ page }) => {
     page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
   });
   await page.goto('/welcome', { waitUntil: 'networkidle' }); // TODO: Our redirects flicker the original URL before going to welcome which confuses the tests. Needs fixing on the router level
-  page.locator('button:has-text("Connect Keplr")').click();
-  page.locator('button:has-text("Agree")').click();
+  (await page.locator('button:has-text("Connect Keplr")')).click();
+  (await page.locator('button:has-text("Agree")')).click();
 });
 
 // eslint-disable-next-line max-lines-per-function
