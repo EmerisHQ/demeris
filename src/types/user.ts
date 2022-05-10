@@ -1,7 +1,7 @@
 import { EmerisFees } from '@emeris/types';
 
 export type UserData = {
-  customSlippage?: boolean;
+  allowCustomSlippage?: boolean;
   viewLPAssetPools?: boolean;
   viewUnverified?: boolean;
   gasPriceLevel?: EmerisFees.GasPriceLevel;

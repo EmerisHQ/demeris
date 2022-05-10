@@ -17,7 +17,7 @@ export const getInputAmountFromRoute = (context: SwapContext, routeIndex?: numbe
 
   const firstStep = route.steps[0];
 
-  if (firstStep?.data.from.amount === undefined) {
+  if (firstStep?.data.from.amount === undefined || isNaN(firstStep?.data.to.amount)) {
     return { amount: '0', denom: firstStep.data.from.denom };
   }
 
@@ -30,7 +30,7 @@ export const getOutputAmountFromRoute = (context: SwapContext, routeIndex?: numb
 
   const lastStep = route.steps[route.steps.length - 1];
 
-  if (lastStep?.data.to.amount === undefined) {
+  if (lastStep?.data.to.amount === undefined || isNaN(lastStep?.data.to.amount)) {
     return { amount: '0', denom: lastStep.data.to.denom };
   }
 

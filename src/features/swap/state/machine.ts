@@ -450,7 +450,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           if (!context.data.routes.length) {
             return '0';
           }
-
           const { amount, denom } = logic.getOutputAmountFromRoute(context);
           const baseDenom = resolveBaseDenom(denom, { context });
           return logic.amountToHuman({ denom: baseDenom, amount: amount })?.amount;

@@ -10,8 +10,7 @@ import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from 
 import { SessionParams } from '@/types/user';
 import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
-import { hashObject } from '@/utils/basic';
-import { fromHexString, keyHashfromAddress } from '@/utils/basic';
+import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
 import { addChain } from '@/utils/keplr';
 
@@ -88,7 +87,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       commit(MutationTypes.SET_SESSION_DATA, newData);
     } else {
       const newData = {
-        customSlippage: false,
+        allowCustomSlippage: false,
         viewUnverified: false,
         viewLPAssetPools: false,
         gasPriceLevel: EmerisFees.GasPriceLevel.Average,

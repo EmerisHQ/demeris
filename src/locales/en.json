@@ -153,7 +153,7 @@
         "minReceivedLbl": "Min. received if 100% swapped",
         "minReceivedLblHint": "Minimum you will receive if your entire swap is fulfilled.",
         "slippageValueError": "Please enter a valid slippage rate.",
-        "highSlippageMessage": "Your swap price may be significantly above the market price."
+        "highSlippageMessage": "Your effective swap price may be significantly below the market price."
       },
       "staking": {
         "navigation": {
@@ -174,7 +174,7 @@
         "earnRewards": "Earn rewards by staking",
         "lockUpAndEarnRewards": "Learn how to earn staking rewards on your assets. ",
         "learnMore": "Learn more",
-        "noLiquidStaking": "Note that Emeris does not support liquid staking yet",
+        "noLiquidStaking": "Note that Emeris does not support liquid staking yet.",
         "apy": "APY",
         "reward": "Rewards",
         "stakeAsset": "Stake {ticker}",
