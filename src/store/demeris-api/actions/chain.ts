@@ -7,6 +7,7 @@ import { GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, SimpleSubscribable, Subscribable } from '@/types/util';
 import { hashObject } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ActionTypes } from '../action-types';
 import { MutationTypes } from '../mutation-types';
@@ -138,29 +139,35 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
     return getters['getChains'];
   },
   async [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS]({ dispatch, getters }, { subscribe = false }) {
-    dispatch(ActionTypes.GET_CHAINS, {
-      subscribe: subscribe,
-    })
-      .then((chains) => {
-        for (const chain in chains) {
-          dispatch(ActionTypes.GET_CHAIN, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          }).then((chain) => {
-            dispatch(ActionTypes.GET_CHAIN_STATUS, {
+    if (featureRunning('USE_NEW_CHAINS_API')) {
+      dispatch(ActionTypes.GET_CHAINS, {
+        subscribe: true,
+      });
+    } else {
+      dispatch(ActionTypes.GET_CHAINS, {
+        subscribe: subscribe,
+      })
+        .then((chains) => {
+          for (const chain in chains) {
+            dispatch(ActionTypes.GET_CHAIN, {
               subscribe: true,
               params: {
-                chain_name: chain.chain_name,
+                chain_name: chain,
               },
+            }).then((chain) => {
+              dispatch(ActionTypes.GET_CHAIN_STATUS, {
+                subscribe: true,
+                params: {
+                  chain_name: chain.chain_name,
+                },
+              });
             });
-          });
-        }
-      })
-      .catch((e) => {
-        console.error('Could not load chain information: ' + e);
-      });
+          }
+        })
+        .catch((e) => {
+          console.error('Could not load chain information: ' + e);
+        });
+    }
     return getters['getChains'];
   },
 };

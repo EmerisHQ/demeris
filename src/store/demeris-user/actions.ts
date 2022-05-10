@@ -12,6 +12,7 @@ import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 import { addChain } from '@/utils/keplr';
 
 import { USERStore } from '.';
@@ -134,22 +135,24 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         (await dispatch(
           GlobalActionTypes.API.GET_CHAINS,
           {
-            subscribe: false,
+            subscribe: featureRunning('USE_NEW_CHAINS_API'),
           },
           { root: true },
         ));
-      for (const chain in chains) {
-        if (!chains[chain].node_info)
-          chains[chain] = await dispatch(
-            GlobalActionTypes.API.GET_CHAIN,
-            {
-              subscribe: true,
-              params: {
-                chain_name: chain,
+      if (!featureRunning('USE_NEW_CHAINS_API')) {
+        for (const chain in chains) {
+          if (!chains[chain].node_info)
+            chains[chain] = await dispatch(
+              GlobalActionTypes.API.GET_CHAIN,
+              {
+                subscribe: true,
+                params: {
+                  chain_name: chain,
+                },
               },
-            },
-            { root: true },
-          );
+              { root: true },
+            );
+        }
       }
       // The only case where the getChains getter would not return full data for a chain
       // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
