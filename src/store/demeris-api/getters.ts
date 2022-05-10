@@ -8,6 +8,7 @@ import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import { ChartPrices, LoadingState, Namespaced } from '@/types/util';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
@@ -333,7 +334,8 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return state.tokenPricesLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
-    return state.chains[params.chain_name]?.online;
+    if (featureRunning('USE_NEW_CHAINS_API')) return state.chains[params.chain_name]?.online;
+    else return state.chains[params.chain_name]?.status;
   },
   [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
     return Object.values(state.chains)?.find((chain) => {
