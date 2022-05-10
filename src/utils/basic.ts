@@ -54,10 +54,11 @@ export async function getOwnAddress({ chain_name }) {
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-      subscribe: !featureRunning('USE_NEW_CHAINS_API'),
-      params: { chain_name },
-    });
+    if (!featureRunning('USE_NEW_CHAINS_API'))
+      await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+        subscribe: true,
+        params: { chain_name },
+      });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
