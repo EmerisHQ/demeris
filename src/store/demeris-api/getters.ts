@@ -333,7 +333,7 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return state.tokenPricesLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
-    return state.chains[params.chain_name]?.status;
+    return state.chains[params.chain_name]?.online;
   },
   [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
     return Object.values(state.chains)?.find((chain) => {
