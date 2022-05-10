@@ -15,9 +15,9 @@
       </dt>
       <dd class="place-self-end">
         <CoinDescription
-          :amount="transaction.data[0].to.amount"
-          :denom="getBaseDenomSync(transaction.data[0].to.denom)"
-          :chain="transaction.data[0].chainName"
+          :amount="transaction.data[transaction.data.length - 1].to.amount"
+          :denom="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)"
+          :chain="transaction.data[transaction.data.length - 1].chainName"
         />
       </dd>
     </dl>
@@ -117,8 +117,11 @@ const transaction = computed(() => {
 });
 
 const expectOutputAmount = computed(() => {
-  const denom = transaction.value.data[0].to.denom;
-  const orderPrice = getOrderPrice(transaction.value.data[0].from, transaction.value.data[0].to);
+  const denom = transaction.value.data[transaction.value.data.length - 1].to.denom;
+  const orderPrice = getOrderPrice(
+    transaction.value.data[0].from,
+    transaction.value.data[transaction.value.data.length - 1].to,
+  );
 
   const { amount } = amountToUnit({ amount: orderPrice, denom });
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
@@ -133,10 +136,13 @@ const priceInputAmount = computed(() => {
 });
 
 const minOutputAmount = computed(() => {
-  const denom = transaction.value.data[0].to.denom;
+  const denom = transaction.value.data[transaction.value.data.length - 1].to.denom;
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return {
-    amount: calculateSlippage(transaction.value.data[0].to.amount, swapStore.getSlippageSession()),
+    amount: calculateSlippage(
+      transaction.value.data[transaction.value.data.length - 1].to.amount,
+      swapStore.getSlippageSession(),
+    ),
     denom: baseDenom,
   };
 });

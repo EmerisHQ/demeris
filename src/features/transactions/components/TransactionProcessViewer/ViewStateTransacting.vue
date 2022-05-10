@@ -24,9 +24,9 @@
         ]"
       >
         <template v-if="transaction.type == 'swap'">
-          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data[0].from.denom)" />
           <EphemerisSpinner class="-my-6 grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.to.denom)" />
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)" />
         </template>
 
         <template v-if="transaction.type == 'addLiquidity' || transaction.type == 'createPool'">
@@ -143,8 +143,8 @@
 
         <template v-if="transaction.type === 'swap'">
           <p class="font-medium">
-            <Ticker :name="getBaseDenomSync(transaction.data.from.denom)" /> &rarr;
-            <Ticker :name="getBaseDenomSync(transaction.data.to.denom)" />
+            <Ticker :name="getBaseDenomSync(transaction.data[0].from.denom)" /> &rarr;
+            <Ticker :name="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)" />
           </p>
         </template>
 

@@ -72,11 +72,14 @@
           <i18n-t scope="global" keypath="components.txHandlingModal.failedSwap">
             <template #amount>
               <AmountDisplay
-                :amount="{ amount: transaction.data.from.amount, denom: getBaseDenomSync(transaction.data.from.denom) }"
+                :amount="{
+                  amount: transaction.data[0].from.amount,
+                  denom: getBaseDenomSync(transaction.data[0].from.denom),
+                }"
               />
             </template>
             <template #denom>
-              <Denom :name="getBaseDenomSync(transaction.data.to.denom)" />
+              <Denom :name="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)" />
             </template>
           </i18n-t>
         </template>
@@ -122,11 +125,11 @@
         <i18n-t scope="global" keypath="components.txHandlingModal.notSwapped">
           <template #amount>
             <span class="font-bold">
-              <AmountDisplay :amount="lastResult?.transaction.data.from" />
+              <AmountDisplay :amount="lastResult?.transaction.data[0].from" />
             </span>
           </template>
           <template #chainName>
-            <ChainName :name="'cosmos-hub'" />
+            <ChainName :name="lastResult?.transaction.data[0].chainName" />
           </template>
         </i18n-t>
       </p>
