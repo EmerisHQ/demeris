@@ -308,23 +308,22 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
         await walletActionHandler.enable(chainIds);
       }
-      const paths = new Set();
-      const toQuery = [];
-      for (const chain_name in chains) {
-        const chain = chains[chain_name];
-        if (paths.has(chain.derivation_path)) {
-          continue;
-        }
-        paths.add(chain.derivation_path);
-        toQuery.push(chain);
-      }
+      // const paths = new Set();
+      // const toQuery = [];
+      // for (const chain_name in chains) {
+      //   const chain = chains[chain_name];
+      //   if (paths.has(chain.derivation_path)) {
+      //     continue;
+      //   }
+      //   paths.add(chain.derivation_path);
+      //   toQuery.push(chain);
+      // }
       const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
       });
       let keyData;
       let signer;
       if (!isCypress) {
-        await walletActionHandler.enable(dexchain.node_info.chain_id);
         keyData = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
       } else {
         signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
@@ -348,11 +347,14 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
-      for (const chain of toQuery) {
+      for (const chain of Object.values(chains)) {
         if (!isCypress) {
-          await walletActionHandler.enable(dexchain.node_info.chain_id);
-          const otherKey = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
-          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+          try {
+            const otherKey = await walletActionHandler.getAccount(chain.node_info.chain_id);
+            commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+          } catch (err) {
+            console.error(err); // EmerisSigner has a weird list of networks hardcoded so it fails for some, we need to change that
+          }
         } else {
           const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
             prefix: chain.node_info.bech32_config.main_prefix,
