@@ -36,7 +36,7 @@ import Button from '@/components/ui/Button.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export default defineComponent({
-  name: 'ConnectKeplr',
+  name: 'ConnectWallet',
 
   components: {
     Button,
