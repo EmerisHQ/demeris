@@ -3,7 +3,7 @@ import { EmerisBase, EmerisDEXInfo } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 
 import { move } from '@/actionhandler/actions/move';
-import { Step } from '@/types/actions';
+import { Step, SwapStepTx } from '@/types/actions';
 
 import { SwapContext } from '../state/machine';
 import { amountToHuman, calculateSlippage, getOrderPrice } from './amount';
@@ -224,81 +224,70 @@ export const prepareRouteToSign = async (context: SwapContext, routeIndex: numbe
   const route = context.data.routes[routeIndex];
   if (!route) return [];
 
-  const txs: Step[] = [];
+  const steps: Step[] = [];
 
-  const createSwapTx = ({ stepFrom, stepTo, routes }): Step => {
+  const createSwapTx = (routeSteps): SwapStepTx => {
     return {
-      name: 'swap',
-      description: '',
-      transactions: [
-        {
-          status: 'pending',
-          type: 'swap',
-          protocol: stepFrom.protocol,
-          data: {
-            routes: routes?.map((step) => {
-              return {
-                pool: {
-                  id: step.data.pool_id.split('/')[1],
-                },
-                to: step.data.to,
-              };
-            }),
-            from: {
-              amount: stepFrom.data.from.amount,
-              denom: normalizeDenom(stepFrom.data.from.denom),
-            },
-            to: {
-              amount: stepTo.data.to.amount,
-              denom: normalizeDenom(stepTo.data.to.denom),
-            },
-            pool: {
-              id: stepTo.data.pool_id.split('/')[1],
-              type_id: 1,
-            },
-            chainName: getChainFromProtocol(stepTo.protocol),
-          },
+      status: 'pending',
+      type: 'swap',
+      protocol: routeSteps[0].protocol,
+      data: routeSteps.map((routeStep) => ({
+        from: {
+          amount: routeStep.data.from.amount,
+          denom: normalizeDenom(routeStep.data.from.denom),
         },
-      ],
-    } as unknown as Step;
+        to: {
+          amount: routeStep.data.to.amount,
+          denom: normalizeDenom(routeStep.data.to.denom),
+        },
+        pool: {
+          id: routeStep.data.pool_id.split('/')[1],
+          type_id: 1,
+        },
+        chainName: getChainFromProtocol(routeStep.protocol),
+      })),
+    };
   };
 
-  for (const steps of aggregateRouteSteps(route.steps)) {
-    // multi-hop swap
-    if (steps.length > 1 && steps[0].type === EmerisDEXInfo.SwapType.Pool) {
-      const stepFrom = steps[0];
-      const stepTo = steps[steps.length - 1];
+  for (const routeSteps of aggregateRouteSteps(route.steps)) {
+    const isMultiHopSwap = routeSteps.length > 1 && routeSteps[0].type === EmerisDEXInfo.SwapType.Pool;
 
-      const routes = steps.slice(0, steps.length - 1);
-
-      txs.push(createSwapTx({ stepFrom, stepTo, routes }));
-
+    if (isMultiHopSwap) {
+      steps.push({
+        name: 'swap',
+        description: '',
+        transactions: [createSwapTx(routeSteps)],
+      });
       continue;
     }
 
-    for (const step of steps) {
-      if (step.type === 'ibc') {
+    for (const routeStep of routeSteps) {
+      if (routeStep.type === 'ibc') {
         const result = await move({
           amount: {
-            amount: step.data.from.amount,
-            denom: normalizeDenom(step.data.from.denom),
+            amount: routeStep.data.from.amount,
+            denom: normalizeDenom(routeStep.data.from.denom),
           },
-          chain_name: getChainFromDenom(context, step.data.from.denom),
-          destination_chain_name: getChainFromDenom(context, step.data.to.denom),
+          chain_name: getChainFromDenom(context, routeStep.data.from.denom),
+          destination_chain_name: getChainFromDenom(context, routeStep.data.to.denom),
         });
 
-        txs.push({
+        steps.push({
           name: 'move',
           description: '',
           transactions: result.steps,
         });
       }
 
-      if (step.type === 'pool') {
-        txs.push(createSwapTx({ stepFrom: step, stepTo: step, routes: [] }));
+      if (routeStep.type === 'pool') {
+        steps.push({
+          name: 'swap',
+          description: '',
+          transactions: [createSwapTx([routeStep])],
+        });
       }
     }
   }
 
-  return txs;
+  return steps;
 };

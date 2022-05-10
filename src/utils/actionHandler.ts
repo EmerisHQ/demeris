@@ -438,6 +438,8 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
   let chainName: string;
   if (stepTx.type == 'stake') {
     chainName = stepTx.data[0].chainName;
+  } else if (stepTx.type == 'swap') {
+    chainName = stepTx.data[0].chainName;
   } else {
     chainName = stepTx.data.chainName;
   }
@@ -1062,7 +1064,7 @@ export async function validateStepFeeBalances(
       }
     }
     if (stepTx.type == 'swap') {
-      const data = stepTx.data;
+      const data = stepTx.data[0];
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
@@ -1492,7 +1494,7 @@ export async function validateStepsFeeBalances(
         }
       }
       if (stepTx.type == 'swap') {
-        const data = stepTx.data;
+        const data = stepTx.data[0];
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
           if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
