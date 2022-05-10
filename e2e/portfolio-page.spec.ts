@@ -20,7 +20,7 @@ test.beforeEach(async ({ page, baseURL }) => {
   await expect(page).toHaveURL(baseURL + '/');
 });
 test.describe('Portfolio visual check', function () {
-  test('visibility of elements', async ({ page /*, baseURL*/ }) => {
+  test('visibility of elements', async ({ page }) => {
     const totalBalance = await page.locator('text=Total balance');
     await expect(totalBalance).toBeVisible();
     const totalBalanceValue = await page.locator('*[class="total-price"]');
