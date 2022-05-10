@@ -24,7 +24,7 @@ test.describe('Portfolio visual check', function () {
 
     const pools = await page.locator('h2', { hasText: 'Pools' });
     await expect(pools).toBeVisible();
-    const atomRow = await page.locator('table.assets-table').locator('tr', { hasText: 'CRO' });
+    const atomRow = await page.locator('table.assets-table').locator('tr', { hasText: 'ATOM' });
     await expect(atomRow).toBeVisible();
     const dvpnPool = await page.locator('text=ATOM · DVPN');
     await expect(dvpnPool).toBeVisible();
