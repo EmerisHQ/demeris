@@ -19,7 +19,7 @@
 
       <SwapMenu
         :search="data.searchQuery"
-        :items="availableCoins"
+        :items="isOutputView ? availableCoinsWithMarketCap : availableCoins"
         search-field="baseDenom"
         @select="selectAsset($event)"
       >
@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts" setup>
+import orderBy from 'lodash.orderby';
 import { computed, reactive } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
@@ -70,7 +71,12 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { getAvailableChainsByDenom, getAvailableInputAssets, resolveBaseDenom } from '@/features/swap/logic';
+import {
+  getAvailableChainsByDenom,
+  getAvailableInputAssets,
+  getMarketCap,
+  resolveBaseDenom,
+} from '@/features/swap/logic';
 import { useSwapActor, useSwapStore } from '@/features/swap/state';
 
 import SwapMenu from '../SwapMenu.vue';
@@ -90,7 +96,19 @@ const initialData = {
 const data = reactive({ ...initialData });
 
 const availableCoins = computed(() => getAvailableInputAssets(state.value.context));
-
+const availableCoinsWithMarketCap = computed(() => {
+  let coins = availableCoins.value;
+  coins
+    .filter((coin) => coin.baseDenom !== state.value.context.inputCoin.baseDenom)
+    .map((coin) => {
+      let marketCap = getMarketCap(coin.denom);
+      if (marketCap) {
+        coin.marketCap = marketCap;
+      }
+    });
+  coins = orderBy(coins, [(x) => x.marketCap || '', 'name'], ['desc', 'asc']);
+  return coins;
+});
 const isInputView = computed(() => swap.selectAssetType === 'input');
 const isOutputView = computed(() => swap.selectAssetType === 'output');
 
