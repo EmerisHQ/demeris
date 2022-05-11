@@ -46,7 +46,7 @@ import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 
 export default defineComponent({
-  name: 'GetBrowser',
+  name: 'ConnectWallet',
 
   components: {
     Button,
