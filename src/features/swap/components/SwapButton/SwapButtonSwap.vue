@@ -24,9 +24,7 @@ const props = defineProps<SwapButtonProps>();
 const { send, state } = toRefs(props);
 
 const buttonName = computed(() => {
-  if (state.value.matches('unavailable')) {
-    return 'Swap unavailable';
-  } else if (state.value.matches('ready.invalid.belowMin')) {
+  if (state.value.matches('ready.invalid.belowMin')) {
     return t('components.swap.inputBelowMin');
   } else if (state.value.matches('ready.invalid.overMax')) {
     return t('components.swap.inputOverMax');

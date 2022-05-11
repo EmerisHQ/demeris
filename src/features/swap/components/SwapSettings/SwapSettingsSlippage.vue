@@ -11,18 +11,19 @@
         </div>
       </label>
 
-      <div v-if="swapStore.allowCustomSlippage" class="flex w-full relative p-[2px]">
+      <div v-if="allowCustomSlippage" class="flex w-full relative p-[2px]">
         <div
           class="relative w-full rounded-xl px-2 inline-flex items-center z-[1]"
           :class="[
             isCustomInputFocused ? 'bg-bg' : 'bg-fg dark:bg-fg',
-            isCustomSelected ? 'theme-inverse text-text font-medium !bg-surface' : '',
+            isCustomSelected && alertStatus !== 'error' ? 'theme-inverse text-text font-medium !bg-surface' : '',
+            alertStatus === 'error' ? 'error-border' : '',
           ]"
         >
           <FlexibleAmountInput
             ref="customInputRef"
             v-model="data.customValue"
-            :min-width="10"
+            :min-width="30"
             :suffix="showCustomPlaceholder ? '' : '%'"
             class="max-w-full"
             :placeholder="showCustomPlaceholder ? '' : '0'"
@@ -67,17 +68,19 @@
 import { useToggle } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Alert from '@/components/ui/Alert.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
+import { GlobalGetterTypes } from '@/store';
 
 import { amountToUnit, getLimitPriceFromRoute, getMinOutputAmountFromRoute } from '../../logic';
-import { useSwapActor, useSwapStore } from '../../state';
+import { useSwapActor } from '../../state';
 
 const slippageOptions = ['0.1', '0.5', '1'];
 
-const swapStore = useSwapStore();
+const store = useStore();
 const { state, send } = useSwapActor();
 const { t } = useI18n({ useScope: 'global' });
 
@@ -88,6 +91,7 @@ const data = reactive({
 
 const [isCustomInputFocused, toggleCustomFocus] = useToggle();
 const isCustomSelected = computed(() => data.selectedOption === data.customValue);
+const allowCustomSlippage = computed(() => store.getters[GlobalGetterTypes.USER.allowCustomSlippage]);
 
 const inputAmount = computed(() => amountToUnit({ amount: '1', denom: state.value.context.inputCoin?.baseDenom }));
 
@@ -114,6 +118,8 @@ const showCustomPlaceholder = computed(() => {
 const alertStatus = computed(() => {
   if (Number(data.selectedOption) >= 20 && Number(data.selectedOption) <= 100) {
     return 'warning';
+  } else if (Number(data.selectedOption) === 0 || Number(data.selectedOption) > 100) {
+    return 'error';
   } else {
     return null;
   }
@@ -122,6 +128,8 @@ const alertStatus = computed(() => {
 const alertText = computed(() => {
   if (alertStatus.value === 'warning') {
     return t('components.slippageSettingsModal.highSlippageMessage');
+  } else if (alertStatus.value === 'error') {
+    return t('components.slippageSettingsModal.slippageValueError');
   } else {
     return '';
   }
@@ -151,9 +159,11 @@ onMounted(() => {
 
 watch(data, () => {
   send({ type: 'SLIPPAGE.CHANGE', value: data.selectedOption });
-  if (Number(data.selectedOption) >= 100) {
-    data.customValue = '100';
-    data.selectedOption = data.customValue;
-  }
 });
 </script>
+<style lang="postcss" scoped>
+.error-border {
+  border: var(--negative);
+  border-style: solid;
+}
+</style>

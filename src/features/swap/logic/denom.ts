@@ -165,3 +165,10 @@ export const resolveDisplayName = (baseDenom: string) => {
   const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
   return config?.display_name;
 };
+
+export const getMarketCap = (denom: string) => {
+  const price = useStore().getters[GlobalGetterTypes.API.getPrice]({ denom });
+  const supply = useStore().getters[GlobalGetterTypes.API.getSupply]({ denom });
+  const marketCap = price * supply;
+  return marketCap;
+};
