@@ -69,6 +69,7 @@
 
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
 import { defineComponent, nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -196,6 +197,18 @@ export default defineComponent({
         // isIEedge === false &&
         isOpera === false;
 
+      console.log(
+        'ischromv',
+        isChromium,
+        'winnamv',
+        winNav,
+        'vendomname',
+        vendorName,
+        'isooper',
+        isOpera,
+        'isEmerisSupported',
+        isEmerisSupported.value,
+      );
       // dont present spinner forever if not Chromium
       if (!isEmerisSupported.value) {
         isLoading.value = false;
