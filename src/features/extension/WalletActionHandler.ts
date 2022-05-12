@@ -2,7 +2,7 @@ import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
 import { Key } from '@keplr-wallet/types';
 import { noop } from 'lodash';
 
-import { SupportedWallet, WalletFeatureMap } from '@/features/extension/types';
+import { SupportedWallet, WalletFeatureMap, WalletSession } from '@/features/extension/types';
 import { EmerisWallet } from '@/features/extension/Wallet';
 
 class WalletActionHandler {
@@ -10,6 +10,11 @@ class WalletActionHandler {
   private walletMap = new Map<SupportedWallet, EmerisWallet>();
   private unsubscribeWalletEvents: () => void = noop; // array of functions to call when switching connected wallet in order to unsub
   private debugMode = process.env.NODE_ENV === 'development';
+  private lastSession: WalletSession = { timestamp: 0, wallet: SupportedWallet.EMERIS };
+
+  public constructor() {
+    this.getLastSession();
+  }
 
   /**
    * @desc adds a supported wallet throws on failure, returns true on success
@@ -34,6 +39,28 @@ class WalletActionHandler {
   private get wallet() {
     if (!this.isConnected) throw new Error(`Wallet is not currently connected`);
     return this.walletMap.get(this.currentWallet);
+  }
+
+  get session() {
+    return this.lastSession;
+  }
+  private getLastSession() {
+    if (!window.localStorage.getItem('lastEmerisSession')) {
+      this.lastSession = {
+        timestamp: 0,
+        wallet: SupportedWallet.EMERIS,
+      };
+    }
+    this.lastSession.timestamp = Number(window.localStorage.getItem('lastEmerisSession'));
+    this.lastSession.wallet = window.localStorage.getItem('lastEmerisWallet') as SupportedWallet;
+  }
+  public setLastSession(walletSession: WalletSession) {
+    window.localStorage.setItem('lastEmerisSession', `${walletSession.timestamp}`);
+    window.localStorage.setItem('lastEmerisWallet', walletSession.wallet);
+  }
+  public clearLastSession() {
+    window.localStorage.setItem('lastEmerisSession', '');
+    window.localStorage.setItem('lastEmerisWallet', '');
   }
 
   public isAvailable(wallet: SupportedWallet) {

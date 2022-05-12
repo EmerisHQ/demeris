@@ -31,7 +31,7 @@ import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { initializeExtension } from '@/features/extension/init';
-import { SupportedWallet } from '@/features/extension/types';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { axiosInit } from '@/utils/api-settings';
@@ -140,7 +140,6 @@ onMounted(async () => {
         console.error('Could not load denom supply: ' + e);
       });
     });
-
   if (featureRunning('USE_EMERIS_EXTENSION')) {
     try {
       await initializeExtension();
@@ -160,18 +159,19 @@ onMounted(async () => {
     });
   }
 
-  if (autoLogin()) {
-    if (featureRunning('USE_EMERIS_EXTENSION')) {
-      // Keplr by default for the time being
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType: SupportedWallet.KEPLR });
+  if (featureRunning('USE_EMERIS_EXTENSION')) {
+    if (!walletActionHandler.session.timestamp) {
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     } else {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, {
+        walletType: walletActionHandler.session.wallet,
+      });
     }
   } else {
-    if (autoLoginDemo()) {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-    }
+    if (autoLogin()) typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);
+    else if (autoLoginDemo()) typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
   }
+
   if (window.location.pathname !== '/welcome' && !window.localStorage.getItem('isReturnUser')) {
     await router.push({ name: 'Welcome', params: { originUrl: window.location.pathname } });
   }
