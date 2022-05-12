@@ -142,7 +142,12 @@ onMounted(async () => {
     });
 
   if (featureRunning('USE_EMERIS_EXTENSION')) {
-    await initializeExtension();
+    try {
+      await initializeExtension();
+    } catch (ex) {
+      console.warn('failed to initialize extensions');
+      console.error(ex);
+    }
   } else {
     window.addEventListener('keplr_keystorechange', () => {
       window.localStorage.setItem('lastEmerisSession', '');
