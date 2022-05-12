@@ -160,12 +160,12 @@ onMounted(async () => {
   }
 
   if (featureRunning('USE_EMERIS_EXTENSION')) {
-    if (!walletActionHandler.session.timestamp) {
-      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-    } else {
+    if (walletActionHandler.session.timestamp && walletActionHandler.session.wallet) {
       typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, {
         walletType: walletActionHandler.session.wallet,
       });
+    } else {
+      typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
     }
   } else {
     if (autoLogin()) typedstore.dispatch(GlobalActionTypes.USER.SIGN_IN);

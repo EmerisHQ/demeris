@@ -24,6 +24,7 @@ class WalletActionHandler {
   public add(wallet: SupportedWallet, walletObj: any, featureMap: WalletFeatureMap) {
     try {
       this.walletMap.set(wallet, new EmerisWallet(wallet, walletObj, featureMap));
+      console.log(`added wallet[${wallet}]`);
       return true;
     } catch (ex) {
       console.error(`failed to set wallet - ${wallet}`, ex);
@@ -57,6 +58,7 @@ class WalletActionHandler {
   public setLastSession(walletSession: WalletSession) {
     window.localStorage.setItem('lastEmerisSession', `${walletSession.timestamp}`);
     window.localStorage.setItem('lastEmerisWallet', walletSession.wallet);
+    this.lastSession = walletSession;
   }
   public clearLastSession() {
     window.localStorage.setItem('lastEmerisSession', '');

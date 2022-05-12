@@ -372,6 +372,8 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
       dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
       dispatch(GlobalActionTypes.API.GET_ALL_STAKING_BALANCES, undefined, { root: true });
+
+      walletActionHandler.setLastSession({ timestamp: Date.now(), wallet: walletType });
       return true;
     } catch (e) {
       console.error(e);
