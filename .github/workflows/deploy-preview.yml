@@ -26,7 +26,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: NODE_OPTIONS="--max_old_space_size=8192" npm run build:production
+        run: npm run build:production
 
       - name: Deploy
         uses: FirebaseExtended/action-hosting-deploy@v0

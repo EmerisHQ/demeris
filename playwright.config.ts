@@ -40,7 +40,6 @@ const config: PlaywrightTestConfig = {
     trace: 'on-first-retry',
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:8080',
     headless: true,
-    video: 'on-first-retry',
   },
 
   /* Configure projects for major browsers */

@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-import { loginToKeplr } from './login-to-keplr';
-
 test.beforeEach(async ({ page }) => {
-  await loginToKeplr(page, '/');
+  page.on('domcontentloaded', () => {
+    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
+  });
+  await page.goto('/');
+  (await page.locator('button:has-text("Connect Keplr")')).click();
+  (await page.locator('button:has-text("Agree")')).click();
 });
 
 test.describe('Navbar elements location and availibility', function () {

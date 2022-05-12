@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-import { loginToKeplr } from './login-to-keplr';
-
 test.beforeEach(async ({ page }) => {
-  await loginToKeplr(page, '/asset/uatom?VITE_FEATURE_STAKING=true');
+  page.on('domcontentloaded', () => {
+    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
+  });
+  await page.goto('/asset/uatom?VITE_FEATURE_STAKING=true'); // TODO: Our redirects flicker the original URL before going to welcome which confuses the tests. Needs fixing on the router level
+  (await page.locator('button:has-text("Connect Keplr")')).click();
+  (await page.locator('button:has-text("Agree")')).click();
 });
 test.describe('Check Staking functionality', function () {
   test('shows staked Atom', async ({ page }) => {
