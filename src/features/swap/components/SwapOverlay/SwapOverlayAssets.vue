@@ -99,7 +99,7 @@ const availableCoins = computed(() => getAvailableInputAssets(state.value.contex
 const availableCoinsWithMarketCap = computed(() => {
   let coins = availableCoins.value;
   coins
-    .filter((coin) => coin.baseDenom !== state.value.context.inputCoin.baseDenom)
+    .filter((coin) => coin.baseDenom !== state.value.context.inputCoin?.baseDenom)
     .map((coin) => {
       let marketCap = getMarketCap(coin.denom);
       if (marketCap) {
