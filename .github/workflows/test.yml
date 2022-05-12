@@ -82,7 +82,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Build
-        run: npm run build:production
+        run: NODE_OPTIONS="--max_old_space_size=8192" npm run build:production
 
       - name: Run Playwright tests
         run: 
@@ -91,9 +91,12 @@ jobs:
         env: 
           PLAYWRIGHT_TEST_BASE_URL: 'http://localhost:8080'
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 30
