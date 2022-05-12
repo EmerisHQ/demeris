@@ -8,6 +8,7 @@ export enum ActionTypes {
   SET_SESSION_DATA = 'SET_SESSION_DATA',
   LOAD_SESSION_DATA = 'LOAD_SESSION_DATA',
   SIGN_IN = 'SIGN_IN',
+  SIGN_IN_NEW = 'SIGN_IN_NEW', //  TODO : replace the SIGN_IN after USE_EMERIS_EXTENSION is turned on by default in the repo
   SIGN_IN_WITH_WATCHER = 'SIGN_IN_WITH_WATCHER',
   SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   SIGN_OUT = 'SIGN_OUT',
@@ -30,6 +31,7 @@ export enum GlobalActionTypes {
   SET_SESSION_DATA = 'demerisUSER/SET_SESSION_DATA',
   LOAD_SESSION_DATA = 'demerisUSER/LOAD_SESSION_DATA',
   SIGN_IN = 'demerisUSER/SIGN_IN',
+  SIGN_IN_NEW = 'demerisUSER/SIGN_IN_NEW',
   SIGN_IN_WITH_WATCHER = 'demerisUSER/SIGN_IN_WITH_WATCHER',
   SET_GAS_LIMIT = 'demerisUSER/SET_GAS_LIMIT',
   SIGN_OUT = 'demerisUSER/SIGN_OUT',

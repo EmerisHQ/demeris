@@ -53,7 +53,7 @@ export const getters: GetterTree<USERState, RootState> & Getters = {
     return state.correlationId;
   },
   [GetterTypes.allowCustomSlippage]: (state) => {
-    return state._Session.customSlippage;
+    return state._Session.allowCustomSlippage;
   },
   [GetterTypes.viewUnverified]: (state) => {
     return state._Session.viewUnverified;

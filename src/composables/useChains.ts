@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-lines */
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
+/* eslint-disable max-lines-per-function */
 export default function useChains() {
   const store = useStore();
 
@@ -23,24 +26,26 @@ export default function useChains() {
     if (!chain_name) {
       try {
         const chains = await getChains();
-        const promises = [];
-        for (const chain in chains) {
-          if (!chains[chain]?.node_info) {
-            promises.push(
-              store.dispatch(
-                GlobalActionTypes.API.GET_CHAIN,
-                {
-                  subscribe: true,
-                  params: {
-                    chain_name: chain,
+        if (!featureRunning('USE_NEW_CHAINS_API')) {
+          const promises = [];
+          for (const chain in chains) {
+            if (!chains[chain]?.node_info) {
+              promises.push(
+                store.dispatch(
+                  GlobalActionTypes.API.GET_CHAIN,
+                  {
+                    subscribe: true,
+                    params: {
+                      chain_name: chain,
+                    },
                   },
-                },
-                { root: true },
-              ),
-            );
+                  { root: true },
+                ),
+              );
+            }
           }
+          await Promise.all(promises);
         }
-        await Promise.all(promises);
       } catch (e) {
         console.error('Error occurred while fetching chain data: ' + e);
       }
