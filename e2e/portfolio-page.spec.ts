@@ -1,9 +1,19 @@
 import { expect, test } from '@playwright/test';
 
-import { loginToKeplr } from './login-to-keplr';
+// import mockHandler from './mock-api';
 
 test.beforeEach(async ({ page, baseURL }) => {
-  await loginToKeplr(page, '/');
+  /**
+   * This test shouldn't be using any mocked data. It's a regression
+   * Also see: https://github.com/EmerisHQ/demeris/pull/1530
+   */
+  // page.route('https://api.emeris.com/**/*', mockHandler);
+  page.on('domcontentloaded', () => {
+    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
+  });
+  await page.goto('/welcome', { waitUntil: 'networkidle' }); // TODO: Our redirects flicker the original URL before going to welcome which confuses the tests. Needs fixing on the router level
+  (await page.locator('button:has-text("Connect Keplr")')).click();
+  (await page.locator('button:has-text("Agree")')).click();
   const navbar = await page.locator("header[role='navigation']");
 
   (await navbar.locator('text=Portfolio')).click();
