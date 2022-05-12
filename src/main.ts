@@ -61,11 +61,9 @@ if (featureRunning('SENTRY')) {
       }),
     ],
     beforeSend(event) {
-      if (
-        messageRegex.test(event.message) &&
-        Math.random() <= parseFloat(import.meta.env.VITE_SENTRY_CUSTOM_SEND_CHANCE as string)
-      ) {
-        return null;
+      if (messageRegex.test(event.message)) {
+        window.alert(`A new version of the website was detected! The page will now refresh.`);
+        window.location.reload();
       }
       return event;
     },
