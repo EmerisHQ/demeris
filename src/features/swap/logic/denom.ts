@@ -172,3 +172,10 @@ export const normalizeDenom = (denom: string) => {
   const [prefix, hash] = denom.split('/');
   return `${prefix}/${hash.toUpperCase()}`;
 };
+
+export const getMarketCap = (denom: string) => {
+  const price = useStore().getters[GlobalGetterTypes.API.getPrice]({ denom });
+  const supply = useStore().getters[GlobalGetterTypes.API.getSupply]({ denom });
+  const marketCap = price * supply;
+  return marketCap;
+};

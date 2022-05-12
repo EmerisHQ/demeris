@@ -269,6 +269,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
@@ -364,6 +365,7 @@ export default defineComponent({
         emit('connect');
       } else {
         emit('disconnect');
+        walletActionHandler.disconnect();
         window.localStorage.setItem('lastEmerisSession', '');
         store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
       }

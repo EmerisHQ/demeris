@@ -603,16 +603,18 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   const chains =
     typedstore.getters[GlobalGetterTypes.API.getChains] ??
     (await typedstore.dispatch(GlobalActionTypes.API.GET_CHAINS, {
-      subscribe: false,
+      subscribe: featureRunning('USE_NEW_CHAINS_API'),
     }));
-  for (const chain in chains) {
-    if (!chains[chain].primary_channel)
-      chains[chain] = await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-        subscribe: true,
-        params: {
-          chain_name: chain,
-        },
-      });
+  if (!featureRunning('USE_NEW_CHAINS_API')) {
+    for (const chain in chains) {
+      if (!chains[chain].primary_channel)
+        chains[chain] = await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+          subscribe: true,
+          params: {
+            chain_name: chain,
+          },
+        });
+    }
   }
   await Promise.all(
     pools.map(async (pool) => {
