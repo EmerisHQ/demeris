@@ -547,7 +547,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 break;
               } catch {
                 retriesDestCount++;
-                await new Promise((r) => setTimeout(r, 4000));
+                await new Promise((r) => setTimeout(r, 6000));
               }
             }
 

@@ -9,6 +9,7 @@ import { useStore } from '@/utils/useStore';
 
 import { SwapCoin, SwapContext } from '../state/machine';
 import { amountToHuman, totalDenomBalance } from './amount';
+import { getChainFromProtocol } from './protocol';
 
 export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
@@ -39,14 +40,24 @@ export const getDenomFromBaseDenom = (context: SwapContext, baseDenom: string, c
   return swaps ?? baseDenom;
 };
 
-export const getChainFromDenom = (context: SwapContext, denom: string) => {
+export const getChainFromDenom = (context: SwapContext, denom: string, protocol?: string) => {
   const chain = useStore().getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom });
   if (chain) return chain;
 
-  const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  const trace = traces[denom.split('/')[1]?.toUpperCase()];
+  let trace;
 
-  if (trace?.trace) {
+  if (protocol) {
+    const hash = denom.split('/')[1];
+    trace = useStore().getters[GlobalGetterTypes.API.getVerifyTrace]({
+      chain_name: getChainFromProtocol(protocol),
+      hash,
+    });
+  } else {
+    const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
+    trace = traces[denom.split('/')[1]?.toUpperCase()];
+  }
+
+  if (trace?.trace?.[0]) {
     return trace.trace[0].chain_name;
   }
 

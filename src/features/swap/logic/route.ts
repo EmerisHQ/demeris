@@ -86,7 +86,7 @@ export const getOutputChainFromRoute = (context: SwapContext, routeIndex?: numbe
   if (!route?.steps) return;
 
   const lastStep = route.steps[route.steps.length - 1];
-  return getChainFromDenom(context, lastStep.data.to.denom);
+  return getChainFromDenom(context, lastStep.data.to.denom, getProtocolFromStep(lastStep));
 };
 
 export const getProtocolFromStep = (step: any) => {
@@ -140,8 +140,8 @@ export const countChainsFromRoute = (context: SwapContext, routeIndex: number) =
 export const getDetailsFromRoute = (context: SwapContext, routeIndex: number) => {
   const result = context.data.routes[routeIndex]?.steps.map((step) => {
     const data = step.data;
-    const chainIn = getChainFromDenom(context, data.from.denom);
-    const chainOut = getChainFromDenom(context, data.to.denom);
+    const chainIn = getChainFromDenom(context, data.from.denom, getProtocolFromStep(step));
+    const chainOut = getChainFromDenom(context, data.to.denom, getProtocolFromStep(step));
     const baseDenomIn = resolveBaseDenom(data.from.denom, { context });
     const baseDenomOut = resolveBaseDenom(data.to.denom, { context });
 
@@ -268,8 +268,8 @@ export const prepareRouteToSign = async (context: SwapContext, routeIndex: numbe
             amount: routeStep.data.from.amount,
             denom: normalizeDenom(routeStep.data.from.denom),
           },
-          chain_name: getChainFromDenom(context, routeStep.data.from.denom),
-          destination_chain_name: getChainFromDenom(context, routeStep.data.to.denom),
+          chain_name: getChainFromDenom(context, routeStep.data.from.denom, getProtocolFromStep(routeStep)),
+          destination_chain_name: getChainFromDenom(context, routeStep.data.to.denom, getProtocolFromStep(routeStep)),
         });
 
         steps.push({
