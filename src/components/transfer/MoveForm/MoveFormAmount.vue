@@ -468,6 +468,7 @@ const setCurrentAsset = async (asset: Record<string, unknown>) => {
   );
 
   state.currentAsset = { ...asset, amount: parseCoins(asset.amount as string)[0].amount };
+
   form.balance.denom = parseCoins(asset.amount as string)[0].denom;
   if (location.search) {
     form.on_chain = dexChain;
@@ -491,8 +492,8 @@ watch(
     if (state.isMaximumAmountChecked) {
       const precision =
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-      const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
-      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+      const assetAmount = new BigNumber(state.currentAsset.amount);
+      const fee = new BigNumber(feesAmount.value[state.currentAsset.base_denom] ?? 0);
 
       form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
       return;
