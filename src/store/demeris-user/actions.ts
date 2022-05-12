@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
-import { Secp256k1HdWallet } from '@cosmjs/amino';
+import { pubkeyToAddress, pubkeyToRawAddress, Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
+import { fromBase64 } from '@cosmjs/encoding';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { ActionTree, DispatchOptions } from 'vuex';
@@ -378,13 +379,34 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       return false;
     }
   },
-  async [ActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
+  async [ActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(ActionTypes.SIGN_OUT);
       commit(MutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(MutationTypes.SET_PRICES_FIRST_LOAD, true);
-      const key = demoAccount;
+      let key = demoAccount;
+      if (import.meta.env.VITE_EMERIS_DEMO_PUBKEY) {
+        const chains = rootGetters[GlobalGetterTypes.API.getChains];
+        const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map(
+          (x) => x.node_info.bech32_config.prefix_account,
+        );
+        const pubkeyBytes = fromBase64(import.meta.env.VITE_EMERIS_DEMO_PUBKEY as string);
+        const pubkeyPair = {
+          type: 'tendermint/PubKeySecp256k1',
+          value: import.meta.env.VITE_EMERIS_DEMO_PUBKEY,
+        };
+
+        key = {
+          name: 'Emeris Watcher',
+          algo: 'secp256k1',
+          pubKey: pubkeyBytes,
+          bech32Address: pubkeyToAddress(pubkeyPair, 'cosmos'),
+          isNanoLedger: false,
+          address: pubkeyToRawAddress(pubkeyPair),
+          keyHashes: chainIds.map((prefix) => keyHashfromAddress(pubkeyToAddress(pubkeyPair, prefix))),
+        };
+      }
       commit(MutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
         commit(MutationTypes.ADD_KEPLR_KEYHASH, hash);
