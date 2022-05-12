@@ -142,7 +142,7 @@ onMounted(async () => {
     });
 
   if (featureRunning('USE_EMERIS_EXTENSION')) {
-    initializeExtension();
+    await initializeExtension();
   } else {
     window.addEventListener('keplr_keystorechange', () => {
       window.localStorage.setItem('lastEmerisSession', '');
