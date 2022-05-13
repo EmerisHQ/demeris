@@ -22,7 +22,7 @@
       </dd>
     </dl>
 
-    <CollapseDescription content-class="pb-6" is-open>
+    <CollapseDescription content-class="pb-6">
       <template #title><span class="-text-1">Price</span></template>
       <template #label>
         <AmountDisplay :amount="priceInputAmount" trunc-big-balance /> ≈
@@ -67,7 +67,7 @@
       </dl>
     </CollapseDescription>
 
-    <CollapseDescription content-class="pb-6" is-open>
+    <CollapseDescription content-class="pb-6">
       <template #title><span class="-text-1">Fees (included)</span></template>
       <template #label><AmountDisplay v-for="fee of txFeesAmount" :key="fee.denom" :amount="fee" /></template>
 
