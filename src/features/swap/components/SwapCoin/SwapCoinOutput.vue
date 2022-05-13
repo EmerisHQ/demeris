@@ -7,6 +7,7 @@
     :chain="getOutputChainFromRoute(state.context)"
     :is-loading-chain="state.matches('updating.routes')"
     :is-loading-amount="state.matches('updating.routes.input')"
+    type="output"
     @select="swapStore.openAssetsMenu('output')"
     @update:input="send({ type: 'OUTPUT.CHANGE_AMOUNT', value: $event })"
   >
