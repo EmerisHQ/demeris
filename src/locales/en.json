@@ -311,7 +311,7 @@
         "notSwapped": "Your {amount} on {chainName} was not swapped.",
         "notTransferredAtoB": "Your {amount} on {chainA} could not be transferred to {chainB}.",
         "notTransferred": "Your {amount} on {chain} could not be transferred.",
-        "failedSwap": "Your {amount} could not be swapped to {denom} on the Cosmos Hub.",
+        "failedSwap": "Your {amount} could not be swapped to {denom} on {chain}.",
         "failedAddLiquidity": "Could not add liquidity to the {denomA} {denomB} pool on the Cosmos Hub.",
         "failedCreatePool": "Could not create a {denomA} / {denomB} pool on the Cosmos Hub.",
         "failedWithdrawLiquidity": "Could not withdraw liquidity from the {denom} on the Cosmos Hub."

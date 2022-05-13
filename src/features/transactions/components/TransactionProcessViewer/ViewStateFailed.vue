@@ -81,6 +81,9 @@
             <template #denom>
               <Denom :name="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)" />
             </template>
+            <template #chain>
+              <ChainName :name="transaction.data[transaction.data.length - 1].chainName" />
+            </template>
           </i18n-t>
         </template>
 
