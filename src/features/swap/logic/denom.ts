@@ -124,7 +124,7 @@ export const getAvailableInputAssets = (context: SwapContext) => {
     })
     .filter((x) => !x.baseDenom.startsWith('pool'));
 
-  return orderBy(results, [(x) => +x.humanBalance, 'displayName'], ['desc', 'asc']);
+  return orderBy(results, [(x) => (x.humanBalance === '-' ? 0 : +x.humanBalance), 'displayName'], ['desc', 'asc']);
 };
 
 export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: string) => {
