@@ -1,4 +1,4 @@
-import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
+import { Coin, pubkeyToAddress, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { EmerisAPI } from '@emeris/types';
@@ -52,6 +52,14 @@ export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
   const typedstore = useStore() as RootStoreTyped;
+  if (import.meta.env.VITE_EMERIS_DEMO_PUBKEY) {
+    const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
+    const pubkeyPair = {
+      type: 'tendermint/PubKeySecp256k1',
+      value: import.meta.env.VITE_EMERIS_DEMO_PUBKEY,
+    };
+    return pubkeyToAddress(pubkeyPair, chain.node_info.bech32_config.prefix_account);
+  }
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {

@@ -371,16 +371,13 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        let validation = {};
-        if (!context.input.isDemoAccount) {
-          validation = await validateStepsFeeBalances(
-            context.input.action,
-            context.formattedSteps,
-            context.input.balances,
-            totals,
-            context.input.gasPriceLevel,
-          );
-        }
+        const validation = await validateStepsFeeBalances(
+          context.input.action,
+          context.formattedSteps,
+          context.input.balances,
+          totals,
+          context.input.gasPriceLevel,
+        );
         return { totals, validation };
       },
       validateChainStatus: async (context) => {
