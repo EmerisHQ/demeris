@@ -310,7 +310,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         return Promise.resolve(true);
       },
       handleSubmit: async (context) => {
-        return logic.convertRouteToSteps(context, context.selectedRouteIndex);
+        return logic.prepareRouteToSign(context, context.selectedRouteIndex);
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
@@ -334,7 +334,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       })),
       assignRoutes: assign((context, event: any) => {
         let routes = logic.removeExceedingStepsFromRoutes(event.data);
-
         if (context.inputCoin.chain !== context.inputCoinDex.chain) {
           routes = logic.prependAdditionalStepsToRoutes(routes, context.inputCoin, context.inputCoinDex);
         }

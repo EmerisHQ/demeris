@@ -29,7 +29,7 @@
               class="opacity-60 hover:-translate-y-px transition-all text-left"
               @click.stop="showRouteDetail(index)"
             >
-              {{ countTransactionsFromRoute(state.context, index) }} transactions
+              {{ formatCountTransactionsLabel(index) }}
             </button>
             <div class="opacity-60 flex text-right">~<Price :amount="getOutputAmount(index)" /></div>
           </div>
@@ -47,6 +47,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Price from '@/components/common/Price.vue';
@@ -67,6 +68,7 @@ import SwapOverlayRouteDetail from './SwapOverlayRouteDetail.vue';
 
 const swap = useSwapStore();
 const { state, send } = useSwapActor();
+const { t } = useI18n({ useScope: 'global' });
 
 const routeDetailIndex = ref(undefined);
 
@@ -79,6 +81,11 @@ const protocols = (route) => {
   return protocols.map((protocol) => {
     return { chain: getChainFromProtocol(protocol), name: formatProtocolName(protocol) };
   });
+};
+
+const formatCountTransactionsLabel = (index: number) => {
+  const count = countTransactionsFromRoute(state.value.context, index);
+  return t('components.swap.transaction', { txs: count }, count);
 };
 
 const quoteDexText = (route) => {
