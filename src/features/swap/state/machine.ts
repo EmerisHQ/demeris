@@ -382,8 +382,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             chain: undefined,
           };
         },
-        inputAmount: (_) => undefined,
-        outputAmount: (_) => undefined,
+        inputAmount: (context) => context.outputAmount,
+        outputAmount: (context) => context.inputAmount,
         inputCoin: (context) => {
           if (!context.outputCoin) return undefined;
 
@@ -438,7 +438,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       updateInputAmountFromRoute: assign({
         inputAmount: (context) => {
           if (!context.data.routes.length) {
-            return '0';
+            return '-';
           }
 
           const expectedAmount = logic.getInputAmountFromRoute(context);
@@ -448,7 +448,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       updateOutputAmountFromRoute: assign({
         outputAmount: (context) => {
           if (!context.data.routes.length) {
-            return '0';
+            return '-';
           }
           const { amount, denom } = logic.getOutputAmountFromRoute(context);
           const baseDenom = resolveBaseDenom(denom, { context });

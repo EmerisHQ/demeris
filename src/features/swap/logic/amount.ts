@@ -48,7 +48,7 @@ export const getMinInputValue = () => {
 export const amountToHuman = ({ amount, denom }: EmerisBase.Amount) => {
   const precision = useStore().getters[GlobalGetterTypes.API.getDenomPrecision]({ name: getBaseDenomSync(denom) }) ?? 6;
   return {
-    amount: new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString(),
+    amount: amount == '0' ? '-' : new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString(),
     denom,
   };
 };
