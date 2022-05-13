@@ -33,9 +33,6 @@
           <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap text-left">
             <ChainName :name="chain" />
           </span>
-          <span v-else-if="chainFallback" class="text-muted -text-1 whitespace-nowrap text-left">
-            {{ chainFallback }}
-          </span>
         </div>
       </button>
 
