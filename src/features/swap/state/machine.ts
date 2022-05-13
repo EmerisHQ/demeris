@@ -290,6 +290,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             target: '#ready',
             actions: 'clearSteps',
           },
+          'BALANCES.SET': {
+            actions: 'assignBalances',
+          },
         },
       },
     },
