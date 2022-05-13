@@ -39,7 +39,7 @@
       </button>
 
       <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">
-        <SkeletonLoader v-if="isLoadingAmount" height="24px" width="82px" />
+        <SkeletonLoader v-if="isLoadingAmount" height="22px" width="82px" />
         <SkeletonLoader v-if="isLoadingAmount" height="16px" width="82px" />
         <template v-else>
           <AmountInput
