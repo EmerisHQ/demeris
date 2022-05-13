@@ -28,7 +28,9 @@
           </div>
 
           <template v-if="isLoadingCoin || isLoadingChain">
-            <SkeletonLoader height="17px" width="96px" />
+            <div>
+              <SkeletonLoader height="17px" width="96px" />
+            </div>
           </template>
           <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap text-left">
             <ChainName :name="chain" />
