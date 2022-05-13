@@ -44,7 +44,7 @@
             v-model="value"
             class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
           />
-          <span class="text-muted -text-1">
+          <span v-if="value && value !== '0' && value !== '-'" class="text-muted -text-1">
             <Price :amount="amountToUnit({ denom: baseDenom, amount: value })" show-zero />
           </span>
         </template>
