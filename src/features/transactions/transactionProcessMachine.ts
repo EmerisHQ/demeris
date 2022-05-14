@@ -289,7 +289,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       next: {
         id: 'next',
-        entry: { type: 'logEvent', key: 'completed_tx' },
+        entry: [{ type: 'logEvent', key: 'completed_tx' }, 'refreshBalances'],
         always: [
           { target: 'receipt', cond: 'hasMoreTransactions' },
           { target: 'receipt', cond: 'hasMoreSteps' },
@@ -701,6 +701,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
 
         event(key, data);
+      },
+      refreshBalances: () => {
+        useStore().dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, { subscribe: false });
       },
     },
 
