@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
 import { getGravityResultFromDecodedEvents, parseEncodedEvents, resolveSwapResponse } from './transaction';
 
@@ -16,9 +17,19 @@ const osmosisEvents = [
     type: 'tx',
     attributes: [
       {
+        key: 'YWNjX3NlcQ==',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Ny8zNTQ=',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'tx',
+    attributes: [
+      {
         key: 'c2lnbmF0dXJl',
         value:
-          'ZGw5TU1RQ01yYnhEOFRaMzRKV1luM25YY2hiZ1k5VDhkOE1lUkxmbUh6NWxWM1cxYmNvRzZlNmFMbXBiWnNZWkJlNzB2QkNRVWZpMksrR1ZSRHFYT0E9PQ==',
+          'M1BHNTJOTnAxRDluSE9PVllsTDkwaTk2QW1Xem9GcEhHT0lSbFpmVS9VdExMUllXMWRPa1MxQ3pZckhrYk9sckh0VWhHdExzbjJZYzZjMER1cWp6OVE9PQ==',
         index: true,
       },
     ],
@@ -43,7 +54,7 @@ const osmosisEvents = [
       },
       {
         key: 'YW1vdW50',
-        value: 'MTAwMDB1b3Ntbw==',
+        value: 'MTAwMHVvc21v',
         index: true,
       },
     ],
@@ -53,12 +64,12 @@ const osmosisEvents = [
     attributes: [
       {
         key: 'cmVjZWl2ZXI=',
-        value: 'b3NtbzFoZWszZndndGx4Z2p2c2dwbGhzdWNwejd3N3E5dmxwNm1qbTVtMGM4NG5hMHgyeTl5NDNxeW5yczZn',
+        value: 'b3NtbzFqdmU3emM5eTI5a2w4amFsdTBhYXo4djM4eTJ2cGp1Y2RrN3RoZzc5ZWt0cTR0N2Fzd2NzYTZ3NDVk',
         index: true,
       },
       {
         key: 'YW1vdW50',
-        value: 'MTAwMDB1b3Ntbw==',
+        value: 'MTAwMHVvc21v',
         index: true,
       },
     ],
@@ -68,7 +79,7 @@ const osmosisEvents = [
     attributes: [
       {
         key: 'cmVjaXBpZW50',
-        value: 'b3NtbzFoZWszZndndGx4Z2p2c2dwbGhzdWNwejd3N3E5dmxwNm1qbTVtMGM4NG5hMHgyeTl5NDNxeW5yczZn',
+        value: 'b3NtbzFqdmU3emM5eTI5a2w4amFsdTBhYXo4djM4eTJ2cGp1Y2RrN3RoZzc5ZWt0cTR0N2Fzd2NzYTZ3NDVk',
         index: true,
       },
       {
@@ -78,7 +89,7 @@ const osmosisEvents = [
       },
       {
         key: 'YW1vdW50',
-        value: 'MTAwMDB1b3Ntbw==',
+        value: 'MTAwMHVvc21v',
         index: true,
       },
     ],
@@ -98,13 +109,12 @@ const osmosisEvents = [
     attributes: [
       {
         key: 'c3BlbmRlcg==',
-        value: 'b3NtbzFoZWszZndndGx4Z2p2c2dwbGhzdWNwejd3N3E5dmxwNm1qbTVtMGM4NG5hMHgyeTl5NDNxeW5yczZn',
+        value: 'b3NtbzFqdmU3emM5eTI5a2w4amFsdTBhYXo4djM4eTJ2cGp1Y2RrN3RoZzc5ZWt0cTR0N2Fzd2NzYTZ3NDVk',
         index: true,
       },
       {
         key: 'YW1vdW50',
-        value:
-          'MTQ4NTMwODZpYmMvRTY5MzFGNzgwNTdGN0NDNURBMEZENkNFRjgyRkYzOTM3M0E2RTA0NTJCRjFGRDc2OTEwQjkzMjkyQ0YzNTZDMQ==',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
         index: true,
       },
     ],
@@ -119,8 +129,7 @@ const osmosisEvents = [
       },
       {
         key: 'YW1vdW50',
-        value:
-          'MTQ4NTMwODZpYmMvRTY5MzFGNzgwNTdGN0NDNURBMEZENkNFRjgyRkYzOTM3M0E2RTA0NTJCRjFGRDc2OTEwQjkzMjkyQ0YzNTZDMQ==',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
         index: true,
       },
     ],
@@ -135,13 +144,12 @@ const osmosisEvents = [
       },
       {
         key: 'c2VuZGVy',
-        value: 'b3NtbzFoZWszZndndGx4Z2p2c2dwbGhzdWNwejd3N3E5dmxwNm1qbTVtMGM4NG5hMHgyeTl5NDNxeW5yczZn',
+        value: 'b3NtbzFqdmU3emM5eTI5a2w4amFsdTBhYXo4djM4eTJ2cGp1Y2RrN3RoZzc5ZWt0cTR0N2Fzd2NzYTZ3NDVk',
         index: true,
       },
       {
         key: 'YW1vdW50',
-        value:
-          'MTQ4NTMwODZpYmMvRTY5MzFGNzgwNTdGN0NDNURBMEZENkNFRjgyRkYzOTM3M0E2RTA0NTJCRjFGRDc2OTEwQjkzMjkyQ0YzNTZDMQ==',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
         index: true,
       },
     ],
@@ -151,7 +159,7 @@ const osmosisEvents = [
     attributes: [
       {
         key: 'c2VuZGVy',
-        value: 'b3NtbzFoZWszZndndGx4Z2p2c2dwbGhzdWNwejd3N3E5dmxwNm1qbTVtMGM4NG5hMHgyeTl5NDNxeW5yczZn',
+        value: 'b3NtbzFqdmU3emM5eTI5a2w4amFsdTBhYXo4djM4eTJ2cGp1Y2RrN3RoZzc5ZWt0cTR0N2Fzd2NzYTZ3NDVk',
         index: true,
       },
     ],
@@ -171,18 +179,317 @@ const osmosisEvents = [
       },
       {
         key: 'cG9vbF9pZA==',
-        value: 'Mjg1',
+        value: 'MTkz',
         index: true,
       },
       {
         key: 'dG9rZW5zX2lu',
-        value: 'MTAwMDB1b3Ntbw==',
+        value: 'MTAwMHVvc21v',
         index: true,
       },
       {
         key: 'dG9rZW5zX291dA==',
-        value:
-          'MTQ4NTMwODZpYmMvRTY5MzFGNzgwNTdGN0NDNURBMEZENkNFRjgyRkYzOTM3M0E2RTA0NTJCRjFGRDc2OTEwQjkzMjkyQ0YzNTZDMQ==',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_spent',
+    attributes: [
+      {
+        key: 'c3BlbmRlcg==',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_received',
+    attributes: [
+      {
+        key: 'cmVjZWl2ZXI=',
+        value: 'b3NtbzFucHo4MG50eDN2d2t2M3c5cnl6YzhnMDc0aGx5a213NDk3YXIwajdkcXprNHlhbmp5bHFzaGFuNDRk',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'transfer',
+    attributes: [
+      {
+        key: 'cmVjaXBpZW50',
+        value: 'b3NtbzFucHo4MG50eDN2d2t2M3c5cnl6YzhnMDc0aGx5a213NDk3YXIwajdkcXprNHlhbmp5bHFzaGFuNDRk',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'message',
+    attributes: [
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_spent',
+    attributes: [
+      {
+        key: 'c3BlbmRlcg==',
+        value: 'b3NtbzFucHo4MG50eDN2d2t2M3c5cnl6YzhnMDc0aGx5a213NDk3YXIwajdkcXprNHlhbmp5bHFzaGFuNDRk',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_received',
+    attributes: [
+      {
+        key: 'cmVjZWl2ZXI=',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'transfer',
+    attributes: [
+      {
+        key: 'cmVjaXBpZW50',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzFucHo4MG50eDN2d2t2M3c5cnl6YzhnMDc0aGx5a213NDk3YXIwajdkcXprNHlhbmp5bHFzaGFuNDRk',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'message',
+    attributes: [
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzFucHo4MG50eDN2d2t2M3c5cnl6YzhnMDc0aGx5a213NDk3YXIwajdkcXprNHlhbmp5bHFzaGFuNDRk',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'token_swapped',
+    attributes: [
+      {
+        key: 'bW9kdWxl',
+        value: 'Z2FtbQ==',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'cG9vbF9pZA==',
+        value: 'Mjc0',
+        index: true,
+      },
+      {
+        key: 'dG9rZW5zX2lu',
+        value: 'MTUxNjU3NWliYy85NzEyREJCMTNCOTYzMUVERkE5QkY2MUI1NUYxQjJEMjkwQjJBREI2N0UzQTRFQjNBODc1RjNCNjA4MUIzQjg0',
+        index: true,
+      },
+      {
+        key: 'dG9rZW5zX291dA==',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_spent',
+    attributes: [
+      {
+        key: 'c3BlbmRlcg==',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_received',
+    attributes: [
+      {
+        key: 'cmVjZWl2ZXI=',
+        value: 'b3NtbzFtcmx0ZnY4eTNqZjR2M2dndzBobmpqeHptd21xNzQ5cnNqZ3Zndmp1azBlenpzNGh5Y2Zza202YzZh',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'transfer',
+    attributes: [
+      {
+        key: 'cmVjaXBpZW50',
+        value: 'b3NtbzFtcmx0ZnY4eTNqZjR2M2dndzBobmpqeHptd21xNzQ5cnNqZ3Zndmp1azBlenpzNGh5Y2Zza202YzZh',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'message',
+    attributes: [
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_spent',
+    attributes: [
+      {
+        key: 'c3BlbmRlcg==',
+        value: 'b3NtbzFtcmx0ZnY4eTNqZjR2M2dndzBobmpqeHptd21xNzQ5cnNqZ3Zndmp1azBlenpzNGh5Y2Zza202YzZh',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTAzNjM5aWJjLzdDNEQ2MEFBOTVFNUE3NTU4QjBBMzY0ODYwOTc5Q0EzNEI3RkY4QUFGMjU1Qjg3QUY5RTg3OTM3NDQ3MENFQzA=',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'coin_received',
+    attributes: [
+      {
+        key: 'cmVjZWl2ZXI=',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTAzNjM5aWJjLzdDNEQ2MEFBOTVFNUE3NTU4QjBBMzY0ODYwOTc5Q0EzNEI3RkY4QUFGMjU1Qjg3QUY5RTg3OTM3NDQ3MENFQzA=',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'transfer',
+    attributes: [
+      {
+        key: 'cmVjaXBpZW50',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzFtcmx0ZnY4eTNqZjR2M2dndzBobmpqeHptd21xNzQ5cnNqZ3Zndmp1azBlenpzNGh5Y2Zza202YzZh',
+        index: true,
+      },
+      {
+        key: 'YW1vdW50',
+        value: 'MTAzNjM5aWJjLzdDNEQ2MEFBOTVFNUE3NTU4QjBBMzY0ODYwOTc5Q0EzNEI3RkY4QUFGMjU1Qjg3QUY5RTg3OTM3NDQ3MENFQzA=',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'message',
+    attributes: [
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzFtcmx0ZnY4eTNqZjR2M2dndzBobmpqeHptd21xNzQ5cnNqZ3Zndmp1azBlenpzNGh5Y2Zza202YzZh',
+        index: true,
+      },
+    ],
+  },
+  {
+    type: 'token_swapped',
+    attributes: [
+      {
+        key: 'bW9kdWxl',
+        value: 'Z2FtbQ==',
+        index: true,
+      },
+      {
+        key: 'c2VuZGVy',
+        value: 'b3NtbzF6NW55eDg3YzAzbDR1dmR5MHZ0MnA4Nm5nMG1sNDJjeHo0d3I4Nw==',
+        index: true,
+      },
+      {
+        key: 'cG9vbF9pZA==',
+        value: 'MzAx',
+        index: true,
+      },
+      {
+        key: 'dG9rZW5zX2lu',
+        value: 'NTAzN2liYy8xNDgwQjhGRDIwQUQ1RkNBRTgxRUE4NzU4NEQyNjk1NDdERDRENDM2ODQzQzFEMjBGMTVFMDBFQjY0NzQzRUY0',
+        index: true,
+      },
+      {
+        key: 'dG9rZW5zX291dA==',
+        value: 'MTAzNjM5aWJjLzdDNEQ2MEFBOTVFNUE3NTU4QjBBMzY0ODYwOTc5Q0EzNEI3RkY4QUFGMjU1Qjg3QUY5RTg3OTM3NDQ3MENFQzA=',
         index: true,
       },
     ],
@@ -525,35 +832,151 @@ const gravityEvents = [
 it('should parse encoded events', () => {
   expect(parseEncodedEvents(osmosisEvents)).toMatchInlineSnapshot(`
     {
-      "coin_received": {
-        "amount": "14853086ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
-        "receiver": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
-      },
-      "coin_spent": {
-        "amount": "14853086ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
-        "spender": "osmo1hek3fwgtlxgjvsgplhsucpz7w7q9vlp6mjm5m0c84na0x2y9y43qynrs6g",
-      },
-      "message": {
-        "action": "/osmosis.gamm.v1beta1.MsgSwapExactAmountIn",
-        "module": "gamm",
-        "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
-      },
-      "token_swapped": {
-        "module": "gamm",
-        "pool_id": "285",
-        "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
-        "tokens_in": "10000uosmo",
-        "tokens_out": "14853086ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
-      },
-      "transfer": {
-        "amount": "14853086ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
-        "recipient": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
-        "sender": "osmo1hek3fwgtlxgjvsgplhsucpz7w7q9vlp6mjm5m0c84na0x2y9y43qynrs6g",
-      },
-      "tx": {
-        "fee": "0uosmo",
-        "signature": "dl9MMQCMrbxD8TZ34JWYn3nXchbgY9T8d8MeRLfmHz5lV3W1bcoG6e6aLmpbZsYZBe70vBCQUfi2K+GVRDqXOA==",
-      },
+      "coin_received": [
+        {
+          "amount": "1000uosmo",
+          "receiver": "osmo1jve7zc9y29kl8jalu0aaz8v38y2vpjucdk7thg79ektq4t7aswcsa6w45d",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "receiver": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "receiver": "osmo1npz80ntx3vwkv3w9ryzc8g074hlykmw497ar0j7dqzk4yanjylqshan44d",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "receiver": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "receiver": "osmo1mrltfv8y3jf4v3ggw0hnjjxzmwmq749rsjgvgvjuk0ezzs4hycfskm6c6a",
+        },
+        {
+          "amount": "103639ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+          "receiver": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+      ],
+      "coin_spent": [
+        {
+          "amount": "1000uosmo",
+          "spender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "spender": "osmo1jve7zc9y29kl8jalu0aaz8v38y2vpjucdk7thg79ektq4t7aswcsa6w45d",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "spender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "spender": "osmo1npz80ntx3vwkv3w9ryzc8g074hlykmw497ar0j7dqzk4yanjylqshan44d",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "spender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "103639ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+          "spender": "osmo1mrltfv8y3jf4v3ggw0hnjjxzmwmq749rsjgvgvjuk0ezzs4hycfskm6c6a",
+        },
+      ],
+      "message": [
+        {
+          "action": "/osmosis.gamm.v1beta1.MsgSwapExactAmountIn",
+        },
+        {
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "sender": "osmo1jve7zc9y29kl8jalu0aaz8v38y2vpjucdk7thg79ektq4t7aswcsa6w45d",
+        },
+        {
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "sender": "osmo1npz80ntx3vwkv3w9ryzc8g074hlykmw497ar0j7dqzk4yanjylqshan44d",
+        },
+        {
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "sender": "osmo1mrltfv8y3jf4v3ggw0hnjjxzmwmq749rsjgvgvjuk0ezzs4hycfskm6c6a",
+        },
+        {
+          "module": "gamm",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+      ],
+      "token_swapped": [
+        {
+          "module": "gamm",
+          "pool_id": "193",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "tokens_in": "1000uosmo",
+          "tokens_out": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+        },
+        {
+          "module": "gamm",
+          "pool_id": "274",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "tokens_in": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "tokens_out": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+        },
+        {
+          "module": "gamm",
+          "pool_id": "301",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "tokens_in": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "tokens_out": "103639ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+        },
+      ],
+      "transfer": [
+        {
+          "amount": "1000uosmo",
+          "recipient": "osmo1jve7zc9y29kl8jalu0aaz8v38y2vpjucdk7thg79ektq4t7aswcsa6w45d",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "recipient": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "sender": "osmo1jve7zc9y29kl8jalu0aaz8v38y2vpjucdk7thg79ektq4t7aswcsa6w45d",
+        },
+        {
+          "amount": "1516575ibc/9712DBB13B9631EDFA9BF61B55F1B2D290B2ADB67E3A4EB3A875F3B6081B3B84",
+          "recipient": "osmo1npz80ntx3vwkv3w9ryzc8g074hlykmw497ar0j7dqzk4yanjylqshan44d",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "recipient": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "sender": "osmo1npz80ntx3vwkv3w9ryzc8g074hlykmw497ar0j7dqzk4yanjylqshan44d",
+        },
+        {
+          "amount": "5037ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "recipient": "osmo1mrltfv8y3jf4v3ggw0hnjjxzmwmq749rsjgvgvjuk0ezzs4hycfskm6c6a",
+          "sender": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+        },
+        {
+          "amount": "103639ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+          "recipient": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87",
+          "sender": "osmo1mrltfv8y3jf4v3ggw0hnjjxzmwmq749rsjgvgvjuk0ezzs4hycfskm6c6a",
+        },
+      ],
+      "tx": [
+        {
+          "fee": "0uosmo",
+        },
+        {
+          "acc_seq": "osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87/354",
+        },
+        {
+          "signature": "3PG52NNp1D9nHOOVYlL90i96AmWzoFpHGOIRlZfU/UtLLRYW1dOkS1CzYrHkbOlrHtUhGtLsn2Yc6c0Duqjz9Q==",
+        },
+      ],
     }
   `);
 });
@@ -565,16 +988,17 @@ it('should return swap result for osmosis dex', async () => {
     },
   };
 
-  expect(await resolveSwapResponse(response, 'osmosis')).toMatchInlineSnapshot(`
-    {
-      "inputAmount": "10000",
-      "inputDenom": "uosmo",
-      "orderPrice": "0",
-      "outputAmount": "14853086",
-      "outputDenom": "ibc/E6931F78057F7CC5DA0FD6CEF82FF39373A6E0452BF1FD76910B93292CF356C1",
-      "poolId": "285",
-    }
-  `);
+  expect(await resolveSwapResponse(response, 'osmosis', 'osmo1z5nyx87c03l4uvdy0vt2p86ng0ml42cxz4wr87'))
+    .toMatchInlineSnapshot(`
+      {
+        "inputAmount": "1000",
+        "inputDenom": "uosmo",
+        "orderPrice": "0",
+        "outputAmount": "103639",
+        "outputDenom": "ibc/7C4D60AA95E5A7558B0A364860979CA34B7FF8AAF255B87AF9E879374470CEC0",
+        "poolId": "301",
+      }
+    `);
 });
 
 it('should return swap result for gravity dex', async () => {

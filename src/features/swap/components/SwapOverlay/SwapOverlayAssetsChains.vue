@@ -34,7 +34,7 @@
       <template #label="{ item }">
         <AmountDisplay
           :amount="{ amount: totalDenomBalance(state.context, denom, item.chain), denom: denom }"
-          :chain="item"
+          :chain="item.chain"
         />
       </template>
     </SwapMenu>

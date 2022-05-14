@@ -31,10 +31,10 @@
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
-        <ConnectKeplr
+        <ConnectWallet
           ref="connectKeplrRef"
           type="welcome"
-          @connect="cancelConnectKeplr"
+          @connect="cancelConnectWallet"
           @warning="showWarning"
           @try-demo="tryDemo"
         />
@@ -53,7 +53,7 @@
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
-        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" @connect="cancelConnectKeplr" />
+        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" @connect="cancelConnectWallet" />
       </div>
     </div>
 
@@ -74,7 +74,7 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
-import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import ConnectWallet from '@/components/account/ConnectWallet.vue';
 import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetDesktop from '@/components/account/GetDesktop.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
@@ -106,7 +106,7 @@ export default defineComponent({
   name: 'ConnectWalletModal',
 
   components: {
-    ConnectKeplr,
+    ConnectWallet,
     Brandmark,
     AgreeWarning,
     GetKeplr,
@@ -146,7 +146,7 @@ export default defineComponent({
       router.push(originUrl.value ?? '/');
     };
 
-    const cancelConnectKeplr = () => {
+    const cancelConnectWallet = () => {
       connectKeplrRef.value?.cancel();
       isReturnUser.value = true;
       goBackToOrigin();
@@ -236,7 +236,7 @@ export default defineComponent({
       isWarningAgreed,
       isWarningNeeded,
       cancelAgreeWarning,
-      cancelConnectKeplr,
+      cancelConnectWallet,
       tryDemo,
     };
   },

@@ -60,7 +60,7 @@ import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
 import { GlobalGetterTypes } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getDisplayName, getTicker } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 export default defineComponent({
   name: 'DenomSelectModal',
@@ -110,6 +110,7 @@ export default defineComponent({
                     asset.base_denom,
                     useStore().getters[GlobalGetterTypes.API.getDexChain],
                   ),
+                  ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
                 };
               }),
             ),
@@ -125,6 +126,7 @@ export default defineComponent({
                       asset.base_denom,
                       useStore().getters[GlobalGetterTypes.API.getDexChain],
                     ),
+                    ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
                   };
                 }),
               ),
@@ -153,10 +155,16 @@ export default defineComponent({
 
     const keywordFilteredAssets = computed(() => {
       const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
-        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+        return (
+          asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
+          asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+        );
       });
       const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
-        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+        return (
+          asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
+          asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+        );
       });
 
       return [filteredAssets, filteredOtherAssets];

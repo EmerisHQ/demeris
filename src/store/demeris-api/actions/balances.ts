@@ -8,6 +8,7 @@ import { GlobalActionTypes, GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, Subscribable } from '@/types/util';
 import { hashObject } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ActionTypes } from '../action-types';
 import { MutationTypes } from '../mutation-types';
@@ -32,7 +33,7 @@ export interface BalanceActionsInterface {
     context: APIActionContext,
     payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
   ): Promise<EmerisAPI.UnbondingDelegations>;
-  [ActionTypes.GET_ALL_BALANCES](context: APIActionContext): Promise<EmerisAPI.Balances>;
+  [ActionTypes.GET_ALL_BALANCES](context: APIActionContext, payload?: Subscribable<any>): Promise<EmerisAPI.Balances>;
   [ActionTypes.GET_ALL_STAKING_BALANCES](context: APIActionContext): Promise<EmerisAPI.StakingBalances>;
   [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS](context: APIActionContext): Promise<EmerisAPI.UnbondingDelegations>;
 }
@@ -141,7 +142,7 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
       return getters['getBalances'](params);
     }
   },
-  async [ActionTypes.GET_ALL_BALANCES]({ dispatch, getters, rootGetters }) {
+  async [ActionTypes.GET_ALL_BALANCES]({ dispatch, getters, rootGetters }, params) {
     try {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
 
@@ -150,19 +151,23 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
       const chains =
         getters['getChains'] ??
         (await dispatch(ActionTypes.GET_CHAINS, {
-          subscribe: false,
+          subscribe: featureRunning('USE_NEW_CHAINS_API'),
         }));
-      for (const chain in chains) {
-        if (!chains[chain].primary_channel)
-          chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
-            subscribe: true,
-            params: {
-              chain_name: chain,
-            },
-          });
+      if (!featureRunning('USE_NEW_CHAINS_API')) {
+        for (const chain in chains) {
+          if (!chains[chain].primary_channel)
+            chains[chain] = await dispatch(ActionTypes.GET_CHAIN, {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            });
+        }
       }
       for (const keyHash of keyHashes) {
-        balanceLoads.push(dispatch(ActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }));
+        balanceLoads.push(
+          dispatch(ActionTypes.GET_BALANCES, { subscribe: params?.subscribe ?? true, params: { address: keyHash } }),
+        );
       }
       await Promise.all(balanceLoads);
       if (rootGetters[GlobalGetterTypes.USER.getBalancesFirstLoad]) {

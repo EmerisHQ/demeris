@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  page.on('domcontentloaded', () => {
-    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr=true');
+  await page.goto('/');
+  await page.on('domcontentloaded', async () => {
+    await page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
   });
-  await page.goto('/welcome');
+  await page.goto('/welcome', { waitUntil: 'networkidle' });
 });
 
 test.describe('Welcome page elements location and availibility', () => {

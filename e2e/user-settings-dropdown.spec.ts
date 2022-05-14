@@ -1,12 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+import { loginToKeplr } from './login-to-keplr';
+
 test.beforeEach(async ({ page }) => {
-  page.on('domcontentloaded', () => {
-    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
-  });
-  await page.goto('/welcome'); // TODO: Our redirects flicker the original URL before going to welcome which confuses the tests. Needs fixing on the router level
-  (await page.locator('button:has-text("Connect Keplr")')).click();
-  (await page.locator('button:has-text("Agree")')).click();
+  await loginToKeplr(page, '/');
 });
 
 test.describe('Navbar elements location and availibility', function () {
