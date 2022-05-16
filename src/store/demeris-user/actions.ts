@@ -1,17 +1,22 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines-per-function */
-import { Secp256k1HdWallet } from '@cosmjs/amino';
+/* eslint-disable max-lines */
+import { pubkeyToAddress, pubkeyToRawAddress, Secp256k1HdWallet } from '@cosmjs/amino';
 import { stringToPath } from '@cosmjs/crypto';
+import { fromBase64 } from '@cosmjs/encoding';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
 import { ActionTree, DispatchOptions } from 'vuex';
 
+import { SupportedWallet } from '@/features/extension/types';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
 import { SessionParams } from '@/types/user';
 import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 import { addChain } from '@/utils/keplr';
 
 import { USERStore } from '.';
@@ -51,6 +56,7 @@ export interface Actions {
     { walletName, isDemoAccount }: { walletName: string; isDemoAccount: boolean },
   ): Promise<void>;
   [ActionTypes.SIGN_IN](context: UserActionContext): Promise<boolean>;
+  [ActionTypes.SIGN_IN_NEW](context: UserActionContext, data: { walletType: SupportedWallet }): Promise<boolean>;
   [ActionTypes.SIGN_IN_WITH_WATCHER](context: UserActionContext): Promise<boolean>;
   // Internal module actions
   [ActionTypes.SET_GAS_LIMIT](context: UserActionContext, { gasLimit }: { gasLimit: number }): Promise<void>;
@@ -134,22 +140,24 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
         (await dispatch(
           GlobalActionTypes.API.GET_CHAINS,
           {
-            subscribe: false,
+            subscribe: featureRunning('USE_NEW_CHAINS_API'),
           },
           { root: true },
         ));
-      for (const chain in chains) {
-        if (!chains[chain].node_info)
-          chains[chain] = await dispatch(
-            GlobalActionTypes.API.GET_CHAIN,
-            {
-              subscribe: true,
-              params: {
-                chain_name: chain,
+      if (!featureRunning('USE_NEW_CHAINS_API')) {
+        for (const chain in chains) {
+          if (!chains[chain].node_info)
+            chains[chain] = await dispatch(
+              GlobalActionTypes.API.GET_CHAIN,
+              {
+                subscribe: true,
+                params: {
+                  chain_name: chain,
+                },
               },
-            },
-            { root: true },
-          );
+              { root: true },
+            );
+        }
       }
       // The only case where the getChains getter would not return full data for a chain
       // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
@@ -246,13 +254,159 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       return false;
     }
   },
-  async [ActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
+  async [ActionTypes.SIGN_IN_NEW]({ commit, dispatch, rootGetters }, { walletType }: { walletType: SupportedWallet }) {
+    try {
+      if (!featureRunning('USE_EMERIS_EXTENSION'))
+        throw new Error('Should not be called with USE_EMERIS_EXTENSION turned off');
+
+      await walletActionHandler.connect(walletType);
+
+      await dispatch(ActionTypes.SIGN_OUT);
+      // Prior to signing in with a new account we must SIGN_OUT to remove all account related data from the store
+      // i.e. balances/staking_balances/subscriptions to those endpoints etc.
+      // We could call global reset_state but then we'd have to reload all non user-specific data (pools, chains, denoms etc.)
+      commit(MutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(MutationTypes.SET_PRICES_FIRST_LOAD, true);
+      // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
+      // This status is used for displaying skeleton loaders appropriately
+
+      const isCypress = !!window['Cypress'];
+      const chains =
+        rootGetters[GlobalGetterTypes.API.getChains] ??
+        (await dispatch(
+          GlobalActionTypes.API.GET_CHAINS,
+          {
+            subscribe: false,
+          },
+          { root: true },
+        ));
+      for (const chain in chains) {
+        if (!chains[chain].node_info)
+          chains[chain] = await dispatch(
+            GlobalActionTypes.API.GET_CHAIN,
+            {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            },
+            { root: true },
+          );
+      }
+      // The only case where the getChains getter would not return full data for a chain
+      // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
+      // This happens with the autoLogin feature or if the user clicks on connect_wallet as soon as it appears
+      // Since their async load has already been initiated this does not make new requests but makes use of the _InProgress
+      // caching and just waits for the previous ones to be resolved (hence it's a threading...or lack thereof issue since
+      // no actual requests are involved)
+      if (walletActionHandler.isAvailable(SupportedWallet.KEPLR))
+        window.keplr.defaultOptions = {
+          sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
+        };
+      if (!isCypress) {
+        // for (const chain in chains) {
+        //   // TODO : implement addChain for Emeris extension and apply as well
+        // }
+        const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
+        await walletActionHandler.enable(chainIds);
+      }
+      const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
+        chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
+      });
+      let keyData;
+      let signer;
+      if (!isCypress) {
+        keyData = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
+      } else {
+        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
+          prefix: dexchain.node_info.bech32_config.main_prefix,
+          hdPaths: [stringToPath(dexchain.derivation_path)],
+        });
+        const [account] = await signer.getAccounts();
+        keyData = {
+          name: 'Cypress Test',
+          algo: account.algo,
+          pubKey: account.pubkey,
+          bech32Address: account.address,
+          isNanoLedger: false,
+          address: fromHexString(keyHashfromAddress(account.address)),
+        };
+      }
+      const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
+      commit(MutationTypes.SET_CORRELATION_ID, encryptedUID);
+      commit(MutationTypes.SET_KEPLR, keyData);
+      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
+      analyticsConfig({ user_id: encryptedUID });
+
+      await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
+      for (const chain of Object.values(chains)) {
+        if (!isCypress) {
+          try {
+            const otherKey = await walletActionHandler.getAccount(chain.node_info.chain_id);
+            commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+          } catch (err) {
+            console.error(err); // EmerisSigner has a weird list of networks hardcoded so it fails for some, we need to change that
+          }
+        } else {
+          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
+            prefix: chain.node_info.bech32_config.main_prefix,
+            hdPaths: [stringToPath(chain.derivation_path)],
+          });
+          const [account] = await signer.getAccounts();
+          const otherKey = {
+            name: 'Cypress Test',
+            algo: account.algo,
+            pubKey: account.pubkey,
+            bech32Address: account.address,
+            isNanoLedger: false,
+            address: fromHexString(keyHashfromAddress(account.address)),
+          };
+          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        }
+      }
+
+      !isCypress
+        ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
+        : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
+
+      dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
+      dispatch(GlobalActionTypes.API.GET_ALL_STAKING_BALANCES, undefined, { root: true });
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  },
+  async [ActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(ActionTypes.SIGN_OUT);
       commit(MutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(MutationTypes.SET_PRICES_FIRST_LOAD, true);
-      const key = demoAccount;
+      let key = demoAccount;
+      if (import.meta.env.VITE_EMERIS_DEMO_PUBKEY) {
+        const chains = rootGetters[GlobalGetterTypes.API.getChains];
+        const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map(
+          (x) => x.node_info.bech32_config.prefix_account,
+        );
+        const pubkeyBytes = fromBase64(import.meta.env.VITE_EMERIS_DEMO_PUBKEY as string);
+        const pubkeyPair = {
+          type: 'tendermint/PubKeySecp256k1',
+          value: import.meta.env.VITE_EMERIS_DEMO_PUBKEY,
+        };
+
+        key = {
+          name: 'Emeris Watcher',
+          algo: 'secp256k1',
+          pubKey: pubkeyBytes,
+          bech32Address: pubkeyToAddress(pubkeyPair, 'cosmos'),
+          isNanoLedger: false,
+          address: pubkeyToRawAddress(pubkeyPair),
+          keyHashes: chainIds.map((prefix) => keyHashfromAddress(pubkeyToAddress(pubkeyPair, prefix))),
+        };
+      }
       commit(MutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
         commit(MutationTypes.ADD_KEPLR_KEYHASH, hash);

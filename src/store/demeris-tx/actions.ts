@@ -5,11 +5,13 @@ import { stringToPath } from '@cosmjs/crypto';
 import axios from 'axios';
 import { ActionTree } from 'vuex';
 
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
 import { SignParams, TxParams, TxResponse } from '@/types/tx';
 import { Namespaced } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { TXStore } from '.';
 import { ActionTypes } from './action-types';
@@ -58,7 +60,11 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       // await addChain(chain_name);
 
       if (!isCypress) {
-        await window.keplr.enable(chain.node_info.chain_id);
+        if (featureRunning('USE_EMERIS_EXTENSION')) {
+          await walletActionHandler.enable(chain.node_info.chain_id);
+        } else {
+          await window.keplr.enable(chain.node_info.chain_id);
+        }
       }
 
       const offlineSigner = isCypress

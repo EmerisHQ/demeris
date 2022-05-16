@@ -290,6 +290,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             target: '#ready',
             actions: 'clearSteps',
           },
+          'BALANCES.SET': {
+            actions: 'assignBalances',
+          },
         },
       },
     },
@@ -310,7 +313,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         return Promise.resolve(true);
       },
       handleSubmit: async (context) => {
-        return logic.convertRouteToSteps(context, context.selectedRouteIndex);
+        return logic.prepareRouteToSign(context, context.selectedRouteIndex);
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
@@ -334,7 +337,6 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       })),
       assignRoutes: assign((context, event: any) => {
         let routes = logic.removeExceedingStepsFromRoutes(event.data);
-
         if (context.inputCoin.chain !== context.inputCoinDex.chain) {
           routes = logic.prependAdditionalStepsToRoutes(routes, context.inputCoin, context.inputCoinDex);
         }
@@ -383,8 +385,8 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             chain: undefined,
           };
         },
-        inputAmount: (_) => undefined,
-        outputAmount: (_) => undefined,
+        inputAmount: (context) => context.outputAmount,
+        outputAmount: (context) => context.inputAmount,
         inputCoin: (context) => {
           if (!context.outputCoin) return undefined;
 
@@ -439,7 +441,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       updateInputAmountFromRoute: assign({
         inputAmount: (context) => {
           if (!context.data.routes.length) {
-            return '0';
+            return '-';
           }
 
           const expectedAmount = logic.getInputAmountFromRoute(context);
@@ -449,7 +451,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       updateOutputAmountFromRoute: assign({
         outputAmount: (context) => {
           if (!context.data.routes.length) {
-            return '0';
+            return '-';
           }
           const { amount, denom } = logic.getOutputAmountFromRoute(context);
           const baseDenom = resolveBaseDenom(denom, { context });

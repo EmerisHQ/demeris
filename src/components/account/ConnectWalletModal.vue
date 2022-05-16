@@ -8,9 +8,9 @@
       show-close-button
       class="connect-wallet-modal"
       max-width-class="max-w-sm"
-      @close="closeConnectKeplr"
+      @close="closeConnectWallet"
     >
-      <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
+      <ConnectWallet ref="connectKeplrRef" @cancel="closeConnectWallet" @connect="closeConnectWallet" />
     </Modal>
 
     <Modal
@@ -59,7 +59,7 @@
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
-import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import ConnectWallet from '@/components/account/ConnectWallet.vue';
 import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -90,7 +90,7 @@ export default defineComponent({
 
   components: {
     Modal,
-    ConnectKeplr,
+    ConnectWallet,
     AgreeWarning,
     GetKeplr,
     GetBrowser,
@@ -115,7 +115,7 @@ export default defineComponent({
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
 
-    const closeConnectKeplr = () => {
+    const closeConnectWallet = () => {
       connectKeplrRef.value.cancel();
       emit('close');
     };
@@ -176,7 +176,7 @@ export default defineComponent({
       isKeplrSupported,
       isKeplrInstalled,
       closeAgreeWarning,
-      closeConnectKeplr,
+      closeConnectWallet,
       closeGetKeplr,
       closeGetBrowser,
       tryDemo,
