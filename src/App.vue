@@ -213,6 +213,5 @@ watch(
   { immediate: true },
 );
 </script>
-o
 
 <style lang="scss"></style>
