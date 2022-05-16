@@ -27,26 +27,28 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
   
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          cache: yarn
+          cache-dependency-path: |
+            ./yarn.lock
 
-      - name: Install (npm)
-        run: npm ci
+      - name: Install (yarn)
+        run: yarn
 
       - name: Test
-        run: npm run test:unit
+        run: yarn test:unit
 
   e2e:
     
@@ -57,32 +59,34 @@ jobs:
     runs-on: self-hosted
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
 
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          cache: yarn
+          cache-dependency-path: |
+            ./yarn.lock
 
-      - name: Install (npm)
-        run: npm ci
+      - name: Install (yarn)
+        run: yarn
 
       - name: Install Serve
-        run: npm install -g serve
+        run: yarn global add serve
       
       - name: Install Playwright
         run: npx playwright install chromium --with-deps
 
       - name: Build
-        run: NODE_OPTIONS="--max_old_space_size=8192" npm run build:production
+        run: NODE_OPTIONS="--max_old_space_size=8192" yarn build:production
 
       - name: Run Playwright tests
         run: 

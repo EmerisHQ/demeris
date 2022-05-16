@@ -13,8 +13,8 @@ Before contributing, please familiarize yourself with the [Frontend Engineering 
 ⚠️ Since currently dev is unstable at best, we recommend to run Emeris in production mode.
 
 ```
-npm ci
-npm run serve
+yarn
+yarn serve
 ```
 
 ### Configuration
@@ -65,7 +65,7 @@ Test commands:
 
 ```
 # Run all tests in headless mode
-npm run dev && npm run e2e
+yarn dev && yarn e2e
 
 # Run one specific (failing) test in debug mode
 PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts
@@ -76,10 +76,10 @@ PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts
 
 ```
 # Run all unit tests
-npm run test:unit
+yarn test:unit
 
 # Run one specific unit test
-npm run test:unit -t src/features/transactions/components/TransactionsCenterActionButton.spec.ts
+yarn test:unit -t src/features/transactions/components/TransactionsCenterActionButton.spec.ts
 ```
 
 ### Manual testing transactions / swaps
@@ -89,7 +89,7 @@ In order to do testing, we can send $10-$20 to devs from the demo account upon r
 ## Build
 
 ```
-npm run build
+yarn build
 ```
 
 ## Feature Flags

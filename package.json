@@ -140,7 +140,7 @@
       "prettier --write"
     ],
     "*.{js,ts,tsx,vue}": [
-      "npm run lint"
+      "yarn lint"
     ]
   },
   "simple-git-hooks": {
