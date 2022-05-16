@@ -24,7 +24,7 @@ export default function usePrice() {
     let value = new BigNumber(0);
 
     if (price) {
-      value = new BigNumber(price * parseInt(amount)).dividedBy(10 ** parseInt(precision));
+      value = new BigNumber(parseInt(amount)).multipliedBy(price).shiftedBy(-precision);
     }
 
     return value;
