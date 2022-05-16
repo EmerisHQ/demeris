@@ -411,7 +411,23 @@ export default defineComponent({
     };
 
     const orderedUserBalances = computed(() => {
-      let tokens = orderBy(balancesWithName.value, [(x) => +x.value.value, 'name'], ['desc', 'asc']);
+      let tokens = balancesWithName.value
+        .map((item) => {
+          const denom = item.denom;
+          const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+          const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+          const result = new BigNumber(item.totalAmount).multipliedBy(price).shiftedBy(-precision);
+          return { ...item, price: result };
+        })
+        .sort((a, b) => {
+          if (a.price.isNaN()) {
+            return 1;
+          }
+          if (b.price.isNaN()) {
+            return -1;
+          }
+          return a.price > b.price ? -1 : 1;
+        });
       return tokens.slice(0, currentLimit.value);
     });
 
