@@ -29,7 +29,7 @@ export default function (
     let value = new BigNumber(0);
 
     if (amount.amount) {
-      value = new BigNumber(price.value * parseInt(amount.amount)).dividedBy(10 ** parseInt(precision));
+      value = new BigNumber(parseInt(amount.amount)).multipliedBy(price.value).shiftedBy(-precision);
     }
 
     return value;
