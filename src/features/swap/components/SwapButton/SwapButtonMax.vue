@@ -3,7 +3,7 @@
     v-if="maxAmount"
     class="-text-1 hover:text-link transition-colors"
     :class="{
-      'text-negative-text': state.matches('ready.invalid.overMax'),
+      'text-negative-text': state.matches('ready.invalid.overMax') || state.matches('unavailable.overMax'),
     }"
     @click="handleClick"
   >
