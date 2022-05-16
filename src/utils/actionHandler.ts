@@ -33,7 +33,7 @@ export async function msgFromStepTransaction(
   stepTx: Actions.StepTransaction,
   gasPriceLevel: EmerisFees.GasPriceLevel,
 ): Promise<Actions.MsgMeta> {
-  const chainName = stepTx.type == 'stake' ? stepTx.data[0].chainName : stepTx.data.chainName;
+  const chainName = ['stake', 'swap'].includes(stepTx.type) ? stepTx.data[0].chainName : stepTx.data.chainName;
 
   const typedstore = useStore() as RootStoreTyped;
   if (stepTx.type == 'transfer') {
@@ -98,7 +98,10 @@ export async function msgFromStepTransaction(
     const slippage = (typedstore.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
 
     if (featureRunning('DEX_AGG')) {
-      stepTx.data.to.amount = calculateSlippage(stepTx.data.to.amount, slippage * 100);
+      stepTx.data[stepTx.data.length - 1].to.amount = calculateSlippage(
+        stepTx.data[stepTx.data.length - 1].to.amount,
+        slippage * 100,
+      );
     } else {
       let isReverse = false;
       const price = [stepTx.data.from, stepTx.data.to];
@@ -323,7 +326,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let error: Error;
 
   let denoms = [];
-  const chain = transaction.data.chainName ?? typedstore.getters[GlobalGetterTypes.API.getDexChain];
+  let chain = transaction.data.chainName ?? typedstore.getters[GlobalGetterTypes.API.getDexChain];
 
   switch (transaction.type) {
     case 'addLiquidity':
@@ -335,7 +338,8 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
       denoms = [createdata.coinA.denom, createdata.coinB.denom];
       break;
     case 'swap':
-      const swapdata = transaction.data;
+      chain = transaction.data[0].chainName;
+      const swapdata = transaction.data[0];
       denoms = [swapdata.from.denom, swapdata.to.denom];
       break;
     case 'withdrawLiquidity':
@@ -437,6 +441,8 @@ export async function isLive(chain_name) {
 export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
   let chainName: string;
   if (stepTx.type == 'stake') {
+    chainName = stepTx.data[0].chainName;
+  } else if (stepTx.type == 'swap') {
     chainName = stepTx.data[0].chainName;
   } else {
     chainName = stepTx.data.chainName;
@@ -758,7 +764,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.type == 'swap') {
-        const chain_name = stepTx.data.chainName;
+        const chain_name = stepTx.data[0].chainName;
         if (!typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -1064,7 +1070,7 @@ export async function validateStepFeeBalances(
       }
     }
     if (stepTx.type == 'swap') {
-      const data = stepTx.data;
+      const data = stepTx.data[0];
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
@@ -1494,7 +1500,7 @@ export async function validateStepsFeeBalances(
         }
       }
       if (stepTx.type == 'swap') {
-        const data = stepTx.data;
+        const data = stepTx.data[0];
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
           if (amount.denom == data.from.denom && x.on_chain == data.chainName) {
