@@ -80,7 +80,7 @@ jobs:
         run: yarn
 
       - name: Install Serve
-        run: yarn global add serve
+        run: npm install -g serve
       
       - name: Install Playwright
         run: npx playwright install chromium --with-deps

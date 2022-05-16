@@ -65,7 +65,7 @@ Test commands:
 
 ```
 # Run all tests in headless mode
-yarn dev && yarn e2e
+yarn dev && yarn test:e2e
 
 # Run one specific (failing) test in debug mode
 PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts
