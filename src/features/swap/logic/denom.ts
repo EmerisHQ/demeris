@@ -4,10 +4,12 @@ import orderBy from 'lodash.orderby';
 
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
+import { isNative } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 import { SwapCoin, SwapContext } from '../state/machine';
 import { amountToHuman, totalDenomBalance } from './amount';
+import { getChainFromProtocol } from './protocol';
 
 export const denomBalancesPerChain = (context: SwapContext, denom: string) => {
   const balances = context.balances.filter((item) => item.base_denom === denom);
@@ -38,14 +40,24 @@ export const getDenomFromBaseDenom = (context: SwapContext, baseDenom: string, c
   return swaps ?? baseDenom;
 };
 
-export const getChainFromDenom = (context: SwapContext, denom: string) => {
+export const getChainFromDenom = (context: SwapContext, denom: string, protocol?: string) => {
   const chain = useStore().getters[GlobalGetterTypes.API.getChainNameByBaseDenom]({ denom });
   if (chain) return chain;
 
-  const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  const trace = traces[denom.split('/')[1]?.toUpperCase()];
+  let trace;
 
-  if (trace?.trace) {
+  if (protocol) {
+    const hash = denom.split('/')[1];
+    trace = useStore().getters[GlobalGetterTypes.API.getVerifyTrace]({
+      chain_name: getChainFromProtocol(protocol),
+      hash,
+    });
+  } else {
+    const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
+    trace = traces[denom.split('/')[1]?.toUpperCase()];
+  }
+
+  if (trace?.trace?.[0]) {
     return trace.trace[0].chain_name;
   }
 
@@ -112,7 +124,7 @@ export const getAvailableInputAssets = (context: SwapContext) => {
     })
     .filter((x) => !x.baseDenom.startsWith('pool'));
 
-  return orderBy(results, [(x) => +x.humanBalance, 'displayName'], ['desc', 'asc']);
+  return orderBy(results, [(x) => (x.humanBalance === '-' ? 0 : +x.humanBalance), 'displayName'], ['desc', 'asc']);
 };
 
 export const getAvailableChainsByDenom = (context: SwapContext, baseDenom: string) => {
@@ -164,6 +176,12 @@ export const resolveBaseDenom = (denom: string, base: { context?: SwapContext; s
 export const resolveDisplayName = (baseDenom: string) => {
   const config = useStore().getters[GlobalGetterTypes.API.getVerifiedDenoms].find((x) => x.name === baseDenom);
   return config?.display_name;
+};
+
+export const normalizeDenom = (denom: string) => {
+  if (isNative(denom)) return denom;
+  const [prefix, hash] = denom.split('/');
+  return `${prefix}/${hash.toUpperCase()}`;
 };
 
 export const getMarketCap = (denom: string) => {

@@ -28,26 +28,26 @@
           </div>
 
           <template v-if="isLoadingCoin || isLoadingChain">
-            <div><SkeletonLoader height="12px" width="96px" /></div>
+            <div>
+              <SkeletonLoader height="17px" width="96px" />
+            </div>
           </template>
           <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap text-left">
             <ChainName :name="chain" />
-          </span>
-          <span v-else-if="chainFallback" class="text-muted -text-1 whitespace-nowrap text-left">
-            {{ chainFallback }}
           </span>
         </div>
       </button>
 
       <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">
-        <SkeletonLoader v-if="isLoadingAmount" height="20px" width="82px" />
+        <SkeletonLoader v-if="isLoadingAmount" height="22px" width="82px" />
+        <SkeletonLoader v-if="isLoadingAmount" height="16px" width="82px" />
         <template v-else>
           <AmountInput
             ref="inputRef"
             v-model="value"
             class="bg-transparent text-right w-full text-text font-bold text-1 placeholder-inactive appearance-none border-none outline-none"
           />
-          <span class="text-muted -text-1">
+          <span v-if="showAssetPrice" class="text-muted -text-1">
             <Price :amount="amountToUnit({ denom: baseDenom, amount: value })" show-zero />
           </span>
         </template>
@@ -80,6 +80,7 @@ interface Props {
   isLoadingAmount?: boolean;
   isLoadingChain?: boolean;
   refKey: string;
+  type?: string;
 }
 
 const props = defineProps<Props>();
@@ -97,5 +98,13 @@ const value = computed<string>({
   set(value) {
     emit('update:input', value);
   },
+});
+
+const showAssetPrice = computed(() => {
+  if (props?.type === 'output') {
+    return value.value && value.value !== '0' && value.value !== '-';
+  } else {
+    return true;
+  }
 });
 </script>

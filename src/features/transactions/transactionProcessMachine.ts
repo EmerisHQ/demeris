@@ -289,7 +289,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       next: {
         id: 'next',
-        entry: { type: 'logEvent', key: 'completed_tx' },
+        entry: [{ type: 'logEvent', key: 'completed_tx' }, 'refreshBalances'],
         always: [
           { target: 'receipt', cond: 'hasMoreTransactions' },
           { target: 'receipt', cond: 'hasMoreSteps' },
@@ -371,16 +371,13 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
         );
-        let validation = {};
-        if (!context.input.isDemoAccount) {
-          validation = await validateStepsFeeBalances(
-            context.input.action,
-            context.formattedSteps,
-            context.input.balances,
-            totals,
-            context.input.gasPriceLevel,
-          );
-        }
+        const validation = await validateStepsFeeBalances(
+          context.input.action,
+          context.formattedSteps,
+          context.input.balances,
+          totals,
+          context.input.gasPriceLevel,
+        );
         return { totals, validation };
       },
       validateChainStatus: async (context) => {
@@ -547,7 +544,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 break;
               } catch {
                 retriesDestCount++;
-                await new Promise((r) => setTimeout(r, 4000));
+                await new Promise((r) => setTimeout(r, 6000));
               }
             }
 
@@ -704,6 +701,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }
 
         event(key, data);
+      },
+      refreshBalances: () => {
+        useStore().dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, { subscribe: false });
       },
     },
 

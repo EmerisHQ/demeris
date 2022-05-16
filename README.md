@@ -103,3 +103,19 @@ Right now, because we don't have a [good feature management system in place](htt
 ## Maintenance Screen
 
 In case of emergencies, for example the backend API's are down, it's possible for us to show a maintenance screen to the customers of Emeris. To do this, change `VITE_FEATURE_MAINTENANCE_SCREEN` to `true` in the [Netlify environment variables](https://app.netlify.com/sites/emeris-app/settings/deploys#environment), and [trigger a deploy](https://app.netlify.com/sites/emeris-app/deploys).
+
+## Demo Account
+
+Currently Emeris uses a specific account to be used as demo, you can override it using an environment variable with the wallet's public key:
+
+```
+VITE_EMERIS_DEMO_PUBKEY=A1OICufyXCvxCPl+humMapyHLXu3bdVMJCLEam3bmq1Q
+```
+
+To find the public key of a specific address, you will need to get a transaction signed by the wallet (in any chain):
+
+- Go to https://www.mintscan.io
+- Search the target address
+- Click in any transaction sent\* to check its details
+- Check the raw data by pressing the JSON button (at top-right)
+- In the `auth_info` field, there is a `public_key` property, `key` is the value you need.

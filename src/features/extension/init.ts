@@ -8,7 +8,7 @@ export async function initializeExtension() {
   }
 
   if ((window as unknown as any)?.emeris) {
-    await (window as unknown as any)?.emeris?.init();
+    await (window as unknown as any)?.emeris?.ready();
     walletActionHandler.add(
       SupportedWallet.EMERIS,
       (window as unknown as any).emeris,

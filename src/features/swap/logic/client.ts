@@ -3,6 +3,7 @@ import { EmerisDEXInfo } from '@emeris/types';
 import axios from 'axios';
 
 import { GlobalGetterTypes } from '@/store';
+import { appLogger } from '@/utils/logging';
 import { useStore } from '@/utils/useStore';
 
 import { SwapContext } from '../state';
@@ -30,11 +31,17 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
   if (direction === 'input') payload.amountOut = null;
   if (direction === 'output') payload.amountIn = null;
 
-  const { data } = await axios.post(`${endpoint}/daggregation/routing`, payload);
-  if (data.routes?.length === 0) {
-    throw new Error('No swaps available');
+  try {
+    const { data } = await axios.post(`${endpoint}/daggregation/routing`, payload);
+    if (data.routes?.length === 0) throw new Error('No swaps available');
+
+    return data.routes;
+  } catch (error) {
+    appLogger.reportSingleError(error);
+    const cause = error.response?.data?.error;
+    if (cause) console.error(cause);
+    throw error;
   }
-  return data.routes;
 };
 
 export const fetchAvailableDenoms = async () => {
