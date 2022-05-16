@@ -336,7 +336,7 @@ export default defineComponent({
           }
         }
       }
-      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
+      const sortedSummary = summary.sort((a, b) => (a.totalAmount.isGreaterThan(b.totalAmount) ? -1 : 1));
       return sortedSummary;
     });
 
@@ -426,7 +426,7 @@ export default defineComponent({
           if (b.price.isNaN()) {
             return -1;
           }
-          return a.price > b.price ? -1 : 1;
+          return a.price.isGreaterThan(b.price) ? -1 : 1;
         });
       return tokens.slice(0, currentLimit.value);
     });
