@@ -277,6 +277,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             target: 'updating.routes.input',
             actions: ['switchCoins', 'updateInputCoinDex', 'focusInputAmount'],
           },
+          'BALANCES.SET': {
+            actions: 'assignBalances',
+          },
         },
       },
       submitted: {
