@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { loginToKeplr } from './login-to-keplr';
+import { loginToKeplr } from '../login-to-keplr';
 
 test.beforeEach(async ({ page }) => {
   await loginToKeplr(page, '/asset/uatom?VITE_FEATURE_STAKING=true');

@@ -291,6 +291,9 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           'UNAVAILABLE.UNKNOWN': {
             target: '.unknown',
           },
+          'BALANCES.SET': {
+            actions: 'assignBalances',
+          },
         },
         states: {
           overMax: {},
