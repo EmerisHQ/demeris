@@ -32,7 +32,7 @@ export const calculateInputAmountWithTransactionFees = (
 
   const denomFee = chainFees.find((fee) => fee.denom === baseDenom);
 
-  if (!denomFee) return;
+  if (!denomFee) return inputAmount;
 
   const feeLevel = denomFee.amount[gasPriceLevel];
   const requiredFee = new BigNumber(feeLevel).times(gasLimit);
