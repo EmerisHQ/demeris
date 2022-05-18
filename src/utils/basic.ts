@@ -52,15 +52,17 @@ export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
   const typedstore = useStore() as RootStoreTyped;
-  if (import.meta.env.VITE_EMERIS_DEMO_PUBKEY) {
-    const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
-    const pubkeyPair = {
-      type: 'tendermint/PubKeySecp256k1',
-      value: import.meta.env.VITE_EMERIS_DEMO_PUBKEY,
-    };
-    return pubkeyToAddress(pubkeyPair, chain.node_info.bech32_config.prefix_account);
-  }
+
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
+    if (import.meta.env.VITE_EMERIS_DEMO_PUBKEY) {
+      const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
+      const pubkeyPair = {
+        type: 'tendermint/PubKeySecp256k1',
+        value: import.meta.env.VITE_EMERIS_DEMO_PUBKEY,
+      };
+      return pubkeyToAddress(pubkeyPair, chain.node_info.bech32_config.prefix_account);
+    }
+
     return demoAddresses[chain_name];
   } else {
     if (!featureRunning('USE_NEW_CHAINS_API'))

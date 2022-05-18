@@ -5,11 +5,11 @@
       <p class="text-muted -text-1 leading-normal">{{ $t('components.swap.disabledMessage') }}</p>
     </div>
     <a
-      href="https://support.emeris.com/en/articles/6095013-how-to-withdraw-your-funds-from-liquidity-pools"
+      href="https://support.emeris.com/en/collections/3445330-contact"
       class="font-[500]"
       target="_blank"
       rel="noopener noreferrer"
-      >{{ $t('components.swap.disabledLearnMore') }}</a
+      >{{ $t('components.swap.contactEmerisSupport') }}</a
     >
   </section>
 </template>
