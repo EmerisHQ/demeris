@@ -34,8 +34,11 @@
         </div>
         <SwapCoinOutput />
       </div>
-
       <SwapButtonSwap :state="state" :send="send" />
+    </div>
+
+    <div v-if="state.context.data.steps.length" class="-text-1 px-6">
+      <FeeLevelSelector :steps="state.context.data.steps" class="pb-0" />
     </div>
 
     <SwapOverlaySettings />
@@ -48,6 +51,7 @@
 import { whenever } from '@vueuse/core';
 import { computed, nextTick, watch } from 'vue';
 
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';

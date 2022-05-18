@@ -44,7 +44,7 @@ export const fetchSwapRoutes = async (context: SwapContext, direction?: string) 
     return data.routes;
   } catch (error) {
     appLogger.reportSingleError(error);
-    const cause = error.response?.data?.error ?? error.message;
+    const cause = error.response?.data?.message ?? error.message;
     if (cause) console.error('[swap]: ' + cause);
     throw error;
   }

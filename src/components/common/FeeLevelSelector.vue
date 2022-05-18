@@ -218,13 +218,16 @@ export default defineComponent({
 
     // get swap tx
     const swapTx = computed(() => {
-      return props.steps.find((step) => step.name === 'swap')?.transactions[0].data as SwapData;
+      return props.steps.find((step) => step.name === 'swap')?.transactions[0].data;
     });
 
     //if swap tx is exist, check from/to coins denoms to identify pool coin
     const hasPoolCoinToSwap = computed(() => {
       if (swapTx.value) {
-        return swapTx.value.from.denom.startsWith('pool') || swapTx.value.to.denom.startsWith('pool');
+        return (
+          swapTx.value[0].from.denom.startsWith('pool') ||
+          swapTx.value[swapTx.value.length - 1].to.denom.startsWith('pool')
+        );
       } else {
         return false;
       }
@@ -237,11 +240,11 @@ export default defineComponent({
       async () => {
         if (hasPoolCoinToSwap.value) {
           poolCoinDisplayDenoms.value[0] = await getTicker(
-            swapTx.value.from.denom,
+            swapTx.value[0].from.denom,
             typedstore.getters[GlobalGetterTypes.API.getDexChain],
           );
           poolCoinDisplayDenoms.value[1] = await getTicker(
-            swapTx.value.to.denom,
+            swapTx.value[swapTx.value.length - 1].to.denom,
             typedstore.getters[GlobalGetterTypes.API.getDexChain],
           );
         }
@@ -254,7 +257,7 @@ export default defineComponent({
         const swapFees = [];
         const swapFeeRate =
           parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
-        const tx = swapTx.value;
+        const tx = swapTx.value[0];
         const precision =
           typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
             name: tx.from.denom, //pool coin precision is same
@@ -275,19 +278,23 @@ export default defineComponent({
     const swapDollarFee = computed(() => {
       if (swapTx.value) {
         let value = 0;
-        const tx = swapTx.value;
+        const txs = swapTx.value as SwapData[];
+        const firstTx = txs[0];
+        const lastTx = txs[txs.length - 1];
+
         const swapFeeRate =
           parseFloat(typedstore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ??
           0.0015;
 
-        const fromPrecision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? 6;
-        const toPrecision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? 6;
-        const fromPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: tx.from.denom });
-        const toPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: tx.to.denom });
+        const fromPrecision =
+          typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: firstTx.from.denom }) ?? 6;
+        const toPrecision = typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: lastTx.to.denom }) ?? 6;
+        const fromPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: firstTx.from.denom });
+        const toPrice = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: lastTx.to.denom });
 
         value =
-          ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, fromPrecision) ?? 0) +
-          ((toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, toPrecision) ?? 0);
+          ((fromPrice * Number(firstTx.from.amount) * swapFeeRate) / Math.pow(10, fromPrecision) ?? 0) +
+          ((toPrice * Number(lastTx.to.amount) * swapFeeRate) / Math.pow(10, toPrecision) ?? 0);
         return value;
       } else {
         return null;
