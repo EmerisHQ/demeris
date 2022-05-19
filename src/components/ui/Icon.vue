@@ -26,7 +26,6 @@ export default defineComponent({
     const currentIcon = shallowRef('');
     const isReady = ref(false);
     onMounted(async () => {
-      //console.log('bc')
       const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
       currentIcon.value = icon;
       isReady.value = true;
