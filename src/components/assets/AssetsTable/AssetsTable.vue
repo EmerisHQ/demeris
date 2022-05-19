@@ -411,7 +411,7 @@ export default defineComponent({
     };
 
     const orderedUserBalances = computed(() => {
-      let tokens = balancesWithName.value
+      const tokens = balancesWithName.value
         .map((item) => {
           const denom = item.denom;
           const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
@@ -432,7 +432,7 @@ export default defineComponent({
     });
 
     const orderedAllBalances = computed(() => {
-      let tokens = orderBy(
+      const tokens = orderBy(
         balancesWithMarketCap.value,
         [(x) => x.marketCap || '', (x) => x.value.value, 'name'],
         ['desc', 'desc', 'asc'],
