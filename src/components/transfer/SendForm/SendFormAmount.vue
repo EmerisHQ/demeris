@@ -81,9 +81,7 @@
           <AmountDisplay
             v-if="state.isUSDInputChecked"
             :amount="{
-              amount: form.balance.amount
-                ? `${new BigNumber(parseCoins(form.balance.amount)[0].amount).multipliedBy(denomDecimals)}`
-                : '0',
+              amount: formBalanceAmount,
               denom: state.currentAsset?.base_denom,
             }"
           />
@@ -118,14 +116,14 @@
       <div class="text-right">
         <p>
           <Price
-            :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }"
+            :amount="{ amount: currentAssetAmount, denom: state.currentAsset.base_denom }"
             :auto-update="false"
             show-zero
           />
         </p>
         <p class="-text-1 mt-0.5 transition-colors" :class="hasSufficientFunds ? 'text-muted' : 'text-negative-text'">
           <span>
-            <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+            <AmountDisplay :amount="{ amount: currentAssetAmount, denom: state.currentAsset.base_denom }" />
             {{ $t('components.sendForm.available') }}
           </span>
         </p>
@@ -188,6 +186,7 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { GasPriceLevel, SendAddressForm, Step } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+
 const props = defineProps({
   balances: {
     type: Array as PropType<EmerisAPI.Balances>,
@@ -209,14 +208,8 @@ const typedstore = useStore() as RootStoreTyped;
 const router = useRouter();
 const form = inject<SendAddressForm>('transferForm');
 const { nativeBalances } = useAccount();
-const propsRef = toRefs(props);
-const availableBalances = computed(() => {
-  if (propsRef.balances.value.length) {
-    return propsRef.balances.value;
-  }
 
-  return nativeBalances.value;
-});
+const propsRef = toRefs(props);
 
 const state = reactive({
   currentAsset: undefined,
@@ -227,6 +220,22 @@ const state = reactive({
   usdValue: '',
   gasPrice: undefined,
   fees: {},
+});
+
+const formBalanceAmount = computed(() => {
+  return form.balance.amount ? `${Number(form.balance.amount) * denomDecimals.value}` : '0';
+});
+
+const currentAssetAmount = computed(() => {
+  return parseCoins(state.currentAsset.amount)[0].amount;
+});
+
+const availableBalances = computed(() => {
+  if (propsRef.balances.value.length) {
+    return propsRef.balances.value;
+  }
+
+  return nativeBalances.value;
 });
 
 const feesAmount = computed(() => {
@@ -259,14 +268,10 @@ const hasFunds = computed(() => {
     return false;
   }
 
-  const totalAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+  const totalAmount = currentAssetAmount.value;
 
-  return totalAmount.isGreaterThan(new BigNumber(0));
+  return +totalAmount > 0;
 });
-
-const openAssetPage = () => {
-  router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
-};
 
 const hasPrice = computed(() => {
   if (!state.currentAsset) {
@@ -292,7 +297,7 @@ const hasSufficientFunds = computed(() => {
   const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
   const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
-  return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
+  return amount.plus(fee).isLessThanOrEqualTo(currentAssetAmount.value);
 });
 
 const isValid = computed(() => {
@@ -313,6 +318,10 @@ const isValid = computed(() => {
   return true;
 });
 
+const openAssetPage = () => {
+  router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+};
+
 const onSubmit = () => {
   if (!isValid.value) {
     return;
@@ -322,7 +331,7 @@ const onSubmit = () => {
 };
 
 const setCurrentAsset = async (asset: Record<string, unknown>) => {
-  state.currentAsset = { ...asset, amount: parseCoins(asset.amount as string)[0].amount };
+  state.currentAsset = asset;
 
   if (asset) {
     form.balance.denom = parseCoins(asset.amount as string)[0].denom;
@@ -391,7 +400,7 @@ watch(
     if (state.isMaximumAmountChecked) {
       const precision =
         typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-      const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+      const assetAmount = new BigNumber(currentAssetAmount.value);
       const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
       form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
       return;
