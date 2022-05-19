@@ -20,7 +20,7 @@ export default () => {
       chunkSizeWarningLimit: 1000,
       sourcemap: true,
     },
-    plugins: [vue(), nodeResolve(), dynamicImport(), envCompatible(), eslintPlugin({ fix: true })],
+    plugins: [vue(), nodeResolve(), dynamicImport(), envCompatible(), eslintPlugin({ fix: true }), dynamicImport()],
     resolve: {
       alias: {
         '@starport/vuex': path.resolve(__dirname, './src/utils/EmerisError.ts'),
