@@ -28,12 +28,8 @@ export function useTotalPortfolioBalance() {
                 name: balance.base_denom,
               }) || 6,
             );
-            const value = totalValue.dividedBy(precision);
-            if (value) {
-              return total.plus(value);
-            } else {
-              return total;
-            }
+            const totalValueWithPrecision = totalValue.dividedBy(precision);
+            return totalValueWithPrecision ? total.plus(totalValueWithPrecision) : total;
           } else {
             return total;
           }
@@ -59,12 +55,8 @@ export function useTotalPortfolioBalance() {
               name: stakedDenom[0].name,
             }) || 6,
           );
-          const value = totalValue.dividedBy(precision);
-          if (value) {
-            return total.plus(value);
-          } else {
-            return total;
-          }
+          const totalValueWithPrecision = totalValue.dividedBy(precision);
+          return totalValueWithPrecision ? total.plus(totalValueWithPrecision) : total;
         } else {
           return total;
         }
@@ -98,12 +90,8 @@ export function useTotalPortfolioBalance() {
               name: unstakedDenom[0].name,
             }) || 6,
           );
-          const value = totalValue.dividedBy(precision);
-          if (value) {
-            return total.plus(value);
-          } else {
-            return total;
-          }
+          const totalValueWithPrecision = totalValue.dividedBy(precision);
+          return totalValueWithPrecision ? total.plus(totalValueWithPrecision) : total;
         } else {
           return total;
         }
