@@ -121,7 +121,7 @@
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                   :amount="{
-                    amount: new BigNumber(parseCoins(asset.amount)[0].amount)
+                    amount: getFormattedAmount(asset.amount)
                       .plus(new BigNumber(stakedAmount))
                       .toFixed(assetConfig.precision),
                     denom,
@@ -130,7 +130,7 @@
                 <AmountDisplay
                   v-else
                   :amount="{
-                    amount: new BigNumber(parseCoins(asset.amount)[0].amount).toFixed(assetConfig.precision),
+                    amount: getFormattedAmount(asset.amount).toFixed(assetConfig.precision),
                     denom,
                   }"
                 />
@@ -140,7 +140,7 @@
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                     :amount="{
-                      amount: new BigNumber(parseCoins(asset.amount)[0].amount)
+                      amount: getFormattedAmount(asset.amount)
                         .plus(new BigNumber(stakedAmount))
                         .toFixed(assetConfig.precision),
                       denom,
@@ -149,7 +149,7 @@
                   <Price
                     v-else
                     :amount="{
-                      amount: new BigNumber(parseCoins(asset.amount)[0].amount).toFixed(assetConfig.precision),
+                      amount: getFormattedAmount(asset.amount).toFixed(assetConfig.precision),
                       denom,
                     }"
                   />
@@ -493,7 +493,9 @@ export default defineComponent({
       typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
     });
 
-    const isStakingRunning = featureRunning('STAKING');
+    const getFormattedAmount = (assetAmount) => {
+      return new BigNumber(parseCoins(assetAmount)[0].amount);
+    };
 
     return {
       nativeAsset,
@@ -518,7 +520,7 @@ export default defineComponent({
       showPriceChartLoadingSkeleton,
       priceDiffObject,
       setPriceDifference,
-      isStakingRunning,
+      getFormattedAmount,
       displayPrice,
     };
   },
