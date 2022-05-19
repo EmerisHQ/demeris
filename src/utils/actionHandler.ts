@@ -172,7 +172,7 @@ export async function msgFromStepTransaction(
   }
 }
 // TODO make getter so it out updates on getFeeTokens getter
-export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+export function getFeeForChain(chain_name: string): Array<Actions.FeeWDenom> {
   if (!chain_name) return [];
 
   const typedstore = useStore() as RootStoreTyped;

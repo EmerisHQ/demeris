@@ -52,7 +52,9 @@ export const getChainFromDenom = (context: SwapContext, denom: string, protocol?
       chain_name: getChainFromProtocol(protocol),
       hash,
     });
-  } else {
+  }
+
+  if (!trace) {
     const traces: Record<string, any> = useStore().getters[GlobalGetterTypes.API.getAllVerifiedTraces];
     trace = traces[denom.split('/')[1]?.toUpperCase()];
   }

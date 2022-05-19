@@ -107,7 +107,8 @@ export default defineComponent({
     const validators = ref([]);
     const tx = propsRef.step.value.transactions[0];
     const baseDenom = (tx.data as Actions.UnstakeData).amount.denom;
-    const chainName = (tx.data as Actions.UnstakeData).chain_name;
+    const chainName = (tx.data as Actions.UnstakeData).chainName;
+
     const stakingRewardsData = ref(null);
     const unStaked = (tx.data as Actions.UnstakeData).amount.amount;
 

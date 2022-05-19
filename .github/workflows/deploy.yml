@@ -10,6 +10,11 @@ on:
         description: Enable maintenance screen
         required: true
         default: "false"
+      empty_out_dir:
+        description: Clear dist folder before build
+        required: true
+        default: false
+        type: boolean
 
 env:
   VITE_FEATURE_MAINTENANCE_SCREEN: ${{ github.event.inputs.enable_maintenance_screen || 'false' }}
@@ -38,7 +43,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: NODE_OPTIONS="--max_old_space_size=8192" npm run build:production
+        run: NODE_OPTIONS="--max_old_space_size=8192" npm run build:production -- --emptyOutDir ${{ github.event.inputs.empty_out_dir }}
 
       - name: Deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
