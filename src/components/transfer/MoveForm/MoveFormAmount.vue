@@ -100,9 +100,7 @@
             <AmountDisplay
               v-if="state.isUSDInputChecked"
               :amount="{
-                amount: form.balance.amount
-                  ? `${new BigNumber(parseCoins(form.balance.amount)[0].amount).multipliedBy(denomDecimals)}`
-                  : '0',
+                amount: form.balance.amount ? `${Number(form.balance.amount) * denomDecimals}` : '0',
                 denom: state.currentAsset?.base_denom,
               }"
             />
@@ -378,7 +376,7 @@ const hasFunds = computed(() => {
     return false;
   }
 
-  const totalAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+  const totalAmount = new BigNumber(state.currentAsset.amount);
 
   return totalAmount.isGreaterThan(new BigNumber(0));
 });
@@ -397,7 +395,7 @@ const hasSufficientFunds = computed(() => {
   const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
   const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
-  return amount.plus(fee).isLessThanOrEqualTo(new BigNumber(parseCoins(state.currentAsset.amount)[0].amount));
+  return amount.plus(fee).isLessThanOrEqualTo(new BigNumber(state.currentAsset.amount));
 });
 
 const isValid = computed(() => {
