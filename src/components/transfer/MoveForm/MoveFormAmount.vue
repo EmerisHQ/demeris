@@ -393,7 +393,7 @@ const hasSufficientFunds = computed(() => {
   const precision =
     store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
   const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
-  const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+  const fee = new BigNumber(feesAmount.value[state.currentAsset.base_denom] ?? 0);
 
   return amount.plus(fee).isLessThanOrEqualTo(new BigNumber(state.currentAsset.amount));
 });
