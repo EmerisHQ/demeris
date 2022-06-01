@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { computed } from 'vue';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
@@ -20,10 +21,12 @@ export default function usePrice() {
         name: denom,
       }) ?? '6';
 
-    let value = 0;
+    let value = new BigNumber(0);
+
     if (price) {
-      value = price ? (price * parseInt(amount)) / Math.pow(10, parseInt(precision)) : 0;
+      value = new BigNumber(parseInt(amount)).multipliedBy(price).shiftedBy(-precision);
     }
+
     return value;
   }
 
