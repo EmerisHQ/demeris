@@ -46,7 +46,7 @@
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
           <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
           <template v-else>
-            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <AmountDisplay :amount="{ denom: coin.base_denom, amount: `${parseCoins(coin.amount)[0].amount}` }" />
             <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
               {{ $t('components.coinList.available') }}
             </span>
@@ -68,15 +68,16 @@
       </template>
     </div>
     <div v-else-if="showBalance" class="text-muted text-right">
-      <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+      <AmountDisplay :amount="{ amount: parseCoins(coin.amount)[0].amount, denom: coin.base_denom }" />
     </div>
   </div>
 </template>
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
@@ -109,8 +110,9 @@ export default defineComponent({
   emits: ['select'],
   setup(props) {
     const typedstore = useStore() as RootStoreTyped;
-    const modifiedData = computed(() => getUniqueCoinList(props.data));
+    const modifiedData = computed(() => getUniqueCoinList(propsRef.data.value));
 
+    const propsRef = toRefs(props);
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
     }
@@ -121,6 +123,7 @@ export default defineComponent({
           const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
           return {
             ...item,
+            amount: item.amount ? item.amount : '0' + item.base_denom,
             unavailableChains,
             isFullAmountUnavailable: !!unavailableChains.length,
           };
@@ -128,30 +131,32 @@ export default defineComponent({
       }
 
       const newData = JSON.parse(JSON.stringify(data));
-      let denomNameObejct = {};
+      let denomNameObject = {};
       let modifiedData = [];
 
       newData.forEach((denom) => {
-        if (denomNameObejct[denom.base_denom]) {
+        if (denomNameObject[denom.base_denom]) {
           // Remove from available amount if chain is down
-          if (denomNameObejct[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
+          if (denomNameObject[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
             return;
           }
-
-          denomNameObejct[denom.base_denom].amount =
-            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
+          const denomAmount = new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0);
+          const baseDenomAmount = new BigNumber(parseCoins(denomNameObject[denom.base_denom].amount)[0].amount);
+          denomNameObject[denom.base_denom].amount = `${baseDenomAmount.plus(denomAmount).toString()}${
+            denom.base_denom
+          }`;
         } else {
-          denomNameObejct[denom.base_denom] = denom;
+          denomNameObject[denom.base_denom] = denom;
           const unavailableChains = getUnavailableChains(denom);
           const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
-          let amount = denom.amount;
+          let amount = new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0).toString();
 
           // Remove from available amount if chain is down
           if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
-            amount = `0${parseCoins(denom.amount)[0].denom}`;
+            amount = '0';
           }
-
-          denomNameObejct[denom.base_denom] = {
+          amount = amount + denom.base_denom;
+          denomNameObject[denom.base_denom] = {
             ...denom,
             amount,
             unavailableChains,
@@ -160,10 +165,9 @@ export default defineComponent({
         }
       });
 
-      for (let denom in denomNameObejct) {
-        modifiedData.push(denomNameObejct[denom]);
+      for (let denom in denomNameObject) {
+        modifiedData.push(denomNameObject[denom]);
       }
-
       return modifiedData;
     }
 
@@ -195,7 +199,7 @@ export default defineComponent({
     const coinsByType = computed(() => {
       return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });
-    return { setWordColorByKeyword, coinsByType };
+    return { setWordColorByKeyword, coinsByType, parseCoins };
   },
 });
 </script>
