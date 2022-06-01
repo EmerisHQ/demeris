@@ -255,6 +255,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
       },
       updating: {
+        entry: 'clearSteps',
         states: {
           routes: {
             states: {

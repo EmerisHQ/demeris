@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <dl v-if="state.matches('ready.valid')" class="grid grid-cols-[auto_1fr] gap-y-3 -text-1 mr-1">
+    <dl v-if="state.context.data.routes" class="grid grid-cols-[auto_1fr] gap-y-3 -text-1 mr-1">
       <dt class="text-muted">Limit price</dt>
       <dd class="text-right font-medium whitespace-nowrap">
         <AmountDisplay :amount="inputAmount" /> =
