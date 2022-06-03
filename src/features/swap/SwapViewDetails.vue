@@ -109,7 +109,14 @@ import { useSwapStore } from './state';
 // NOTE: We should not interact with the current swap machine here
 // this component is used to display a transaction in the `review` or `receipt` state.
 
-const props = defineProps(['step', 'fees', 'context', 'transactionProcessContext']);
+interface Props {
+  step: any;
+  fees: any;
+  context: any;
+  transactionProcessContext: any;
+}
+
+const props = defineProps<Props>();
 const swapStore = useSwapStore();
 
 const transaction = computed(() => {

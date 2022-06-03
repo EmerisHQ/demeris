@@ -50,9 +50,8 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
-import { computed, defineComponent, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
 
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CoinList from '@/components/common/CoinList.vue';
@@ -62,161 +61,147 @@ import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
 import { GlobalGetterTypes } from '@/store';
 import { getDisplayName, getTicker } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
-export default defineComponent({
-  name: 'DenomSelectModal',
-  components: {
-    TitleWithGoback,
-    ChainSelectModal,
-    Search,
-    CoinList,
-    WhiteOverlay,
+
+interface Props {
+  type?: string;
+  assets: any;
+  otherAssets?: any;
+  counterDenom: any;
+  func?: any;
+  title: string;
+  showBalance?: boolean;
+  showBackButton: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  type: undefined,
+  otherAssets: () => {
+    return {};
   },
-  props: {
-    type: { type: String, default: undefined },
-    assets: { type: Object, required: true },
-    otherAssets: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
-    counterDenom: { type: Object, required: false, default: null },
-    func: { type: Function, default: () => void 0 },
-    title: { type: String, required: true },
-    showBalance: { type: Boolean, default: false },
-    showBackButton: { type: Boolean, required: false, default: true },
-  },
-  emits: ['select'],
-  setup(props, { emit }) {
-    const isModalOpen = ref(false);
-    const keyword = ref('');
-    const selectedDenom = ref(null);
-
-    const chainSelectModalData = ref(props.assets);
-
-    const displayNameAddedList = ref([]);
-    const displayNameAddedOtherList = ref([]);
-    watch(
-      () => props.assets,
-      async () => {
-        if (props.assets.length) {
-          displayNameAddedList.value = [
-            await Promise.all(
-              props.assets.map(async (asset) => {
-                return {
-                  ...asset,
-                  display_name: await getDisplayName(
-                    asset.base_denom,
-                    useStore().getters[GlobalGetterTypes.API.getDexChain],
-                  ),
-                  ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
-                };
-              }),
-            ),
-          ];
-
-          if (props.otherAssets.length > 0) {
-            displayNameAddedOtherList.value = [
-              await Promise.all(
-                props.otherAssets.map(async (asset) => {
-                  return {
-                    ...asset,
-                    display_name: await getDisplayName(
-                      asset.base_denom,
-                      useStore().getters[GlobalGetterTypes.API.getDexChain],
-                    ),
-                    ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
-                  };
-                }),
-              ),
-            ];
-          }
-        } else {
-          return [];
-        }
-      },
-      { immediate: true },
-    );
-
-    const displaySelectedPair = ref('');
-    watch(
-      () => props.counterDenom?.base_denom,
-      async () => {
-        if (props.counterDenom?.base_denom) {
-          displaySelectedPair.value = await getDisplayName(
-            props.counterDenom.base_denom,
-            useStore().getters[GlobalGetterTypes.API.getDexChain],
-          );
-        }
-      },
-      { immediate: true },
-    );
-
-    const keywordFilteredAssets = computed(() => {
-      const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
-        return (
-          asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
-          asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
-        );
-      });
-      const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
-        return (
-          asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
-          asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
-        );
-      });
-
-      return [filteredAssets, filteredOtherAssets];
-    });
-
-    function coinListselectHandler(payload) {
-      if (props.title === 'Receive') {
-        payload.type = props.title;
-        emit('select', payload);
-      } else {
-        selectedDenom.value = payload.base_denom;
-
-        if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
-          chainSelectModalData.value = props.assets;
-          toggleChainSelectModal();
-          return;
-        } else if (
-          props.otherAssets.length > 0 &&
-          props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1
-        ) {
-          chainSelectModalData.value = props.otherAssets;
-          toggleChainSelectModal();
-          return;
-        }
-
-        emit('select', payload);
-      }
-    }
-
-    function chainSelectHandler(payload) {
-      emit('select', payload);
-      toggleChainSelectModal();
-    }
-
-    function toggleChainSelectModal() {
-      isModalOpen.value = !isModalOpen.value;
-      keyword.value = '';
-    }
-
-    return {
-      isModalOpen,
-      toggleChainSelectModal,
-      coinListselectHandler,
-      chainSelectModalData,
-      chainSelectHandler,
-      keyword,
-      keywordFilteredAssets,
-      displayNameAddedList,
-      selectedDenom,
-      displaySelectedPair,
-    };
-  },
+  counterDenom: null,
+  func: () => void 0,
+  showBalance: false,
+  showBackButton: true,
 });
+
+const emit = defineEmits<{
+  (e: 'select', payload: any): void;
+}>();
+
+const isModalOpen = ref(false);
+const keyword = ref('');
+const selectedDenom = ref(null);
+
+const chainSelectModalData = ref(props.assets);
+
+const displayNameAddedList = ref([]);
+const displayNameAddedOtherList = ref([]);
+watch(
+  () => props.assets,
+  async () => {
+    if (props.assets.length) {
+      displayNameAddedList.value = [
+        await Promise.all(
+          props.assets.map(async (asset) => {
+            return {
+              ...asset,
+              display_name: await getDisplayName(
+                asset.base_denom,
+                useStore().getters[GlobalGetterTypes.API.getDexChain],
+              ),
+              ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
+            };
+          }),
+        ),
+      ];
+
+      if (props.otherAssets.length > 0) {
+        displayNameAddedOtherList.value = [
+          await Promise.all(
+            props.otherAssets.map(async (asset) => {
+              return {
+                ...asset,
+                display_name: await getDisplayName(
+                  asset.base_denom,
+                  useStore().getters[GlobalGetterTypes.API.getDexChain],
+                ),
+                ticker: await getTicker(asset.base_denom, useStore().getters[GlobalGetterTypes.API.getDexChain]),
+              };
+            }),
+          ),
+        ];
+      }
+    } else {
+      return [];
+    }
+  },
+  { immediate: true },
+);
+
+const displaySelectedPair = ref('');
+watch(
+  () => props.counterDenom?.base_denom,
+  async () => {
+    if (props.counterDenom?.base_denom) {
+      displaySelectedPair.value = await getDisplayName(
+        props.counterDenom.base_denom,
+        useStore().getters[GlobalGetterTypes.API.getDexChain],
+      );
+    }
+  },
+  { immediate: true },
+);
+
+const keywordFilteredAssets = computed(() => {
+  const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
+    return (
+      asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
+      asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+    );
+  });
+  const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
+    return (
+      asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1 ||
+      asset.ticker?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+    );
+  });
+
+  return [filteredAssets, filteredOtherAssets];
+});
+
+function coinListselectHandler(payload) {
+  if (props.title === 'Receive') {
+    payload.type = props.title;
+    emit('select', payload);
+  } else {
+    selectedDenom.value = payload.base_denom;
+
+    if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+      chainSelectModalData.value = props.assets;
+      toggleChainSelectModal();
+      return;
+    } else if (
+      props.otherAssets.length > 0 &&
+      props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1
+    ) {
+      chainSelectModalData.value = props.otherAssets;
+      toggleChainSelectModal();
+      return;
+    }
+
+    emit('select', payload);
+  }
+}
+
+function chainSelectHandler(payload) {
+  emit('select', payload);
+  toggleChainSelectModal();
+}
+
+function toggleChainSelectModal() {
+  isModalOpen.value = !isModalOpen.value;
+  keyword.value = '';
+}
 </script>
 
 <style lang="scss" scoped>

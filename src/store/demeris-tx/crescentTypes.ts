@@ -199,14 +199,14 @@ export const crescentTypes = {
       amount,
       orderLifespan: _orderLifespan,
     }: MsgLimitOrder): AminoMsgLimitOrder['value'] => {
-      const _price = `${new BigNumber(price).shiftedBy(-18).toFixed(18)}`;
+      const priceFixed = `${new BigNumber(price).shiftedBy(-18).toFixed(18)}`;
       return {
         orderer: orderer,
         pair_id: String(pairId),
         direction: Number(direction),
         offer_coin: offerCoin,
         demand_coin_denom: demandCoinDenom,
-        price: _price,
+        price: priceFixed,
         amount: amount,
         order_lifespan: '0',
       };

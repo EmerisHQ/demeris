@@ -71,86 +71,51 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-export default defineComponent({
-  name: 'ListItem',
-  components: {
-    Button,
-    Icon,
-  },
-  props: {
-    direction: {
-      type: String as PropType<'row' | 'col'>,
-      default: 'row',
-    },
-    collapsible: {
-      type: Boolean,
-      default: false,
-    },
-    collapsed: {
-      type: Boolean,
-      default: false,
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    disclosureShowText: {
-      type: String,
-      default: 'Show',
-    },
-    disclosureHideText: {
-      type: String,
-      default: 'Hide',
-    },
-    firstCellClass: {
-      type: String,
-      default: 'w-full',
-    },
-    hint: {
-      type: String,
-      default: undefined,
-    },
-    inset: {
-      type: Boolean,
-      default: false,
-    },
-    label: {
-      type: String,
-      default: undefined,
-    },
-    secondCellClass: {
-      type: String,
-      default: 'w-full',
-    },
-    value: {
-      type: String,
-      default: undefined,
-    },
-    labelFontWeight: {
-      type: String as PropType<'light' | 'normal' | 'medium'>,
-      default: 'medium',
-    },
-    size: {
-      type: String as PropType<'xs' | 'sm' | 'md'>,
-      default: 'md',
-    },
-  },
-  setup(props) {
-    const isCollapsed = ref(props.collapsed);
+interface Props {
+  direction?: 'row' | 'col';
+  collapsible?: boolean;
+  collapsed?: boolean;
+  description?: string;
+  disclosureShowText?: string;
+  disclosureHideText?: string;
+  firstCellClass?: string;
+  hint?: string;
+  inset?: boolean;
+  label?: string;
+  secondCellClass?: string;
+  value?: string;
+  labelFontWeight?: 'light' | 'normal' | 'medium';
+  size?: 'xs' | 'sm' | 'md';
+}
 
-    const toggleCollapse = () => {
-      isCollapsed.value = !isCollapsed.value;
-    };
-
-    return { isCollapsed, toggleCollapse };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  direction: 'row',
+  collapsible: false,
+  collapsed: false,
+  description: '',
+  disclosureShowText: 'Show',
+  disclosureHideText: 'Hide',
+  firstCellClass: 'w-full',
+  hint: undefined,
+  inset: false,
+  label: undefined,
+  secondCellClass: 'w-full',
+  value: undefined,
+  labelFontWeight: 'medium',
+  size: 'md',
 });
+
+const isCollapsed = ref(props.collapsed);
+
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
 </script>
 
 <style lang="scss" scoped></style>

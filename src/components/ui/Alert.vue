@@ -34,62 +34,43 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 
 type AlertStatus = 'error' | 'info' | 'warning';
 type AlertSize = 'sm' | 'md';
 
-export default defineComponent({
-  name: 'Alert',
+interface Props {
+  status?: AlertStatus;
+  message?: string;
+  showIcon?: boolean;
+  size?: AlertSize;
+}
 
-  components: {
-    Icon,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  status: 'warning',
+  message: '',
+  showIcon: true,
+  size: 'sm',
+});
 
-  props: {
-    status: {
-      type: String as PropType<AlertStatus>,
-      default: 'warning',
-    },
-    message: {
-      type: String,
-      default: '',
-    },
-    showIcon: {
-      type: Boolean,
-      default: true,
-    },
-    size: {
-      type: String as PropType<AlertSize>,
-      default: 'sm',
-    },
-  },
-
-  setup(props) {
-    const iconName = computed(() => {
-      switch (props.status) {
-        case 'error':
-          return 'WarningTriangleIcon';
-          break;
-        case 'warning':
-          return 'ExclamationIcon';
-          break;
-        case 'info':
-          return 'InformationIcon';
-          break;
-        default:
-          return null;
-          break;
-      }
-    });
-
-    return {
-      iconName,
-    };
-  },
+const iconName = computed(() => {
+  switch (props.status) {
+    case 'error':
+      return 'WarningTriangleIcon';
+      break;
+    case 'warning':
+      return 'ExclamationIcon';
+      break;
+    case 'info':
+      return 'InformationIcon';
+      break;
+    default:
+      return null;
+      break;
+  }
 });
 </script>
 

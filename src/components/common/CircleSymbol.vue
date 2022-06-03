@@ -80,13 +80,12 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 /*
  * when customSize is set glow is forced to false
  */
 import { EmerisAPI } from '@emeris/types';
-import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import gdexSvg from '@/assets/svg/symbols/gdex.svg';
@@ -110,212 +109,174 @@ const findSymbolColors = (symbol: string) => {
   return symbolsData[symbol]?.colors || defaultColors;
 };
 
-export default defineComponent({
-  name: 'CircleSymbol',
+interface Props {
+  displayStatus?: boolean;
+  denom?: string;
+  poolDenoms?: string[];
+  chainName?: string;
+  variant?: CircleSymbolVariant;
+  size?: DesignSizes;
+  customSize?: string;
+  logo?: boolean;
+  glow?: boolean;
+}
 
-  components: {
-    CircleSymbolStatus,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  displayStatus: true,
+  denom: '',
+  poolDenoms: () => [],
+  chainName: undefined,
+  variant: 'asset',
+  size: 'md',
+  customSize: '',
+  logo: true,
+  glow: true,
+});
 
-  props: {
-    displayStatus: {
-      type: Boolean,
-      default: true,
-    },
-    denom: {
-      type: String,
-      default: '',
-    },
-    poolDenoms: {
-      type: Array as PropType<string[]>,
-      default: () => [],
-    },
-    chainName: {
-      type: String,
-      default: undefined,
-    },
-    variant: {
-      type: String as PropType<CircleSymbolVariant>,
-      default: 'asset',
-    },
-    size: {
-      type: String as PropType<DesignSizes>,
-      default: 'md',
-    },
-    customSize: {
-      type: String,
-      default: '',
-    },
-    logo: {
-      type: Boolean,
-      default: true,
-    },
-    glow: {
-      type: Boolean,
-      default: true,
-    },
-  },
+const { pools, getReserveBaseDenoms } = usePools();
 
-  setup(props) {
-    const { pools, getReserveBaseDenoms } = usePools();
+const typedstore = useStore() as RootStoreTyped;
+const denoms = ref<string[]>([]);
+const isLoaded = ref(false);
 
-    const typedstore = useStore() as RootStoreTyped;
-    const denoms = ref<string[]>([]);
-    const isLoaded = ref(false);
+const isPoolCoin = computed(() => {
+  if (props.variant === 'asset') {
+    return (props.denom as string).startsWith('pool') || props.poolDenoms.length > 0;
+  }
 
-    const isPoolCoin = computed(() => {
-      if (props.variant === 'asset') {
-        return (props.denom as string).startsWith('pool') || props.poolDenoms.length > 0;
-      }
+  return false;
+});
 
-      return false;
-    });
+const assetConfig = computed(() => {
+  const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
+  const chains = typedstore.getters[GlobalGetterTypes.API.getChains] || ([] as EmerisAPI.Chain[]);
 
-    const assetConfig = computed(() => {
-      const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
-      const chains = typedstore.getters[GlobalGetterTypes.API.getChains] || ([] as EmerisAPI.Chain[]);
+  const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
 
-      const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
+  if (!denomConfig) {
+    return;
+  }
 
-      if (!denomConfig) {
-        return;
-      }
+  const chainConfig = chains[denomConfig.chain_name];
+  denomConfig.logo = denomConfig.logo || chainConfig?.logo;
 
-      const chainConfig = chains[denomConfig.chain_name];
-      denomConfig.logo = denomConfig.logo || chainConfig?.logo;
+  return { ...denomConfig };
+});
 
-      return { ...denomConfig };
-    });
+const isVerified = computed(() => {
+  if (!isLoaded.value) {
+    return true;
+  }
 
-    const isVerified = computed(() => {
-      if (!isLoaded.value) {
-        return true;
-      }
+  if (isPoolCoin.value) {
+    return true;
+  }
 
-      if (isPoolCoin.value) {
-        return true;
-      }
+  if (assetConfig.value) {
+    return assetConfig.value.verified;
+  }
 
-      if (assetConfig.value) {
-        return assetConfig.value.verified;
-      }
+  return true;
+});
 
-      return true;
-    });
+const isNativeChain = computed(() => {
+  if (props.chainName === undefined) {
+    return true;
+  }
 
-    const isNativeChain = computed(() => {
-      if (props.chainName === undefined) {
-        return true;
-      }
+  if (props.variant === 'asset') {
+    return assetConfig.value?.chain_name === props.chainName;
+  }
 
-      if (props.variant === 'asset') {
-        return assetConfig.value?.chain_name === props.chainName;
-      }
+  return false;
+});
 
-      return false;
-    });
+const generateBackground = (colors: Record<string, string>) => {
+  const hexArray = Object.values(colors).reverse();
+  const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
+  const colorStops = [];
 
-    const generateBackground = (colors: Record<string, string>) => {
-      const hexArray = Object.values(colors).reverse();
-      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
-      const colorStops = [];
+  for (const [index, hex] of Object.entries(hexArray)) {
+    colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+  }
 
-      for (const [index, hex] of Object.entries(hexArray)) {
-        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
-      }
-
-      return `radial-gradient(
+  return `radial-gradient(
 					ellipse farthest-corner at 16.67% 16.67%,
 					${colorStops.join(',')}
 				)`;
-    };
+};
 
-    const innerStyle = computed(() => {
-      let colors: Record<string, string> = {};
+const innerStyle = computed(() => {
+  let colors: Record<string, string> = {};
 
-      if (isPoolCoin.value) {
-        colors.primary = findSymbolColors(denoms.value[0]).primary;
-        colors.secondary = findSymbolColors('gdex').primary;
-        colors.tertiary = findSymbolColors(denoms.value[1]).primary;
-      } else {
-        colors = findSymbolColors(denoms.value[0]);
-      }
+  if (isPoolCoin.value) {
+    colors.primary = findSymbolColors(denoms.value[0]).primary;
+    colors.secondary = findSymbolColors('gdex').primary;
+    colors.tertiary = findSymbolColors(denoms.value[1]).primary;
+  } else {
+    colors = findSymbolColors(denoms.value[0]);
+  }
 
-      const background = generateBackground(colors);
-      const boxShadow = `rgba(${hexToRGB(colors.secondary)}, 0.5) 0px 2.4px 10px 1px`;
+  const background = generateBackground(colors);
+  const boxShadow = `rgba(${hexToRGB(colors.secondary)}, 0.5) 0px 2.4px 10px 1px`;
 
-      return {
-        background,
-        boxShadow,
-      };
-    });
-
-    const clipPathId =
-      'clip-' +
-      Math.random()
-        .toString(36)
-        .replace(/[^a-z]+/g, '')
-        .substr(2, 10);
-
-    const ringStyle = computed(() => {
-      const colors = findSymbolColors(props.chainName as string);
-
-      const background = generateBackground(colors);
-      const clipPath = `url(#${clipPathId})`;
-
-      return {
-        background,
-        clipPath,
-      };
-    });
-
-    const symbolImage = computed(() => {
-      if (isPoolCoin.value) {
-        return gdexSvg;
-      }
-
-      return undefined;
-    });
-
-    watch(
-      () => toRefs(props),
-      async () => {
-        if (isPoolCoin.value) {
-          let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
-
-          if (existingPool) {
-            denoms.value = await getReserveBaseDenoms(existingPool);
-          } else if (props.poolDenoms.filter(Boolean).length) {
-            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
-          }
-        } else {
-          let baseDenom = props.denom;
-          try {
-            baseDenom = await getBaseDenom(props.denom as string, props.chainName);
-          } catch {
-            //
-          }
-          denoms.value = [baseDenom];
-        }
-        isLoaded.value = true;
-      },
-      { immediate: true },
-    );
-
-    return {
-      assetConfig,
-      denoms,
-      innerStyle,
-      isPoolCoin,
-      isLoaded,
-      isNativeChain,
-      isVerified,
-      clipPathId,
-      ringStyle,
-      symbolImage,
-    };
-  },
+  return {
+    background,
+    boxShadow,
+  };
 });
+
+const clipPathId =
+  'clip-' +
+  Math.random()
+    .toString(36)
+    .replace(/[^a-z]+/g, '')
+    .substr(2, 10);
+
+const ringStyle = computed(() => {
+  const colors = findSymbolColors(props.chainName as string);
+
+  const background = generateBackground(colors);
+  const clipPath = `url(#${clipPathId})`;
+
+  return {
+    background,
+    clipPath,
+  };
+});
+
+const symbolImage = computed(() => {
+  if (isPoolCoin.value) {
+    return gdexSvg;
+  }
+
+  return undefined;
+});
+
+watch(
+  () => toRefs(props),
+  async () => {
+    if (isPoolCoin.value) {
+      let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
+
+      if (existingPool) {
+        denoms.value = await getReserveBaseDenoms(existingPool);
+      } else if (props.poolDenoms.filter(Boolean).length) {
+        denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
+      }
+    } else {
+      let baseDenom = props.denom;
+      try {
+        baseDenom = await getBaseDenom(props.denom as string, props.chainName);
+      } catch {
+        //
+      }
+      denoms.value = [baseDenom];
+    }
+    isLoaded.value = true;
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>

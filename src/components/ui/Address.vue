@@ -30,60 +30,40 @@
   </label>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Clipboard from '@/components/ui/Clipboard.vue';
 
-export default defineComponent({
-  name: 'Address',
+interface Props {
+  invalid?: boolean;
+  readonly?: boolean;
+  placeholder?: string;
+  address?: string;
+  chainName?: string;
+}
 
-  components: {
-    Button,
-    ChainName,
-    Clipboard,
-  },
-
-  inheritAttrs: false,
-
-  props: {
-    invalid: {
-      type: Boolean,
-      default: false,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    placeholder: {
-      type: String,
-      default: 'Enter an address',
-    },
-    address: {
-      type: String,
-      default: undefined,
-    },
-    chainName: {
-      type: String,
-      default: '',
-    },
-  },
-
-  emits: ['update:address'],
-
-  setup(props, { emit }) {
-    const model = computed({
-      get: () => props.address,
-      set: (value) => emit('update:address', value),
-    });
-    const pasteClip = () => {
-      navigator.clipboard.readText().then((clipText) => (model.value = clipText));
-    };
-    return { model, pasteClip };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  invalid: false,
+  readonly: false,
+  placeholder: 'Enter an address',
+  address: undefined,
+  chainName: '',
 });
+
+const emit = defineEmits<{
+  (e: 'update:address', value: any): void;
+}>();
+
+const model = computed({
+  get: () => props.address,
+  set: (value) => emit('update:address', value),
+});
+const pasteClip = () => {
+  navigator.clipboard.readText().then((clipText) => (model.value = clipText));
+};
 </script>
 
 <style lang="scss" scoped>

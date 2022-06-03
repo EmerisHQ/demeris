@@ -54,9 +54,9 @@
   </teleport>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
-import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectWallet from '@/components/account/ConnectWallet.vue';
@@ -85,103 +85,73 @@ async function getKeplrInstance() {
   });
 }
 
-export default defineComponent({
-  name: 'ConnectWalletModal',
+interface Props {
+  open?: boolean;
+}
 
-  components: {
-    Modal,
-    ConnectWallet,
-    AgreeWarning,
-    GetKeplr,
-    GetBrowser,
-  },
+withDefaults(defineProps<Props>(), { open: false });
 
-  props: {
-    open: {
-      type: Boolean,
-      default: false,
-    },
-  },
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
 
-  emits: ['close'],
+const connectKeplrRef = ref(null);
+const agreeWarningRef = ref(null);
+const getKeplrRef = ref(null);
+const getBrowserRef = ref(null);
+const isWarningAgreed = ref(null);
+const isKeplrSupported = ref(null);
+const isKeplrInstalled = ref(null);
+const isLoading = ref(true);
 
-  setup(_, { emit }) {
-    const connectKeplrRef = ref(null);
-    const agreeWarningRef = ref(null);
-    const getKeplrRef = ref(null);
-    const getBrowserRef = ref(null);
-    const isWarningAgreed = ref(null);
-    const isKeplrSupported = ref(null);
-    const isKeplrInstalled = ref(null);
-    const isLoading = ref(true);
+const closeConnectWallet = () => {
+  connectKeplrRef.value.cancel();
+  emit('close');
+};
+const closeAgreeWarning = () => {
+  emit('close');
+};
+const closeGetKeplr = () => {
+  emit('close');
+};
+const closeGetBrowser = () => {
+  emit('close');
+};
 
-    const closeConnectWallet = () => {
-      connectKeplrRef.value.cancel();
-      emit('close');
-    };
-    const closeAgreeWarning = () => {
-      emit('close');
-    };
-    const closeGetKeplr = () => {
-      emit('close');
-    };
-    const closeGetBrowser = () => {
-      emit('close');
-    };
+const agreeWarning = () => {
+  isWarningAgreed.value = true;
+  connectKeplrRef.value.signIn();
+};
 
-    const agreeWarning = () => {
-      isWarningAgreed.value = true;
-      connectKeplrRef.value.signIn();
-    };
+// TODO: Implement demo account
+const tryDemo = () => {
+  emit('close');
+};
 
-    // TODO: Implement demo account
-    const tryDemo = () => {
-      emit('close');
-    };
+onMounted(async () => {
+  isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
 
-    onMounted(async () => {
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+  // dont present spinner forever if not Chrome
+  // @ts-ignore
+  if (!window.chrome) {
+    isLoading.value = false;
+  }
 
-      // dont present spinner forever if not Chrome
-      // @ts-ignore
-      if (!window.chrome) {
-        isLoading.value = false;
-      }
+  await getKeplrInstance();
+  await nextTick();
 
-      await getKeplrInstance();
-      await nextTick();
+  // @ts-ignore
+  isKeplrSupported.value = !!window.chrome;
 
-      // @ts-ignore
-      isKeplrSupported.value = !!window.chrome;
+  nextTick(() => {
+    // detect keplr installed
+    // @ts-ignore
+    isKeplrInstalled.value = !!window.keplr;
+  });
+});
 
-      nextTick(() => {
-        // detect keplr installed
-        // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
-    });
-
-    watch(isWarningAgreed, () => {
-      window.localStorage.setItem('isWarningAgreed', 'true');
-    });
-
-    return {
-      agreeWarning,
-      connectKeplrRef,
-      agreeWarningRef,
-      getKeplrRef,
-      getBrowserRef,
-      isLoading,
-      isWarningAgreed,
-      isKeplrSupported,
-      isKeplrInstalled,
-      closeAgreeWarning,
-      closeConnectWallet,
-      closeGetKeplr,
-      closeGetBrowser,
-      tryDemo,
-    };
-  },
+watch(isWarningAgreed, () => {
+  window.localStorage.setItem('isWarningAgreed', 'true');
 });
 </script>
 
