@@ -102,7 +102,7 @@ const stakedDenoms = computed(() => {
       stakingAmount: stakingAmountByChain(chain),
       stakingAmountFiat: getRawPrice(getStakableBaseDenomFromChainName(chain), stakingAmountByChain(chain)),
     }))
-    .sort((a, b) => (a.stakingAmountFiat > b.stakingAmountFiat ? -1 : 1));
+    .sort((a, b) => (a.stakingAmountFiat.isGreaterThan(b.stakingAmountFiat) ? -1 : 1));
 });
 
 const handleClick = (assetName) => {

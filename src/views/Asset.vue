@@ -14,7 +14,7 @@
               </div>
               <Price
                 v-tippy
-                :amount="{ amount: 0, denom }"
+                :amount="{ amount: '0', denom }"
                 :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
@@ -120,17 +120,39 @@
               <div class="w-1/3 ml-4 text-muted text-right">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                  :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                  :amount="{
+                    amount: getFormattedAmount(asset.amount)
+                      .plus(new BigNumber(stakedAmount))
+                      .toFixed(assetConfig.precision),
+                    denom,
+                  }"
                 />
-                <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
+                <AmountDisplay
+                  v-else
+                  :amount="{
+                    amount: getFormattedAmount(asset.amount).toFixed(assetConfig.precision),
+                    denom,
+                  }"
+                />
               </div>
               <div class="flex items-center justify-end w-1/3 ml-4">
                 <span class="text-right font-medium">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                    :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                    :amount="{
+                      amount: getFormattedAmount(asset.amount)
+                        .plus(new BigNumber(stakedAmount))
+                        .toFixed(assetConfig.precision),
+                      denom,
+                    }"
                   />
-                  <Price v-else :amount="{ amount: asset.amount, denom }" />
+                  <Price
+                    v-else
+                    :amount="{
+                      amount: getFormattedAmount(asset.amount).toFixed(assetConfig.precision),
+                      denom,
+                    }"
+                  />
                 </span>
                 <ChainDownWarning
                   v-if="unavailableChains[asset.on_chain]"
@@ -173,6 +195,7 @@
 <script lang="ts">
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -301,7 +324,9 @@ export default defineComponent({
     const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
-      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
+      return assets.value
+        .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
+        .toFixed(0);
     });
 
     const stakingBalance = computed(() => {
@@ -321,31 +346,31 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      let totalStakedAmount = 0;
+      let totalStakedAmount = new BigNumber(0);
       if (Array.isArray(staked)) {
         for (let i = 0; i < staked.length; i++) {
-          let amount = parseFloat(staked[i].amount);
+          let amount = new BigNumber(staked[i].amount);
           if (amount) {
-            totalStakedAmount += amount;
+            totalStakedAmount = totalStakedAmount.plus(amount);
           }
         }
       }
-      return totalStakedAmount;
+      return totalStakedAmount.toFixed(0);
     });
 
     const unstakedAmount = computed(() => {
-      let totalUnstakedAmount = 0;
+      let totalUnstakedAmount = new BigNumber(0);
       if (unbondingDelegation.value.length > 0) {
         const unstakedAmounts = unbondingDelegation.value
           .map((y) => y.entries)
           .flat()
           .map((z) => z.balance);
         if (unstakedAmounts.length > 0) {
-          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item)), new BigNumber(0));
+          totalUnstakedAmount = totalUnstakedAmount.plus(unstakedAmount);
         }
       }
-      return totalUnstakedAmount;
+      return totalUnstakedAmount.toFixed(0);
     });
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
@@ -382,7 +407,7 @@ export default defineComponent({
     });
 
     const pooledAmount = computed(() => {
-      let assetPooledAmount = 0;
+      let assetPooledAmount = new BigNumber(0);
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
@@ -393,7 +418,7 @@ export default defineComponent({
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
         if (assetBalanceInPool) {
-          assetPooledAmount += assetBalanceInPool.amount;
+          assetPooledAmount = assetPooledAmount.plus(new BigNumber(assetBalanceInPool.amount));
         }
       }
 
@@ -401,7 +426,10 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
+      return new BigNumber(availableAmount.value)
+        .plus(new BigNumber(stakedAmount.value))
+        .plus(new BigNumber(unstakedAmount.value))
+        .toFixed(0);
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
@@ -465,11 +493,15 @@ export default defineComponent({
       typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
     });
 
-    const isStakingRunning = featureRunning('STAKING');
+    const getFormattedAmount = (assetAmount) => {
+      return new BigNumber(parseCoins(assetAmount)[0].amount);
+    };
 
     return {
       nativeAsset,
       assetConfig,
+      BigNumber,
+      parseCoins,
       denom,
       assets,
       unavailableChains,
@@ -488,7 +520,7 @@ export default defineComponent({
       showPriceChartLoadingSkeleton,
       priceDiffObject,
       setPriceDifference,
-      isStakingRunning,
+      getFormattedAmount,
       displayPrice,
     };
   },

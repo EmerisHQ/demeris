@@ -121,9 +121,12 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
           const fee = transaction.chainFee[0].amount[context.input.gasPriceLevel] * context.input.gasLimit;
           const txAmount = parseInt(transaction.data.amount.amount);
           if (baseDenomBalance) {
-            const amount = parseCoins(baseDenomBalance.amount)[0];
-            if (parseInt(amount.amount) - txAmount < fee) {
-              transaction.data.amount.amount = parseInt(amount.amount) - fee + '';
+            const backwardTx = step.transactions.find((x) => x.type == 'IBCtransferBackward');
+            const backwardAmount = backwardTx ? parseInt(backwardTx.data.amount.amount) : 0;
+            const amount = backwardAmount + parseInt(parseCoins(baseDenomBalance.amount)[0].amount);
+
+            if (amount - txAmount < fee) {
+              transaction.data.amount.amount = amount - fee + '';
             }
           } else {
             transaction.data.amount.amount = txAmount - fee + '';

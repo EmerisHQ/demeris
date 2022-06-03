@@ -334,8 +334,8 @@
         "tooltipNoPool": "Currently there is no pool for this pair, please select other pair",
         "tooltipChainDown": "Cosmos Hub appears to be down, swap is temporarily unavailable",
         "disabledTitle": "Swap is temporarily unavailable",
-        "disabledMessage": "Swapping is about to get even more powerful. Watch this space!",
-        "disabledLearnMore": "Learn more ↗",
+        "disabledMessage": "The swap function is currently undergoing maintenance and will be back soon.",
+        "contactEmerisSupport": "Contact Emeris Support ↗",
         "transaction": "1 transaction | {txs} transactions",
         "transactionAcrossChains": "1 transaction across {chains} chains | {txs} transactions across {chains} chains"
       },

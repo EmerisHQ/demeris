@@ -3,7 +3,7 @@ import { EmerisDEXInfo } from '@emeris/types';
 const protocolChainMap: Record<string, string> = {
   [EmerisDEXInfo.DEX.Osmosis]: 'osmosis',
   [EmerisDEXInfo.DEX.Gravity]: 'cosmos-hub',
-  crescent: 'crescent',
+  [EmerisDEXInfo.DEX.Crescent]: 'crescent',
 };
 
 export const formatProtocolName = (protocol: string) => {
@@ -24,3 +24,6 @@ export const getProtocolFromChain = (chainName: string) => {
 export const getChainFromProtocol = (protocol: string) => {
   return protocolChainMap[protocol];
 };
+
+export const activeSupportedProtocols = [EmerisDEXInfo.DEX.Osmosis];
+export const activeSupportedProtocolChains = activeSupportedProtocols.map(getChainFromProtocol);

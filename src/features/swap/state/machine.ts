@@ -66,6 +66,8 @@ export type SwapEvents =
   | { type: 'INPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'INVALID.BELOW_MIN' }
   | { type: 'INVALID.OVER_MAX' }
+  | { type: 'UNAVAILABLE.OVER_MAX' }
+  | { type: 'UNAVAILABLE.UNKNOWN' }
   | { type: 'OUTPUT.CHANGE_AMOUNT'; value: string }
   | { type: 'OUTPUT.CHANGE_COIN'; value: SwapCoin }
   | { type: 'RESET' }
@@ -76,6 +78,7 @@ export type SwapEvents =
   | { type: 'STEPS.CLEAR' }
   | { type: 'SUBMIT' };
 
+// xstate-ignore-next-line
 export const swapMachine = createMachine<SwapContext, SwapEvents>(
   {
     id: 'swap',
@@ -272,14 +275,29 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       },
       unavailable: {
         id: 'unavailable',
+        initial: 'unknown',
+        invoke: {
+          src: 'isOverMax',
+          onDone: '.overMax',
+        },
         on: {
           'COINS.SWITCH': {
             target: 'updating.routes.input',
             actions: ['switchCoins', 'updateInputCoinDex', 'focusInputAmount'],
           },
+          'UNAVAILABLE.OVER_MAX': {
+            target: '.overMax',
+          },
+          'UNAVAILABLE.UNKNOWN': {
+            target: '.unknown',
+          },
           'BALANCES.SET': {
             actions: 'assignBalances',
           },
+        },
+        states: {
+          overMax: {},
+          unknown: {},
         },
       },
       submitted: {
@@ -320,6 +338,14 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
       getRoutesFromInput: async (context) => logic.fetchSwapRoutes(context, 'input'),
+      isOverMax: (context) => (send) => {
+        const { amount } = logic.amountToUnit({ amount: context.inputAmount, denom: context.inputCoin?.baseDenom });
+
+        if (new BigNumber(amount).isGreaterThan(logic.getMaxInputAmount(context)?.amount)) {
+          return send('UNAVAILABLE.OVER_MAX');
+        }
+        return send('UNAVAILABLE.UNKNOWN');
+      },
     },
     actions: {
       assignDefaultInputDenom: assign({
