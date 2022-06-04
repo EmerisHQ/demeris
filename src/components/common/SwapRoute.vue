@@ -12,14 +12,7 @@
               :glow="false"
               size="md"
             />
-            <CircleSymbol
-              :style="{ position: 'absolute' }"
-              class="ml-1"
-              :display-status="false"
-              :denom="item.denom"
-              :glow="true"
-              size="sm"
-            />
+            <CircleSymbol class="absolute ml-1" :display-status="false" :denom="item.denom" :glow="true" size="sm" />
           </span>
           <span class="ml-4"
             ><span class="denom"><Denom :name="item.denom" /> </span>
@@ -44,8 +37,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -53,77 +46,65 @@ import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { capitalizeFirstLetter, getChainFromDex } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'SwapRoute',
-  components: {
-    CircleSymbol,
-    Icon,
-    Denom,
-    ChainName,
-  },
-  props: {
-    quote: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup(props) {
-    // const numberOftransactions = computed(() => {
-    //   for(let ) //subitems length sum
-    // })
+interface Props {
+  quote: any;
+}
 
-    // const chains = computed(() => {
-    //   //diff chains per item.. set
-    // })
-    // TODO:
-    // it would be better to do these after steps/abstract steps output from dagg api are final and clear
-    // 1. Convert output of the aggregation API to a form usable by this component
-    // 2. Add X transaction over Y chains logic
-    // 3. add conditional right arrow logic (swap vs transfer icon) (Done)
-    // Create type for items if applicable
-    // const items = ref([
-    //   { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
-    //   { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
-    //   { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
-    //   { denom: 'lastcoin', chain: 'lastchain' },
-    // ]);
+const props = defineProps<Props>();
 
-    const route = computed(() => {
-      const items = [];
-      let carryOver = null;
-      let lastType = null;
-      let steps = props.quote.steps;
-      for (let stepIndex = steps.length - 1; stepIndex >= 0; stepIndex--) {
-        let item = { transactions: [] };
-        if (lastType !== steps[stepIndex].type && carryOver) {
-          (item as any).transactions.push(carryOver);
-        }
-        if (steps[stepIndex].type === 'pool') {
-          lastType = 'pool';
-          stepIndex === steps.length - 1
-            ? (carryOver = `Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`)
-            : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
-          (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
-          (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
-        } else if (steps[stepIndex].type === 'ibc') {
-          lastType = 'ibc';
-          stepIndex === steps.length - 1
-            ? (carryOver = `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`)
-            : (item as any).transactions.unshift(
-                `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`,
-              );
-          (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
-          (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
-        } else {
-          console.log(`new type : ${steps[stepIndex].type}`);
-        }
-        items.unshift(item);
-      }
+// const numberOftransactions = computed(() => {
+//   for(let ) //subitems length sum
+// })
 
-      return items;
-    });
-    return { route };
-  },
+// const chains = computed(() => {
+//   //diff chains per item.. set
+// })
+// TODO:
+// it would be better to do these after steps/abstract steps output from dagg api are final and clear
+// 1. Convert output of the aggregation API to a form usable by this component
+// 2. Add X transaction over Y chains logic
+// 3. add conditional right arrow logic (swap vs transfer icon) (Done)
+// Create type for items if applicable
+// const items = ref([
+//   { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
+//   { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
+//   { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
+//   { denom: 'lastcoin', chain: 'lastchain' },
+// ]);
+
+const route = computed(() => {
+  const items = [];
+  let carryOver = null;
+  let lastType = null;
+  let steps = props.quote.steps;
+  for (let stepIndex = steps.length - 1; stepIndex >= 0; stepIndex--) {
+    let item = { transactions: [] };
+    if (lastType !== steps[stepIndex].type && carryOver) {
+      (item as any).transactions.push(carryOver);
+    }
+    if (steps[stepIndex].type === 'pool') {
+      lastType = 'pool';
+      stepIndex === steps.length - 1
+        ? (carryOver = `Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`)
+        : (item as any).transactions.unshift(`Swap on ${capitalizeFirstLetter(steps[stepIndex].protocol)}`);
+      (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
+      (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
+    } else if (steps[stepIndex].type === 'ibc') {
+      lastType = 'ibc';
+      stepIndex === steps.length - 1
+        ? (carryOver = `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`)
+        : (item as any).transactions.unshift(
+            `Transfer to ${capitalizeFirstLetter(getChainFromDex(steps[stepIndex].protocol))}`,
+          );
+      (item as any).denom = stepIndex == 0 ? steps[stepIndex].data.from.denom : steps[stepIndex].data.to.denom;
+      (item as any).chain = getChainFromDex(steps[stepIndex].protocol);
+    } else {
+      console.log(`new type : ${steps[stepIndex].type}`);
+    }
+    items.unshift(item);
+  }
+
+  return items;
 });
 </script>
 <style lang="scss" scoped>

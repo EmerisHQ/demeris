@@ -18,24 +18,10 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 
-export default defineComponent({
-  name: 'GetDesktop',
-
-  components: {
-    Button,
-  },
-
-  setup() {
-    const openUrl = () => {
-      window.open('https://emeris.com');
-    };
-
-    return { openUrl };
-  },
-});
+const openUrl = () => {
+  window.open('https://emeris.com');
+};
 </script>

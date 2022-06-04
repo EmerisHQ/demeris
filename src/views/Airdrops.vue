@@ -55,7 +55,7 @@
   </AppLayout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -70,46 +70,24 @@ import { GlobalGetterTypes } from '@/store';
 import { typedstore } from '@/store/setup';
 import { pageview } from '@/utils/analytics';
 
-export default {
-  name: 'Airdrops',
-  components: {
-    AppLayout,
-    AirdropsInfo,
-    AirdropsFilter,
-    ConnectWalletModal,
-    AirdropsTableSection,
-    Button,
-  },
+const { t } = useI18n({ useScope: 'global' });
+pageview({ page_title: 'Airdrops', page_path: '/' });
+useMeta(
+  computed(() => ({
+    title: t('navbar.airdrops'),
+  })),
+);
 
-  setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Airdrops', page_path: '/' });
-    useMeta(
-      computed(() => ({
-        title: t('navbar.airdrops'),
-      })),
-    );
+const activeFilter = ref('all');
+const isWalletModalOpen = ref(false);
 
-    const activeFilter = ref('all');
-    const isWalletModalOpen = ref(false);
+const isDemoAccount = computed(() => {
+  return (
+    !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] || typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+  );
+});
 
-    const isDemoAccount = computed(() => {
-      return (
-        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
-        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-      );
-    });
-
-    const toggleConnectWalletModal = () => {
-      isWalletModalOpen.value = !isWalletModalOpen.value;
-    };
-
-    return {
-      activeFilter,
-      isDemoAccount,
-      toggleConnectWalletModal,
-      isWalletModalOpen,
-    };
-  },
+const toggleConnectWalletModal = () => {
+  isWalletModalOpen.value = !isWalletModalOpen.value;
 };
 </script>
