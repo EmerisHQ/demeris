@@ -90,16 +90,15 @@
   </NoMarginLayout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
-import { computed, defineComponent } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
-// import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
 import GoBack from '@/components/common/headers/GoBack.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
@@ -108,56 +107,39 @@ import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 
-export default defineComponent({
-  name: 'Airdrop',
-  components: {
-    NoMarginLayout,
-    AirdropClaim,
-    GoBack,
-    // AirdropsCurrentBalance,
-    Divider,
-    LinkIcon,
-    InformationIcon,
-  },
+const typedstore = useStore() as RootStoreTyped;
+const { t } = useI18n({ useScope: 'global' });
+pageview({ page_title: 'Airdrops', page_path: '/' });
+useMeta(
+  computed(() => ({
+    title: t('navbar.airdrops'),
+  })),
+);
 
-  setup() {
-    const typedstore = useStore() as RootStoreTyped;
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Airdrops', page_path: '/' });
-    useMeta(
-      computed(() => ({
-        title: t('navbar.airdrops'),
-      })),
-    );
+const router = useRouter();
+const route = useRoute();
 
-    const router = useRouter();
-    const route = useRoute();
-
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-    });
-
-    const selectedAirdrop = computed(() => {
-      let projectDescription = [];
-      const airdrop = airdrops.value.filter((item) => item.tokenTicker === route.params.airdrop)[0];
-      if (airdrop && airdrop.projectDescription.includes('.')) {
-        projectDescription = airdrop ? airdrop.projectDescription.split('.') : [];
-      } else {
-        projectDescription.push(airdrop ? airdrop.projectDescription : []);
-      }
-      return {
-        ...airdrop,
-        projectDescription: projectDescription.length > 1 ? projectDescription.slice(0, -1) : projectDescription,
-      };
-    });
-
-    const goBackToAirdropspage = () => {
-      router.push('/airdrops');
-    };
-
-    return { EmerisAirdrops, selectedAirdrop, goBackToAirdropspage };
-  },
+const airdrops = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
 });
+
+const selectedAirdrop = computed(() => {
+  let projectDescription = [];
+  const airdrop = airdrops.value.filter((item) => item.tokenTicker === route.params.airdrop)[0];
+  if (airdrop && airdrop.projectDescription.includes('.')) {
+    projectDescription = airdrop ? airdrop.projectDescription.split('.') : [];
+  } else {
+    projectDescription.push(airdrop ? airdrop.projectDescription : []);
+  }
+  return {
+    ...airdrop,
+    projectDescription: projectDescription.length > 1 ? projectDescription.slice(0, -1) : projectDescription,
+  };
+});
+
+const goBackToAirdropspage = () => {
+  router.push('/airdrops');
+};
 </script>
 
 <style lang="scss" scoped>
