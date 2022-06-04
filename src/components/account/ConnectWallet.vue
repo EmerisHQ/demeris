@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { capitalize } from 'lodash';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, defineExpose, onMounted, ref, watch } from 'vue';
 
 import keplrWalletLogo from '@/assets/images/keplr-wallet-logo.png';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
@@ -142,6 +142,8 @@ const signIn = () => {
   store.dispatch(GlobalActionTypes.USER.SIGN_IN);
   isConnecting.value = true;
 };
+
+defineExpose({ cancel, signIn });
 
 onMounted(() => {
   isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');

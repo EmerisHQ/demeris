@@ -55,7 +55,6 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable max-lines-per-function */
 import { nextTick, onMounted, ref, watch } from 'vue';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';

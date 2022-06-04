@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineExpose, nextTick, onMounted, ref, toRefs, watch } from 'vue';
+import { nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -113,7 +113,6 @@ pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
 const router = useRouter();
 const { originUrl } = toRefs(props);
 const connectKeplrRef = ref(null);
-defineExpose({ connectKeplrRef });
 const agreeWarningRef = ref(null);
 const getKeplrRef = ref(null);
 const getBrowserRef = ref(null);
@@ -130,7 +129,7 @@ const goBackToOrigin = () => {
 };
 
 const cancelConnectWallet = () => {
-  connectKeplrRef.value?.connectKeplrRef?.cancel();
+  connectKeplrRef.value?.cancel();
   isReturnUser.value = true;
   goBackToOrigin();
 };
@@ -141,7 +140,7 @@ const cancelAgreeWarning = () => {
 const agreeWarning = () => {
   isWarningNeeded.value = false;
   isWarningAgreed.value = true;
-  connectKeplrRef.value.connectKeplrRef.signIn();
+  connectKeplrRef.value.signIn();
 };
 
 const showWarning = () => {
