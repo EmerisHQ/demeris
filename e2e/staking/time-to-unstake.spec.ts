@@ -1,10 +1,7 @@
-import { test } from '@playwright/test';
+import { test } from '../test-with-keplr';
 
 test.beforeEach(async ({ page }) => {
-  page.on('domcontentloaded', () => {
-    page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
-  });
-  await page.goto('/welcome', { waitUntil: 'networkidle' });
+  await page.goto('/welcome');
   (await page.locator('button:has-text("Connect Keplr")')).click();
   (await page.locator('button:has-text("Agree")')).click();
 });

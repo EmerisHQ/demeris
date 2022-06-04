@@ -146,7 +146,11 @@ export default defineComponent({
     };
 
     const signIn = () => {
-      store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      if (featureRunning('USE_EMERIS_EXTENSION')) {
+        store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletTyp: connectingWallet.value });
+      } else {
+        store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+      }
       isConnecting.value = true;
     };
 
