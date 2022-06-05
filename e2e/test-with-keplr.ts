@@ -9,7 +9,7 @@ export const test = base.extend({
     const context = await browserTypes[browserName].launchPersistentContext('', launchOptions);
     await context.addInitScript({
       content: `
-        window.localStorage.setItem('isWarningAgreed', true) // HACK replace asap
+        // window.localStorage.setItem('isWarningAgreed', true) // HACK replace asap
         window.chrome = true;
         window.keplr = {
           enable() {
