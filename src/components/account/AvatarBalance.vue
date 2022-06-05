@@ -58,10 +58,7 @@ export default defineComponent({
     const store = useStore();
 
     const keplrAccountName = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.getKeplrAccountName];
-    });
-    const keplrAddress = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.getKeplrAddress];
+      return store.getters[GlobalGetterTypes.USER.getAccount]?.name;
     });
     const isPriceApiAvailable = computed(() => {
       return store.getters[GlobalGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
@@ -71,7 +68,6 @@ export default defineComponent({
       return !store.getters[GlobalGetterTypes.USER.getFirstLoad];
     });
     return {
-      keplrAddress,
       initialLoadComplete,
       keplrAccountName,
       isPriceApiAvailable,

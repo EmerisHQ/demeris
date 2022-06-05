@@ -19,12 +19,7 @@ export type UserSession = {
   walletData: UserData;
 };
 
-export type KeplrKeyData = {
+export type AccountData = {
   name: string;
-  algo: string;
-  pubKey: Uint8Array;
-  address: Uint8Array;
-  bech32Address: string;
   uid?: string;
-  keyHashes?: string[];
 };
