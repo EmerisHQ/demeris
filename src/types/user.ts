@@ -23,3 +23,10 @@ export type AccountData = {
   name: string;
   uid?: string;
 };
+
+export type ChainKeyData = {
+  keyHash: string;
+  pubKey: Uint8Array;
+  algo: string;
+  chainName: string;
+};

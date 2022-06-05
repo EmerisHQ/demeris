@@ -1,5 +1,6 @@
 export enum GetterTypes {
   getAccount = 'getAccount',
+  getChainKeyData = 'getChainKeyData',
   getFirstLoad = 'getFirstLoad',
   getPricesFirstLoad = 'getPricesFirstLoad',
   getStakingBalancesFirstLoad = 'getStakingBalancesFirstLoad',
@@ -20,6 +21,7 @@ export enum GetterTypes {
 }
 export enum GlobalGetterTypes {
   getAccount = 'demerisUSER/getAccount',
+  getChainKeyData = 'demerisUSER/getChainKeyData',
   getFirstLoad = 'demerisUSER/getFirstLoad',
   getPricesFirstLoad = 'demerisUSER/getPricesFirstLoad',
   getStakingBalancesFirstLoad = 'demerisUSER/getStakingBalancesFirstLoad',

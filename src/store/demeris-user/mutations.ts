@@ -2,21 +2,14 @@ import { MutationTree } from 'vuex';
 
 import { AccountData, UserData } from '@/types/user';
 
+import { ChainKeyData } from './../../types/user';
 import { ActionTypes } from './action-types';
 import { Subscriptions } from './actions';
 import { MutationTypes } from './mutation-types';
 import { getDefaultState, USERState } from './state';
 
 export type Mutations<S = USERState> = {
-  [MutationTypes.ADD_CHAIN_KEY_DATA](
-    state: S,
-    payload: {
-      keyHash: string;
-      pubKey: Uint8Array;
-      algo: string;
-      chainName: string;
-    },
-  ): void;
+  [MutationTypes.ADD_CHAIN_KEY_DATA](state: S, payload: ChainKeyData): void;
   [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
   [MutationTypes.SET_ACCOUNT](state: S, payload: AccountData): void;
   [MutationTypes.SET_GAS_LIMIT](state: S, payload: { value: number }): void;
@@ -31,15 +24,7 @@ export type Mutations<S = USERState> = {
 };
 
 export const mutations: MutationTree<USERState> & Mutations = {
-  [MutationTypes.ADD_CHAIN_KEY_DATA](
-    state: USERState,
-    payload: {
-      keyHash: string;
-      pubKey: Uint8Array;
-      algo: string;
-      chainName: string;
-    },
-  ) {
+  [MutationTypes.ADD_CHAIN_KEY_DATA](state: USERState, payload: ChainKeyData) {
     state.chainKeyData.push(payload);
   },
   [MutationTypes.SET_SESSION_DATA](state: USERState, payload: UserData) {

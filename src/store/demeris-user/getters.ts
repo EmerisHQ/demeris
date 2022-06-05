@@ -4,12 +4,13 @@ import { GetterTree } from 'vuex';
 import { RootState } from '@/store';
 import { Namespaced } from '@/types/util';
 
-import { AccountData } from './../../types/user';
+import { AccountData, ChainKeyData } from './../../types/user';
 import { GetterTypes } from './getter-types';
 import { USERState } from './state';
 
 export type Getters = {
   [GetterTypes.getAccount](state: USERState): AccountData;
+  [GetterTypes.getChainKeyData](state: USERState): (chainName: string) => ChainKeyData;
   [GetterTypes.getGasLimit](state: USERState): number;
   [GetterTypes.isSignedIn](state: USERState): boolean;
   [GetterTypes.getKeyhashes](state: USERState): string[];
@@ -30,6 +31,9 @@ export type GlobalGetters = Namespaced<Getters, 'demerisUSER'>;
 export const getters: GetterTree<USERState, RootState> & Getters = {
   [GetterTypes.getAccount]: (state) => {
     return state.account ?? null;
+  },
+  [GetterTypes.getChainKeyData]: (state) => (chainName) => {
+    return state.chainKeyData.find((chainKeyData) => chainKeyData.chainName === chainName);
   },
   [GetterTypes.getSlippagePerc]: (state) => {
     return state._Session.slippagePerc;
