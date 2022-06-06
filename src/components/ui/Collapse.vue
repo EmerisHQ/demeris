@@ -24,67 +24,54 @@
     </Transition>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, nextTick, PropType, reactive } from 'vue';
+<script setup lang="ts">
+import { nextTick, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-export default defineComponent({
-  name: 'Collapse',
-  components: {
-    Button,
-    Icon,
-  },
-  props: {
-    isOpen: {
-      type: Boolean as PropType<boolean>,
-      default: false,
-    },
-    labelOpen: {
-      type: String as PropType<string>,
-      default: 'Show',
-    },
-    labelHide: {
-      type: String as PropType<string>,
-      default: 'Hide',
-    },
-    showLabel: {
-      type: Boolean as PropType<boolean>,
-      default: true,
-    },
-  },
-  emits: ['update:isOpen'],
+interface Props {
+  isOpen?: boolean;
+  labelOpen?: string;
+  labelHide?: string;
+  showLabel?: boolean;
+}
 
-  setup(props, { emit }) {
-    const state = reactive({
-      height: 'auto',
-      isOpen: props.isOpen,
-    });
-
-    const toggle = () => {
-      state.isOpen = !state.isOpen;
-      emit('update:isOpen', state.isOpen);
-    };
-
-    const enter = (el: Element) => {
-      const scrollHeight = `${el.scrollHeight}px`;
-      state.height = '0';
-      nextTick(() => (state.height = scrollHeight || 'auto'));
-    };
-
-    const afterEnter = () => {
-      setTimeout(() => (state.height = 'auto'), 5);
-    };
-
-    const leave = (el: Element) => {
-      state.height = getComputedStyle(el).height;
-      setTimeout(() => (state.height = '0'), 100);
-    };
-
-    return { state, toggle, enter, afterEnter, leave };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  labelOpen: 'Show',
+  labelHide: 'Hide',
+  showLabel: true,
 });
+
+const emit = defineEmits<{
+  (e: 'update:isOpen', isOpen: boolean): void;
+}>();
+
+const state = reactive({
+  height: 'auto',
+  isOpen: props.isOpen,
+});
+
+const toggle = () => {
+  state.isOpen = !state.isOpen;
+  emit('update:isOpen', state.isOpen);
+};
+
+const enter = (el: Element) => {
+  const scrollHeight = `${el.scrollHeight}px`;
+  state.height = '0';
+  nextTick(() => (state.height = scrollHeight || 'auto'));
+};
+
+const afterEnter = () => {
+  setTimeout(() => (state.height = 'auto'), 5);
+};
+
+const leave = (el: Element) => {
+  state.height = getComputedStyle(el).height;
+  setTimeout(() => (state.height = '0'), 100);
+};
 </script>
 <style lang="scss" scoped>
 .collapse {

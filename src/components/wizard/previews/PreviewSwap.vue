@@ -121,10 +121,9 @@
     </ListItem>
   </List>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisBase } from '@emeris/types';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -139,178 +138,143 @@ import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
-export default defineComponent({
-  name: 'PreviewSwap',
 
-  components: {
-    AmountDisplay,
-    ChainName,
-    List,
-    ListItem,
-    CircleSymbol,
+interface Props {
+  step: Actions.Step;
+  fees: Record<string, EmerisBase.Amount>;
+  context?: 'default' | 'widget';
+  isReceipt?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  context: 'default',
+  isReceipt: false,
+});
+
+const store = useStore();
+const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
+const { getSwapPrice } = useCalculation();
+const swapFeeRate = computed(() => {
+  const feeRate =
+    1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003 / 2);
+  return Number((1 - (1 - feeRate) / 2).toFixed(4));
+});
+//tx data
+const data = computed(() => {
+  return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
+});
+
+const protocol = computed(() => {
+  return (props.step as Actions.Step).transactions[0].protocol;
+});
+
+//for receive coin chain_name(always cosmos hub)
+const dexChainName = computed(() => {
+  if (!protocol.value) store.getters[GlobalGetterTypes.API.getDexChain];
+
+  return getChainFromProtocol(protocol.value);
+});
+
+// minReceivedAmount & limit price
+const minReceivedAmount = ref({} as EmerisBase.Amount);
+const limitPrice = ref(0);
+const fromCoinBaseDenom = ref('');
+const toCoinBaseDenom = ref('');
+watch(
+  () => {
+    ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
   },
+  async () => {
+    if (protocol.value !== 'gravity') {
+      return;
+    }
 
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      required: true,
-    },
-    fees: {
-      type: Object as PropType<Record<string, EmerisBase.Amount>>,
-      required: true,
-    },
-    context: {
-      type: String as PropType<'default' | 'widget'>,
-      default: 'default',
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
+    let pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
+
+    if (!pool.reserve_coin_denoms) {
+      pool = getPoolById(pool.id);
+    }
+    const reserveDenoms = await getReserveBaseDenoms(pool);
+    const reserveBalances = await getReserveBalances(pool);
+    const inputAmount = parseInt(String(Number(data.value.from.amount)));
+    toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
+    fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
+
+    let swapPrice = null;
+
+    if (reserveDenoms[1] === toCoinBaseDenom.value) {
+      swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
+    } else {
+      //reverse
+      swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
+    }
+
+    minReceivedAmount.value = {
+      denom: toCoinBaseDenom.value,
+      amount: (
+        (1 / Number(swapPrice)) *
+        Number(data.value.from.amount) *
+        swapFeeRate.value ** 2 *
+        (1 - slippageTolerance.value / 100)
+      ).toString(),
+    };
+
+    limitPrice.value =
+      Math.trunc(
+        ((1 / Number(swapPrice)) *
+          Number(
+            10 **
+              store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+                name: fromCoinBaseDenom.value,
+              }),
+          ) *
+          swapFeeRate.value ** 2 *
+          (1 - slippageTolerance.value / 100)) /
+          10000,
+      ) * 10000;
   },
+  { immediate: true },
+);
 
-  setup(props) {
-    const store = useStore();
-    const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
-    const { getSwapPrice } = useCalculation();
-    const swapFeeRate = computed(() => {
-      const feeRate =
-        1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003 / 2);
-      return Number((1 - (1 - feeRate) / 2).toFixed(4));
-    });
-    //tx data
-    const data = computed(() => {
-      return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
-    });
+//user slippage tolerance
+const slippageTolerance = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5;
+});
 
-    const protocol = computed(() => {
-      return (props.step as Actions.Step).transactions[0].protocol;
-    });
-
-    //for receive coin chain_name(always cosmos hub)
-    const dexChainName = computed(() => {
-      if (!protocol.value) store.getters[GlobalGetterTypes.API.getDexChain];
-
-      return getChainFromProtocol(protocol.value);
-    });
-
-    // minReceivedAmount & limit price
-    const minReceivedAmount = ref({} as EmerisBase.Amount);
-    const limitPrice = ref(0);
-    const fromCoinBaseDenom = ref('');
-    const toCoinBaseDenom = ref('');
-    watch(
-      () => {
-        ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
-      },
-      async () => {
-        if (protocol.value !== 'gravity') {
-          return;
-        }
-
-        let pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
-
-        if (!pool.reserve_coin_denoms) {
-          pool = getPoolById(pool.id);
-        }
-        const reserveDenoms = await getReserveBaseDenoms(pool);
-        const reserveBalances = await getReserveBalances(pool);
-        const inputAmount = parseInt(String(Number(data.value.from.amount)));
-        toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
-        fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
-
-        let swapPrice = null;
-
-        if (reserveDenoms[1] === toCoinBaseDenom.value) {
-          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
-        } else {
-          //reverse
-          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
-        }
-
-        minReceivedAmount.value = {
-          denom: toCoinBaseDenom.value,
-          amount: (
-            (1 / Number(swapPrice)) *
-            Number(data.value.from.amount) *
-            swapFeeRate.value ** 2 *
-            (1 - slippageTolerance.value / 100)
-          ).toString(),
-        };
-
-        limitPrice.value =
-          Math.trunc(
-            ((1 / Number(swapPrice)) *
-              Number(
-                10 **
-                  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-                    name: fromCoinBaseDenom.value,
-                  }),
-              ) *
-              swapFeeRate.value ** 2 *
-              (1 - slippageTolerance.value / 100)) /
-              10000,
-          ) * 10000;
-      },
-      { immediate: true },
-    );
-
-    //user slippage tolerance
-    const slippageTolerance = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.getSlippagePerc] || 0.5;
-    });
-
-    const payCoinChainName = ref('');
-    watch(
-      () => data.value.from.denom,
-      async () => {
-        if (isNative(data.value.from.denom)) {
-          payCoinChainName.value = store.getters[GlobalGetterTypes.API.getDexChain];
-        } else {
-          const verifyTrace =
-            store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+const payCoinChainName = ref('');
+watch(
+  () => data.value.from.denom,
+  async () => {
+    if (isNative(data.value.from.denom)) {
+      payCoinChainName.value = store.getters[GlobalGetterTypes.API.getDexChain];
+    } else {
+      const verifyTrace =
+        store.getters[GlobalGetterTypes.API.getVerifyTrace]({
+          chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
+          hash: data.value.from.denom.split('/')[1],
+        }) ??
+        (await store.dispatch(
+          GlobalActionTypes.API.GET_VERIFY_TRACE,
+          {
+            subscribe: false,
+            params: {
               chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
               hash: data.value.from.denom.split('/')[1],
-            }) ??
-            (await store.dispatch(
-              GlobalActionTypes.API.GET_VERIFY_TRACE,
-              {
-                subscribe: false,
-                params: {
-                  chain_name: store.getters[GlobalGetterTypes.API.getDexChain],
-                  hash: data.value.from.denom.split('/')[1],
-                },
-              },
-              { root: true },
-            ));
-          payCoinChainName.value = verifyTrace.trace[0].chain_name;
-        }
-      },
-      { immediate: true },
-    );
-
-    // tx fee
-    const fee = computed(() => {
-      return props.fees[dexChainName.value]?.['uatom'];
-    });
-
-    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
-
-    return {
-      data,
-      dexChainName,
-      payCoinChainName,
-      limitPrice,
-      minReceivedAmount,
-      toCoinBaseDenom,
-      fromCoinBaseDenom,
-      store,
-      swapFeeRate,
-      fee,
-      size,
-    };
+            },
+          },
+          { root: true },
+        ));
+      payCoinChainName.value = verifyTrace.trace[0].chain_name;
+    }
   },
+  { immediate: true },
+);
+
+// tx fee
+const fee = computed(() => {
+  return props.fees[dexChainName.value]?.['uatom'];
 });
+
+const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 </script>
 <style lang="scss" scoped></style>

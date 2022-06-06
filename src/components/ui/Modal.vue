@@ -65,88 +65,63 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, CSSProperties, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed, CSSProperties } from 'vue';
 
 import { ModalVariant } from '@/types/util';
 
 import Button from './Button.vue';
 import Icon from './Icon.vue';
 
-export default defineComponent({
-  name: 'Modal',
+interface Props {
+  variant?: ModalVariant;
+  fullscreen?: boolean;
+  open?: boolean;
+  showCloseButton?: boolean;
+  height?: string | number;
+  maxWidthClass?: string;
+  bodyClass?: CSSProperties;
+  contentClass?: CSSProperties;
+  footerClass?: CSSProperties;
+  closeOnOverlayClick?: boolean;
+}
 
-  components: { Button, Icon },
-
-  props: {
-    variant: {
-      type: String as PropType<ModalVariant>,
-      default: 'dialog',
-    },
-    fullscreen: {
-      type: Boolean,
-      default: false,
-    },
-    open: {
-      type: Boolean,
-      default: true,
-    },
-    showCloseButton: {
-      type: Boolean,
-      default: false,
-    },
-    height: {
-      type: [String, Number],
-      default: undefined,
-    },
-    maxWidthClass: {
-      type: String,
-      default: 'max-w-4xl',
-    },
-    bodyClass: {
-      type: [String, Array, Object],
-      default: undefined,
-    },
-    contentClass: {
-      type: [String, Array, Object],
-      default: undefined,
-    },
-    footerClass: {
-      type: [String, Array, Object],
-      default: undefined,
-    },
-    closeOnOverlayClick: {
-      type: Boolean,
-      default: true,
-    },
-  },
-
-  emits: ['close'],
-
-  setup(props, { emit }) {
-    const bodyStyle = computed(() => {
-      const styles: CSSProperties = {};
-
-      if (props.height !== undefined) {
-        styles.height = props.height as string;
-      }
-
-      return styles;
-    });
-
-    const emitClose = () => {
-      emit('close');
-    };
-
-    const onOverlayClick = () => {
-      if (props.closeOnOverlayClick) {
-        emitClose();
-      }
-    };
-
-    return { bodyStyle, emitClose, onOverlayClick };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'dialog',
+  fullscreen: false,
+  open: true,
+  showCloseButton: false,
+  height: undefined,
+  maxWidthClass: 'max-w-4xl',
+  bodyClass: undefined,
+  contentClass: undefined,
+  footerClass: undefined,
+  closeOnOverlayClick: true,
 });
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const bodyStyle = computed(() => {
+  const styles: CSSProperties = {};
+
+  if (props.height !== undefined) {
+    styles.height = props.height as string;
+  }
+
+  return styles;
+});
+
+const emitClose = () => {
+  emit('close');
+};
+
+const onOverlayClick = () => {
+  if (props.closeOnOverlayClick) {
+    emitClose();
+  }
+};
 </script>
 
 <style lang="scss" scoped>

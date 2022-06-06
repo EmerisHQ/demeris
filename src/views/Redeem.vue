@@ -88,10 +88,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines */
-/* eslint-disable max-lines-per-function */
-import { defineComponent, reactive, ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -106,132 +105,92 @@ import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'Redeem',
+const router = useRouter();
+const { redeemableBalances } = useAccount();
+const steps = ['assets', 'review', 'transfer', 'redeemed'];
+const typedstore = useStore() as RootStoreTyped;
 
-  components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector },
+pageview({ page_title: 'Redeem', page_path: '/redeem' });
+typedstore.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+const state = reactive({
+  step: 'assets',
+  selectedAsset: undefined,
+  showInstruction: true,
+});
 
-  setup() {
-    const router = useRouter();
-    const { redeemableBalances } = useAccount();
-    const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const typedstore = useStore() as RootStoreTyped;
+const augmentedBalances = ref([]);
 
-    pageview({ page_title: 'Redeem', page_path: '/redeem' });
-    typedstore.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
-    const state = reactive({
-      step: 'assets',
-      selectedAsset: undefined,
-      showInstruction: true,
-    });
-
-    const augmentedBalances = ref([]);
-
-    watch(
-      () => redeemableBalances.value,
-      async (newBalances) => {
-        augmentedBalances.value = await Promise.all(
-          newBalances.map(async (newBalance) => {
-            let balance = { ...newBalance };
-            balance.hops = [];
-            const verifyTrace =
-              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+watch(
+  () => redeemableBalances.value,
+  async (newBalances) => {
+    augmentedBalances.value = await Promise.all(
+      newBalances.map(async (newBalance) => {
+        let balance = { ...newBalance };
+        balance.hops = [];
+        const verifyTrace =
+          typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+            chain_name: balance.on_chain,
+            hash: balance.ibc.hash,
+          }) ??
+          (await typedstore.dispatch(
+            GlobalActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              params: {
                 chain_name: balance.on_chain,
                 hash: balance.ibc.hash,
-              }) ??
-              (await typedstore.dispatch(
-                GlobalActionTypes.API.GET_VERIFY_TRACE,
-                {
-                  subscribe: false,
-                  params: {
-                    chain_name: balance.on_chain,
-                    hash: balance.ibc.hash,
-                  },
-                },
-                { root: true },
-              ));
-            for (let hop of verifyTrace.trace) {
-              balance.hops.unshift(hop.counterparty_name);
-            }
-            balance.steps = await actionHandler({
-              name: 'redeem',
-              params: [
-                {
-                  ...parseCoins(balance.amount)[0],
-                  chain_name: balance.on_chain,
-                },
-              ],
-            });
+              },
+            },
+            { root: true },
+          ));
+        for (let hop of verifyTrace.trace) {
+          balance.hops.unshift(hop.counterparty_name);
+        }
+        balance.steps = await actionHandler({
+          name: 'redeem',
+          params: [
+            {
+              ...parseCoins(balance.amount)[0],
+              chain_name: balance.on_chain,
+            },
+          ],
+        });
 
-            return balance;
-          }),
-        );
-      },
-      { immediate: true },
+        return balance;
+      }),
     );
-
-    const onClose = () => {
-      router.push('/pools');
-    };
-
-    const getRoute = (hash, chain_name) => {
-      const verifyTrace = typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
-        chain_name,
-        hash,
-      });
-      const hops = [];
-      for (let hop of verifyTrace.trace) {
-        hops.unshift(hop.counterparty_name);
-      }
-      return hops;
-    };
-    const goBack = () => {
-      const currentStepIndex = steps.findIndex((item) => item === state.step);
-
-      if (currentStepIndex > 0) {
-        state.step = steps[currentStepIndex - 1];
-        return;
-      }
-
-      router.back();
-    };
-
-    const goToStep = (step: string) => {
-      state.step = step;
-    };
-
-    const selectAsset = (asset: Record<string, unknown>) => {
-      state.selectedAsset = asset;
-      event('review_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
-      goToStep('review');
-    };
-
-    const closeInstruction = () => {
-      state.showInstruction = false;
-    };
-
-    const resetHandler = () => {
-      state.selectedAsset = undefined;
-      state.showInstruction = false;
-
-      goToStep('assets');
-    };
-
-    return {
-      augmentedBalances,
-      steps,
-      state,
-      closeInstruction,
-      selectAsset,
-      onClose,
-      goBack,
-      goToStep,
-      parseCoins,
-      getRoute,
-      resetHandler,
-    };
   },
-});
+  { immediate: true },
+);
+
+const onClose = () => {
+  router.push('/pools');
+};
+
+const goBack = () => {
+  const currentStepIndex = steps.findIndex((item) => item === state.step);
+
+  if (currentStepIndex > 0) {
+    state.step = steps[currentStepIndex - 1];
+    return;
+  }
+
+  router.back();
+};
+
+const goToStep = (step: string) => {
+  state.step = step;
+};
+
+const selectAsset = (asset: Record<string, unknown>) => {
+  state.selectedAsset = asset;
+  event('review_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
+  goToStep('review');
+};
+
+const closeInstruction = () => {
+  state.showInstruction = false;
+};
 </script>
 
 <style lang="scss" scoped>

@@ -16,6 +16,11 @@ export type WalletFeatureMap = {
   };
 };
 
+export interface WalletSession {
+  timestamp: number;
+  wallet: SupportedWallet;
+}
+
 export enum WalletMethods {
   enable = 'enable',
   getAccount = 'getAccount',

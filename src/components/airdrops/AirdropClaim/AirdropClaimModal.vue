@@ -47,41 +47,28 @@
   </Modal>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
-import { defineComponent, PropType } from 'vue';
 
 import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Modal from '@/components/ui/Modal.vue';
 
-export default defineComponent({
-  name: 'AirdropClaimModal',
-  components: {
-    Modal,
-    InformationIcon,
-    ClaimedIcon,
-  },
-  props: {
-    open: {
-      type: Boolean,
-      default: false,
-    },
-    selectedAirdrop: {
-      type: Object as PropType<EmerisAirdrops.Airdrop>,
-      default: null,
-    },
-  },
+interface Props {
+  open?: boolean;
+  selectedAirdrop?: EmerisAirdrops.Airdrop;
+}
 
-  emits: ['close'],
-
-  setup(_, { emit }) {
-    const closeClaimModal = () => {
-      emit('close');
-    };
-    return {
-      closeClaimModal,
-    };
-  },
+withDefaults(defineProps<Props>(), {
+  open: false,
+  selectedAirdrop: null,
 });
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const closeClaimModal = () => {
+  emit('close');
+};
 </script>

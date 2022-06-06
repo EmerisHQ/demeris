@@ -68,7 +68,7 @@ Test commands:
 yarn dev && yarn test:e2e
 
 # Run one specific (failing) test in debug mode
-PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts
+PWDEBUG=1 npx playwright test e2e/assets-page.spec.ts --retries=1
 
 ```
 

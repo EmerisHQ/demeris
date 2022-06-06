@@ -32,19 +32,15 @@
         <span v-if="airdropsLoading">
           <Icon name="LoadingIcon" :icon-size="0.8" class="ml-2" />
         </span>
-        <span
-          v-if="showEligibleAmount"
-          class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium"
-          style="color: white"
-        >
+        <span v-if="showEligibleAmount" class="ml-2 bg-negative py-1 px-2 rounded-full -text-1 font-medium text-white">
           {{ noOfClaimableAirdrops }}
         </span>
       </div>
     </router-link>
   </nav>
 </template>
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -54,47 +50,28 @@ import { LoadingState } from '@/types/util';
 import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 import { featureRunning } from '@/utils/FeatureManager';
 
-export default defineComponent({
-  name: 'Navbar',
-  components: {
-    Icon,
-  },
-  setup() {
-    const route = useRoute();
-    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
-    const typedstore = useStore() as RootStoreTyped;
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-    });
+const route = useRoute();
+const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
+const typedstore = useStore() as RootStoreTyped;
+const airdrops = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+});
 
-    const onAirdropsPage = computed(() => {
-      return route.fullPath.includes('/airdrop');
-    });
+const onAirdropsPage = computed(() => {
+  return route.fullPath.includes('/airdrop');
+});
 
-    const airdropsLoading = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
-    });
+const airdropsLoading = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+});
 
-    const noOfClaimableAirdrops = computed(() => {
-      const claimableAirdrops = airdrops.value.filter(
-        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
-      );
-      return claimableAirdrops.length;
-    });
+const noOfClaimableAirdrops = computed(() => {
+  const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE);
+  return claimableAirdrops.length;
+});
 
-    const showEligibleAmount = computed(() => {
-      return !onAirdropsPage.value && !airdropsLoading.value && noOfClaimableAirdrops.value > 0;
-    });
-
-    return {
-      isAirdropsFeatureRunning,
-      airdrops,
-      onAirdropsPage,
-      airdropsLoading,
-      showEligibleAmount,
-      noOfClaimableAirdrops,
-    };
-  },
+const showEligibleAmount = computed(() => {
+  return !onAirdropsPage.value && !airdropsLoading.value && noOfClaimableAirdrops.value > 0;
 });
 </script>
 
