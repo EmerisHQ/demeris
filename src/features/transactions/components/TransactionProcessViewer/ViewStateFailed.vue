@@ -143,7 +143,7 @@
         target="_blank"
         class="font-medium text-link hover:text-link-hover"
       >
-        {{ $t('components.txHandlingModal.keplrSupport') }}
+        {{ $t('components.txHandlingModal.walletSupport', { wallet: capitalize(wallet) }) }}
       </a>
 
       <Collapse
@@ -200,7 +200,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { capitalize } from 'lodash';
+import { computed, inject, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -210,6 +211,8 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { SupportedWallet } from '@/features/extension/types';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { StepTransaction } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
@@ -218,6 +221,7 @@ import { useTransactionsStore } from '../../transactionsStore';
 
 const { t } = useI18n({ useScope: 'global' });
 
+const { wallet } = toRefs<{ wallet: SupportedWallet }>({ wallet: walletActionHandler.session.wallet });
 const transactionsStore = useTransactionsStore();
 const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey);
 const { state, send } = actor;

@@ -249,12 +249,17 @@
         "chainsDown": "appear to be down, action is temporarily unavailable."
       },
       "txHandlingModal": {
+        "openWallet": "Opening {wallet}",
         "openKeplr": "Opening Keplr",
+
         "signTx": "Sign transaction",
         "signError": "Transaction not signed!",
         "genericError": "Something went wrong",
         "tryAgain": "Try again",
+
+        "walletSupport": "{wallet} troubleshooting ↗️",
         "keplrSupport": "Keplr troubleshooting ↗️",
+
         "ibcTransferSubtitle": "This may take up to 1 minute",
         "ibcTransferDelayTitle": "Still transferring…",
         "ibcTransferDelaySubtitle": "Your transaction appears to be taking longer than expected. If the transfer is not complete in 4 minutes, it will be reverted.",
