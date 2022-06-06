@@ -29,7 +29,7 @@
 
           <template v-if="isLoadingCoin || isLoadingChain">
             <div>
-              <SkeletonLoader height="17px" width="96px" />
+              <SkeletonLoader height="13px" width="96px" />
             </div>
           </template>
           <span v-else-if="chain" class="text-muted -text-1 whitespace-nowrap text-left">
@@ -40,7 +40,9 @@
 
       <div v-if="denom" class="flex-1 flex flex-col items-end space-y-0.5">
         <SkeletonLoader v-if="isLoadingAmount" height="22px" width="82px" />
-        <SkeletonLoader v-if="isLoadingAmount" height="16px" width="82px" />
+        <span v-if="isLoadingAmount">
+          <SkeletonLoader height="13px" width="82px" />
+        </span>
         <template v-else>
           <AmountInput
             ref="inputRef"

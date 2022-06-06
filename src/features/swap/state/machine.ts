@@ -221,13 +221,19 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
             },
           },
           valid: {
+            invoke: {
+              src: 'prepareSigningSteps',
+              onDone: {
+                actions: 'assignSteps',
+              },
+            },
             on: {
               SUBMIT: 'submitting',
             },
           },
           submitting: {
             invoke: {
-              src: 'handleSubmit',
+              src: 'prepareSigningSteps',
               onDone: {
                 target: 'confirming',
                 actions: 'assignSteps',
@@ -249,6 +255,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
         },
       },
       updating: {
+        entry: 'clearSteps',
         states: {
           routes: {
             states: {
@@ -333,7 +340,7 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
 
         return Promise.resolve(true);
       },
-      handleSubmit: async (context) => {
+      prepareSigningSteps: async (context) => {
         return logic.prepareRouteToSign(context, context.selectedRouteIndex);
       },
       getRoutesFromOutput: async (context) => logic.fetchSwapRoutes(context, 'output'),
@@ -438,6 +445,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           inputAmount: undefined,
           outputCoin: event.value?.baseDenom === context.outputCoin?.baseDenom ? undefined : context.outputCoin,
           outputAmount: undefined,
+          data: {
+            ...context.data,
+            steps: [],
+          },
         };
       }),
       updateInputCoinDex: assign({
@@ -451,6 +462,10 @@ export const swapMachine = createMachine<SwapContext, SwapEvents>(
           outputAmount: undefined,
           inputCoin: event.value?.baseDenom === context.inputCoin?.baseDenom ? undefined : context.inputCoin,
           inputAmount: context.outputAmount ? undefined : context.inputAmount,
+          data: {
+            ...context.data,
+            steps: [],
+          },
         };
       }),
       setSelectedRouteIndex: assign({

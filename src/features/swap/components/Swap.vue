@@ -35,7 +35,17 @@
         <SwapCoinOutput />
       </div>
 
-      <SwapButtonSwap :state="state" :send="send" />
+      <div>
+        <SwapButtonSwap :state="state" :send="send" />
+        <div v-if="state.matches('updating')" class="flex items-center justify-between mt-5">
+          <SkeletonLoader height="12px" width="74px" />
+          <SkeletonLoader height="12px" width="74px" />
+        </div>
+
+        <div v-if="state.context.data.steps.length" class="-text-1 mt-5 -mb-6">
+          <FeeLevelSelector :steps="state.context.data.steps" />
+        </div>
+      </div>
     </div>
 
     <SwapOverlaySettings />
@@ -48,6 +58,8 @@
 import { whenever } from '@vueuse/core';
 import { computed, nextTick, watch } from 'vue';
 
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
