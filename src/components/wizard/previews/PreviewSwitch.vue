@@ -21,15 +21,15 @@
     <!-- Price  -->
     <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.fromLbl')">
       <div class="flex justify-end items-center">
-        {{ getValidatorMoniker(tx.validatorSrcAddress) }}
-        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorSrcAddress)" />
+        {{ getValidatorMoniker(validatorSrcAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(validatorSrcAddress)" />
       </div>
     </ListItem>
 
     <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.toLbl')">
       <div class="flex justify-end items-center">
-        {{ getValidatorMoniker(tx.validatorDstAddress) }}
-        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorDstAddress)" />
+        {{ getValidatorMoniker(validatorDstAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(validatorDstAddress)" />
       </div>
     </ListItem>
     <!-- Fee -->
@@ -78,8 +78,9 @@ const validators = ref([]);
 const tx = propsRef.step.value.transactions[0];
 const baseDenom = (tx.data as Actions.RestakeData).amount.denom;
 const chainName = (tx.data as Actions.RestakeData).chain_name;
-
 const totalStaked = (tx.data as Actions.RestakeData).amount.amount;
+const validatorSrcAddress = tx.data.validatorSrcAddress;
+const validatorDstAddress = tx.data.validatorDstAddress;
 
 onMounted(async () => {
   validators.value = await getValidatorsByBaseDenom(baseDenom);
