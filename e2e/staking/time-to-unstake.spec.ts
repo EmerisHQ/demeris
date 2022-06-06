@@ -8,13 +8,11 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('Check Staking functionality', function () {
   test('time to unstake is a number', async ({ page, baseURL }) => {
-    // Click text=Osmosis >> nth=0
-    await Promise.all([
-      page.waitForNavigation({ url: `${baseURL}/asset/uosmo` }),
-      page.locator('text=Osmosis').first().click(),
-    ]);
-    // Click [data-test="openMenuButton"] button
-    await page.locator('[data-test="openMenuButton"] button').click();
+    await page.locator('text=View all').first().click(),
+      await page.locator('text=Osmosis').first().click(),
+      await page.waitForNavigation({ url: `${baseURL}/asset/uosmo` }),
+      // Click [data-test="openMenuButton"] button
+      await page.locator('[data-test="openMenuButton"] button').click();
     // Click button:has-text("Unstake")
     await Promise.all([
       page.waitForNavigation({
