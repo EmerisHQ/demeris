@@ -67,9 +67,8 @@
   </main>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
-import { defineComponent, nextTick, onMounted, ref, toRefs, watch } from 'vue';
+<script setup lang="ts">
+import { nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -102,144 +101,108 @@ async function getKeplrInstance() {
   });
 }
 
-export default defineComponent({
-  name: 'ConnectWalletModal',
+interface Props {
+  open?: boolean;
+  originUrl: string;
+}
 
-  components: {
-    ConnectWallet,
-    Brandmark,
-    AgreeWarning,
-    GetKeplr,
-    GetDesktop,
-    GetBrowser,
-  },
+const props = withDefaults(defineProps<Props>(), { open: false });
 
-  props: {
-    open: {
-      type: Boolean,
-      default: false,
-    },
-    originUrl: {
-      type: String,
-      required: true,
-    },
-  },
+useMeta({ title: '' });
+pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
+const router = useRouter();
+const { originUrl } = toRefs(props);
+const connectKeplrRef = ref(null);
+const connectWalletType = ref(null);
+const agreeWarningRef = ref(null);
+const getKeplrRef = ref(null);
+const getBrowserRef = ref(null);
+const isEmerisSupported = ref(null);
+const isKeplrInstalled = ref(null);
+const isLoading = ref(true);
+const isMobile = ref(null);
+const isReturnUser = ref(null);
+const isWarningAgreed = ref(null);
+const isWarningNeeded = ref(null);
 
-  setup(props) {
-    useMeta({ title: '' });
-    pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
-    const router = useRouter();
-    const { originUrl } = toRefs(props);
-    const connectKeplrRef = ref(null);
-    const agreeWarningRef = ref(null);
-    const getKeplrRef = ref(null);
-    const getBrowserRef = ref(null);
-    const isEmerisSupported = ref(null);
-    const isKeplrInstalled = ref(null);
-    const isLoading = ref(true);
-    const isMobile = ref(null);
-    const isReturnUser = ref(null);
-    const isWarningAgreed = ref(null);
-    const isWarningNeeded = ref(null);
+const goBackToOrigin = () => {
+  router.push(originUrl.value ?? '/');
+};
 
-    const goBackToOrigin = () => {
-      router.push(originUrl.value ?? '/');
-    };
+const cancelConnectWallet = () => {
+  connectKeplrRef.value?.cancel();
+  isReturnUser.value = true;
+  goBackToOrigin();
+};
+const cancelAgreeWarning = () => {
+  isWarningNeeded.value = null;
+};
 
-    const cancelConnectWallet = () => {
-      connectKeplrRef.value?.cancel();
-      isReturnUser.value = true;
-      goBackToOrigin();
-    };
-    const cancelAgreeWarning = () => {
-      isWarningNeeded.value = null;
-    };
+const agreeWarning = () => {
+  isWarningNeeded.value = false;
+  isWarningAgreed.value = true;
+  connectKeplrRef.value.signIn(connectWalletType.value);
+};
 
-    const agreeWarning = () => {
-      isWarningNeeded.value = false;
-      isWarningAgreed.value = true;
-      connectKeplrRef.value.signIn();
-    };
+const showWarning = (walletType) => {
+  connectWalletType.value = walletType;
+  isWarningNeeded.value = true;
+};
 
-    const showWarning = () => {
-      isWarningNeeded.value = true;
-    };
+// TODO: Implement demo account
+// right now it skips past the welcome flow
+const tryDemo = () => {
+  isReturnUser.value = true;
+  goBackToOrigin();
+};
 
-    // TODO: Implement demo account
-    // right now it skips past the welcome flow
-    const tryDemo = () => {
-      isReturnUser.value = true;
-      goBackToOrigin();
-    };
+onMounted(async () => {
+  isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches;
+  isReturnUser.value = window.localStorage.getItem('isReturnUser');
+  isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+  isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
 
-    onMounted(async () => {
-      isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches;
-      isReturnUser.value = window.localStorage.getItem('isReturnUser');
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
-      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+  // @ts-ignore
+  let isChromium = window.chrome;
+  let winNav = window.navigator;
+  let vendorName = winNav.vendor;
+  // @ts-ignore
+  // let isBrave = typeof navigator.brave !== 'undefined';
+  // @ts-ignore
+  let isOpera = typeof window.opr !== 'undefined';
+  // let isIEedge = winNav.userAgent.indexOf('Edg') > -1;
 
-      // @ts-ignore
-      let isChromium = window.chrome;
-      let winNav = window.navigator;
-      let vendorName = winNav.vendor;
-      // @ts-ignore
-      // let isBrave = typeof navigator.brave !== 'undefined';
-      // @ts-ignore
-      let isOpera = typeof window.opr !== 'undefined';
-      // let isIEedge = winNav.userAgent.indexOf('Edg') > -1;
+  isEmerisSupported.value =
+    isChromium !== null &&
+    typeof isChromium !== 'undefined' &&
+    vendorName === 'Google Inc.' &&
+    // isBrave === false &&
+    // isIEedge === false &&
+    isOpera === false;
 
-      isEmerisSupported.value =
-        isChromium !== null &&
-        typeof isChromium !== 'undefined' &&
-        vendorName === 'Google Inc.' &&
-        // isBrave === false &&
-        // isIEedge === false &&
-        isOpera === false;
+  // dont present spinner forever if not Chromium
+  if (!isEmerisSupported.value) {
+    isLoading.value = false;
+  }
 
-      // dont present spinner forever if not Chromium
-      if (!isEmerisSupported.value) {
-        isLoading.value = false;
-      }
+  await getKeplrInstance();
+  await nextTick();
 
-      await getKeplrInstance();
-      await nextTick();
+  nextTick(() => {
+    // detect keplr installed
+    // @ts-ignore
+    isKeplrInstalled.value = !!window.keplr;
+  });
+});
 
-      nextTick(() => {
-        // detect keplr installed
-        // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
-    });
-
-    watch(isWarningAgreed, () => {
-      window.localStorage.setItem('isWarningAgreed', 'true');
-    });
-    watch(isWarningNeeded, (newVal: string) => {
-      window.localStorage.setItem('isWarningNeeded', newVal);
-    });
-    watch(isReturnUser, (newVal: string) => {
-      window.localStorage.setItem('isReturnUser', newVal);
-    });
-
-    return {
-      agreeWarning,
-      showWarning,
-      connectKeplrRef,
-      agreeWarningRef,
-      getKeplrRef,
-      getBrowserRef,
-      isLoading,
-      isEmerisSupported,
-      isKeplrInstalled,
-      isMobile,
-      isReturnUser,
-      isWarningAgreed,
-      isWarningNeeded,
-      cancelAgreeWarning,
-      cancelConnectWallet,
-      tryDemo,
-    };
-  },
+watch(isWarningAgreed, () => {
+  window.localStorage.setItem('isWarningAgreed', 'true');
+});
+watch(isWarningNeeded, (newVal: string) => {
+  window.localStorage.setItem('isWarningNeeded', newVal);
+});
+watch(isReturnUser, (newVal: string) => {
+  window.localStorage.setItem('isReturnUser', newVal);
 });
 </script>
 

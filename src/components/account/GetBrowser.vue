@@ -39,50 +39,30 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 
-export default defineComponent({
-  name: 'ConnectWallet',
+interface Props {
+  type?: string;
+  isLoading?: boolean;
+}
 
-  components: {
-    Button,
-    Spinner,
-  },
+withDefaults(defineProps<Props>(), { type: undefined, isLoading: false });
 
-  props: {
-    type: {
-      type: String,
-      default: undefined,
-    },
-    isLoading: {
-      type: Boolean,
-      required: false,
-    },
-  },
+const emit = defineEmits<{
+  (e: 'cancel'): void;
+  (e: 'try-demo'): void;
+}>();
 
-  emits: ['cancel', 'try-demo'],
+const emitTryDemo = () => {
+  emit('try-demo');
+};
 
-  setup(_, { emit }) {
-    const emitCancel = () => {
-      emit('cancel');
-    };
-
-    const emitTryDemo = () => {
-      emit('try-demo');
-    };
-
-    const openUrlChrome = () => {
-      window.open('https://www.google.com/chrome/', '_blank', 'noopener');
-    };
-    const openUrlBrave = () => {
-      window.open('https://www.brave.com', '_blank', 'noopener');
-    };
-
-    return { emitCancel, openUrlChrome, openUrlBrave, emitTryDemo };
-  },
-});
+const openUrlChrome = () => {
+  window.open('https://www.google.com/chrome/', '_blank', 'noopener');
+};
+const openUrlBrave = () => {
+  window.open('https://www.brave.com', '_blank', 'noopener');
+};
 </script>

@@ -9,26 +9,21 @@
     </button>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import Icon from '@/components/ui/Icon.vue';
-export default defineComponent({
-  name: 'GobackWithClose',
-  components: { Icon },
-  props: {
-    showClose: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  emits: ['goback', 'close'],
-  setup(props, { emit }) {
-    function clickIcon(event) {
-      emit(event);
-    }
-    return { clickIcon };
-  },
-});
+
+interface Props {
+  showClose?: boolean;
+}
+
+withDefaults(defineProps<Props>(), { showClose: true });
+
+const emit = defineEmits<{
+  (e: 'goback'): void;
+  (e: 'close'): void;
+}>();
+
+function clickIcon(event) {
+  emit(event);
+}
 </script>
-<style lang="scss" scoped></style>

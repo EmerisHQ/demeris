@@ -6,36 +6,25 @@
     <div class="ml-4">{{ title }}</div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-export default defineComponent({
-  name: 'Goback',
-  components: { Button, Icon },
-  props: {
-    title: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    showBackButton: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-  },
-  emits: ['go-back'],
-  setup(_, { emit }) {
-    const handleGoBackClick = () => {
-      emit('go-back');
-    };
+interface Props {
+  title?: string;
+  showBackButton?: boolean;
+}
 
-    return {
-      handleGoBackClick,
-    };
-  },
+withDefaults(defineProps<Props>(), {
+  title: '',
+  showBackButton: true,
 });
+
+const emit = defineEmits<{
+  (e: 'go-back'): void;
+}>();
+
+const handleGoBackClick = () => {
+  emit('go-back');
+};
 </script>

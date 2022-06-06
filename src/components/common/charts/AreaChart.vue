@@ -29,261 +29,239 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines */
-/* eslint-disable max-lines-per-function */
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { computed, defineComponent, PropType, ref, toRaw, watch } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import useTheme from '@/composables/useTheme';
 import { ChartPrices } from '@/types/util';
 
-export default defineComponent({
-  name: 'AreaChart',
-  components: {
-    SkeletonLoader,
-  },
-  props: {
-    variant: {
-      type: String,
-      default: 'full',
-    },
-    height: {
-      type: Number,
-      default: 320,
-    },
-    dataStream: {
-      type: Array as PropType<ChartPrices>,
-      required: true,
-    },
-    showLoading: {
-      type: Boolean,
-    },
-    displayPrice: {
-      type: Number,
-      default: 0,
-    },
-  },
-  emits: ['filterChanged', 'priceDiff'],
-  setup(props, { emit }) {
-    const filterItems = ref([
-      {
-        text: '1D',
-        value: '1',
-      },
-      {
-        text: '1W',
-        value: '7',
-      },
-      {
-        text: '1M',
-        value: '30',
-      },
-      {
-        text: '1Y',
-        value: '365',
-      },
-      {
-        text: 'All',
-        value: 'max',
-      },
-    ]);
+interface Props {
+  variant?: string;
+  height?: number;
+  dataStream: ChartPrices[];
+  showLoading?: boolean;
+  displayPrice?: number;
+}
 
-    const theme = useTheme();
-
-    const chartData = ref({
-      options: {
-        tooltip: {
-          enabled: true,
-          x: {
-            show: true,
-          },
-          y: {
-            formatter: (value) => {
-              return `$${value}`;
-            },
-            title: {
-              formatter: () => '',
-            },
-          },
-          marker: {
-            show: false,
-          },
-        },
-        chart: {
-          type: 'area',
-          toolbar: {
-            show: false,
-          },
-          animations: {
-            enabled: true,
-            easing: 'easeinout',
-            speed: 1000,
-            dynamicAnimation: {
-              speed: 250,
-            },
-            animateGradually: {
-              enabled: true,
-              delay: 150,
-              speed: 350,
-            },
-          },
-          zoom: {
-            enabled: false,
-          },
-          background: 'transparent',
-        },
-        stroke: {
-          width: 2,
-        },
-        xaxis: {
-          labels: {
-            show: false,
-          },
-          tooltip: {
-            enabled: false,
-            theme: false,
-          },
-          axisBorder: {
-            show: false,
-          },
-          axisTicks: {
-            show: false,
-          },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        colors: [],
-        fill: {
-          colors: [],
-          gradient: {
-            type: 'vertical',
-            shade: 'light',
-            opacityFrom: 0.1,
-            opacityTo: 0,
-          },
-        },
-        yaxis: {
-          show: false,
-        },
-        grid: {
-          show: false,
-          padding: {
-            left: 0,
-            right: 0,
-          },
-        },
-      },
-      series: [
-        {
-          name: 'Price',
-          data: ref(null),
-        },
-      ],
-    });
-
-    const activeFilterItem = ref('1');
-    let highestPrice = ref('');
-    let lowestPrice = ref('');
-    let openingPrice = ref(0);
-    let closingPrice = ref(0);
-    let priceDiff = ref('');
-    let priceDiffPercent = ref('');
-
-    watch(
-      () => activeFilterItem.value,
-      (newFilterItem) => {
-        emit('filterChanged', newFilterItem, false);
-      },
-    );
-
-    const hasData = computed(() => {
-      return chartData.value.series[0].data && chartData.value.series[0].data.length > 1;
-    });
-
-    const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
-      let rawPriceDiff = 0;
-      if (indicator === 'gain') {
-        rawPriceDiff = closingPrice - openingPrice;
-        priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
-        priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
-      } else {
-        rawPriceDiff = openingPrice - closingPrice;
-        priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
-        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
-      }
-
-      emit('priceDiff', {
-        diff: priceDiff.value,
-        rawDiff: rawPriceDiff,
-        indicator: indicator,
-        percent: priceDiffPercent.value,
-      });
-    };
-
-    const gainColor = computed(() => {
-      return 'var(--chart-positive)';
-    });
-
-    const lossColor = computed(() => {
-      return 'var(--chart-negative)';
-    });
-
-    watch(
-      () => [props.dataStream, props.variant, props.displayPrice],
-      async () => {
-        const rawDataStream = toRaw(props.dataStream);
-        const dataStream = [
-          ...rawDataStream,
-          {
-            x: rawDataStream[rawDataStream.length - 1] ? rawDataStream[rawDataStream.length - 1].x : '',
-            y: Number(props.displayPrice.toFixed(6)),
-          },
-        ];
-        chartData.value.series[0].data = dataStream;
-
-        const high = (maxBy(dataStream, 'y') ? maxBy(dataStream, 'y').y : 0).toFixed(2);
-        highestPrice.value = '$' + high.toString();
-
-        const low = (minBy(dataStream, 'y') ? minBy(dataStream, 'y').y : 0).toFixed(2);
-        lowestPrice.value = '$' + low.toString();
-
-        openingPrice.value = dataStream[0] ? dataStream[0].y : 0;
-        closingPrice.value = dataStream[dataStream.length - 1] ? dataStream[dataStream.length - 1].y : 0;
-
-        if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = gainColor.value;
-          chartData.value.options.fill.colors[0] = gainColor.value;
-
-          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
-        } else {
-          chartData.value.options.colors[0] = lossColor.value;
-          chartData.value.options.fill.colors[0] = lossColor.value;
-
-          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
-        }
-
-        if (props.variant === 'mini') {
-          chartData.value.options.tooltip.enabled = false;
-        }
-      },
-      { immediate: true },
-    );
-
-    return {
-      theme,
-      filterItems,
-      chartData,
-      hasData,
-      activeFilterItem,
-      highestPrice,
-      lowestPrice,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'full',
+  height: 320,
+  displayPrice: 0,
 });
+
+const emit = defineEmits<{
+  (e: 'filterChanged', days: any, showSkeleton: boolean): void;
+  (e: 'priceDiff', priceDiff: any): void;
+}>();
+
+const filterItems = ref([
+  {
+    text: '1D',
+    value: '1',
+  },
+  {
+    text: '1W',
+    value: '7',
+  },
+  {
+    text: '1M',
+    value: '30',
+  },
+  {
+    text: '1Y',
+    value: '365',
+  },
+  {
+    text: 'All',
+    value: 'max',
+  },
+]);
+
+useTheme();
+
+const chartData = ref({
+  options: {
+    tooltip: {
+      enabled: true,
+      x: {
+        show: true,
+      },
+      y: {
+        formatter: (value) => {
+          return `$${value}`;
+        },
+        title: {
+          formatter: () => '',
+        },
+      },
+      marker: {
+        show: false,
+      },
+    },
+    chart: {
+      type: 'area',
+      toolbar: {
+        show: false,
+      },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 1000,
+        dynamicAnimation: {
+          speed: 250,
+        },
+        animateGradually: {
+          enabled: true,
+          delay: 150,
+          speed: 350,
+        },
+      },
+      zoom: {
+        enabled: false,
+      },
+      background: 'transparent',
+    },
+    stroke: {
+      width: 2,
+    },
+    xaxis: {
+      labels: {
+        show: false,
+      },
+      tooltip: {
+        enabled: false,
+        theme: false,
+      },
+      axisBorder: {
+        show: false,
+      },
+      axisTicks: {
+        show: false,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    colors: [],
+    fill: {
+      colors: [],
+      gradient: {
+        type: 'vertical',
+        shade: 'light',
+        opacityFrom: 0.1,
+        opacityTo: 0,
+      },
+    },
+    yaxis: {
+      show: false,
+    },
+    grid: {
+      show: false,
+      padding: {
+        left: 0,
+        right: 0,
+      },
+    },
+  },
+  series: [
+    {
+      name: 'Price',
+      data: ref(null),
+    },
+  ],
+});
+
+const activeFilterItem = ref('1');
+let highestPrice = ref('');
+let lowestPrice = ref('');
+let openingPrice = ref(0);
+let closingPrice = ref(0);
+let priceDiff = ref('');
+let priceDiffPercent = ref('');
+
+watch(
+  () => activeFilterItem.value,
+  (newFilterItem) => {
+    emit('filterChanged', newFilterItem, false);
+  },
+);
+
+const hasData = computed(() => {
+  return chartData.value.series[0].data && chartData.value.series[0].data.length > 1;
+});
+
+const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
+  let rawPriceDiff = 0;
+  if (indicator === 'gain') {
+    rawPriceDiff = closingPrice - openingPrice;
+    priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
+    priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+  } else {
+    rawPriceDiff = openingPrice - closingPrice;
+    priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
+    priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+  }
+
+  emit('priceDiff', {
+    diff: priceDiff.value,
+    rawDiff: rawPriceDiff,
+    indicator: indicator,
+    percent: priceDiffPercent.value,
+  });
+};
+
+const gainColor = computed(() => {
+  return 'var(--chart-positive)';
+});
+
+const lossColor = computed(() => {
+  return 'var(--chart-negative)';
+});
+
+watch(
+  () => [props.dataStream, props.variant, props.displayPrice],
+  async () => {
+    const rawDataStream = toRaw(props.dataStream);
+    const dataStream = [
+      ...rawDataStream,
+      {
+        x: rawDataStream[rawDataStream.length - 1] ? rawDataStream[rawDataStream.length - 1].x : '',
+        y: Number(props.displayPrice.toFixed(6)),
+      },
+    ];
+    chartData.value.series[0].data = dataStream;
+
+    const high = (maxBy(dataStream, 'y') ? maxBy(dataStream, 'y').y : 0).toFixed(2);
+    highestPrice.value = '$' + high.toString();
+
+    const low = (minBy(dataStream, 'y') ? minBy(dataStream, 'y').y : 0).toFixed(2);
+    lowestPrice.value = '$' + low.toString();
+
+    openingPrice.value = dataStream[0] ? dataStream[0].y : 0;
+    closingPrice.value = dataStream[dataStream.length - 1] ? dataStream[dataStream.length - 1].y : 0;
+
+    if (openingPrice.value <= closingPrice.value) {
+      chartData.value.options.colors[0] = gainColor.value;
+      chartData.value.options.fill.colors[0] = gainColor.value;
+
+      emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
+    } else {
+      chartData.value.options.colors[0] = lossColor.value;
+      chartData.value.options.fill.colors[0] = lossColor.value;
+
+      emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
+    }
+
+    if (props.variant === 'mini') {
+      chartData.value.options.tooltip.enabled = false;
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss">

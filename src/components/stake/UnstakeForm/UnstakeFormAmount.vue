@@ -29,11 +29,10 @@
     </div>
   </main>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, ref, toRefs } from 'vue';
+import { computed, inject, onMounted, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -48,92 +47,62 @@ import { Step, UnstakeForm } from '@/types/actions';
 
 import UnstakeFormAmountInput from './UnstakeFormAmountInput.vue';
 
-export default defineComponent({
-  name: 'UnstakeFormAmount',
-  components: {
-    UnstakeFormAmountInput,
-    ListItem,
-    DaysToUnstake,
-    AmountDisplay,
-    Button,
-    Price,
-    FeeLevelSelector,
-  },
-  props: {
-    validator: {
-      type: Object as PropType<EmerisAPI.Validator>,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-    steps: {
-      type: Array as PropType<Step[]>,
-      default: () => [],
-    },
-  },
-  emits: ['next'],
-  setup(props, { emit }) {
-    const store = useStore();
+interface Props {
+  validator: EmerisAPI.Validator;
+  steps?: Step[];
+}
 
-    const form = inject<UnstakeForm>('unstakeForm');
-    const { getStakingRewardsByBaseDenom } = useStaking();
-    const propsRef = toRefs(props);
-    const fees = ref({});
-    const stakingRewardsData = ref(null);
-    const chain = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
-    });
-    const chainName = ref<string>(propsRef.validator.value.chain_name);
-    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
-    const precision = computed(() =>
-      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-        name: baseDenom,
-      }),
-    );
+const props = withDefaults(defineProps<Props>(), {
+  steps: () => [],
+});
 
-    const stakingRewards = computed(() => {
-      if (stakingRewardsData.value?.rewards) {
-        return parseFloat(
-          stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
-            ?.reward ?? '0',
-        ).toString();
-      } else {
-        return '0';
-      }
-    });
-    const stakingBalance = computed(() => {
-      return propsRef.validator.value.stakedAmount;
-    });
-    const displayStakingBalance = computed(() => {
-      const bn = new BigNumber(stakingBalance.value ?? 0);
-      return bn.dividedBy(10 ** precision.value);
-    });
-    const remainingStake = computed(() => {
-      return new BigNumber(stakingBalance.value ?? 0)
-        .minus(new BigNumber(form.amount != '' ? form.amount ?? 0 : 0).multipliedBy(10 ** precision.value))
-        .toString();
-    });
-    const isValid = computed(() => {
-      return parseFloat(remainingStake.value) >= 0 && parseFloat(form.amount) > 0;
-    });
-    const goToReview = () => {
-      emit('next');
-    };
-    onMounted(async () => {
-      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
-    });
-    return {
-      chainName,
-      displayStakingBalance,
-      baseDenom,
-      fees,
-      goToReview,
-      remainingStake,
-      isValid,
-      stakingRewards,
-      form,
-    };
-  },
+const emit = defineEmits<{
+  (e: 'next'): void;
+}>();
+
+const store = useStore();
+
+const form = inject<UnstakeForm>('unstakeForm');
+const { getStakingRewardsByBaseDenom } = useStaking();
+const propsRef = toRefs(props);
+const fees = ref({});
+const stakingRewardsData = ref(null);
+const chain = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+});
+const chainName = ref<string>(propsRef.validator.value.chain_name);
+const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
+const precision = computed(() =>
+  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+    name: baseDenom,
+  }),
+);
+
+const stakingRewards = computed(() => {
+  if (stakingRewardsData.value?.rewards) {
+    return parseFloat(
+      stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
+        ?.reward ?? '0',
+    ).toString();
+  } else {
+    return '0';
+  }
+});
+const stakingBalance = computed(() => {
+  return propsRef.validator.value.stakedAmount;
+});
+const remainingStake = computed(() => {
+  return new BigNumber(stakingBalance.value ?? 0)
+    .minus(new BigNumber(form.amount != '' ? form.amount ?? 0 : 0).multipliedBy(10 ** precision.value))
+    .toString();
+});
+const isValid = computed(() => {
+  return parseFloat(remainingStake.value) >= 0 && parseFloat(form.amount) > 0;
+});
+const goToReview = () => {
+  emit('next');
+};
+onMounted(async () => {
+  stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
 });
 </script>

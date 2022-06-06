@@ -1,6 +1,8 @@
 import { MutationTree } from 'vuex';
 
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { AccountData, UserData } from '@/types/user';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ChainKeyData } from './../../types/user';
 import { ActionTypes } from './action-types';
@@ -30,7 +32,12 @@ export const mutations: MutationTree<USERState> & Mutations = {
   [MutationTypes.SET_SESSION_DATA](state: USERState, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
     if (!state._Session.isDemoAccount) {
-      window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+      if (featureRunning('USE_EMERIS_EXTENSION'))
+        walletActionHandler.setLastSession({
+          timestamp: payload.updateDT,
+          wallet: walletActionHandler.session.wallet,
+        });
+      else window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
     }
   },
   [MutationTypes.SET_ACCOUNT](state: USERState, payload: AccountData) {
@@ -62,7 +69,11 @@ export const mutations: MutationTree<USERState> & Mutations = {
     state.account = null;
     state.chainKeyData = [];
     state._Session = {};
-    window.localStorage.setItem('lastEmerisSession', '');
+    if (featureRunning('USE_EMERIS_EXTENSION')) {
+      walletActionHandler.clearLastSession();
+    } else {
+      window.localStorage.setItem('lastEmerisSession', '');
+    }
   },
   [MutationTypes.RESET_STATE](state: USERState) {
     Object.assign(state, getDefaultState());

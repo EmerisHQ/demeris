@@ -192,11 +192,10 @@
   </AppLayout>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 /* eslint-disable max-lines */
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -226,303 +225,247 @@ import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 
-export default defineComponent({
-  name: 'Asset',
+const displayName = ref('');
+const displayPrice = ref(0);
+const metaSource = computed(() => {
+  return { title: displayName.value };
+});
+useMeta(metaSource);
+const isPoolCoin = computed(() => {
+  return denom.value.startsWith('pool');
+});
+const stakingEnabled = featureRunning('STAKING');
+const typedstore = useStore() as RootStoreTyped;
+const route = useRoute();
+const router = useRouter();
+const denom = computed(() => route.params.denom as string);
+pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
+const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } = useAccount();
+const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
-  components: {
-    Swap,
-    // StakingBanner,
-    AmountDisplay,
-    ChainName,
-    Denom,
-    Ticker,
-    CircleSymbol,
-    StakeTable,
-    AppLayout,
-    Price,
-    Pools,
-    TooltipPools,
-    PoolBanner,
-    BuyCryptoBanner,
-    ChainDownWarning,
-    AreaChart,
-    AssetAirdrop,
-  },
+const assetConfig = computed(() => {
+  const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
+  return verifiedDenoms.find((item) => item.name === denom.value);
+});
+if (!assetConfig.value) {
+  router.push('/');
+}
 
-  setup() {
-    const displayName = ref('');
-    const displayPrice = ref(0);
-    const metaSource = computed(() => {
-      return { title: displayName.value };
-    });
-    useMeta(metaSource);
-    const isPoolCoin = computed(() => {
-      return denom.value.startsWith('pool');
-    });
-    const stakingEnabled = featureRunning('STAKING');
-    const typedstore = useStore() as RootStoreTyped;
-    const route = useRoute();
-    const router = useRouter();
-    const denom = computed(() => route.params.denom as string);
-    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
-    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
-      useAccount();
-    const { filterPoolsByDenom, getWithdrawBalances } = usePools();
+const nativeAsset = computed(() => {
+  return nativeBalances.value.find((item) => item.base_denom === denom.value);
+});
 
-    const assetConfig = computed(() => {
-      const verifiedDenoms = typedstore.getters[GlobalGetterTypes.API.getVerifiedDenoms] || [];
-      return verifiedDenoms.find((item) => item.name === denom.value);
-    });
-    if (!assetConfig.value) {
-      router.push('/');
-    }
-
-    const nativeAsset = computed(() => {
-      return nativeBalances.value.find((item) => item.base_denom === denom.value);
-    });
-
-    const assets = computed(() => balancesByDenom(denom.value));
-    const unavailableChains = computed(() => {
-      const result = {};
-      for (const asset of assets.value) {
-        const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
-        if (!status) {
-          result[asset.on_chain] = {
-            chain: asset.on_chain,
-            denom: asset.base_denom,
-            unavailable: 'full',
-          };
-        }
-      }
-      return result;
-    });
-
-    const poolDenom = ref(denom.value);
-
-    watch(
-      denom,
-      async () => {
-        const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-
-        if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
-          await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
-            subscribe: false,
-            params: { chain_name: dexChain },
-          });
-          const invPrimaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
-            chain_name: dexChain,
-            destination_chain_name: assetConfig.value.chain_name,
-          });
-
-          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
-        }
-        displayName.value = await getDisplayName(denom.value, dexChain);
-      },
-      { immediate: true },
-    );
-
-    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
-
-    const availableAmount = computed(() => {
-      return assets.value
-        .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
-        .toFixed(0);
-    });
-
-    const stakingBalance = computed(() => {
-      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
-      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
-        return stakingBalancesByChain(assetConfig.value.chain_name);
-      }
-      return 0;
-    });
-    const unbondingDelegation = computed(() => {
-      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
-      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
-        return unbondingDelegationsByChain(assetConfig.value.chain_name);
-      }
-      return [];
-    });
-
-    const stakedAmount = computed(() => {
-      let staked = stakingBalance.value;
-      let totalStakedAmount = new BigNumber(0);
-      if (Array.isArray(staked)) {
-        for (let i = 0; i < staked.length; i++) {
-          let amount = new BigNumber(staked[i].amount);
-          if (amount) {
-            totalStakedAmount = totalStakedAmount.plus(amount);
-          }
-        }
-      }
-      return totalStakedAmount.toFixed(0);
-    });
-
-    const unstakedAmount = computed(() => {
-      let totalUnstakedAmount = new BigNumber(0);
-      if (unbondingDelegation.value.length > 0) {
-        const unstakedAmounts = unbondingDelegation.value
-          .map((y) => y.entries)
-          .flat()
-          .map((z) => z.balance);
-        if (unstakedAmounts.length > 0) {
-          const unstakedAmount = unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item)), new BigNumber(0));
-          totalUnstakedAmount = totalUnstakedAmount.plus(unstakedAmount);
-        }
-      }
-      return totalUnstakedAmount.toFixed(0);
-    });
-    const poolsInvestedWithAsset = computed(() => {
-      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
-      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-
-      return poolsCopy.filter((item) =>
-        balancesCopy.some(
-          (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount > 0,
-        ),
-      );
-    });
-
-    const poolsNotInvestedWithAsset = computed(() => {
-      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
-      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-
-      return poolsCopy.filter(
-        (item) =>
-          !balancesCopy.some((item2) => item.pool_coin_denom == item2.base_denom) ||
-          balancesCopy.some(
-            (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount == 0,
-          ),
-      );
-    });
-
-    const poolsDisplay = computed(() => {
-      const fillBy = 3 - poolsInvestedWithAsset.value.length;
-
-      if (fillBy > 0) {
-        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0, fillBy));
-      }
-
-      return poolsInvestedWithAsset.value;
-    });
-
-    const pooledAmount = computed(() => {
-      let assetPooledAmount = new BigNumber(0);
-
-      for (const pool of poolsInvestedWithAsset.value) {
-        const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-        const withdrawBalances = getWithdrawBalances(
-          pool,
-          poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
-        );
-
-        const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
-        if (assetBalanceInPool) {
-          assetPooledAmount = assetPooledAmount.plus(new BigNumber(assetBalanceInPool.amount));
-        }
-      }
-
-      return assetPooledAmount;
-    });
-
-    const totalAmount = computed(() => {
-      return new BigNumber(availableAmount.value)
-        .plus(new BigNumber(stakedAmount.value))
-        .plus(new BigNumber(unstakedAmount.value))
-        .toFixed(0);
-    });
-
-    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
-    const dataStream = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getTokenPrices];
-    });
-
-    const getTokenPrices = ref(null);
-    let priceDiffObject = ref(null);
-
-    const setPriceDifference = (priceDiff: any) => {
-      priceDiffObject.value = priceDiff;
-    };
-
-    if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
-      watch(displayName, async () => {
-        if (displayName.value) {
-          getTokenPrices.value('1', true);
-        }
-      });
-
-      getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
-        const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
-        const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
-          subscribe: false,
-          params: {
-            token: tokenTicker.toLowerCase(),
-            showSkeleton: false,
-          },
-        });
-        if (chainName) {
-          await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_PRICES, {
-            subscribe: false,
-            params: {
-              token_id: chainName,
-              days,
-              currency: 'usd',
-              showSkeleton,
-            },
-          });
-        }
+const assets = computed(() => balancesByDenom(denom.value));
+const unavailableChains = computed(() => {
+  const result = {};
+  for (const asset of assets.value) {
+    const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
+    if (!status) {
+      result[asset.on_chain] = {
+        chain: asset.on_chain,
+        denom: asset.base_denom,
+        unavailable: 'full',
       };
     }
-
-    const isDenomAPool = computed(() => {
-      return denom.value.includes('pool');
-    });
-
-    const showPriceChart = computed(() => {
-      return isAreaChartFeatureRunning && !isDenomAPool.value;
-    });
-
-    const showPriceChartLoadingSkeleton = computed(() => {
-      return (
-        typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
-        typedstore.getters[GlobalGetterTypes.API.getCoinGeckoIdLoadingStatus] === LoadingState.LOADING
-      );
-    });
-
-    onUnmounted(() => {
-      typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
-    });
-
-    const getFormattedAmount = (assetAmount) => {
-      return new BigNumber(parseCoins(assetAmount)[0].amount);
-    };
-
-    return {
-      nativeAsset,
-      assetConfig,
-      BigNumber,
-      parseCoins,
-      denom,
-      assets,
-      unavailableChains,
-      poolsDisplay,
-      poolsInvestedWithAsset,
-      availableAmount,
-      stakedAmount,
-      unstakedAmount,
-      pooledAmount,
-      totalAmount,
-      isPoolCoin,
-      stakingEnabled,
-      dataStream,
-      getTokenPrices,
-      showPriceChart,
-      showPriceChartLoadingSkeleton,
-      priceDiffObject,
-      setPriceDifference,
-      getFormattedAmount,
-      displayPrice,
-    };
-  },
+  }
+  return result;
 });
+
+const poolDenom = ref(denom.value);
+
+watch(
+  denom,
+  async () => {
+    const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+
+    if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
+      await typedstore.dispatch(GlobalActionTypes.API.GET_CHAIN, {
+        subscribe: false,
+        params: { chain_name: dexChain },
+      });
+      const invPrimaryChannel = typedstore.getters[GlobalGetterTypes.API.getPrimaryChannel]({
+        chain_name: dexChain,
+        destination_chain_name: assetConfig.value.chain_name,
+      });
+
+      poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
+    }
+    displayName.value = await getDisplayName(denom.value, dexChain);
+  },
+  { immediate: true },
+);
+
+const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
+
+const availableAmount = computed(() => {
+  return assets.value
+    .reduce((acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)), new BigNumber(0))
+    .toFixed(0);
+});
+
+const stakingBalance = computed(() => {
+  // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+  if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
+    return stakingBalancesByChain(assetConfig.value.chain_name);
+  }
+  return 0;
+});
+const unbondingDelegation = computed(() => {
+  // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+  if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
+    return unbondingDelegationsByChain(assetConfig.value.chain_name);
+  }
+  return [];
+});
+
+const stakedAmount = computed(() => {
+  let staked = stakingBalance.value;
+  let totalStakedAmount = new BigNumber(0);
+  if (Array.isArray(staked)) {
+    for (let i = 0; i < staked.length; i++) {
+      let amount = new BigNumber(staked[i].amount);
+      if (amount) {
+        totalStakedAmount = totalStakedAmount.plus(amount);
+      }
+    }
+  }
+  return totalStakedAmount.toFixed(0);
+});
+
+const unstakedAmount = computed(() => {
+  let totalUnstakedAmount = new BigNumber(0);
+  if (unbondingDelegation.value.length > 0) {
+    const unstakedAmounts = unbondingDelegation.value
+      .map((y) => y.entries)
+      .flat()
+      .map((z) => z.balance);
+    if (unstakedAmounts.length > 0) {
+      const unstakedAmount = unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item)), new BigNumber(0));
+      totalUnstakedAmount = totalUnstakedAmount.plus(unstakedAmount);
+    }
+  }
+  return totalUnstakedAmount.toFixed(0);
+});
+const poolsInvestedWithAsset = computed(() => {
+  const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
+  const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+
+  return poolsCopy.filter((item) =>
+    balancesCopy.some((item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount > 0),
+  );
+});
+
+const poolsNotInvestedWithAsset = computed(() => {
+  const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
+  const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+
+  return poolsCopy.filter(
+    (item) =>
+      !balancesCopy.some((item2) => item.pool_coin_denom == item2.base_denom) ||
+      balancesCopy.some(
+        (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount == 0,
+      ),
+  );
+});
+
+const poolsDisplay = computed(() => {
+  const fillBy = 3 - poolsInvestedWithAsset.value.length;
+
+  if (fillBy > 0) {
+    return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0, fillBy));
+  }
+
+  return poolsInvestedWithAsset.value;
+});
+
+const pooledAmount = computed(() => {
+  let assetPooledAmount = new BigNumber(0);
+
+  for (const pool of poolsInvestedWithAsset.value) {
+    const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
+    const withdrawBalances = getWithdrawBalances(
+      pool,
+      poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
+    );
+
+    const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
+    if (assetBalanceInPool) {
+      assetPooledAmount = assetPooledAmount.plus(new BigNumber(assetBalanceInPool.amount));
+    }
+  }
+
+  return assetPooledAmount;
+});
+
+const totalAmount = computed(() => {
+  return new BigNumber(availableAmount.value)
+    .plus(new BigNumber(stakedAmount.value))
+    .plus(new BigNumber(unstakedAmount.value))
+    .toFixed(0);
+});
+
+const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+const dataStream = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getTokenPrices];
+});
+
+const getTokenPrices = ref(null);
+let priceDiffObject = ref(null);
+
+const setPriceDifference = (priceDiff: any) => {
+  priceDiffObject.value = priceDiff;
+};
+
+if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
+  watch(displayName, async () => {
+    if (displayName.value) {
+      getTokenPrices.value('1', true);
+    }
+  });
+
+  getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
+    const tokenTicker = await getTicker(denom.value, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+    const chainName = await typedstore.dispatch(GlobalActionTypes.API.GET_COINGECKO_ID_BY_NAMES, {
+      subscribe: false,
+      params: {
+        token: tokenTicker.toLowerCase(),
+        showSkeleton: false,
+      },
+    });
+    if (chainName) {
+      await typedstore.dispatch(GlobalActionTypes.API.GET_TOKEN_PRICES, {
+        subscribe: false,
+        params: {
+          token_id: chainName,
+          days,
+          currency: 'usd',
+          showSkeleton,
+        },
+      });
+    }
+  };
+}
+
+const isDenomAPool = computed(() => {
+  return denom.value.includes('pool');
+});
+
+const showPriceChart = computed(() => {
+  return isAreaChartFeatureRunning && !isDenomAPool.value;
+});
+
+const showPriceChartLoadingSkeleton = computed(() => {
+  return (
+    typedstore.getters[GlobalGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
+    typedstore.getters[GlobalGetterTypes.API.getCoinGeckoIdLoadingStatus] === LoadingState.LOADING
+  );
+});
+
+onUnmounted(() => {
+  typedstore.dispatch(GlobalActionTypes.API.RESET_TOKEN_PRICES);
+});
+
+const getFormattedAmount = (assetAmount) => {
+  return new BigNumber(parseCoins(assetAmount)[0].amount);
+};
 </script>

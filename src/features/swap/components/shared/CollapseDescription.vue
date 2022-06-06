@@ -31,5 +31,10 @@
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-defineProps(['title', 'contentClass']);
+interface Props {
+  title: string;
+  contentClass?: string;
+}
+
+defineProps<Props>();
 </script>
