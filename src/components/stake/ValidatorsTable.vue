@@ -192,12 +192,12 @@
   </section>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
+import { computed, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import Price from '@/components/common/Price.vue';
@@ -216,159 +216,118 @@ enum ValStyle {
   ACTIONLIST = 'actionlist',
 }
 type ValStyleType = `${ValStyle}`;
-//TODO: implement type for validator list
-export default defineComponent({
-  name: 'ValidatorsTable',
-  components: { ValidatorTag, Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
-  props: {
-    tableTitle: {
-      type: String as PropType<string>,
-      required: true,
-    },
-    validatorList: {
-      type: Array as PropType<EmerisAPI.Validator[]>,
-      required: true,
-      default: () => [],
-    },
-    disabledList: {
-      type: Array as PropType<any[]>,
-      required: false,
-      default: () => [],
-    },
-    tableStyle: {
-      type: String as PropType<ValStyleType>,
-      default: 'actionlist',
-    },
-    currentlyEditing: {
-      type: String as PropType<string>,
-      required: false,
-      default: '',
-    },
-    sortingBy: {
-      type: String as PropType<'power' | 'name' | 'commission' | 'staked'>,
-      required: false,
-      default: 'power',
-    },
-    sortingOrder: {
-      type: String as PropType<'asc' | 'desc'>,
-      required: false,
-      default: 'desc',
-    },
-  },
-  emits: ['selectValidator'],
-  setup(props, { emit }) {
-    /* hooks */
-    const store = useStore() as RootStoreTyped;
-    const isDisabled = ref(false);
-    const propsRef = toRefs(props);
-    /* preset variables */
-    const chain = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getChain]({
-        chain_name: propsRef.validatorList.value[0].chain_name,
-      });
-    });
-    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
-    const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom });
-    const detailedValidator = ref(null);
-    /* variables */
-    const keyword = ref<string>('');
-    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null);
-    const sortBy = ref(props.sortingBy);
-    const sortOrder = ref(props.sortingOrder);
-    const totalStakedAmount = computed(() => {
-      return propsRef.validatorList.value
-        .reduce((acc, validator) => {
-          return acc.plus(new BigNumber(validator.tokens));
-        }, new BigNumber(0))
-        .toString();
-    });
-    /* functions */
-    const filteredAndSortedValidatorList = computed(() => {
-      const query = keyword.value.toLowerCase();
-      return propsRef.validatorList.value
-        .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
-        .sort((a, b) => {
-          let res = 0;
-          //  if only one of a and b are offline
-          if ((isValidatorOffline(a) || isValidatorOffline(b)) && !(isValidatorOffline(a) && isValidatorOffline(b))) {
-            return isValidatorOffline(a) ? 1 : -1;
-          } else {
-            switch (sortBy.value) {
-              case 'power':
-                if (Number(a.tokens) < Number(b.tokens)) res = 1;
-                if (Number(a.tokens) > Number(b.tokens)) res = -1;
-                break;
-              case 'name':
-                if (a.moniker < b.moniker) res = 1;
-                if (a.moniker > b.moniker) res = -1;
-                break;
-              case 'commission':
-                if (Number(a.commission_rate) < Number(b.commission_rate)) res = 1;
-                if (Number(a.commission_rate) > Number(b.commission_rate)) res = -1;
-                break;
-              case 'staked':
-                if (Number(a.stakedAmount) < Number(b.stakedAmount)) res = 1;
-                if (Number(a.stakedAmount) > Number(b.stakedAmount)) res = -1;
-                break;
-            }
-            if (res === 0) {
-              if (Number(a.tokens) < Number(b.tokens)) res = 1;
-              if (Number(a.tokens) > Number(b.tokens)) res = -1;
-            }
-          }
-          if (sortOrder.value === 'asc') return -res;
-          return res;
-        });
-    });
-    const sort = (by) => {
-      if (sortBy.value == by && sortOrder.value == 'asc') {
-        sortOrder.value = 'desc';
-      } else {
-        sortOrder.value = 'asc';
-      }
-      sortBy.value = by;
-    };
-    const getCommissionDisplayValue = (value) => {
-      return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
-    };
-    const getAmountDisplayValueTruncated = (value) => {
-      return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US');
-    };
-    const getAmountDisplayValue = (value) => {
-      return new BigNumber(value)
-        .dividedBy(10 ** precision)
-        .toNumber()
-        .toLocaleString('en-US');
-    };
-    const getVotingPowerPercDisplayValue = (value) => {
-      return (
-        new BigNumber(value).dividedBy(totalStakedAmount.value).multipliedBy(100).decimalPlaces(2).toString() + '%'
-      );
-    };
-    const selectValidator = (vali) => {
-      emit('selectValidator', vali);
-      detailedValidator.value = null;
-    };
 
-    return {
-      baseDenom,
-      filteredAndSortedValidatorList,
-      keyword,
-      getCommissionDisplayValue,
-      getAmountDisplayValue,
-      getAmountDisplayValueTruncated,
-      getVotingPowerPercDisplayValue,
-      selectValidator,
-      detailedValidator,
-      hasActions,
-      sort,
-      sortBy,
-      sortOrder,
-      isDisabled,
-      isValidatorOffline,
-    };
-  },
+interface Props {
+  tableTitle: string;
+  validatorList: EmerisAPI.Validator[];
+  disabledList?: any[];
+  tableStyle?: ValStyleType;
+  currentlyEditing?: string;
+  sortingBy?: 'power' | 'name' | 'commission' | 'staked';
+  sortingOrder?: 'asc' | 'desc';
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  validatorList: () => [],
+  disabledList: () => [],
+  tableStyle: 'actionlist',
+  currentlyEditing: '',
+  sortingBy: 'power',
+  sortingOrder: 'desc',
 });
+
+const emit = defineEmits<{
+  (e: 'selectValidator', validator: any): void;
+}>();
+
+const store = useStore() as RootStoreTyped;
+const propsRef = toRefs(props);
+/* preset variables */
+const chain = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChain]({
+    chain_name: propsRef.validatorList.value[0].chain_name,
+  });
+});
+const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
+const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom });
+const detailedValidator = ref(null);
+/* variables */
+const keyword = ref<string>('');
+const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null);
+const sortBy = ref(props.sortingBy);
+const sortOrder = ref(props.sortingOrder);
+const totalStakedAmount = computed(() => {
+  return propsRef.validatorList.value
+    .reduce((acc, validator) => {
+      return acc.plus(new BigNumber(validator.tokens));
+    }, new BigNumber(0))
+    .toString();
+});
+/* functions */
+const filteredAndSortedValidatorList = computed(() => {
+  const query = keyword.value.toLowerCase();
+  return propsRef.validatorList.value
+    .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
+    .sort((a, b) => {
+      let res = 0;
+      //  if only one of a and b are offline
+      if ((isValidatorOffline(a) || isValidatorOffline(b)) && !(isValidatorOffline(a) && isValidatorOffline(b))) {
+        return isValidatorOffline(a) ? 1 : -1;
+      } else {
+        switch (sortBy.value) {
+          case 'power':
+            if (Number(a.tokens) < Number(b.tokens)) res = 1;
+            if (Number(a.tokens) > Number(b.tokens)) res = -1;
+            break;
+          case 'name':
+            if (a.moniker < b.moniker) res = 1;
+            if (a.moniker > b.moniker) res = -1;
+            break;
+          case 'commission':
+            if (Number(a.commission_rate) < Number(b.commission_rate)) res = 1;
+            if (Number(a.commission_rate) > Number(b.commission_rate)) res = -1;
+            break;
+          case 'staked':
+            if (Number(a.stakedAmount) < Number(b.stakedAmount)) res = 1;
+            if (Number(a.stakedAmount) > Number(b.stakedAmount)) res = -1;
+            break;
+        }
+        if (res === 0) {
+          if (Number(a.tokens) < Number(b.tokens)) res = 1;
+          if (Number(a.tokens) > Number(b.tokens)) res = -1;
+        }
+      }
+      if (sortOrder.value === 'asc') return -res;
+      return res;
+    });
+});
+const sort = (by) => {
+  if (sortBy.value == by && sortOrder.value == 'asc') {
+    sortOrder.value = 'desc';
+  } else {
+    sortOrder.value = 'asc';
+  }
+  sortBy.value = by;
+};
+const getCommissionDisplayValue = (value) => {
+  return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
+};
+const getAmountDisplayValueTruncated = (value) => {
+  return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US');
+};
+const getAmountDisplayValue = (value) => {
+  return new BigNumber(value)
+    .dividedBy(10 ** precision)
+    .toNumber()
+    .toLocaleString('en-US');
+};
+const getVotingPowerPercDisplayValue = (value) => {
+  return new BigNumber(value).dividedBy(totalStakedAmount.value).multipliedBy(100).decimalPlaces(2).toString() + '%';
+};
+const selectValidator = (vali) => {
+  emit('selectValidator', vali);
+  detailedValidator.value = null;
+};
 </script>
 
 <style lang="scss" scoped>

@@ -37,10 +37,7 @@
             class="z-0 first:z-10"
           />
         </div>
-        <div
-          v-else-if="['transacting', 'validating', 'signing'].some(state.matches)"
-          style="transform: scale(0.5) translateX(-0.75rem)"
-        >
+        <div v-else-if="['transacting', 'validating', 'signing'].some(state.matches)" class="scale-50 -translate-x-3">
           <Spinner :size="2.5" />
         </div>
         <Icon v-else name="ExclamationIcon" class="text-warning" />

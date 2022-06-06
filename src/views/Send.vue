@@ -77,7 +77,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -93,62 +93,53 @@ import { pageview } from '@/utils/analytics';
 
 type TransferType = 'address' | 'move';
 
-export default {
-  name: 'Send',
-  components: { Button, SendForm, MoveForm, Icon },
+const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const transactionsStore = useTransactionsStore();
+const route = useRoute();
+const transferType = computed(() => route.params.type as TransferType);
 
-  setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    const router = useRouter();
-    const transactionsStore = useTransactionsStore();
-    const route = useRoute();
-    const transferType = computed(() => route.params.type as TransferType);
+const step = ref(undefined);
+pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
+const { balances } = useAccount();
 
-    const step = ref(undefined);
-    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
-    const { balances } = useAccount();
+const showBackButton = computed(() => {
+  return !!transferType.value;
+});
 
-    const showBackButton = computed(() => {
-      return !!transferType.value;
-    });
+const allSteps = {
+  address: ['recipient', 'amount', 'review', 'send'],
+  move: ['amount', 'review', 'move'],
+};
 
-    const allSteps = {
-      address: ['recipient', 'amount', 'review', 'send'],
-      move: ['amount', 'review', 'move'],
-    };
+const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value));
 
-    const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value));
+const metaSource = computed(() => {
+  let title = t('components.send.send');
+  if (transferType.value) {
+    title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
+  }
 
-    const metaSource = computed(() => {
-      let title = t('components.send.send');
-      if (transferType.value) {
-        title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
-      }
+  return {
+    title,
+  };
+});
+useMeta(metaSource);
 
-      return {
-        title,
-      };
-    });
-    useMeta(metaSource);
+const goBack = () => {
+  transactionsStore.removeTransaction(transactionsStore.currentId);
+  if (currentStepIndex.value > 0) {
+    step.value = allSteps[transferType.value][currentStepIndex.value - 1];
+    return;
+  }
 
-    const goBack = () => {
-      transactionsStore.removeTransaction(transactionsStore.currentId);
-      if (currentStepIndex.value > 0) {
-        step.value = allSteps[transferType.value][currentStepIndex.value - 1];
-        return;
-      }
+  step.value = undefined;
+  router.back();
+};
 
-      step.value = undefined;
-      router.back();
-    };
-
-    const onClose = () => {
-      transactionsStore.setTransactionAsPending();
-      router.push('/');
-    };
-
-    return { balances, transferType, step, allSteps, goBack, showBackButton, onClose };
-  },
+const onClose = () => {
+  transactionsStore.setTransactionAsPending();
+  router.push('/');
 };
 </script>
 

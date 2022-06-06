@@ -3,12 +3,7 @@
     <table v-if="showSectionTitle(mappedItem.sectionTitle)" class="assets-table w-full">
       <tbody>
         <tr>
-          <td
-            v-if="mappedItem.sectionTitle"
-            colspan="3"
-            class="flex justify-between items-center mt-8 mb-4"
-            style="padding-right: 0 !important; padding-left: 0 !important"
-          >
+          <td v-if="mappedItem.sectionTitle" colspan="3" class="flex justify-between items-center mt-8 mb-4 pr-0 pl-0">
             <p class="text-2 font-medium capitalize">
               {{ sectionTitle(mappedItem.sectionTitle) }}
             </p>
@@ -133,12 +128,11 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines */
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
 import { EmerisAirdrops } from '@emeris/types';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
@@ -150,181 +144,150 @@ import { typedstore } from '@/store/setup';
 import { AirdropDateStatus } from '@/types/api';
 import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
-export default defineComponent({
-  name: 'AirdropsTable',
+interface Props {
+  showHeaders?: boolean;
+  limitRows?: number;
+  airdrops: EmerisAirdrops.Airdrop[];
+  keyword?: string;
+  activeFilter?: string;
+}
 
-  components: {
-    ChainName,
-    SkeletonLoader,
-    Ticker,
-    Button,
-    Icon,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  showHeaders: true,
+  limitRows: undefined,
+  keyword: '',
+  activeFilter: '',
+});
 
-  props: {
-    showHeaders: {
-      type: Boolean,
-      default: true,
-    },
-    limitRows: {
-      type: Number,
-      default: undefined,
-    },
-    airdrops: {
-      type: Array as PropType<EmerisAirdrops.Airdrop[]>,
-      required: true,
-    },
-    keyword: {
-      type: String,
-      default: '',
-    },
-    activeFilter: {
-      type: String,
-      default: '',
-    },
-  },
-  emits: ['row-click'],
-  setup(props, { emit }) {
-    let watchedAirdrops = ref([]);
-    let mappedAirdrops = ref([]);
-    let imageFailIndexes = ref([]);
+const emit = defineEmits<{
+  (e: 'row-click', airdrop: any): void;
+}>();
 
-    const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
-      emit('row-click', airdrop);
+let watchedAirdrops = ref([]);
+let mappedAirdrops = ref([]);
+let imageFailIndexes = ref([]);
+
+const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
+  emit('row-click', airdrop);
+};
+
+const noAirdropsToClaim = computed(() => {
+  return watchedAirdrops.value.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
+});
+
+const isDemoAccount = computed(() => {
+  return (
+    !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] || typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+  );
+});
+
+const sections = computed(() => {
+  if (props.activeFilter === 'mine') {
+    if (noAirdropsToClaim.value) return ['CLAIMED', 'NOT_STARTED'];
+    else return ['CLAIMABLE', 'CLAIMED', 'NOT_STARTED'];
+  } else if (props.activeFilter === 'upcoming' || props.activeFilter === 'live') {
+    if (isDemoAccount.value) return [];
+    else return ['ELIGIBLE', 'ELIGIBILITY_UNAVAILABLE', 'NOT_ELIGIBLE'];
+  }
+  return [];
+});
+
+const setAirdropsTable = (activeFilter: string) => {
+  mappedAirdrops.value = [];
+  if (activeFilter === 'all') {
+    const mappedAirdropsObj = { sectionTitle: 'all', airdrops: watchedAirdrops.value, shouldMinimize: false };
+    mappedAirdrops.value.push(mappedAirdropsObj);
+  } else if (activeFilter === 'past') {
+    const mappedAirdropsObj = {
+      sectionTitle: 'past',
+      airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
+      shouldMinimize: false,
     };
-
-    const noAirdropsToClaim = computed(() => {
-      return watchedAirdrops.value.some((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
-    });
-
-    const isDemoAccount = computed(() => {
-      return (
-        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
-        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+    mappedAirdrops.value.push(mappedAirdropsObj);
+  } else if (activeFilter === 'upcoming' && sections.value.length === 0) {
+    const mappedAirdropsObj = {
+      sectionTitle: 'upcoming',
+      airdrops: watchedAirdrops.value.filter(
+        (airdropItem) =>
+          airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
+          airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED,
+      ),
+      shouldMinimize: false,
+    };
+    mappedAirdrops.value.push(mappedAirdropsObj);
+  } else if (activeFilter === 'upcoming' && sections.value.length > 0) {
+    sections.value.forEach((item) => {
+      const airdrops = watchedAirdrops.value.filter(
+        (airdropItem) =>
+          airdropItem.eligibility === item &&
+          (airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
+            airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED),
       );
-    });
-
-    const sections = computed(() => {
-      if (props.activeFilter === 'mine') {
-        if (noAirdropsToClaim.value) return ['CLAIMED', 'NOT_STARTED'];
-        else return ['CLAIMABLE', 'CLAIMED', 'NOT_STARTED'];
-      } else if (props.activeFilter === 'upcoming' || props.activeFilter === 'live') {
-        if (isDemoAccount.value) return [];
-        else return ['ELIGIBLE', 'ELIGIBILITY_UNAVAILABLE', 'NOT_ELIGIBLE'];
-      }
-      return [];
-    });
-
-    const setAirdropsTable = (activeFilter: string) => {
-      mappedAirdrops.value = [];
-      if (activeFilter === 'all') {
-        const mappedAirdropsObj = { sectionTitle: 'all', airdrops: watchedAirdrops.value, shouldMinimize: false };
-        mappedAirdrops.value.push(mappedAirdropsObj);
-      } else if (activeFilter === 'past') {
-        const mappedAirdropsObj = {
-          sectionTitle: 'past',
-          airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ENDED),
-          shouldMinimize: false,
-        };
-        mappedAirdrops.value.push(mappedAirdropsObj);
-      } else if (activeFilter === 'upcoming' && sections.value.length === 0) {
-        const mappedAirdropsObj = {
-          sectionTitle: 'upcoming',
-          airdrops: watchedAirdrops.value.filter(
-            (airdropItem) =>
-              airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
-              airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED,
-          ),
-          shouldMinimize: false,
-        };
-        mappedAirdrops.value.push(mappedAirdropsObj);
-      } else if (activeFilter === 'upcoming' && sections.value.length > 0) {
-        sections.value.forEach((item) => {
-          const airdrops = watchedAirdrops.value.filter(
-            (airdropItem) =>
-              airdropItem.eligibility === item &&
-              (airdropItem.dateStatus === AirdropDateStatus.NOT_STARTED ||
-                airdropItem.dateStatus === AirdropDateStatus.NOT_ANNOUNCED),
-          );
-          const mappedAirdropsObj = {
-            sectionTitle: item,
-            airdrops,
-            shouldMinimize: airdrops.length > 3,
-          };
-          mappedAirdrops.value.push(mappedAirdropsObj);
-        });
-      } else if (activeFilter === 'live' && sections.value.length === 0) {
-        const mappedAirdropsObj = {
-          sectionTitle: 'live',
-          airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ONGOING),
-          shouldMinimize: false,
-        };
-        mappedAirdrops.value.push(mappedAirdropsObj);
-      } else if (activeFilter === 'live' && sections.value.length > 0) {
-        sections.value.forEach((item) => {
-          const airdrops = watchedAirdrops.value.filter(
-            (airdropItem) => airdropItem.eligibility === item && airdropItem.dateStatus === AirdropDateStatus.ONGOING,
-          );
-          const mappedAirdropsObj = {
-            sectionTitle: item,
-            airdrops,
-            shouldMinimize: airdrops.length > 3,
-          };
-          mappedAirdrops.value.push(mappedAirdropsObj);
-        });
-      } else {
-        sections.value.forEach((item) => {
-          const airdrops = watchedAirdrops.value.filter((airdropItem) => airdropItem.eligibility === item);
-          const mappedAirdropsObj = {
-            sectionTitle: item,
-            airdrops,
-            shouldMinimize: airdrops.length > 3,
-          };
-          mappedAirdrops.value.push(mappedAirdropsObj);
-        });
-      }
-    };
-
-    const seeAllMappedSection = (mappedItem: any) => {
-      mappedAirdrops.value = [];
-      mappedAirdrops.value.push(mappedItem);
-    };
-
-    const imageLoadError = (airdropIndex: number) => {
-      imageFailIndexes.value.push(airdropIndex);
-    };
-
-    watch(
-      () => [props.activeFilter, props.airdrops],
-      async (props: any) => {
-        watchedAirdrops.value = props[1];
-        setAirdropsTable(props[0]);
-      },
-      { immediate: true },
-    );
-
-    const sectionTitle = (title: string) => {
-      return title ? title.replace(/\_/g, ' ').toLowerCase() : '';
-    };
-
-    const showSectionTitle = computed(() => {
-      return (title) => {
-        return title !== 'all' && title !== 'past' && title !== 'upcoming' && title !== 'live';
+      const mappedAirdropsObj = {
+        sectionTitle: item,
+        airdrops,
+        shouldMinimize: airdrops.length > 3,
       };
+      mappedAirdrops.value.push(mappedAirdropsObj);
     });
-
-    return {
-      handleClick,
-      mappedAirdrops,
-      seeAllMappedSection,
-      AirdropEligibilityStatus,
-      EmerisAirdrops,
-      sectionTitle,
-      imageLoadError,
-      imageFailIndexes,
-      showSectionTitle,
+  } else if (activeFilter === 'live' && sections.value.length === 0) {
+    const mappedAirdropsObj = {
+      sectionTitle: 'live',
+      airdrops: watchedAirdrops.value.filter((airdropItem) => airdropItem.dateStatus === AirdropDateStatus.ONGOING),
+      shouldMinimize: false,
     };
+    mappedAirdrops.value.push(mappedAirdropsObj);
+  } else if (activeFilter === 'live' && sections.value.length > 0) {
+    sections.value.forEach((item) => {
+      const airdrops = watchedAirdrops.value.filter(
+        (airdropItem) => airdropItem.eligibility === item && airdropItem.dateStatus === AirdropDateStatus.ONGOING,
+      );
+      const mappedAirdropsObj = {
+        sectionTitle: item,
+        airdrops,
+        shouldMinimize: airdrops.length > 3,
+      };
+      mappedAirdrops.value.push(mappedAirdropsObj);
+    });
+  } else {
+    sections.value.forEach((item) => {
+      const airdrops = watchedAirdrops.value.filter((airdropItem) => airdropItem.eligibility === item);
+      const mappedAirdropsObj = {
+        sectionTitle: item,
+        airdrops,
+        shouldMinimize: airdrops.length > 3,
+      };
+      mappedAirdrops.value.push(mappedAirdropsObj);
+    });
+  }
+};
+
+const seeAllMappedSection = (mappedItem: any) => {
+  mappedAirdrops.value = [];
+  mappedAirdrops.value.push(mappedItem);
+};
+
+const imageLoadError = (airdropIndex: number) => {
+  imageFailIndexes.value.push(airdropIndex);
+};
+
+watch(
+  () => [props.activeFilter, props.airdrops],
+  async (props: any) => {
+    watchedAirdrops.value = props[1];
+    setAirdropsTable(props[0]);
   },
+  { immediate: true },
+);
+
+const sectionTitle = (title: string) => {
+  return title ? title.replace(/\_/g, ' ').toLowerCase() : '';
+};
+
+const showSectionTitle = computed(() => {
+  return (title) => {
+    return title !== 'all' && title !== 'past' && title !== 'upcoming' && title !== 'live';
+  };
 });
 </script>
 

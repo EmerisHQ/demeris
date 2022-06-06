@@ -14,8 +14,8 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+<script setup lang="ts">
+import { computed, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -25,36 +25,20 @@ import { DesignSizes } from '@/types/util';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
 
-export default defineComponent({
-  name: 'ValidatorDisplay',
-  components: { AmountDisplay, ValidatorBadge, Price },
-  props: {
-    validator: {
-      type: Object,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
-  },
-  setup(props) {
-    const store = useStore() as RootStoreTyped;
-    const propsRef = toRefs(props);
-    const chain = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
-    });
-    const stakingDenom = computed(() => {
-      return chain.value?.denoms.find((x) => x.stakable) ?? null;
-    });
-    const stakingBalance = computed(() => {
-      return propsRef.validator.value?.stakedAmount;
-    });
-    return {
-      stakingDenom,
-      stakingBalance,
-    };
-  },
+interface Props {
+  validator: any;
+  size?: DesignSizes;
+}
+
+const props = withDefaults(defineProps<Props>(), { size: 'md' });
+
+const store = useStore() as RootStoreTyped;
+const propsRef = toRefs(props);
+const chain = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
+});
+const stakingDenom = computed(() => {
+  return chain.value?.denoms.find((x) => x.stakable) ?? null;
 });
 </script>
 

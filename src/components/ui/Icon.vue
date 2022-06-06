@@ -7,34 +7,22 @@
     <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`" />
   </div>
 </template>
-<script lang="ts">
-import { defineAsyncComponent, defineComponent, onMounted, ref, shallowRef } from 'vue';
+<script setup lang="ts">
+import { defineAsyncComponent, onMounted, ref, shallowRef } from 'vue';
 
-export default defineComponent({
-  name: 'Icon',
+interface Props {
+  name: string;
+  iconSize?: number;
+  color?: string;
+}
 
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    iconSize: { type: Number, required: false, default: 1.5 },
-    color: { type: String, required: false, default: 'inherit' },
-  },
+const props = withDefaults(defineProps<Props>(), { iconSize: 1.5, color: 'inherit' });
 
-  setup(props) {
-    const currentIcon = shallowRef('');
-    const isReady = ref(false);
-    onMounted(async () => {
-      const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
-      currentIcon.value = icon;
-      isReady.value = true;
-    });
-
-    return {
-      currentIcon,
-      isReady,
-    };
-  },
+const currentIcon = shallowRef('');
+const isReady = ref(false);
+onMounted(async () => {
+  const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
+  currentIcon.value = icon;
+  isReady.value = true;
 });
 </script>

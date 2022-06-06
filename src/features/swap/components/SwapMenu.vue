@@ -32,8 +32,17 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-const props = defineProps(['items', 'search', 'searchField']);
-defineEmits(['select']);
+interface Props {
+  items: any;
+  search: any;
+  searchField: any;
+}
+
+const props = defineProps<Props>();
+
+defineEmits<{
+  (e: 'select', item: any): void;
+}>();
 
 const results = computed(() => {
   if (!props.search) {

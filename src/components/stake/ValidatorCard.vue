@@ -23,7 +23,7 @@
     >
     <p class="text-muted mt-4 w-full text-left break-words">{{ validator.details }}</p>
     <div v-if="validator?.website && validator.website !== ''" class="mt-4 flex items-center w-full">
-      <LinkIcon class="mr-2.5" style="width: 11px; height: 11px" />
+      <LinkIcon class="mr-2.5 w-3 h-3" />
       <a :href="getProperUrl(validator.website)" class="-text-1 text-link" rel="noopener noreferral" target="_blank"
         >{{ getCleanURL(validator.website) }} ↗️</a
       >
@@ -44,8 +44,8 @@
     </List>
   </section>
 </template>
-<script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+<script setup lang="ts">
+import { computed, toRefs } from 'vue';
 
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
@@ -54,56 +54,42 @@ import List from '@/components/ui/List/List.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import { getCleanURL, getProperUrl } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'ValidatorCard',
-  components: { LinkIcon, Button, ValidatorBadge, List, ListItem },
-  props: {
-    validator: {
-      type: Object,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-    disabled: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-    size: { type: String, required: false, default: 'md' },
-  },
-  emits: ['close', 'clicked'],
-  setup(props, { emit }) {
-    const propsRef = toRefs(props);
-    const toPerc = (val) => {
-      return Math.trunc(parseFloat(val) * 10000) / 100 + '%';
-    };
-    const commission = computed(() => {
-      return toPerc(propsRef.validator.value.commission_rate);
-    });
-    const maxCommission = computed(() => {
-      return toPerc(propsRef.validator.value.max_rate);
-    });
-    const maxChange = computed(() => {
-      return toPerc(propsRef.validator.value.max_change_rate);
-    });
-    const close = () => {
-      emit('close');
-    };
-    const clicked = () => {
-      emit('clicked');
-    };
-    return {
-      close,
-      clicked,
-      commission,
-      maxCommission,
-      maxChange,
-      getCleanURL,
-      getProperUrl,
-    };
-  },
-});
-</script>
+interface Props {
+  validator: any;
+  disabled?: boolean;
+  size: string;
+}
 
-<style lang="scss" scoped></style>
+const props = withDefaults(defineProps<Props>(), {
+  validator: () => {
+    return {};
+  },
+  disabled: false,
+  size: 'md',
+});
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'clicked'): void;
+}>();
+
+const propsRef = toRefs(props);
+const toPerc = (val) => {
+  return Math.trunc(parseFloat(val) * 10000) / 100 + '%';
+};
+const commission = computed(() => {
+  return toPerc(propsRef.validator.value.commission_rate);
+});
+const maxCommission = computed(() => {
+  return toPerc(propsRef.validator.value.max_rate);
+});
+const maxChange = computed(() => {
+  return toPerc(propsRef.validator.value.max_change_rate);
+});
+const close = () => {
+  emit('close');
+};
+const clicked = () => {
+  emit('clicked');
+};
+</script>

@@ -1,3 +1,6 @@
+<script lang="ts">
+/* eslint-disable vue/no-static-inline-styles */
+</script>
 <template>
   <div class="w-full h-screen flex flex-col">
     <div class="flex justify-start mt-4 mb-8">

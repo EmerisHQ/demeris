@@ -29,8 +29,8 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
+<script setup lang="ts">
+import { onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CoinList from '@/components/common/CoinList.vue';
@@ -38,59 +38,51 @@ import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
-export default defineComponent({
-  name: 'DenomSelectModal',
-  components: {
-    TitleWithGoback,
-    CoinList,
-    WhiteOverlay,
-  },
-  props: {
-    assets: { type: Object, required: true },
-    func: { type: Function, required: true },
-    title: { type: String, required: true },
-    selectedDenom: { type: String, required: true },
-    showSubtitle: { type: Boolean, default: true },
-    showBackButton: { type: Boolean, default: true },
-  },
-  emits: ['select'],
-  setup(props, { emit }) {
-    const selectedDenomDisplay = ref(props.selectedDenom);
-    const chainsNumber = ref(0);
-    const typedstore = useStore() as RootStoreTyped;
-    onMounted(async () => {
-      selectedDenomDisplay.value = await getDisplayName(
-        props.selectedDenom,
-        typedstore.getters[GlobalGetterTypes.API.getDexChain],
-      );
-    });
-    watch(
-      () => props.selectedDenom,
-      async (newName) => {
-        selectedDenomDisplay.value = await getDisplayName(
-          newName,
-          typedstore.getters[GlobalGetterTypes.API.getDexChain],
-        );
-      },
-    );
-    function filterAsset(assets, keyword) {
-      const filteredList = assets.filter((asset) => {
-        return asset.base_denom == keyword;
-      });
 
-      chainsNumber.value = filteredList.length;
+interface Props {
+  assets: object;
+  func: object;
+  title: string;
+  selectedDenom: string;
+  showSubtitle?: boolean;
+  showBackButton?: boolean;
+}
 
-      return filteredList;
-    }
+const props = withDefaults(defineProps<Props>(), { showSubtitle: true, showBackButton: true });
 
-    function coinListselectHandler(payload) {
-      payload.type = props.title;
-      emit('select', payload);
-    }
+const emit = defineEmits<{
+  (e: 'select', payload: any): void;
+}>();
 
-    return { coinListselectHandler, filterAsset, chainsNumber, selectedDenomDisplay };
-  },
+const selectedDenomDisplay = ref(props.selectedDenom);
+const chainsNumber = ref(0);
+const typedstore = useStore() as RootStoreTyped;
+onMounted(async () => {
+  selectedDenomDisplay.value = await getDisplayName(
+    props.selectedDenom,
+    typedstore.getters[GlobalGetterTypes.API.getDexChain],
+  );
 });
+watch(
+  () => props.selectedDenom,
+  async (newName) => {
+    selectedDenomDisplay.value = await getDisplayName(newName, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
+  },
+);
+function filterAsset(assets, keyword) {
+  const filteredList = assets.filter((asset) => {
+    return asset.base_denom == keyword;
+  });
+
+  chainsNumber.value = filteredList.length;
+
+  return filteredList;
+}
+
+function coinListselectHandler(payload) {
+  payload.type = props.title;
+  emit('select', payload);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -28,9 +28,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { bech32 } from 'bech32';
-import { computed, defineComponent, inject } from 'vue';
+import { computed, inject } from 'vue';
 import { useStore } from 'vuex';
 
 import Address from '@/components/ui/Address.vue';
@@ -40,48 +40,35 @@ import Input from '@/components/ui/Input.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store/index';
 import { SendAddressForm } from '@/types/actions';
 
-export default defineComponent({
-  name: 'SendFormRecipient',
+const emit = defineEmits<{
+  (e: 'next'): void;
+}>();
 
-  components: {
-    Address,
-    Button,
-    Checkbox,
-    Input,
-  },
-
-  emits: ['next'],
-
-  setup(_, { emit }) {
-    const form = inject<SendAddressForm>('transferForm');
-    const typedstore = useStore() as RootStoreTyped;
-    const isValid = computed(() => {
-      return form.isTermChecked && isValidAddress.value;
-    });
-
-    const isValidAddress = computed(() => {
-      const chains = Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]);
-
-      try {
-        const prefix = bech32.decode(form.recipient).prefix;
-        //@ts-ignore
-        if (chains.find((item) => item.node_info.bech32_config.prefix_account == prefix)) {
-          return true;
-        }
-
-        return false;
-      } catch (e) {
-        return false;
-      }
-    });
-
-    const onSubmit = () => {
-      if (isValid.value) {
-        emit('next');
-      }
-    };
-
-    return { form, isValid, isValidAddress, onSubmit };
-  },
+const form = inject<SendAddressForm>('transferForm');
+const typedstore = useStore() as RootStoreTyped;
+const isValid = computed(() => {
+  return form.isTermChecked && isValidAddress.value;
 });
+
+const isValidAddress = computed(() => {
+  const chains = Object.values(typedstore.getters[GlobalGetterTypes.API.getChains]);
+
+  try {
+    const prefix = bech32.decode(form.recipient).prefix;
+    //@ts-ignore
+    if (chains.find((item) => item.node_info.bech32_config.prefix_account == prefix)) {
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
+});
+
+const onSubmit = () => {
+  if (isValid.value) {
+    emit('next');
+  }
+};
 </script>

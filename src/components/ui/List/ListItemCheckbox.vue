@@ -11,42 +11,29 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
 import Checkbox from '@/components/ui/Checkbox.vue';
 
-export default defineComponent({
-  name: 'ListItemCheckbox',
-  components: {
-    Checkbox,
-  },
-  props: {
-    isChecked: {
-      type: Boolean,
-      default: false,
-    },
-    iconUrl: {
-      type: String,
-      required: true,
-    },
-    text: {
-      type: String,
-      required: true,
-    },
-  },
-  emits: ['update:modelValue'],
-  setup(props, { emit }) {
-    const listItemRef = ref({ iconUrl: props.iconUrl, isChecked: props.isChecked, text: props.text });
+interface Props {
+  isChecked?: boolean;
+  iconUrl: string;
+  text: string;
+}
 
-    const onUpdate = (e) => {
-      listItemRef.value = { ...listItemRef.value, isChecked: e };
-      emit('update:modelValue', listItemRef.value);
-    };
+const props = withDefaults(defineProps<Props>(), { isChecked: false });
 
-    return { onUpdate };
-  },
-});
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: any): void;
+}>();
+
+const listItemRef = ref({ iconUrl: props.iconUrl, isChecked: props.isChecked, text: props.text });
+
+const onUpdate = (e) => {
+  listItemRef.value = { ...listItemRef.value, isChecked: e };
+  emit('update:modelValue', listItemRef.value);
+};
 </script>
 
 <style lang="scss" scoped>

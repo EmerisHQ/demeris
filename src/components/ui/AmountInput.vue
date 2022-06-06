@@ -11,79 +11,68 @@
     spellcheck="false"
   />
 </template>
-<script lang="ts">
-import { computed, defineComponent, nextTick, PropType, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 
-export default defineComponent({
-  name: 'AmountInput',
-  props: {
-    modelValue: {
-      type: [String, Number],
-      default: '',
-    },
-    maxDecimals: {
-      type: Number as PropType<number>,
-      default: 6,
-    },
-    placeholder: {
-      type: String as PropType<string>,
-      default: '0',
-    },
-  },
-  emits: ['update:modelValue'],
+interface Props {
+  modelValue?: string | number;
+  maxDecimals?: number;
+  placeholder?: string;
+}
 
-  setup(props, { emit }) {
-    const inputRef = ref(null);
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  maxDecimals: 6,
+  placeholder: '0',
+});
 
-    const format = (value: string) => {
-      let newValue = value;
-      // Replace commas
-      newValue = newValue.replace(',', '.');
-      // Only numbers
-      newValue = newValue.replace(/[^0-9.]/g, '');
+const emit = defineEmits<{
+  (e: 'update:modelValue', formatted: any): void;
+}>();
 
-      if (newValue.startsWith('.')) {
-        newValue = '0' + newValue;
-      }
+const inputRef = ref(null);
 
-      if (newValue.split('').filter((char) => char === '.').length > 1) {
-        // Remove subsequent separators
-        newValue = newValue.replace(/(?<=\..*)\./g, '');
-      }
+const format = (value: string) => {
+  let newValue = value;
+  // Replace commas
+  newValue = newValue.replace(',', '.');
+  // Only numbers
+  newValue = newValue.replace(/[^0-9.]/g, '');
 
-      const [integerDigits, fractionDigits] = newValue.split('.');
+  if (newValue.startsWith('.')) {
+    newValue = '0' + newValue;
+  }
 
-      if (fractionDigits?.length > props.maxDecimals) {
-        newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`;
-      }
+  if (newValue.split('').filter((char) => char === '.').length > 1) {
+    // Remove subsequent separators
+    newValue = newValue.replace(/(?<=\..*)\./g, '');
+  }
 
-      return newValue;
-    };
+  const [integerDigits, fractionDigits] = newValue.split('.');
 
-    const model = computed({
-      get: () => (props.modelValue || '').toString(),
-      set: (value) => {
-        if (!inputRef.value) {
-          return;
-        }
+  if (fractionDigits?.length > props.maxDecimals) {
+    newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`;
+  }
 
-        let currentValue = value;
+  return newValue;
+};
 
-        while (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
-          currentValue = currentValue.slice(0, -1);
-        }
+const model = computed({
+  get: () => (props.modelValue || '').toString(),
+  set: (value) => {
+    if (!inputRef.value) {
+      return;
+    }
 
-        const formatted = format(currentValue);
-        emit('update:modelValue', formatted);
-        inputRef.value.value = formatted;
-      },
-    });
+    let currentValue = value;
 
-    const focus = () => {
-      nextTick(() => inputRef.value?.focus());
-    };
+    while (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
+      currentValue = currentValue.slice(0, -1);
+    }
 
-    return { inputRef, format, model, focus };
+    const formatted = format(currentValue);
+    emit('update:modelValue', formatted);
+    inputRef.value.value = formatted;
   },
 });
 </script>
