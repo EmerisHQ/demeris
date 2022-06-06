@@ -12,7 +12,7 @@ test.describe('Check Staking functionality', function () {
       await page.locator('text=Osmosis').first().click(),
       await page.waitForNavigation({ url: `${baseURL}/asset/uosmo` }),
       // Click [data-test="openMenuButton"] button
-      await page.locator('[data-test="openMenuButton"] button').click();
+      await page.locator('[data-test="openMenuButton"] button').first().click();
     // Click button:has-text("Unstake")
     await Promise.all([
       page.waitForNavigation({
