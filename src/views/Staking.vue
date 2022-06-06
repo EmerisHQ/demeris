@@ -41,6 +41,16 @@
             />
           </div>
         </template>
+        <template v-if="actionType == 'reinvest'">
+          <div class="w-full" :class="{ 'mt-0 mb-auto': step == 'validator' }">
+            <ReinvestForm
+              v-if="validatorList.length > 0"
+              v-model:step="step"
+              :validators="validatorList"
+              @previous="goBack"
+            />
+          </div>
+        </template>
         <template v-if="actionType == 'switch'">
           <div class="w-full" :class="{ 'mt-0 mb-auto': step == 'validator' }">
             <SwitchForm
@@ -86,6 +96,7 @@ import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import ClaimForm from '@/components/stake/ClaimForm/ClaimForm.vue';
+import ReinvestForm from '@/components/stake/ReinvestForm/ReinvestForm.vue';
 import StakeForm from '@/components/stake/StakeForm';
 import SwitchForm from '@/components/stake/SwitchForm/SwitchForm.vue';
 import UnstakeForm from '@/components/stake/UnstakeForm';
@@ -99,7 +110,7 @@ import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
-type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
+type ActionType = 'stake' | 'unstake' | 'claim' | 'switch' | 'reinvest';
 
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
@@ -111,7 +122,12 @@ const actionType = route.params.action as ActionType;
 const validator = route.params.validator as string;
 const baseDenom = route.params.denom as string;
 const rawValidatorList = ref([]);
-const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator');
+const step =
+  actionType == 'claim' || actionType == 'reinvest'
+    ? ref('review')
+    : actionType == 'unstake'
+    ? ref('amount')
+    : ref('validator');
 const inModal = ref(undefined);
 const { getChainNameByBaseDenom } = useChains();
 
@@ -166,6 +182,7 @@ const isBackDisabled = computed(() => {
   return (
     (step.value === 'validator' && !inModal.value) ||
     (actionType === 'claim' && step.value === 'review') ||
+    (actionType === 'reinvest' && step.value === 'review') ||
     (actionType === 'unstake' && step.value === 'amount')
   );
 });
@@ -174,6 +191,7 @@ const allSteps = {
   unstake: ['amount', 'review', 'unstake'],
   switch: ['validator', 'amount', 'review', 'restake'],
   claim: ['review', 'claim'],
+  reinvest: ['review', 'reinvest'],
 };
 
 const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));

@@ -165,7 +165,8 @@
           "restake": "Restake",
           "unstake": "Unstake",
           "transfer": "Transfer",
-          "claim": "Claim"
+          "claim": "Claim",
+          "reinvest": "Reinvest"
         }
       },
       "stakeTable": {
@@ -181,6 +182,7 @@
         "selectValidator": "Select a validator",
         "searchValidator": "Search validators",
         "claimRewards": "Claim rewards",
+        "claimAndReinvest": "Claim and reinvest",
         "stake": "Stake",
         "unstake": "Unstake",
         "switchValidator": "Switch validator",
@@ -410,6 +412,12 @@
           "swapFeeLblHint": "Swap fee paid to liquidity providers"
         },
         "claim": {
+          "totalRewards": "Total rewards",
+          "validators": "Validators",
+          "transactionFee": "Transaction fee",
+          "rewards": "rewards"
+        },
+        "reinvest": {
           "totalRewards": "Total rewards",
           "validators": "Validators",
           "transactionFee": "Transaction fee",
