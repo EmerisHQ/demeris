@@ -66,13 +66,17 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
           await window.keplr.enable(chain.node_info.chain_id);
         }
       }
-
-      const offlineSigner = isCypress
-        ? await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-            prefix: chain.node_info.bech32_config.main_prefix,
-            hdPaths: [stringToPath(chain.derivation_path)],
-          })
-        : await window.getOfflineSigner(chain.node_info.chain_id);
+      let offlineSigner;
+      if (isCypress) {
+        offlineSigner = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
+          prefix: chain.node_info.bech32_config.main_prefix,
+          hdPaths: [stringToPath(chain.derivation_path)],
+        });
+      } else if (!featureRunning('USE_EMERIS_EXTENSION')) {
+        offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      } else {
+        offlineSigner = await walletActionHandler.getOfflineSigner(chain.node_info.chain_id);
+      }
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });

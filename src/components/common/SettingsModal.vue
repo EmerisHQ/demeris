@@ -250,6 +250,7 @@ import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 const emit = defineEmits<{
@@ -337,7 +338,11 @@ const disconnectWallet = () => {
   } else {
     emit('disconnect');
     walletActionHandler.disconnect();
-    window.localStorage.setItem('lastEmerisSession', '');
+    if (featureRunning('USE_EMERIS_EXTENSION')) {
+      walletActionHandler.clearLastSession();
+    } else {
+      window.localStorage.setItem('lastEmerisSession', '');
+    }
     store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
   }
 };

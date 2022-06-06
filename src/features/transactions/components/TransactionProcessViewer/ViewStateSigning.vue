@@ -10,7 +10,12 @@
       <Spinner :size="2.5" />
 
       <p v-if="!state.matches('signing.delayed')" class="text-muted">
-        {{ $t('components.txHandlingModal.openKeplr') }}
+        <FeatureRunningConditional name="USE_EMERIS_EXTENSION">
+          <template #deactivated>
+            {{ $t('components.txHandlingModal.openKeplr') }}
+          </template>
+          {{ $t('components.txHandlingModal.openWallet', { wallet: capitalize(wallet) }) }}
+        </FeatureRunningConditional>
       </p>
 
       <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">
@@ -30,7 +35,12 @@
         target="_blank"
         class="font-medium text-link hover:text-link-hover pt-2"
       >
-        {{ $t('components.txHandlingModal.keplrSupport') }}
+        <FeatureRunningConditional name="USE_EMERIS_EXTENSION">
+          <template #deactivated>
+            {{ $t('components.txHandlingModal.keplrSupport') }}
+          </template>
+          {{ $t('components.txHandlingModal.walletSupport', { wallet: capitalize(wallet) }) }}
+        </FeatureRunningConditional>
       </a>
     </div>
 
@@ -43,11 +53,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { capitalize } from 'lodash';
+import { computed, inject, toRefs } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
+import { SupportedWallet } from '@/features/extension/types';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { StepTransaction } from '@/types/actions';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
@@ -56,6 +70,8 @@ import { useTransactionsStore } from '../../transactionsStore';
 const transactionsStore = useTransactionsStore();
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state } = actor;
+
+const { wallet } = toRefs<{ wallet: SupportedWallet }>({ wallet: walletActionHandler.session.wallet });
 
 const transaction = computed<StepTransaction>(() => getCurrentTransaction(state.value.context));
 </script>
