@@ -1,6 +1,8 @@
 import { MutationTree } from 'vuex';
 
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { KeplrKeyData, UserData } from '@/types/user';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ActionTypes } from './action-types';
 import { Subscriptions } from './actions';
@@ -29,7 +31,12 @@ export const mutations: MutationTree<USERState> & Mutations = {
   [MutationTypes.SET_SESSION_DATA](state: USERState, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
     if (!state._Session.isDemoAccount) {
-      window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+      if (featureRunning('USE_EMERIS_EXTENSION'))
+        walletActionHandler.setLastSession({
+          timestamp: payload.updateDT,
+          wallet: walletActionHandler.session.wallet,
+        });
+      else window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
     }
   },
   [MutationTypes.SET_KEPLR](state: USERState, payload: KeplrKeyData) {
@@ -61,7 +68,11 @@ export const mutations: MutationTree<USERState> & Mutations = {
     }
     state.keplr = null;
     state._Session = {};
-    window.localStorage.setItem('lastEmerisSession', '');
+    if (featureRunning('USE_EMERIS_EXTENSION')) {
+      walletActionHandler.clearLastSession();
+    } else {
+      window.localStorage.setItem('lastEmerisSession', '');
+    }
   },
   [MutationTypes.RESET_STATE](state: USERState) {
     Object.assign(state, getDefaultState());

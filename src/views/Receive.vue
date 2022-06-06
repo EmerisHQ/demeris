@@ -59,8 +59,7 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
@@ -86,73 +85,64 @@ const defaultColors = {
   tertiary: '#64dafb',
 };
 
-export default {
-  name: 'Receive',
-  components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
+const { t } = useI18n({ useScope: 'global' });
+pageview({ page_title: 'Receive assets', page_path: '/receive' });
+useMeta(
+  computed(() => ({
+    title: t('navbar.receive'),
+  })),
+);
 
-  setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Receive assets', page_path: '/receive' });
-    useMeta(
-      computed(() => ({
-        title: t('navbar.receive'),
-      })),
-    );
+const { nativeBalances } = useAccount();
 
-    const { nativeBalances } = useAccount();
+const balances = computed(() => {
+  return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
+});
 
-    const assetsList = computed(() => {
-      return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
-    });
+const state = reactive({
+  selectedAsset: undefined,
+  recipientAddress: undefined,
+});
 
-    const state = reactive({
-      selectedAsset: undefined,
-      recipientAddress: undefined,
-    });
+const generateBackground = (colors: Record<string, string>) => {
+  const hexArray = Object.values(colors).reverse();
+  const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
+  const colorStops = [];
 
-    const generateBackground = (colors: Record<string, string>) => {
-      const hexArray = Object.values(colors).reverse();
-      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
-      const colorStops = [];
+  for (const [index, hex] of Object.entries(hexArray)) {
+    colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+  }
 
-      for (const [index, hex] of Object.entries(hexArray)) {
-        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
-      }
-
-      return `radial-gradient(
-					ellipse farthest-corner at 16.67% 16.67%,
-					${colorStops.join(',')}
-				)`;
-    };
-
-    const gradientStyle = computed(() => {
-      const colors = symbolsData[state.selectedAsset?.base_denom]?.colors;
-      return {
-        background: generateBackground(colors || defaultColors),
-        color: colors ? '#ffffff' : '#000000',
-      };
-    });
-
-    const goBack = () => {
-      state.selectedAsset = undefined;
-    };
-
-    const assetSelectHandler = (asset: EmerisAPI.Balance) => {
-      state.selectedAsset = asset;
-    };
-
-    const { selectedAsset, recipientAddress } = toRefs(state);
-    watch(selectedAsset, async (value) => {
-      if (value) {
-        state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain });
-      } else {
-        state.recipientAddress = undefined;
-      }
-    });
-
-    return { balances: assetsList, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
-  },
+  return `radial-gradient(
+      ellipse farthest-corner at 16.67% 16.67%,
+      ${colorStops.join(',')}
+    )`;
 };
+
+const gradientStyle = computed(() => {
+  const colors = symbolsData[state.selectedAsset?.base_denom]?.colors;
+  return {
+    background: generateBackground(colors || defaultColors),
+    color: colors ? '#ffffff' : '#000000',
+  };
+});
+
+const goBack = () => {
+  state.selectedAsset = undefined;
+};
+
+const assetSelectHandler = (asset: EmerisAPI.Balance) => {
+  state.selectedAsset = asset;
+};
+
+const { selectedAsset, recipientAddress } = toRefs(state);
+watch(selectedAsset, async (value) => {
+  if (value) {
+    state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain });
+  } else {
+    state.recipientAddress = undefined;
+  }
+});
 </script>
 
 <style lang="scss">

@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col justify-center">
-    <CircleSymbol :style="{ position: 'absolute' }" class="ml-0" :denom="denom" :glow="false" size="sm" />
+    <CircleSymbol class="absolute ml-0" :denom="denom" :glow="false" size="sm" />
     <div class="ml-8">
       <div class="font-medium">Fee token required</div>
       <div class="text-muted theme-inverse dark:theme-inverse">{{ amount }} {{ ticker }}</div>
@@ -15,7 +15,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 const typedstore = useStore() as RootStoreTyped;
-// eslint-disable-next-line
+
 const props = defineProps({
   denom: {
     type: String,

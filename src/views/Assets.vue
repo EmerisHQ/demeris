@@ -8,7 +8,7 @@
   </AppLayout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed } from '@vue/reactivity';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -18,27 +18,18 @@ import AssetsTable from '@/components/assets/AssetsTable';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
 
-export default {
-  name: 'Assets',
-  components: { AppLayout, AssetsTable },
+const { t } = useI18n({ useScope: 'global' });
 
-  setup() {
-    const { t } = useI18n({ useScope: 'global' });
+useMeta(
+  computed(() => ({
+    title: t('context.assets.title'),
+  })),
+);
 
-    useMeta(
-      computed(() => ({
-        title: t('context.assets.title'),
-      })),
-    );
-
-    const router = useRouter();
-    pageview({ page_title: 'Assets', page_path: '/assets' });
-    const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
-    };
-
-    return { openAssetPage };
-  },
+const router = useRouter();
+pageview({ page_title: 'Assets', page_path: '/assets' });
+const openAssetPage = (asset: Record<string, string>) => {
+  router.push({ name: 'Asset', params: { denom: asset.denom } });
 };
 </script>
 

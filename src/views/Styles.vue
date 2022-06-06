@@ -181,8 +181,8 @@
   </AppLayout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
@@ -192,26 +192,9 @@ import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
-export default defineComponent({
-  components: {
-    AppLayout,
-    Address,
-    Alert,
-    AlertIcon,
-    Button,
-    Input,
-    ValidatorBadge,
-  },
-  data: () => {
-    return {
-      validator1: {
-        moniker: 'Valerie',
-      },
-      validator2: {
-        moniker: 'Jailed Valerie',
-        jailed: true,
-      },
-    };
-  },
+const validator1 = ref({ moniker: 'Valerie' });
+const validator2 = ref({
+  moniker: 'Jailed Valerie',
+  jailed: true,
 });
 </script>

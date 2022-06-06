@@ -37,117 +37,87 @@
     </div>
   </label>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
-import { computed, defineComponent, nextTick, PropType, reactive, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 
 import AmountInput from './AmountInput.vue';
 
-export default defineComponent({
-  name: 'FlexibleAmountInput',
-  components: {
-    AmountInput,
+interface Props {
+  modelValue?: string;
+  minWidth?: number;
+  prefix?: string;
+  suffix?: string;
+  compact?: boolean;
+  placeholder?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  minWidth: 30,
+  prefix: undefined,
+  suffix: undefined,
+  compact: false,
+  placeholder: undefined,
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: any): void;
+}>();
+
+const containerElementRef = ref(null);
+const sizeElementRef = ref(null);
+const prefixElementRef = ref(null);
+const suffixElementRef = ref(null);
+const inputComponentRef = ref(null);
+
+const model = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
+
+const state = reactive({
+  width: 0,
+  maxWidth: '100%',
+  scale: 1,
+});
+
+watch(
+  [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
+  ([containerEl, sizeEl, prefixEl, suffixEl]) => {
+    if (!sizeEl) {
+      return;
+    }
+
+    nextTick(() => {
+      const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
+      const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
+      const fullWidth = width + extraWidth;
+      const maxWidth = Math.max(props.minWidth, containerEl?.offsetWidth);
+
+      const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
+
+      state.width = width;
+      state.maxWidth = `${maxWidth}px`;
+      state.scale = scale;
+    });
   },
-  props: {
-    modelValue: {
-      type: String as PropType<string>,
-      default: '',
-    },
-    // maxWidth: {
-    //   type: Number,
-    //   required: false
-    // },
-    minWidth: {
-      type: Number as PropType<number>,
-      default: 30,
-    },
-    prefix: {
-      type: String as PropType<string>,
-      default: undefined,
-    },
-    suffix: {
-      type: String as PropType<string>,
-      default: undefined,
-    },
-    compact: {
-      type: Boolean,
-      default: false,
-    },
-    placeholder: {
-      type: String as PropType<string>,
-      default: undefined,
-    },
-  },
-  emits: ['update:modelValue'],
+  { immediate: true },
+);
 
-  setup(props, { emit }) {
-    const containerElementRef = ref(null);
-    const sizeElementRef = ref(null);
-    const prefixElementRef = ref(null);
-    const suffixElementRef = ref(null);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const inputComponentRef = ref(null);
+const innerStyle = computed(() => {
+  return {
+    transform: `scale(${state.scale})`,
+    maxWidth: state.maxWidth,
+  };
+});
 
-    const model = computed({
-      get: () => props.modelValue,
-      set: (value) => emit('update:modelValue', value),
-    });
-
-    const state = reactive({
-      width: 0,
-      maxWidth: '100%',
-      scale: 1,
-    });
-
-    watch(
-      [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
-      ([containerEl, sizeEl, prefixEl, suffixEl]) => {
-        if (!sizeEl) {
-          return;
-        }
-
-        nextTick(() => {
-          const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
-          const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
-          const fullWidth = width + extraWidth;
-          const maxWidth = Math.max(props.minWidth, containerEl?.offsetWidth);
-
-          const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
-
-          state.width = width;
-          state.maxWidth = `${maxWidth}px`;
-          state.scale = scale;
-        });
-      },
-      { immediate: true },
-    );
-
-    const innerStyle = computed(() => {
-      return {
-        transform: `scale(${state.scale})`,
-        maxWidth: state.maxWidth,
-      };
-    });
-
-    const inputProps = computed(() => {
-      return {
-        style: { width: `${state.width}px` },
-        width: state.width,
-        placeholder: props.placeholder,
-        class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
-      };
-    });
-    return {
-      model,
-      state,
-      innerStyle,
-      inputProps,
-      containerElementRef,
-      sizeElementRef,
-      prefixElementRef,
-      suffixElementRef,
-    };
-  },
+const inputProps = computed(() => {
+  return {
+    style: { width: `${state.width}px` },
+    width: state.width,
+    placeholder: props.placeholder,
+    class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
+  };
 });
 </script>
 

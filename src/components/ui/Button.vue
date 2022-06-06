@@ -40,7 +40,7 @@
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
-        <Spinner :size="2.5" :variant="variant === 'link' ? 'solid' : 'gold'" style="transform: scale(0.6)" />
+        <Spinner class="scale-50" :size="2.5" :variant="variant === 'link' ? 'solid' : 'gold'" />
       </div>
 
       <span v-if="name" class="inline-flex gap-x-2 items-center" :class="textClasses">
@@ -56,62 +56,72 @@
     </tippy>
   </div>
 </template>
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
-export default defineComponent({
-  name: 'Button',
-  components: {
-    Spinner,
-  },
-  props: {
-    name: { type: String, required: false, default: null },
-    alignText: { type: String, required: false, default: 'center' },
-    variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
-    size: { type: String, required: false, default: 'md' }, // 'sm'
-    fullWidth: { type: Boolean, required: false, default: true },
-    rounded: { type: Boolean, required: false },
-    capitalize: { type: Boolean, required: false },
-    shadow: { type: Boolean, required: false, default: true },
-    status: { type: String, required: false, default: 'active' }, // 'loading'
-    clickFunction: { type: Function, required: false, default: null },
-    tooltipText: { type: String, required: false, default: '' },
-    isOutline: { type: Boolean, required: false, default: false },
-    disabled: { type: Boolean, default: false },
-    animate: { type: Boolean, default: true },
-  },
-  emits: ['click'],
-  setup(props, { emit }) {
-    const buttonTooltipRef = ref(null);
-    function toggleToolTip(type) {
-      if (props.tooltipText) {
-        if (type === 'show') {
-          buttonTooltipRef.value.show();
-        } else {
-          buttonTooltipRef.value.hide();
-        }
-      }
+
+interface Props {
+  name?: string;
+  alignText?: string;
+  variant?: string;
+  size?: string;
+  fullWidth?: boolean;
+  rounded?: boolean;
+  capitalize?: boolean;
+  shadow?: boolean;
+  status?: string;
+  clickFunction?: (event: Event) => void;
+  tooltipText?: string;
+  isOutline?: boolean;
+  disabled?: boolean;
+  animate?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  name: null,
+  alignText: 'center',
+  variant: 'primary',
+  size: 'md',
+  fullWidth: true,
+  shadow: true,
+  status: 'active',
+  clickFunction: null,
+  tooltipText: '',
+  isOutline: false,
+  disabled: false,
+  animate: true,
+});
+
+const emit = defineEmits<{
+  (e: 'click', event: any): void;
+}>();
+
+const buttonTooltipRef = ref(null);
+function toggleToolTip(type) {
+  if (props.tooltipText) {
+    if (type === 'show') {
+      buttonTooltipRef.value.show();
+    } else {
+      buttonTooltipRef.value.hide();
     }
+  }
+}
 
-    const alignTextStyle = computed(() => {
-      if (!props.name && !props.alignText) return 'flex items-center justify-center';
-      if (props.alignText === 'center') return 'flex items-center justify-center';
-      if (props.alignText === 'left') return 'flex items-center justify-start';
-      if (props.alignText === 'right') return 'flex items-center justify-end';
-      return '';
-    });
+const alignTextStyle = computed(() => {
+  if (!props.name && !props.alignText) return 'flex items-center justify-center';
+  if (props.alignText === 'center') return 'flex items-center justify-center';
+  if (props.alignText === 'left') return 'flex items-center justify-start';
+  if (props.alignText === 'right') return 'flex items-center justify-end';
+  return '';
+});
 
-    const textClasses = computed(() => {
-      return [
-        { invisible: props.status === 'loading' },
-        { relative: props.variant === 'link' },
-        { capitalize: props.capitalize },
-      ];
-    });
-
-    return { alignTextStyle, textClasses, buttonTooltipRef, toggleToolTip, emit };
-  },
+const textClasses = computed(() => {
+  return [
+    { invisible: props.status === 'loading' },
+    { relative: props.variant === 'link' },
+    { capitalize: props.capitalize },
+  ];
 });
 </script>
 

@@ -61,8 +61,12 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       } else {
         await window.keplr.enable(chain.node_info.chain_id);
       }
-
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      let offlineSigner;
+      if (!featureRunning('USE_EMERIS_EXTENSION')) {
+        offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      } else {
+        offlineSigner = await walletActionHandler.getOfflineSigner(chain.node_info.chain_id);
+      }
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });

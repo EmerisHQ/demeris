@@ -5,43 +5,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import { Pool as PoolType } from '@/types/actions';
 
 import TooltipPool from './TooltipPool.vue';
 
-export default defineComponent({
-  name: 'TooltipPools',
+interface Props {
+  pools: PoolType[];
+  limit?: number;
+  denom: string;
+}
 
-  components: {
-    TooltipPool,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  limit: undefined,
+});
 
-  props: {
-    pools: {
-      type: Array as PropType<PoolType[]>,
-      required: true,
-    },
-    limit: {
-      type: Number,
-      default: undefined,
-    },
-    denom: {
-      type: String,
-      required: true,
-    },
-  },
-
-  setup(props) {
-    const availablePools = computed(() => {
-      return (props.pools as PoolType[]).slice(0, props.limit as number);
-    });
-
-    return {
-      availablePools,
-    };
-  },
+const availablePools = computed(() => {
+  return (props.pools as PoolType[]).slice(0, props.limit as number);
 });
 </script>

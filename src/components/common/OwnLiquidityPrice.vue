@@ -5,9 +5,9 @@
   </span>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed } from 'vue';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -16,62 +16,45 @@ import { parseCoins } from '@/utils/basic';
 
 import CurrencyDisplay from '../ui/CurrencyDisplay.vue';
 
-//import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
+interface Props {
+  pool: Pool;
+  showShare?: boolean;
+}
 
-export default defineComponent({
-  components: { CurrencyDisplay },
+const props = withDefaults(defineProps<Props>(), {
+  showShare: false,
+});
 
-  //components: { TrendingUpIcon },
+const { pool, reserveBalances, getPoolWithdrawBalances, totalLiquidityPrice, totalSupply } = usePool(
+  (props.pool as Pool).id,
+);
 
-  props: {
-    pool: {
-      type: Object as PropType<Pool>,
-      required: true,
-    },
-    showShare: {
-      type: Boolean as PropType<boolean>,
-      default: false,
-    },
-  },
+const { balancesByDenom } = useAccount();
 
-  setup(props) {
-    const { pool, reserveBalances, getPoolWithdrawBalances, totalLiquidityPrice, totalSupply } = usePool(
-      (props.pool as Pool).id,
-    );
+const ownShare = computed(() => {
+  if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
+    return 0;
+  }
 
-    const { balancesByDenom } = useAccount();
+  return new BigNumber(walletBalances.value.poolCoin.amount).dividedBy(totalSupply.value).multipliedBy(100).toNumber();
+});
 
-    const ownShare = computed(() => {
-      if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
-        return 0;
-      }
+const walletBalances = computed(() => {
+  if (!pool.value || !reserveBalances.value?.length) {
+    return;
+  }
+  const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
 
-      return new BigNumber(walletBalances.value.poolCoin.amount)
-        .dividedBy(totalSupply.value)
-        .multipliedBy(100)
-        .toNumber();
-    });
+  const poolCoin = {
+    denom: pool.value.pool_coin_denom,
+    amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
+  };
+  const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
 
-    const walletBalances = computed(() => {
-      if (!pool.value || !reserveBalances.value?.length) {
-        return;
-      }
-      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
-
-      const poolCoin = {
-        denom: pool.value.pool_coin_denom,
-        amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
-      };
-      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
-
-      return {
-        coinA: withdrawBalances[0],
-        coinB: withdrawBalances[1],
-        poolCoin,
-      };
-    });
-
-    return { ownShare, totalLiquidityPrice };
-  },
+  return {
+    coinA: withdrawBalances[0],
+    coinB: withdrawBalances[1],
+    poolCoin,
+  };
 });
 </script>

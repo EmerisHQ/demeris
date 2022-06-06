@@ -32,8 +32,8 @@
   </Alert>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Denom from '@/components/common/Denom.vue';
@@ -42,44 +42,27 @@ import Alert from '@/components/ui/Alert.vue';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 
-export default defineComponent({
-  name: 'PoolBanner',
-  components: {
-    Alert,
-    Denom,
-    Ticker,
-  },
-  props: {
-    name: {
-      type: String,
-      default: '',
-    },
-  },
-  setup(props) {
-    const router = useRouter();
+interface Props {
+  name?: string;
+}
 
-    const { pools } = usePools();
+const props = withDefaults(defineProps<Props>(), { name: '' });
 
-    const pool = computed(() => {
-      return pools.value?.find((pool) => pool.pool_coin_denom == props.name);
-    });
+const router = useRouter();
 
-    const { pairName } = usePool(
-      computed(() => {
-        return (pool.value?.id as string) ?? '';
-      }),
-    );
+const { pools } = usePools();
 
-    const openPoolPage = () => {
-      router.push({ name: 'Pool', params: { id: pool.value.id } });
-    };
-
-    return {
-      pairName,
-      pool,
-      openPoolPage,
-    };
-  },
+const pool = computed(() => {
+  return pools.value?.find((pool) => pool.pool_coin_denom == props.name);
 });
+
+const { pairName } = usePool(
+  computed(() => {
+    return (pool.value?.id as string) ?? '';
+  }),
+);
+
+const openPoolPage = () => {
+  router.push({ name: 'Pool', params: { id: pool.value.id } });
+};
 </script>
-<style lang="scss" scoped></style>
