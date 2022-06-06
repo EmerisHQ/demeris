@@ -133,7 +133,7 @@ export default defineComponent({
         store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
         isConnecting.value = true;
       } else {
-        emit('warning');
+        emit('warning', walletType);
       }
     };
 
@@ -141,13 +141,13 @@ export default defineComponent({
       if (isWarningAgreed.value) {
         signIn();
       } else {
-        emit('warning');
+        emit('warning', connectingWallet.value);
       }
     };
 
-    const signIn = () => {
+    const signIn = (walletType?) => {
       if (featureRunning('USE_EMERIS_EXTENSION')) {
-        store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletTyp: connectingWallet.value });
+        store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
       } else {
         store.dispatch(GlobalActionTypes.USER.SIGN_IN);
       }
