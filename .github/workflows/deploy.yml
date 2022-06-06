@@ -45,7 +45,7 @@ jobs:
         run: yarn
 
       - name: Build
-        run: NODE_OPTIONS="--max_old_space_size=8192" yarn build:production -- --emptyOutDir ${{ github.event.inputs.empty_out_dir }}
+        run: yarn build:production -- --emptyOutDir ${{ github.event.inputs.empty_out_dir }}
 
       - name: Deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
