@@ -22,7 +22,7 @@ jobs:
         run: yarn
 
       - name: Build
-        run: yarn build:production
+        run: NODE_OPTIONS="--max_old_space_size=8192" yarn build:production
 
       - name: Deploy
         uses: FirebaseExtended/action-hosting-deploy@v0

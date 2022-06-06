@@ -11,6 +11,7 @@ on:
 
 env:
   VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  NODE_OPTIONS: '--max-old-space-size=4096'
   
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -85,7 +86,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Build
-        run: yarn build:production
+        run: NODE_OPTIONS="--max_old_space_size=8192" yarn build:production
 
       - name: Run Playwright tests
         run: 
