@@ -8,14 +8,14 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('Check Staking functionality', function () {
   test('time to unstake is a number', async ({ page, baseURL }) => {
-    await page.locator('text=View all').first().click(),
-      await page.locator('text=Osmosis').first().click(),
-      await page.waitForNavigation({ url: `${baseURL}/asset/uosmo` }),
-      // Click [data-test="openMenuButton"] button
-      await page.locator('[data-test="openMenuButton"] button').first().click();
-    await page.locator('button:has-text("Unstake")').click(),
-      // Click text=14 days
-      await page.locator('text=14 days').click();
+    await page.locator('text=View all').first().click();
+    await page.locator('text=Osmosis').first().click();
+    await page.waitForNavigation({ url: `${baseURL}/asset/uosmo` });
+    // Click [data-test="openMenuButton"] button
+    await page.locator('[data-test="openMenuButton"] button').first().click();
+    await page.locator('button:has-text("Unstake")').click();
+    // Click text=14 days
+    await page.locator('text=14 days').click();
     // Click [placeholder="\30 "]
     await page.locator('[placeholder="\\30 "]').click();
     // Fill [placeholder="\30 "]
