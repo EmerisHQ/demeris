@@ -11,6 +11,7 @@ import gitVersion from './build/git-version';
 import * as pkg from './package.json';
 
 // https://vitejs.dev/config/
+// eslint-disable-next-line max-lines-per-function
 export default () => {
   // Do Node stuff here:
   process.env.VITE_GIT_VERSION = gitVersion();
@@ -19,6 +20,13 @@ export default () => {
     build: {
       chunkSizeWarningLimit: 1000,
       sourcemap: true,
+      rollupOptions: {
+        output: {
+          entryFileNames: `assets/[name].js`,
+          chunkFileNames: `assets/[name].js`,
+          assetFileNames: `assets/[name].[ext]`,
+        },
+      },
     },
     plugins: [vue(), nodeResolve(), dynamicImport(), envCompatible(), eslintPlugin({ fix: true })],
     resolve: {
