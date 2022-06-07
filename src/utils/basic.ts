@@ -6,7 +6,6 @@ import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
 
-import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -70,13 +69,8 @@ export async function getOwnAddress({ chain_name }) {
         params: { chain_name },
       });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
-    let key;
-    if (featureRunning('USE_EMERIS_EXTENSION')) {
-      key = await walletActionHandler.getAccount(chain.node_info.chain_id);
-    } else {
-      key = await window.keplr.getKey(chain.node_info.chain_id);
-    }
-    return key.bech32Address;
+    const chainKeyData = typedstore.getters[GlobalGetterTypes.USER.getChainKeyData](chain.chain_name);
+    return chainAddressfromKeyhash(chain.node_info.bech32_config.prefix_account, chainKeyData.keyHash);
   }
 }
 

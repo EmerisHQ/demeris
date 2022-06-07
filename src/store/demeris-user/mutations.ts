@@ -1,18 +1,19 @@
 import { MutationTree } from 'vuex';
 
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
-import { KeplrKeyData, UserData } from '@/types/user';
+import { AccountData, UserData } from '@/types/user';
 import { featureRunning } from '@/utils/FeatureManager';
 
+import { ChainKeyData } from './../../types/user';
 import { ActionTypes } from './action-types';
 import { Subscriptions } from './actions';
 import { MutationTypes } from './mutation-types';
 import { getDefaultState, USERState } from './state';
 
 export type Mutations<S = USERState> = {
-  [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
+  [MutationTypes.ADD_CHAIN_KEY_DATA](state: S, payload: ChainKeyData): void;
   [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
-  [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
+  [MutationTypes.SET_ACCOUNT](state: S, payload: AccountData): void;
   [MutationTypes.SET_GAS_LIMIT](state: S, payload: { value: number }): void;
   [MutationTypes.SET_CORRELATION_ID](state: S, payload: string): void;
   [MutationTypes.SET_BALANCES_FIRST_LOAD](state: S, payload: boolean): void;
@@ -25,8 +26,8 @@ export type Mutations<S = USERState> = {
 };
 
 export const mutations: MutationTree<USERState> & Mutations = {
-  [MutationTypes.ADD_KEPLR_KEYHASH](state: USERState, payload: string) {
-    if (state.keplr) state.keplr.keyHashes.push(payload);
+  [MutationTypes.ADD_CHAIN_KEY_DATA](state: USERState, payload: ChainKeyData) {
+    state.chainKeyData.push(payload);
   },
   [MutationTypes.SET_SESSION_DATA](state: USERState, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
@@ -39,9 +40,8 @@ export const mutations: MutationTree<USERState> & Mutations = {
       else window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
     }
   },
-  [MutationTypes.SET_KEPLR](state: USERState, payload: KeplrKeyData) {
-    state.keplr = payload;
-    state.keplr.keyHashes = [];
+  [MutationTypes.SET_ACCOUNT](state: USERState, payload: AccountData) {
+    state.account = payload;
   },
   [MutationTypes.SET_BALANCES_FIRST_LOAD](state: USERState, payload: boolean) {
     state.balancesFirstLoad = payload;
@@ -66,7 +66,8 @@ export const mutations: MutationTree<USERState> & Mutations = {
         state._Subscriptions.delete(sub);
       }
     }
-    state.keplr = null;
+    state.account = null;
+    state.chainKeyData = [];
     state._Session = {};
     if (featureRunning('USE_EMERIS_EXTENSION')) {
       walletActionHandler.clearLastSession();

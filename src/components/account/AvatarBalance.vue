@@ -7,9 +7,9 @@
         v-html="getAvatar(keplrAccountName)"
       />
       <div
-        v-if="keplrAccountName != 'Demo Account'"
+        v-if="accountName != 'Demo Account'"
         class="avatar__gradient relative rounded-full overflow-hidden w-full h-full"
-        v-html="getAvatar(keplrAccountName)"
+        v-html="getAvatar(accountName)"
       ></div>
       <div v-else class="avatar__demo relative rounded-full overflow-hidden w-full h-full"></div>
     </div>
@@ -17,11 +17,11 @@
     <div
       v-tippy
       class="ml-3 grow"
-      :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }"
+      :class="{ 'hidden sm:block': !walletName, 'mr-3': accountName == 'Demo Account' }"
       :content="isPriceApiAvailable ? '' : $t('components.avatar.priceApiDown')"
     >
       <div class="-text-1 slashed-zero" :class="[walletName ? 'font-bold mb-0.5' : 'leading-none mb-1']">
-        {{ keplrAccountName }}
+        {{ accountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
         <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" />
@@ -51,8 +51,8 @@ withDefaults(defineProps<Props>(), { walletName: '' });
 
 const store = useStore();
 
-const keplrAccountName = computed(() => {
-  return store.getters[GlobalGetterTypes.USER.getKeplrAccountName];
+const accountName = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.getAccount]?.name;
 });
 const isPriceApiAvailable = computed(() => {
   return store.getters[GlobalGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
