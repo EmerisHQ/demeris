@@ -153,9 +153,10 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -171,7 +172,6 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -214,7 +214,7 @@ export default defineComponent({
     },
     showAllAssets: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     hideLpAssets: {
       type: Boolean,
@@ -239,11 +239,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore() as RootStoreTyped;
     const currentLimit = ref(props.limitRows);
-    const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
     });
-    const propsRef = toRefs(props);
 
     const tableColumns = ref(['35%', '20%', '35%', '10%']);
     if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
@@ -251,10 +249,10 @@ export default defineComponent({
     }
 
     const allBalances = computed(() => {
-      let balances = propsRef.balances.value;
+      let balances = store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
       if (props.showAllAssets) {
         balances = [
-          ...propsRef.balances.value,
+          ...balances,
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
             on_chain: denom.chain_name,
@@ -286,23 +284,28 @@ export default defineComponent({
     });
 
     const balancesByAsset = computed(() => {
+      const stakingBalances = store.getters[GlobalGetterTypes.API.getAllStakingBalances] || [];
+      const unbondingDelegations = store.getters[GlobalGetterTypes.API.getAllUnbondingDelegations] || [];
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
       const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
       const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
-        let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
+        let totalAmount = balances.reduce(
+          (acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)),
+          new BigNumber(0),
+        );
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
-        let stakedAmount = 0;
-        let unstakedAmount = 0;
+        let stakedAmount = new BigNumber(0);
+        let unstakedAmount = new BigNumber(0);
         if (denom_details.length > 0) {
-          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
+          const stakedAmounts = stakingBalances.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
-            stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
-            totalAmount = totalAmount + stakedAmount;
+            stakedAmount = stakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item.amount)), new BigNumber(0));
+            totalAmount = totalAmount.plus(stakedAmount);
           }
           if (featureRunning('STAKING')) {
-            unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom_details[0].chain_name);
-            totalAmount = totalAmount + unstakedAmount;
+            unstakedAmount = getUnstakedAmount(unbondingDelegations, denom_details[0].chain_name);
+            totalAmount = totalAmount.plus(unstakedAmount);
           }
         }
         return {
@@ -315,10 +318,13 @@ export default defineComponent({
       });
       if (allBalances.value.length > 0) {
         for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
-          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
+          const stakedAmounts = stakingBalances.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
-            const calcStakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
-            const unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom.chain_name);
+            const calcStakedAmount = stakedAmounts.reduce(
+              (acc, item) => acc.plus(new BigNumber(item.amount)),
+              new BigNumber(0),
+            );
+            const unstakedAmount = getUnstakedAmount(unbondingDelegations, denom.chain_name);
             summary.push({
               chainsNames: [denom.chain_name],
               denom: denom.name,
@@ -342,8 +348,10 @@ export default defineComponent({
 
       if (balances.length > 0) {
         balances.map((b) => {
-          let value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
-          (b as any).value = value;
+          (b as any).value = getPrice({
+            denom: b.denom,
+            amount: b.totalAmount.toString(),
+          });
         });
       }
       return balances;
@@ -352,9 +360,9 @@ export default defineComponent({
     const balancesWithName: ComputedRef<
       {
         denom: string;
-        totalAmount: number;
+        totalAmount: BigNumber;
         chainsNames: string[];
-        marketCap?: number;
+        marketCap?: BigNumber;
         value?: {
           value: string;
         };
@@ -382,7 +390,9 @@ export default defineComponent({
     const getUnavailableChains = (asset) => {
       const result = {};
       const statusMap = asset.chainsNames.reduce((acc, chain) => {
-        acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
+        acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({
+          chain_name: chain,
+        });
         return acc;
       }, {});
 
@@ -405,7 +415,23 @@ export default defineComponent({
     };
 
     const orderedUserBalances = computed(() => {
-      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+      const tokens = balancesWithName.value
+        .map((item) => {
+          const denom = item.denom;
+          const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+          const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+          const result = new BigNumber(item.totalAmount).multipliedBy(price).shiftedBy(-precision);
+          return { ...item, price: result };
+        })
+        .sort((a, b) => {
+          if (a.price.isNaN()) {
+            return 1;
+          }
+          if (b.price.isNaN()) {
+            return -1;
+          }
+          return a.price.isGreaterThan(b.price) ? -1 : 1;
+        });
       return tokens.slice(0, currentLimit.value);
     });
 
@@ -457,8 +483,9 @@ function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations,
     .map((y) => y.entries)
     .flat()
     .map((z) => z.balance);
-  if (unstakedAmounts.length > 0) return unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-  return 0;
+  if (unstakedAmounts.length > 0)
+    return unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(parseInt(item))), new BigNumber(0));
+  return new BigNumber(0);
 }
 </script>
 

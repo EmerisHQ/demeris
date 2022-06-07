@@ -1,15 +1,15 @@
+import { EmerisAPI } from '@emeris/types';
 /* eslint-disable max-lines-per-function */
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 
-import useAccount from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 
 export function useTotalPortfolioBalance() {
-  const { balances } = useAccount();
-
   const store = useStore() as RootStoreTyped;
-  const { stakingBalances, unbondingDelegations } = useAccount();
+  const balances = computed(() => store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances));
+  const stakingBalances = computed(() => store.getters[GlobalGetterTypes.API.getAllStakingBalances] || []);
+  const unbondingDelegations = computed(() => store.getters[GlobalGetterTypes.API.getAllUnbondingDelegations] || []);
 
   const verifiedDenoms = computed(() => store.getters[GlobalGetterTypes.API.getVerifiedDenoms]);
   const liquidValue = computed(() => {
