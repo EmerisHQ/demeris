@@ -37,8 +37,7 @@
           </header>
 
           <ul
-            class="flex flex-col space-y-1 overflow-y-auto"
-            :style="{ maxHeight: '300px' }"
+            class="flex flex-col space-y-1 overflow-y-auto max-h-80"
             :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
           >
             <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group">

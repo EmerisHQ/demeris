@@ -7,15 +7,14 @@
         action="claim"
         @pending="closeModal"
         @close="closeModal"
-        @previous="$emit('previous')"
+        @previous="emit('previous')"
       />
     </template>
   </div>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
+import { computed, onMounted, ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -29,90 +28,64 @@ import { event } from '@/utils/analytics';
 
 type Step = 'validator' | 'amount' | 'review' | 'stake';
 
-export default defineComponent({
-  name: 'ClaimForm',
+interface Props {
+  step?: Step;
+  validators: EmerisAPI.Validator[];
+}
 
-  components: {
-    TransactionProcessCreator,
-  },
-
-  props: {
-    step: {
-      type: String as PropType<Step>,
-      default: undefined,
-    },
-    validators: {
-      type: Array as PropType<EmerisAPI.Validator[]>,
-      required: true,
-      default: () => {
-        return [];
-      },
-    },
-  },
-
-  emits: ['update:step', 'previous'],
-
-  setup(props, { emit }) {
-    const steps = ref([]);
-    const store = useStore() as RootStoreTyped;
-    const router = useRouter();
-
-    const { getChainNameByBaseDenom } = useChains();
-    const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
-
-    const propsRef = toRefs(props);
-    const chain = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getChain]({
-        chain_name: propsRef.validators.value[0].chain_name,
-      });
-    });
-    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
-    const gasPrice = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.getPreferredGasPriceLevel];
-    });
-
-    const step = computed({
-      get: () => props.step,
-      set: (value) => emit('update:step', value),
-    });
-
-    const closeModal = () => {
-      router.push('/');
-    };
-    onMounted(async () => {
-      const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-      const chainName = await getChainNameByBaseDenom(baseDenom);
-      const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
-        reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
-        return reward;
-      });
-      const action = {
-        name: 'claim',
-        params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chainName },
-      } as ClaimRewardsAction;
-      event('review_tx', { event_label: 'Reviewing claim tx', event_category: 'transactions' });
-      steps.value = await actionHandler(action);
-    });
-
-    const goToStep = (value: Step) => {
-      step.value = value;
-    };
-    const resetHandler = () => {
-      goToStep('review');
-    };
-
-    if (!props.step) {
-      step.value = 'review';
-    }
-    return {
-      gasPrice,
-      steps,
-      goToStep,
-      resetHandler,
-      closeModal,
-    };
+const props = withDefaults(defineProps<Props>(), {
+  step: undefined,
+  validators: () => {
+    return [];
   },
 });
+
+const emit = defineEmits<{
+  (e: 'update:step', value: any): void;
+  (e: 'previous'): void;
+}>();
+
+const steps = ref([]);
+const store = useStore() as RootStoreTyped;
+const router = useRouter();
+
+const { getChainNameByBaseDenom } = useChains();
+const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
+
+const propsRef = toRefs(props);
+const chain = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChain]({
+    chain_name: propsRef.validators.value[0].chain_name,
+  });
+});
+const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
+
+const step = computed({
+  get: () => props.step,
+  set: (value) => emit('update:step', value),
+});
+
+const closeModal = () => {
+  router.push('/');
+};
+onMounted(async () => {
+  const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
+  const chainName = await getChainNameByBaseDenom(baseDenom);
+  const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
+    reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
+    return reward;
+  });
+  const action = {
+    name: 'claim',
+    params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chainName },
+  } as ClaimRewardsAction;
+  event('review_tx', { event_label: 'Reviewing claim tx', event_category: 'transactions' });
+  steps.value = await actionHandler(action);
+});
+
+if (!props.step) {
+  step.value = 'review';
+}
 </script>
 
 <style lang="scss"></style>

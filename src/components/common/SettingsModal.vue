@@ -73,16 +73,6 @@
           >
             {{ $t('components.settingsMenu.tos') }}
           </a>
-          <!--
-          <a
-            href="https://www.cookiesandyou.com/"
-            class="settings-modal__list-item white-space-nowrap hover:text-text"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {{ $t('components.settingsMenu.cookiesPolicy') }}
-          </a>
-          -->
         </div>
       </div>
       <!-- end settings-basic-->
@@ -125,16 +115,6 @@
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="pointer-events-none" />
           </button>
-          <!--
-          <button class="menu-item" @click="confirmToggleSetting('viewUnverified')">
-            <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
-            <Switch v-model="settings.viewUnverified" class="pointer-events-none" />
-          </button>
-          <button class="menu-item" @click="confirmToggleSetting('viewLPAssetPools')">
-            <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
-            <Switch v-model="settings.viewLPAssetPools" class="pointer-events-none" />
-          </button>
-          -->
         </div>
       </div>
       <!-- end advanced settings -->
@@ -256,10 +236,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines */
-/* eslint-disable max-lines-per-function */
-import { computed, defineComponent, reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
@@ -271,125 +250,102 @@ import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
-export default defineComponent({
-  name: 'SettingsModal',
-  components: {
-    AmountInput,
-    AvatarBalance,
-    Button,
-    Icon,
-    Modal,
-    ModalButton,
-    Switch,
-  },
-  emits: ['disconnect', 'connect'],
-  setup(_, { emit }) {
-    const gitVersion = import.meta.env.VITE_GIT_VERSION;
-    const appVersion = import.meta.env.VITE_VERSION;
+const emit = defineEmits<{
+  (e: 'disconnect'): void;
+  (e: 'connect'): void;
+}>();
 
-    const store = useStore();
-    const theme = useTheme();
+const gitVersion = import.meta.env.VITE_GIT_VERSION;
+const appVersion = import.meta.env.VITE_VERSION;
 
-    const isAdvancedSettingsOpen = ref(false);
-    const isWarningCustomSlippageOpen = ref(false);
-    const isWarningViewUnverifiedOpen = ref(false);
-    const isWarningViewLPAssetPoolsOpen = ref(false);
-    const isDemoAccount = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
-    });
-    const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
-    const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
-    const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
-    const toggleWarningViewLPAssetPools = () =>
-      (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
+const store = useStore();
+const theme = useTheme();
 
-    const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
-    };
-
-    const settings = reactive({
-      theme,
-      gasLimit: computed({
-        get: () => store.getters[GlobalGetterTypes.USER.getGasLimit],
-        set: (value: number) => {
-          store.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
-        },
-      }),
-      allowCustomSlippage: computed({
-        get: () => store.getters[GlobalGetterTypes.USER.allowCustomSlippage],
-        set: (value: boolean) => updateSession('allowCustomSlippage', value),
-      }),
-      viewUnverified: computed({
-        get: () => store.getters[GlobalGetterTypes.USER.viewUnverified],
-        set: (value: boolean) => updateSession('viewUnverified', value),
-      }),
-      viewLPAssetPools: computed({
-        get: () => store.getters[GlobalGetterTypes.USER.viewLPAssetPools],
-        set: (value: boolean) => updateSession('viewLPAssetPools', value),
-      }),
-    });
-
-    const toggleWarningModals = (key: string) => {
-      switch (key) {
-        case 'allowCustomSlippage':
-          toggleWarningCustomSlippage();
-          break;
-        case 'viewUnverified':
-          toggleWarningViewUnverified();
-          break;
-        case 'viewLPAssetPools':
-          toggleWarningViewLPAssetPools();
-          break;
-        default:
-          break;
-      }
-    };
-
-    const confirmToggleSetting = (key: string) => {
-      if (!settings[key]) {
-        toggleWarningModals(key);
-      } else {
-        settings[key] = !settings[key];
-      }
-    };
-
-    const toggleSetting = (key: string) => {
-      toggleWarningModals(key);
-      settings[key] = !settings[key];
-    };
-
-    const disconnectWallet = () => {
-      if (isDemoAccount.value) {
-        emit('connect');
-      } else {
-        emit('disconnect');
-        walletActionHandler.disconnect();
-        window.localStorage.setItem('lastEmerisSession', '');
-        store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-      }
-    };
-
-    return {
-      appVersion,
-      gitVersion,
-      settings,
-      confirmToggleSetting,
-      toggleSetting,
-      isAdvancedSettingsOpen,
-      isWarningCustomSlippageOpen,
-      isWarningViewUnverifiedOpen,
-      isWarningViewLPAssetPoolsOpen,
-      toggleAdvancedSettings,
-      toggleWarningCustomSlippage,
-      toggleWarningViewUnverified,
-      toggleWarningViewLPAssetPools,
-      disconnectWallet,
-      isDemoAccount,
-    };
-  },
+const isAdvancedSettingsOpen = ref(false);
+const isWarningCustomSlippageOpen = ref(false);
+const isWarningViewUnverifiedOpen = ref(false);
+const isWarningViewLPAssetPoolsOpen = ref(false);
+const isDemoAccount = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isDemoAccount];
 });
+const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
+const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
+const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
+const toggleWarningViewLPAssetPools = () =>
+  (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
+
+const updateSession = (key: string, value: any) => {
+  store.dispatch(GlobalActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
+};
+
+const settings = reactive({
+  theme,
+  gasLimit: computed({
+    get: () => store.getters[GlobalGetterTypes.USER.getGasLimit],
+    set: (value: number) => {
+      store.dispatch(GlobalActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
+    },
+  }),
+  allowCustomSlippage: computed({
+    get: () => store.getters[GlobalGetterTypes.USER.allowCustomSlippage],
+    set: (value: boolean) => updateSession('allowCustomSlippage', value),
+  }),
+  viewUnverified: computed({
+    get: () => store.getters[GlobalGetterTypes.USER.viewUnverified],
+    set: (value: boolean) => updateSession('viewUnverified', value),
+  }),
+  viewLPAssetPools: computed({
+    get: () => store.getters[GlobalGetterTypes.USER.viewLPAssetPools],
+    set: (value: boolean) => updateSession('viewLPAssetPools', value),
+  }),
+});
+
+const toggleWarningModals = (key: string) => {
+  switch (key) {
+    case 'allowCustomSlippage':
+      toggleWarningCustomSlippage();
+      break;
+    case 'viewUnverified':
+      toggleWarningViewUnverified();
+      break;
+    case 'viewLPAssetPools':
+      toggleWarningViewLPAssetPools();
+      break;
+    default:
+      break;
+  }
+};
+
+const confirmToggleSetting = (key: string) => {
+  if (!settings[key]) {
+    toggleWarningModals(key);
+  } else {
+    settings[key] = !settings[key];
+  }
+};
+
+const toggleSetting = (key: string) => {
+  toggleWarningModals(key);
+  settings[key] = !settings[key];
+};
+
+const disconnectWallet = () => {
+  if (isDemoAccount.value) {
+    emit('connect');
+  } else {
+    emit('disconnect');
+    walletActionHandler.disconnect();
+    if (featureRunning('USE_EMERIS_EXTENSION')) {
+      walletActionHandler.clearLastSession();
+    } else {
+      window.localStorage.setItem('lastEmerisSession', '');
+    }
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
+  }
+};
 </script>
 
 <style>

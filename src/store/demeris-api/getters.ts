@@ -102,14 +102,14 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
     return true;
   },
   [GetterTypes.getAllBalances]: (state: APIState, _getters, _rootState, rootGetters) => {
-    if (!rootGetters[GlobalUserGetterTypes.getKeplr]) {
+    if (!rootGetters[GlobalUserGetterTypes.getAccount]) {
       return null;
     }
 
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
-      .filter((balance) => rootGetters[GlobalUserGetterTypes.getKeplr].keyHashes.indexOf(balance.address) > -1)
+      .filter((balance) => rootGetters[GlobalUserGetterTypes.getKeyhashes].indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },

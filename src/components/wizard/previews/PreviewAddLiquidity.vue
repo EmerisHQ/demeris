@@ -80,11 +80,10 @@
   </List>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -98,176 +97,144 @@ import * as Actions from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'PreviewAddLiquidity',
+interface Props {
+  step: Actions.Step;
+  fees: Record<string, EmerisBase.Amount>;
+  response: EmerisBase.AddLiquidityEndBlockResponse | Actions.Step;
+  isReceipt: boolean;
+}
 
-  components: {
-    AmountDisplay,
-    ChainName,
-    List,
-    ListItem,
-    CircleSymbol,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  step: undefined,
+  response: undefined,
+  isReceipt: false,
+});
 
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      default: undefined,
-    },
-    fees: {
-      type: Object as PropType<Record<string, EmerisBase.Amount>>,
-      required: true,
-    },
-    response: {
-      type: Object as PropType<EmerisBase.AddLiquidityEndBlockResponse | Actions.Step>,
-      default: undefined,
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-  },
+const store = useStore();
 
-  setup(props) {
-    const store = useStore();
+const { pools, getReserveBaseDenoms } = usePools();
+const poolInfo = reactive({
+  pairName: '-/-',
+  denom: '-',
+  denoms: [],
+});
 
-    const { pools, getReserveBaseDenoms } = usePools();
-    const poolInfo = reactive({
-      pairName: '-/-',
-      denom: '-',
-      denoms: [],
-    });
-
-    const creationFee = computed(() => {
-      return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
-    });
-    function isBlockResponse(resp): resp is EmerisBase.AddLiquidityEndBlockResponse {
-      return !!(resp as EmerisBase.AddLiquidityEndBlockResponse)?.accepted_coins;
-    }
-    const data = computed(() => {
-      if (isBlockResponse(props.response)) {
-        const endBlock = props.response;
-        const [coinA, coinB] = parseCoins(endBlock.accepted_coins);
-        const pool = pools.value?.find((item) => item.pool_coin_denom === endBlock.pool_coin_denom);
-
-        return {
-          coinA,
-          coinB,
-          pool,
-        };
-      } else {
-        const step = props.response || props.step;
-        return step.transactions[0].data as Actions.CreatePoolData;
-      }
-    });
-
-    const precisions = computed(() => {
-      return {
-        coinA: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
-        coinB: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
-      };
-    });
-
-    const chainName = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getDexChain];
-    });
-
-    const hasPool = computed(() => {
-      return !!(data.value as Actions.AddLiquidityData).pool;
-    });
-
-    // Add liquidity to a existing pool
-    const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
-    const { getPoolName, getNextPoolId } = usePools();
-
-    const exchangeAmount = computed(() => {
-      const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
-      const precisionDiff = precisions.value.coinA - precisions.value.coinB;
-
-      if (!hasPool.value) {
-        const precisionDiff = precisions.value.coinA - precisions.value.coinB;
-        return {
-          coinA,
-          coinB: new BigNumber(data.value.coinB.amount || 1)
-            .dividedBy(data.value.coinA.amount || 1)
-            .shiftedBy(precisions.value.coinB + precisionDiff)
-            .toNumber(),
-        };
-      }
-
-      if (reserveBalances.value?.length) {
-        const isReverse = data.value.coinA.denom !== reserveBalances.value[0].denom;
-        return {
-          coinA,
-          coinB: new BigNumber(reserveBalances.value[isReverse ? 0 : 1].amount)
-            .dividedBy(reserveBalances.value[isReverse ? 1 : 0].amount)
-            .shiftedBy(precisions.value.coinB + precisionDiff)
-            .toNumber(),
-        };
-      }
-
-      return undefined;
-    });
-
-    const updatePoolInfo = async () => {
-      if (hasPool.value) {
-        const pool = (data.value as Actions.AddLiquidityData).pool;
-        poolInfo.pairName = await getPoolName(pool);
-        poolInfo.denom = pool.pool_coin_denom;
-        poolInfo.denoms = await getReserveBaseDenoms(pool);
-        return;
-      }
-
-      const denoms = await Promise.all([getBaseDenom(data.value.coinA.denom), getBaseDenom(data.value.coinB.denom)]);
-      const denomA = await getDisplayName(denoms[0], chainName.value);
-      const denomB = await getDisplayName(denoms[1], chainName.value);
-
-      poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
-      poolInfo.denom = `Gravity ` + getNextPoolId();
-      poolInfo.denoms = denoms;
-    };
-
-    const receiveAmount = computed(() => {
-      if (isBlockResponse(props.response)) {
-        return +props.response.pool_coin_amount;
-      }
-
-      const result = calculateSupplyTokenAmount([
-        {
-          amount: new BigNumber(data.value.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
-          denom: data.value.coinA.denom,
-        },
-        {
-          amount: new BigNumber(data.value.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
-          denom: data.value.coinB.denom,
-        },
-      ]);
-      return new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toNumber();
-    });
-
-    const refundedAmount = computed(() => {
-      if (isBlockResponse(props.response)) {
-        return parseCoins(props.response.refunded_coins)[0];
-      } else {
-        return null;
-      }
-    });
-
-    watch(data, updatePoolInfo, { immediate: true });
+const creationFee = computed(() => {
+  return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
+});
+function isBlockResponse(resp): resp is EmerisBase.AddLiquidityEndBlockResponse {
+  return !!(resp as EmerisBase.AddLiquidityEndBlockResponse)?.accepted_coins;
+}
+const data = computed(() => {
+  if (isBlockResponse(props.response)) {
+    const endBlock = props.response;
+    const [coinA, coinB] = parseCoins(endBlock.accepted_coins);
+    const pool = pools.value?.find((item) => item.pool_coin_denom === endBlock.pool_coin_denom);
 
     return {
-      creationFee,
-      refundedAmount,
-      exchangeAmount,
-      hasPool,
-      poolInfo,
-      chainName,
-      data,
-      receiveAmount,
+      coinA,
+      coinB,
+      pool,
     };
-  },
+  } else {
+    const step = props.response || props.step;
+    return step.transactions[0].data as Actions.CreatePoolData;
+  }
 });
+
+const precisions = computed(() => {
+  return {
+    coinA: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
+    coinB: store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
+  };
+});
+
+const chainName = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getDexChain];
+});
+
+const hasPool = computed(() => {
+  return !!(data.value as Actions.AddLiquidityData).pool;
+});
+
+// Add liquidity to a existing pool
+const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+const { getPoolName, getNextPoolId } = usePools();
+
+const exchangeAmount = computed(() => {
+  const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
+  const precisionDiff = precisions.value.coinA - precisions.value.coinB;
+
+  if (!hasPool.value) {
+    const precisionDiff = precisions.value.coinA - precisions.value.coinB;
+    return {
+      coinA,
+      coinB: new BigNumber(data.value.coinB.amount || 1)
+        .dividedBy(data.value.coinA.amount || 1)
+        .shiftedBy(precisions.value.coinB + precisionDiff)
+        .toNumber(),
+    };
+  }
+
+  if (reserveBalances.value?.length) {
+    const isReverse = data.value.coinA.denom !== reserveBalances.value[0].denom;
+    return {
+      coinA,
+      coinB: new BigNumber(reserveBalances.value[isReverse ? 0 : 1].amount)
+        .dividedBy(reserveBalances.value[isReverse ? 1 : 0].amount)
+        .shiftedBy(precisions.value.coinB + precisionDiff)
+        .toNumber(),
+    };
+  }
+
+  return undefined;
+});
+
+const updatePoolInfo = async () => {
+  if (hasPool.value) {
+    const pool = (data.value as Actions.AddLiquidityData).pool;
+    poolInfo.pairName = await getPoolName(pool);
+    poolInfo.denom = pool.pool_coin_denom;
+    poolInfo.denoms = await getReserveBaseDenoms(pool);
+    return;
+  }
+
+  const denoms = await Promise.all([getBaseDenom(data.value.coinA.denom), getBaseDenom(data.value.coinB.denom)]);
+  const denomA = await getDisplayName(denoms[0], chainName.value);
+  const denomB = await getDisplayName(denoms[1], chainName.value);
+
+  poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
+  poolInfo.denom = `Gravity ` + getNextPoolId();
+  poolInfo.denoms = denoms;
+};
+
+const receiveAmount = computed(() => {
+  if (isBlockResponse(props.response)) {
+    return +props.response.pool_coin_amount;
+  }
+
+  const result = calculateSupplyTokenAmount([
+    {
+      amount: new BigNumber(data.value.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
+      denom: data.value.coinA.denom,
+    },
+    {
+      amount: new BigNumber(data.value.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
+      denom: data.value.coinB.denom,
+    },
+  ]);
+  return new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toNumber();
+});
+
+const refundedAmount = computed(() => {
+  if (isBlockResponse(props.response)) {
+    return parseCoins(props.response.refunded_coins)[0];
+  } else {
+    return null;
+  }
+});
+
+watch(data, updatePoolInfo, { immediate: true });
 </script>
 
 <style lang="scss" scoped></style>

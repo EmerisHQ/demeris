@@ -6,25 +6,19 @@
     @mouseleave="toggleVisibilitiy"
   />
 </template>
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-export default defineComponent({
-  name: 'WhiteOverlay',
-  setup() {
-    const isMouseOver = ref(false);
+<script setup lang="ts">
+import { ref } from 'vue';
+const isMouseOver = ref(false);
 
-    function toggleVisibilitiy() {
-      if (isMouseOver.value) {
-        setTimeout(() => {
-          isMouseOver.value = !isMouseOver.value;
-        }, 5000);
-      } else {
-        isMouseOver.value = !isMouseOver.value;
-      }
-    }
-    return { toggleVisibilitiy, isMouseOver };
-  },
-});
+function toggleVisibilitiy() {
+  if (isMouseOver.value) {
+    setTimeout(() => {
+      isMouseOver.value = !isMouseOver.value;
+    }, 5000);
+  } else {
+    isMouseOver.value = !isMouseOver.value;
+  }
+}
 </script>
 <style lang="scss" scoped>
 .white-overlay {

@@ -66,7 +66,13 @@ import SwapOverlayRouteDetail from './SwapOverlay/SwapOverlayRouteDetail.vue';
 import SwapOverlayRoutes from './SwapOverlay/SwapOverlayRoutes.vue';
 import SwapOverlaySettings from './SwapOverlay/SwapOverlaySettings.vue';
 
-const props = defineProps(['canStart', 'defaultDenom']);
+interface Props {
+  canStart: any;
+  defaultDenom: any;
+}
+
+const props = defineProps<Props>();
+
 const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state, send } = useSwapMachine(props.defaultDenom);

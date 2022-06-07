@@ -28,60 +28,43 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, watch } from 'vue';
+<script setup lang="ts">
+import { computed, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 
-export default defineComponent({
-  name: 'ConnectWallet',
+interface Props {
+  type?: string;
+}
 
-  components: {
-    Button,
-  },
+withDefaults(defineProps<Props>(), { type: undefined });
 
-  props: {
-    type: {
-      type: String,
-      default: undefined,
-    },
-  },
+const emit = defineEmits<{
+  (e: 'connect'): void;
+}>();
 
-  emits: ['cancel', 'try-demo', 'connect'],
+const store = useStore() as RootStoreTyped;
+const signInDemo = () => {
+  store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
+};
 
-  setup(_, { emit }) {
-    const emitCancel = () => {
-      emit('cancel');
-    };
-    const store = useStore() as RootStoreTyped;
-    const signInDemo = () => {
-      store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-    };
-
-    const isSignedIn = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isSignedIn];
-    });
-    watch(isSignedIn, () => {
-      if (isSignedIn.value) {
-        emit('connect');
-      }
-    });
-    const openUrl = () => {
-      window.open(
-        'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en',
-        '_blank',
-        'noopener',
-      );
-    };
-    const reloadApp = () => {
-      location.reload();
-    };
-
-    return { emitCancel, openUrl, reloadApp, signInDemo };
-  },
+const isSignedIn = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isSignedIn];
 });
+watch(isSignedIn, () => {
+  if (isSignedIn.value) {
+    emit('connect');
+  }
+});
+const openUrl = () => {
+  window.open(
+    'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en',
+    '_blank',
+    'noopener',
+  );
+};
 </script>
 
 <style lang="scss" scoped>

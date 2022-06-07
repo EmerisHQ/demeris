@@ -14,46 +14,37 @@
     </template>
   </tippy>
 </template>
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { DesignSizes } from '@/types/util';
 
-export default defineComponent({
-  name: 'CircleSymbolStatus',
-  props: {
-    denom: {
-      type: String,
-      default: undefined,
-    },
-    chainName: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String as PropType<DesignSizes>,
-      default: 'md',
-    },
-  },
-  setup(props) {
-    const typedstore = useStore() as RootStoreTyped;
+interface Props {
+  denom?: string;
+  chainName?: string;
+  size?: DesignSizes;
+}
 
-    const displayChain = computed(() => {
-      const displayName = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: props.chainName });
-      return displayName || props.chainName;
-    });
+const props = withDefaults(defineProps<Props>(), {
+  denom: undefined,
+  chainName: undefined,
+  size: 'md',
+});
 
-    const chainDown = computed(() => {
-      const chainStatus = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({
-        chain_name: props.chainName,
-      });
-      return !chainStatus;
-    });
+const typedstore = useStore() as RootStoreTyped;
 
-    return { displayChain, chainDown };
-  },
+const displayChain = computed(() => {
+  const displayName = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: props.chainName });
+  return displayName || props.chainName;
+});
+
+const chainDown = computed(() => {
+  const chainStatus = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({
+    chain_name: props.chainName,
+  });
+  return !chainStatus;
 });
 </script>
 

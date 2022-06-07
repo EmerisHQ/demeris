@@ -2,6 +2,7 @@
   <div class="flex items-center justify-end gap-x-4">
     <Price
       :amount="{ denom: props.denom, amount: `${totalRewardsAmount}` }"
+      :show-zero="true"
       :show-dash="false"
       :label="props.label"
       :class="{ 'text-muted': totalRewardsAmount <= 0 }"
@@ -28,7 +29,6 @@ interface Props {
   denom: string;
   label?: string;
   hasButton: boolean;
-  buttonAction?: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {

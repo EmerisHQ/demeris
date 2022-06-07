@@ -148,14 +148,15 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
+import { computed, ComputedRef, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -180,275 +181,247 @@ import getPrice from '@/utils/getPrice';
 
 type TableStyleType = 'full' | 'balance';
 
-export default defineComponent({
-  name: 'AssetsTable',
+interface Props {
+  variant?: TableStyleType;
+  showHeaders?: boolean;
+  showAvailableAsset?: boolean;
+  showAllAssets?: boolean;
+  hideLpAssets?: boolean;
+  hideZeroAssets?: boolean;
+  limitRows?: number;
+  balances: EmerisAPI.Balances;
+}
 
-  components: {
-    AmountDisplay,
-    AssetChains,
-    ChainDownWarning,
-    ChainName,
-    CircleSymbol,
-    Denom,
-    Button,
-    Icon,
-    LPAsset,
-    Price,
-    Ticker,
-    CurrencyDisplay,
-    FeatureRunningConditional,
-  },
-
-  props: {
-    variant: {
-      type: String as PropType<TableStyleType>,
-      default: 'full',
-    },
-    showHeaders: {
-      type: Boolean,
-      default: true,
-    },
-    showAvailableAsset: {
-      type: Boolean,
-      default: false,
-    },
-    showAllAssets: {
-      type: Boolean,
-      default: true,
-    },
-    hideLpAssets: {
-      type: Boolean,
-      default: false,
-    },
-    hideZeroAssets: {
-      type: Boolean,
-      default: false,
-    },
-    limitRows: {
-      type: Number,
-      default: undefined,
-    },
-    balances: {
-      type: Array as PropType<EmerisAPI.Balances>,
-      required: true,
-    },
-  },
-
-  emits: ['row-click'],
-
-  setup(props, { emit }) {
-    const store = useStore() as RootStoreTyped;
-    const currentLimit = ref(props.limitRows);
-    const { stakingBalances, unbondingDelegations } = useAccount();
-    const verifiedDenoms = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
-    });
-    const propsRef = toRefs(props);
-
-    const tableColumns = ref(['35%', '20%', '35%', '10%']);
-    if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
-      tableColumns.value = ['25%', '15%', '25%', '25%', '10%'];
-    }
-
-    const allBalances = computed(() => {
-      let balances = propsRef.balances.value;
-      if (props.showAllAssets) {
-        balances = [
-          ...propsRef.balances.value,
-          ...verifiedDenoms.value.map((denom) => ({
-            base_denom: denom.name,
-            on_chain: denom.chain_name,
-            amount: '0' + denom.name,
-            verified: true,
-            address: '',
-            ibc: {},
-          })),
-        ];
-      }
-
-      if (props.hideLpAssets) {
-        balances = balances.filter((balance) => {
-          if (balance.base_denom.substring(0, 4) !== 'pool') {
-            return balance;
-          }
-        });
-        return balances;
-      }
-
-      if (props.hideZeroAssets) {
-        balances = balances.filter((balance) => {
-          if (balance.amount.charAt(0) !== '0') {
-            return balance;
-          }
-        });
-      }
-      return balances;
-    });
-
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-      const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
-      const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
-        let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
-        const chainsNames = balances.map((item) => item.on_chain);
-        const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
-        let stakedAmount = 0;
-        let unstakedAmount = 0;
-        if (denom_details.length > 0) {
-          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
-          if (stakedAmounts.length > 0) {
-            stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
-            totalAmount = totalAmount + stakedAmount;
-          }
-          if (featureRunning('STAKING')) {
-            unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom_details[0].chain_name);
-            totalAmount = totalAmount + unstakedAmount;
-          }
-        }
-        return {
-          denom,
-          totalAmount,
-          stakedAmount,
-          chainsNames,
-          unstakedAmount,
-        };
-      });
-      if (allBalances.value.length > 0) {
-        for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
-          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
-          if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
-            const calcStakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
-            const unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom.chain_name);
-            summary.push({
-              chainsNames: [denom.chain_name],
-              denom: denom.name,
-              totalAmount: calcStakedAmount,
-              stakedAmount: calcStakedAmount,
-              unstakedAmount,
-            });
-          }
-        }
-      }
-      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
-      return sortedSummary;
-    });
-
-    const balancesFiltered = computed(() => {
-      return balancesByAsset.value.slice(0, currentLimit.value);
-    });
-
-    const balancesWithValue = computed(() => {
-      let balances = balancesByAsset.value;
-
-      if (balances.length > 0) {
-        balances.map((b) => {
-          let value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
-          (b as any).value = value;
-        });
-      }
-      return balances;
-    });
-
-    const balancesWithName: ComputedRef<
-      {
-        denom: string;
-        totalAmount: number;
-        chainsNames: string[];
-        marketCap?: number;
-        value?: {
-          value: string;
-        };
-      }[]
-    > = computed(() => {
-      let balances = balancesWithValue.value;
-      balances.map(async (b) => {
-        let name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
-        (b as any).name = name;
-      });
-      return balances;
-    });
-
-    const balancesWithMarketCap = computed(() => {
-      let balances = balancesWithName.value;
-      balances.map((b) => {
-        let marketCap = getMarketCap(b.denom);
-        if (marketCap) {
-          (b as any).marketCap = marketCap;
-        }
-      });
-      return balances;
-    });
-
-    const getUnavailableChains = (asset) => {
-      const result = {};
-      const statusMap = asset.chainsNames.reduce((acc, chain) => {
-        acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
-        return acc;
-      }, {});
-
-      for (const chain of asset.chainsNames) {
-        if (!statusMap[chain]) {
-          result[chain] = {
-            chain: chain,
-            denom: asset.denom,
-            unavailable: 'part',
-          };
-        }
-      }
-
-      const isFullUnavailable = Object.values(statusMap).every((item) => item === false);
-
-      if (isFullUnavailable) {
-        result[Object.keys(result)[0]].unavailable = 'full';
-      }
-      return result;
-    };
-
-    const orderedUserBalances = computed(() => {
-      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
-      return tokens.slice(0, currentLimit.value);
-    });
-
-    const orderedAllBalances = computed(() => {
-      let tokens = orderBy(
-        balancesWithMarketCap.value,
-        [(x) => x.marketCap || '', (x) => x.value.value, 'name'],
-        ['desc', 'desc', 'asc'],
-      );
-      return tokens.slice(0, currentLimit.value);
-    });
-
-    const getMarketCap = (denom: string) => {
-      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
-      const supply = store.getters[GlobalGetterTypes.API.getSupply]({ denom });
-      let marketCap = price * supply;
-      return marketCap;
-    };
-
-    const viewAllHandler = () => {
-      currentLimit.value = undefined;
-    };
-
-    const handleClick = (asset) => {
-      emit('row-click', asset);
-    };
-
-    return {
-      allBalances,
-      balancesByAsset,
-      balancesFiltered,
-      balancesWithName,
-      balancesWithMarketCap,
-      getMarketCap,
-      handleClick,
-      viewAllHandler,
-      getUnavailableChains,
-      orderedUserBalances,
-      orderedAllBalances,
-      tableColumns,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'full',
+  showHeaders: true,
+  showAvailableAsset: false,
+  showAllAssets: true,
+  hideLpAssets: false,
+  hideZeroAssets: false,
+  limitRows: undefined,
 });
+
+const emit = defineEmits<{
+  (e: 'row-click', asset: any): void;
+}>();
+
+const store = useStore() as RootStoreTyped;
+const currentLimit = ref(props.limitRows);
+const { stakingBalances, unbondingDelegations } = useAccount();
+const verifiedDenoms = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
+});
+const propsRef = toRefs(props);
+
+const tableColumns = ref(['35%', '20%', '35%', '10%']);
+if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
+  tableColumns.value = ['25%', '15%', '25%', '25%', '10%'];
+}
+
+const allBalances = computed(() => {
+  let balances = propsRef.balances.value;
+  if (props.showAllAssets) {
+    balances = [
+      ...propsRef.balances.value,
+      ...verifiedDenoms.value.map((denom) => ({
+        base_denom: denom.name,
+        on_chain: denom.chain_name,
+        amount: '0' + denom.name,
+        verified: true,
+        address: '',
+        ibc: {},
+      })),
+    ];
+  }
+
+  if (props.hideLpAssets) {
+    balances = balances.filter((balance) => {
+      if (balance.base_denom.substring(0, 4) !== 'pool') {
+        return balance;
+      }
+    });
+    return balances;
+  }
+
+  if (props.hideZeroAssets) {
+    balances = balances.filter((balance) => {
+      if (balance.amount.charAt(0) !== '0') {
+        return balance;
+      }
+    });
+  }
+  return balances;
+});
+
+const balancesByAsset = computed(() => {
+  const denomsAggregate = groupBy(allBalances.value, 'base_denom');
+  const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
+  const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
+    let totalAmount = balances.reduce(
+      (acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)),
+      new BigNumber(0),
+    );
+    const chainsNames = balances.map((item) => item.on_chain);
+    const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+    let stakedAmount = new BigNumber(0);
+    let unstakedAmount = new BigNumber(0);
+    if (denom_details.length > 0) {
+      const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
+      if (stakedAmounts.length > 0) {
+        stakedAmount = stakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(item.amount)), new BigNumber(0));
+        totalAmount = totalAmount.plus(stakedAmount);
+      }
+      if (featureRunning('STAKING')) {
+        unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom_details[0].chain_name);
+        totalAmount = totalAmount.plus(unstakedAmount);
+      }
+    }
+    return {
+      denom,
+      totalAmount,
+      stakedAmount,
+      chainsNames,
+      unstakedAmount,
+    };
+  });
+  if (allBalances.value.length > 0) {
+    for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
+      const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
+      if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
+        const calcStakedAmount = stakedAmounts.reduce(
+          (acc, item) => acc.plus(new BigNumber(item.amount)),
+          new BigNumber(0),
+        );
+        const unstakedAmount = getUnstakedAmount(unbondingDelegations.value, denom.chain_name);
+        summary.push({
+          chainsNames: [denom.chain_name],
+          denom: denom.name,
+          totalAmount: calcStakedAmount,
+          stakedAmount: calcStakedAmount,
+          unstakedAmount,
+        });
+      }
+    }
+  }
+  const sortedSummary = summary.sort((a, b) => (a.totalAmount.isGreaterThan(b.totalAmount) ? -1 : 1));
+  return sortedSummary;
+});
+
+const balancesFiltered = computed(() => {
+  return balancesByAsset.value.slice(0, currentLimit.value);
+});
+
+const balancesWithValue = computed(() => {
+  let balances = balancesByAsset.value;
+
+  if (balances.length > 0) {
+    balances.map((b) => {
+      (b as any).value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
+    });
+  }
+  return balances;
+});
+
+const balancesWithName: ComputedRef<
+  {
+    denom: string;
+    totalAmount: BigNumber;
+    chainsNames: string[];
+    marketCap?: number;
+    value?: {
+      value: string;
+    };
+  }[]
+> = computed(() => {
+  let balances = balancesWithValue.value;
+  balances.map(async (b) => {
+    let name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
+    (b as any).name = name;
+  });
+  return balances;
+});
+
+const balancesWithMarketCap = computed(() => {
+  let balances = balancesWithName.value;
+  balances.map((b) => {
+    let marketCap = getMarketCap(b.denom);
+    if (marketCap) {
+      (b as any).marketCap = marketCap;
+    }
+  });
+  return balances;
+});
+
+const getUnavailableChains = (asset) => {
+  const result = {};
+  const statusMap = asset.chainsNames.reduce((acc, chain) => {
+    acc[chain] = store.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
+    return acc;
+  }, {});
+
+  for (const chain of asset.chainsNames) {
+    if (!statusMap[chain]) {
+      result[chain] = {
+        chain: chain,
+        denom: asset.denom,
+        unavailable: 'part',
+      };
+    }
+  }
+
+  const isFullUnavailable = Object.values(statusMap).every((item) => item === false);
+
+  if (isFullUnavailable) {
+    result[Object.keys(result)[0]].unavailable = 'full';
+  }
+  return result;
+};
+
+const orderedUserBalances = computed(() => {
+  const tokens = balancesWithName.value
+    .map((item) => {
+      const denom = item.denom;
+      const precision = store.getters[GlobalGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
+      const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+      const result = new BigNumber(item.totalAmount).multipliedBy(price).shiftedBy(-precision);
+      return { ...item, price: result };
+    })
+    .sort((a, b) => {
+      if (a.price.isNaN()) {
+        return 1;
+      }
+      if (b.price.isNaN()) {
+        return -1;
+      }
+      return a.price.isGreaterThan(b.price) ? -1 : 1;
+    });
+  return tokens.slice(0, currentLimit.value);
+});
+
+const orderedAllBalances = computed(() => {
+  const tokens = orderBy(
+    balancesWithMarketCap.value,
+    [(x) => x.marketCap || '', (x) => x.value.value, 'name'],
+    ['desc', 'desc', 'asc'],
+  );
+  return tokens.slice(0, currentLimit.value);
+});
+
+const getMarketCap = (denom: string) => {
+  const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
+  const supply = store.getters[GlobalGetterTypes.API.getSupply]({ denom });
+  let marketCap = price * supply;
+  return marketCap;
+};
+
+const viewAllHandler = () => {
+  currentLimit.value = undefined;
+};
+
+const handleClick = (asset) => {
+  emit('row-click', asset);
+};
 
 // TODO : refactor to different file - probably will be used again somewhere else
 function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations, chainName: string) {
@@ -457,8 +430,9 @@ function getUnstakedAmount(unbondingDelegations: EmerisAPI.UnbondingDelegations,
     .map((y) => y.entries)
     .flat()
     .map((z) => z.balance);
-  if (unstakedAmounts.length > 0) return unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-  return 0;
+  if (unstakedAmounts.length > 0)
+    return unstakedAmounts.reduce((acc, item) => acc.plus(new BigNumber(parseInt(item))), new BigNumber(0));
+  return new BigNumber(0);
 }
 </script>
 

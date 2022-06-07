@@ -39,13 +39,13 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
 import {
   AbstractIBCTransferTransactionData,
   AbstractTransferTransactionData,
 } from '@emeris/types/lib/EmerisTransactions';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
@@ -58,219 +58,199 @@ import { RootStoreTyped } from '@/store';
 import { Step, UserAction } from '@/types/actions';
 import { getBaseDenom, getBaseDenomSync, getDisplayName } from '@/utils/actionHandler';
 
-export default defineComponent({
-  components: {
-    Button,
-  },
-  props: {
-    isSwapComponent: {
-      type: Boolean,
-      default: false,
-    },
-    action: {
-      type: String as PropType<UserAction['name']>,
-      default: 'swap',
-    },
-    steps: {
-      type: Object as PropType<Step[]>,
-      required: true,
-    },
-  },
+interface Props {
+  isSwapComponent?: boolean;
+  action?: UserAction['name'];
+  steps: Step[];
+}
 
-  emits: ['continue'],
+const props = withDefaults(defineProps<Props>(), {
+  isSwapComponent: false,
+  action: 'swap',
+});
 
-  setup(props, { emit }) {
-    const typedstore = useStore() as RootStoreTyped;
-    const { nativeBalances } = useAccount();
-    const { t } = useI18n({ useScope: 'global' });
-    const denoms = ref([]);
-    const chains = ref([]);
+const emit = defineEmits<{
+  (e: 'continue'): void;
+}>();
 
-    const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
+const typedstore = useStore() as RootStoreTyped;
+const { nativeBalances } = useAccount();
+const { t } = useI18n({ useScope: 'global' });
+const denoms = ref([]);
+const chains = ref([]);
 
-    const currentAction = computed(() => {
-      if (props.action === 'move') {
-        return 'transfer';
-      }
-      return props.action;
+const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
+
+const currentAction = computed(() => {
+  if (props.action === 'move') {
+    return 'transfer';
+  }
+  return props.action;
+});
+
+const hasMultiple = computed(() => {
+  if (currentAction.value === 'addliquidity') {
+    return props.steps.length > 2;
+  }
+
+  return props.steps.length > 1;
+});
+
+const title = computed(() => {
+  let result = '';
+
+  switch (currentAction.value) {
+    case 'transfer':
+      result = t('components.transferToHub.transfer');
+      break;
+    case 'addliquidity':
+      result = t('components.transferToHub.addLiquidity');
+      break;
+    case 'swap':
+      result = t('components.transferToHub.swap');
+      break;
+    case 'stake':
+    case 'multistake':
+      result = t('components.transferToHub.stake', { denom: denoms.value[0], chain: chains.value[0] });
+      break;
+  }
+
+  return result;
+});
+
+const subtitle = computed(() => {
+  let result = '';
+
+  if (currentAction.value === 'transfer') {
+    const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
+    let fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+      name: backwardData.chainName,
     });
+    let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.toChain });
 
-    const hasMultiple = computed(() => {
-      if (currentAction.value === 'addliquidity') {
-        return props.steps.length > 2;
+    if (
+      props.steps[0].transactions.length > 1 &&
+      (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+        props.steps[0].transactions[1].type == 'IBCtransferForward')
+    ) {
+      const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
+      toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: forwardData.toChain });
+    }
+
+    return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
+  }
+
+  return result;
+});
+
+const description = computed(() => {
+  let description = '';
+
+  if (!denoms.value.length) {
+    return description;
+  }
+
+  switch (currentAction.value) {
+    case 'addliquidity':
+      if (hasMultiple.value) {
+        description = t('components.transferToHub.addLiquidityDescriptionMultiple', {
+          denomA: denoms.value[0],
+          denomB: denoms.value[1],
+        });
+      } else {
+        description = t('components.transferToHub.addLiquidityDescription', { denom: denoms.value[0] });
       }
-
-      return props.steps.length > 1;
-    });
-
-    const title = computed(() => {
-      let result = '';
-
-      switch (currentAction.value) {
-        case 'transfer':
-          result = t('components.transferToHub.transfer');
-          break;
-        case 'addliquidity':
-          result = t('components.transferToHub.addLiquidity');
-          break;
-        case 'swap':
-          result = t('components.transferToHub.swap');
-          break;
-        case 'stake':
-        case 'multistake':
-          result = t('components.transferToHub.stake', { denom: denoms.value[0], chain: chains.value[0] });
-          break;
-      }
-
-      return result;
-    });
-
-    const subtitle = computed(() => {
-      let result = '';
-
-      if (currentAction.value === 'transfer') {
+      break;
+    case 'swap':
+      description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
+      break;
+    case 'stake':
+    case 'multistake':
+      description = t('components.transferToHub.stakeDescription', {
+        denom: denoms.value[0],
+        chain: chains.value[0],
+      });
+      break;
+    case 'transfer':
+      if (
+        props.steps[0].transactions.length > 1 &&
+        (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
+          props.steps[0].transactions[1].type == 'IBCtransferForward')
+      ) {
         const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
-        let fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+        const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
+
+        const fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
           name: backwardData.chainName,
         });
-        let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.toChain });
+        const toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+          name: forwardData.toChain,
+        });
+        const asset = nativeBalances.value.find(
+          (item) => item.base_denom === getBaseDenomSync(backwardData.amount.denom),
+        );
+        const nativeChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+          name: asset.on_chain,
+        });
 
-        if (
-          props.steps[0].transactions.length > 1 &&
-          (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
-            props.steps[0].transactions[1].type == 'IBCtransferForward')
-        ) {
-          const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
-          toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: forwardData.toChain });
-        }
+        const translateKeyPath =
+          props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultiple';
 
-        return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
+        description = t(`components.transferToHub.${translateKeyPath}`, {
+          denom: denoms.value[0],
+          fromChain,
+          toChain,
+          nativeChain,
+        });
+      } else {
+        description = t('components.transferToHub.transferDescription');
       }
+      break;
+  }
 
-      return result;
-    });
-
-    const description = computed(() => {
-      let description = '';
-
-      if (!denoms.value.length) {
-        return description;
-      }
-
-      switch (currentAction.value) {
-        case 'addliquidity':
-          if (hasMultiple.value) {
-            description = t('components.transferToHub.addLiquidityDescriptionMultiple', {
-              denomA: denoms.value[0],
-              denomB: denoms.value[1],
-            });
-          } else {
-            description = t('components.transferToHub.addLiquidityDescription', { denom: denoms.value[0] });
-          }
-          break;
-        case 'swap':
-          description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
-          break;
-        case 'stake':
-        case 'multistake':
-          description = t('components.transferToHub.stakeDescription', {
-            denom: denoms.value[0],
-            chain: chains.value[0],
-          });
-          break;
-        case 'transfer':
-          if (
-            props.steps[0].transactions.length > 1 &&
-            (props.steps[0].transactions[1].type == 'IBCtransferBackward' ||
-              props.steps[0].transactions[1].type == 'IBCtransferForward')
-          ) {
-            const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
-            const forwardData = props.steps[0].transactions[1].data as AbstractIBCTransferTransactionData;
-
-            const fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-              name: backwardData.chainName,
-            });
-            const toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-              name: forwardData.toChain,
-            });
-            const asset = nativeBalances.value.find(
-              (item) => item.base_denom === getBaseDenomSync(backwardData.amount.denom),
-            );
-            const nativeChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-              name: asset.on_chain,
-            });
-
-            const translateKeyPath =
-              props.steps[0].transactions.length > 2
-                ? 'transferDescriptionMultipleMemo'
-                : 'transferDescriptionMultiple';
-
-            description = t(`components.transferToHub.${translateKeyPath}`, {
-              denom: denoms.value[0],
-              fromChain,
-              toChain,
-              nativeChain,
-            });
-          } else {
-            description = t('components.transferToHub.transferDescription');
-          }
-          break;
-      }
-
-      return description;
-    });
-
-    const emitContinue = () => {
-      emit('continue');
-    };
-
-    watch(
-      props.steps,
-      async () => {
-        let stepDenoms = [];
-        const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
-
-        stepDenoms = props.steps
-          .map((step) => {
-            const transaction = step.transactions[0];
-            if (!(transaction.type == 'IBCtransferBackward' || transaction.type == 'IBCtransferForward')) {
-              return;
-            }
-            const chain = (transaction.data as AbstractIBCTransferTransactionData).chainName || dexChain;
-            const tochain = (transaction.data as AbstractIBCTransferTransactionData).toChain || dexChain;
-
-            const denom = (transaction.data as AbstractTransferTransactionData).amount.denom;
-            return { chain, denom, tochain };
-          })
-          .filter(Boolean);
-
-        (chains.value = stepDenoms.map((item) => {
-          const displayChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
-            name: item.tochain,
-          });
-          return displayChain;
-        })),
-          (denoms.value = await Promise.all(
-            stepDenoms.map(async (item) => {
-              const denom = await getBaseDenom(item.denom, item.chain);
-              const displayDenom = await getDisplayName(denom, item.chain);
-              return displayDenom;
-            }),
-          ));
-      },
-      { immediate: true },
-    );
-
-    return {
-      imageBanner,
-      currentAction,
-      title,
-      subtitle,
-      description,
-      emitContinue,
-    };
-  },
+  return description;
 });
+
+const emitContinue = () => {
+  emit('continue');
+};
+
+watch(
+  props.steps,
+  async () => {
+    let stepDenoms = [];
+    const dexChain = typedstore.getters[GlobalGetterTypes.API.getDexChain];
+
+    stepDenoms = props.steps
+      .map((step) => {
+        const transaction = step.transactions[0];
+        if (!(transaction.type == 'IBCtransferBackward' || transaction.type == 'IBCtransferForward')) {
+          return;
+        }
+        const chain = (transaction.data as AbstractIBCTransferTransactionData).chainName || dexChain;
+        const tochain = (transaction.data as AbstractIBCTransferTransactionData).toChain || dexChain;
+
+        const denom = (transaction.data as AbstractTransferTransactionData).amount.denom;
+        return { chain, denom, tochain };
+      })
+      .filter(Boolean);
+
+    (chains.value = stepDenoms.map((item) => {
+      const displayChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+        name: item.tochain,
+      });
+      return displayChain;
+    })),
+      (denoms.value = await Promise.all(
+        stepDenoms.map(async (item) => {
+          const denom = await getBaseDenom(item.denom, item.chain);
+          const displayDenom = await getDisplayName(denom, item.chain);
+          return displayDenom;
+        }),
+      ));
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped></style>

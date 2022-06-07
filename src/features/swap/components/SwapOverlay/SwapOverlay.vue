@@ -38,6 +38,7 @@ const contentRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 
 const contentScroll = useScroll(wrapperRef);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const { Escape } = useMagicKeys();
 
 const showShadow = computed(() => {

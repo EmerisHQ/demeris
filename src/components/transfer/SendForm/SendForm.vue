@@ -32,11 +32,10 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { computed, provide, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -53,119 +52,104 @@ import SendFormRecipient from './SendFormRecipient.vue';
 
 type Step = 'recipient' | 'amount' | 'review' | 'send';
 
-export default defineComponent({
-  name: 'SendForm',
+interface Props {
+  balances: EmerisAPI.Balances;
+  step?: Step;
+}
 
-  components: {
-    SendFormAmount,
-    SendFormRecipient,
-    TransactionProcessCreator,
+const props = withDefaults(defineProps<Props>(), { step: undefined });
+
+const emit = defineEmits<{
+  (e: 'update:step', value: any): void;
+  (e: 'previous'): void;
+}>();
+
+const steps = ref([]);
+const store = useStore() as RootStoreTyped;
+const router = useRouter();
+
+const form: SendAddressForm = reactive({
+  recipient: '',
+  chain_name: '',
+  memo: '',
+  balance: {
+    denom: '',
+    amount: '',
   },
-
-  props: {
-    balances: {
-      type: Array as PropType<EmerisAPI.Balances>,
-      required: true,
-    },
-    step: {
-      type: String as PropType<Step>,
-      default: undefined,
-    },
-  },
-
-  emits: ['update:step', 'previous'],
-
-  setup(props, { emit }) {
-    const steps = ref([]);
-    const store = useStore() as RootStoreTyped;
-    const router = useRouter();
-
-    const form: SendAddressForm = reactive({
-      recipient: '',
-      chain_name: '',
-      memo: '',
-      balance: {
-        denom: '',
-        amount: '',
-      },
-      isTermChecked: false,
-    });
-
-    const state = reactive({
-      fees: {},
-    });
-
-    const step = computed({
-      get: () => props.step,
-      set: (value) => emit('update:step', value),
-    });
-
-    const closeModal = (payload?: any) => {
-      if (payload?.source === 'send-btn' || payload?.source === 'move-btn') {
-        return;
-      }
-
-      router.push('/');
-    };
-
-    watch(
-      () => [form.balance.amount, form.balance.denom, form.chain_name],
-      async () => {
-        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '' && step.value != 'review') {
-          const precision =
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-              name: await getBaseDenom(form.balance.denom, form.chain_name),
-            }) || 6;
-          const action: TransferAction | MemoTransferAction = {
-            name: form.memo && form.memo != '' ? 'memo-transfer' : 'transfer',
-            memo: form.memo,
-            params: {
-              from: {
-                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                denom: form.balance.denom,
-                chain_name: form.chain_name,
-              },
-              to: {
-                chain_name: getChainFromRecipient(form.recipient),
-                address: form.recipient,
-              },
-            },
-          };
-          steps.value = await actionHandler(action);
-        }
-      },
-    );
-    const goToReview = async () => {
-      event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
-      goToStep('review');
-    };
-
-    const resetHandler = () => {
-      form.recipient = '';
-      form.chain_name = '';
-      form.memo = '';
-      form.balance = {
-        denom: '',
-        amount: undefined,
-      };
-      form.isTermChecked = false;
-      steps.value = [];
-
-      goToStep(undefined);
-    };
-    const goToStep = (value: Step) => {
-      step.value = value;
-    };
-
-    if (!props.step) {
-      step.value = 'recipient';
-    }
-
-    provide('transferForm', form);
-
-    return { steps, form, goToStep, goToReview, resetHandler, state, closeModal };
-  },
+  isTermChecked: false,
 });
+
+const state = reactive({
+  fees: {},
+});
+
+const step = computed({
+  get: () => props.step,
+  set: (value) => emit('update:step', value),
+});
+
+const closeModal = (payload?: any) => {
+  if (payload?.source === 'send-btn' || payload?.source === 'move-btn') {
+    return;
+  }
+
+  router.push('/');
+};
+
+watch(
+  () => [form.balance.amount, form.balance.denom, form.chain_name],
+  async () => {
+    if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '' && step.value != 'review') {
+      const precision =
+        store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+          name: await getBaseDenom(form.balance.denom, form.chain_name),
+        }) || 6;
+      const action: TransferAction | MemoTransferAction = {
+        name: form.memo && form.memo != '' ? 'memo-transfer' : 'transfer',
+        memo: form.memo,
+        params: {
+          from: {
+            amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+            denom: form.balance.denom,
+            chain_name: form.chain_name,
+          },
+          to: {
+            chain_name: getChainFromRecipient(form.recipient),
+            address: form.recipient,
+          },
+        },
+      };
+      steps.value = await actionHandler(action);
+    }
+  },
+);
+const goToReview = async () => {
+  event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
+  goToStep('review');
+};
+
+const resetHandler = () => {
+  form.recipient = '';
+  form.chain_name = '';
+  form.memo = '';
+  form.balance = {
+    denom: '',
+    amount: undefined,
+  };
+  form.isTermChecked = false;
+  steps.value = [];
+
+  goToStep(undefined);
+};
+const goToStep = (value: Step) => {
+  step.value = value;
+};
+
+if (!props.step) {
+  step.value = 'recipient';
+}
+
+provide('transferForm', form);
 </script>
 
 <style lang="scss"></style>

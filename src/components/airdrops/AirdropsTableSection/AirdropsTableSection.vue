@@ -21,7 +21,7 @@
   </section>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -32,70 +32,47 @@ import Search from '@/components/common/Search.vue';
 import { GlobalGetterTypes } from '@/store';
 import { typedstore } from '@/store/setup';
 
-export default {
-  components: {
-    AirdropClaimablePanel,
-    AirdropsTable,
-    Search,
-  },
+interface Props {
+  activeFilter?: string;
+}
 
-  props: {
-    activeFilter: {
-      type: String,
-      default: '',
-    },
-  },
-  emits: ['active-filter'],
-  setup(props, { emit }) {
-    const keyword = ref('');
-    const router = useRouter();
+const props = withDefaults(defineProps<Props>(), { activeFilter: '' });
 
-    const sortAirdropstable = (x, y) => {
-      return x.project ? x.project.localeCompare(y.project) : [];
-    };
+const emit = defineEmits<{
+  (e: 'active-filter', filter: string): void;
+}>();
 
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops].sort(sortAirdropstable);
-    });
+const keyword = ref('');
+const router = useRouter();
 
-    const filteredAirdrops = computed(() => {
-      const filtered = airdrops?.value?.filter((airdrop) => {
-        return airdrop?.project?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
-      });
-      return filtered;
-    });
-
-    const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
-      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
-    };
-
-    const isDemoAccount = computed(() => {
-      return (
-        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
-        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-      );
-    });
-
-    const emitActiveFilter = () => {
-      emit('active-filter', 'upcoming');
-    };
-
-    watch(
-      () => props.activeFilter,
-      () => {
-        keyword.value = '';
-      },
-      { immediate: true },
-    );
-
-    return {
-      airdrops,
-      filteredAirdrops,
-      openAirdropPage,
-      keyword,
-      isDemoAccount,
-      emitActiveFilter,
-    };
-  },
+const sortAirdropstable = (x, y) => {
+  return x.project ? x.project.localeCompare(y.project) : [];
 };
+
+const airdrops = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdrops].sort(sortAirdropstable);
+});
+
+const filteredAirdrops = computed(() => {
+  const filtered = airdrops?.value?.filter((airdrop) => {
+    return airdrop?.project?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+  });
+  return filtered;
+});
+
+const openAirdropPage = (airdrop: EmerisAirdrops.Airdrop) => {
+  router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
+};
+
+const emitActiveFilter = () => {
+  emit('active-filter', 'upcoming');
+};
+
+watch(
+  () => props.activeFilter,
+  () => {
+    keyword.value = '';
+  },
+  { immediate: true },
+);
 </script>

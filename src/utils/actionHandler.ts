@@ -172,7 +172,7 @@ export async function msgFromStepTransaction(
   }
 }
 // TODO make getter so it out updates on getFeeTokens getter
-export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+export function getFeeForChain(chain_name: string): Array<Actions.FeeWDenom> {
   if (!chain_name) return [];
 
   const typedstore = useStore() as RootStoreTyped;
@@ -188,7 +188,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
 export function getBaseDenomSync(denom: string) {
   const typedstore = useStore() as RootStoreTyped;
   const traces = typedstore.getters[GlobalGetterTypes.API.getAllVerifiedTraces];
-  return traces[denom.split('/')[1]?.toUpperCase()]?.base_denom ?? denom;
+  return isNative(denom) ? denom : traces[denom.split('/')[1]?.toUpperCase()]?.base_denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const typedstore = useStore() as RootStoreTyped;

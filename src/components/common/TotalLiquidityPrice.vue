@@ -2,31 +2,16 @@
   <CurrencyDisplay :value="totalLiquidityPrice" show-dash />
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
-
+<script setup lang="ts">
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 
-//import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
+interface Props {
+  pool: Pool;
+}
 
-export default defineComponent({
-  components: { CurrencyDisplay },
+const props = defineProps<Props>();
 
-  //components: { TrendingUpIcon },
-
-  props: {
-    pool: {
-      type: Object as PropType<Pool>,
-      required: true,
-    },
-  },
-
-  setup(props) {
-    const { totalLiquidityPrice } = usePool(props.pool.id);
-
-    return { totalLiquidityPrice };
-  },
-});
+const { totalLiquidityPrice } = usePool(props.pool.id);
 </script>

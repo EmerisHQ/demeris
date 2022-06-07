@@ -21,9 +21,9 @@
   </router-link>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -35,120 +35,89 @@ import { isNative } from '@/utils/basic';
 
 import CurrencyDisplay from '../ui/CurrencyDisplay.vue';
 
-export default defineComponent({
-  name: 'Pool',
+interface Props {
+  pool: Pool;
+}
 
-  components: { CircleSymbol, OwnLiquidityPrice, CurrencyDisplay },
+const props = defineProps<Props>();
 
-  props: {
-    pool: {
-      type: Object as PropType<Pool>,
-      required: true,
-    },
-  },
+const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
+const typedstore = useStore() as RootStoreTyped;
 
-  setup(props) {
-    const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
-    const typedstore = useStore() as RootStoreTyped;
+const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
+const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
+const denoms = ref((newPool as Pool).reserve_coin_denoms);
 
-    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
-    const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
-    const denoms = ref((newPool as Pool).reserve_coin_denoms);
+const hasPrices = computed(() => {
+  let baseDenoms = denoms.value;
+  if (!baseDenoms.length) {
+    baseDenoms = props.pool.reserve_coin_denoms;
+  }
 
-    const hasPrices = computed(() => {
-      let baseDenoms = denoms.value;
-      if (!baseDenoms.length) {
-        baseDenoms = props.pool.reserve_coin_denoms;
-      }
+  const priceA = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
+  const priceB = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
 
-      const priceA = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const priceB = typedstore.getters[GlobalGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
+  if (!priceA || !priceB) {
+    return false;
+  }
 
-      if (!priceA || !priceB) {
-        return false;
-      }
+  return true;
+});
 
-      return true;
-    });
-
-    watch(
-      () => truedenoms.value,
-      async (newDenoms) => {
-        if (isNative(newDenoms[0])) {
-          denoms.value[0] = newDenoms[0];
-        } else {
-          try {
-            const verifyTrace =
-              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+watch(
+  () => truedenoms.value,
+  async (newDenoms) => {
+    if (isNative(newDenoms[0])) {
+      denoms.value[0] = newDenoms[0];
+    } else {
+      try {
+        const verifyTrace =
+          typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+            chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+            hash: newDenoms[0].split('/')[1],
+          }) ??
+          (await typedstore.dispatch(
+            GlobalActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              params: {
                 chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
                 hash: newDenoms[0].split('/')[1],
-              }) ??
-              (await typedstore.dispatch(
-                GlobalActionTypes.API.GET_VERIFY_TRACE,
-                {
-                  subscribe: false,
-                  params: {
-                    chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
-                    hash: newDenoms[0].split('/')[1],
-                  },
-                },
-                { root: true },
-              ));
-            denoms.value[0] = verifyTrace.base_denom;
-          } catch (e) {
-            denoms.value[0] = newDenoms[0];
-          }
-        }
-        if (isNative(newDenoms[1])) {
-          denoms.value[1] = newDenoms[1];
-        } else {
-          try {
-            const verifyTrace =
-              typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+              },
+            },
+            { root: true },
+          ));
+        denoms.value[0] = verifyTrace.base_denom;
+      } catch (e) {
+        denoms.value[0] = newDenoms[0];
+      }
+    }
+    if (isNative(newDenoms[1])) {
+      denoms.value[1] = newDenoms[1];
+    } else {
+      try {
+        const verifyTrace =
+          typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
+            chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
+            hash: newDenoms[1].split('/')[1],
+          }) ??
+          (await typedstore.dispatch(
+            GlobalActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              params: {
                 chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
                 hash: newDenoms[1].split('/')[1],
-              }) ??
-              (await typedstore.dispatch(
-                GlobalActionTypes.API.GET_VERIFY_TRACE,
-                {
-                  subscribe: false,
-                  params: {
-                    chain_name: typedstore.getters[GlobalGetterTypes.API.getDexChain],
-                    hash: newDenoms[1].split('/')[1],
-                  },
-                },
-                { root: true },
-              ));
-            denoms.value[1] = verifyTrace.base_denom;
-          } catch (e) {
-            denoms.value[1] = newDenoms[1];
-          }
-        }
-      },
-      { immediate: true },
-    );
-
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice };
+              },
+            },
+            { root: true },
+          ));
+        denoms.value[1] = verifyTrace.base_denom;
+      } catch (e) {
+        denoms.value[1] = newDenoms[1];
+      }
+    }
   },
-});
+  { immediate: true },
+);
 </script>
-
-<style lang="scss" scoped>
-.pool-card {
-  // &:before {
-  //   content: '';
-  //   position: absolute;
-  //   z-index: 0;
-  //   @apply inset-0;
-  //   @apply rounded-2xl;
-  //   @apply shadow-card;
-  //   @apply transition-shadow;
-  // }
-
-  // not working for some reason?
-  // &:hover:before,
-  // &:focus:before {
-  //   --tw-shadow: 18px ​52px 128px -10px rgba(0, 0, 0, 0.1);
-  // }
-}
-</style>

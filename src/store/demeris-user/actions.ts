@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
-import { pubkeyToAddress, pubkeyToRawAddress, Secp256k1HdWallet } from '@cosmjs/amino';
-import { stringToPath } from '@cosmjs/crypto';
+import { pubkeyToAddress, pubkeyToRawAddress } from '@cosmjs/amino';
 import { fromBase64 } from '@cosmjs/encoding';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { EmerisAPI, EmerisFees } from '@emeris/types';
@@ -11,10 +10,11 @@ import { ActionTree, DispatchOptions } from 'vuex';
 import { SupportedWallet } from '@/features/extension/types';
 import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootState, RootStoreTyped } from '@/store';
+import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { SessionParams } from '@/types/user';
 import { Namespaced } from '@/types/util';
 import { config as analyticsConfig, event } from '@/utils/analytics';
-import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
+import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import EmerisError from '@/utils/EmerisError';
 import { featureRunning } from '@/utils/FeatureManager';
 import { addChain } from '@/utils/keplr';
@@ -110,13 +110,13 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
   async [ActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: SessionParams) {
     if (data) {
       window.localStorage.setItem(
-        getters['getKeplrAccountName'],
+        getters['getAccount']?.name,
         JSON.stringify({ ...state._Session, ...data, updateDT: Date.now() }),
       );
       commit(MutationTypes.SET_SESSION_DATA, { ...data, updateDT: Date.now() });
     } else {
       window.localStorage.setItem(
-        getters['getKeplrAccountName'],
+        getters['getAccount']?.name,
         JSON.stringify({ ...state._Session, updateDT: Date.now() }),
       );
       commit(MutationTypes.SET_SESSION_DATA, { updateDT: Date.now() });
@@ -134,7 +134,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
       // This status is used for displaying skeleton loaders appropriately
 
-      const isCypress = !!window['Cypress'];
       const chains =
         rootGetters[GlobalGetterTypes.API.getChains] ??
         (await dispatch(
@@ -169,15 +168,11 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       window.keplr.defaultOptions = {
         sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
       };
-      if (!isCypress) {
-        for (const chain in chains) {
-          await addChain(chain);
-        }
-
-        await window.keplr['enable'](
-          (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id),
-        );
+      for (const chain in chains) {
+        await addChain(chain);
       }
+
+      await window.keplr['enable']((Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id));
       const paths = new Set();
       const toQuery = [];
       for (const chain_name in chains) {
@@ -191,59 +186,27 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
       });
-      let keyData;
-      let signer;
-      if (!isCypress) {
-        await window.keplr.enable(dexchain.node_info.chain_id);
-        keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
-      } else {
-        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-          prefix: dexchain.node_info.bech32_config.main_prefix,
-          hdPaths: [stringToPath(dexchain.derivation_path)],
-        });
-        const [account] = await signer.getAccounts();
-        keyData = {
-          name: 'Cypress Test',
-          algo: account.algo,
-          pubKey: account.pubkey,
-          bech32Address: account.address,
-          isNanoLedger: false,
-          address: fromHexString(keyHashfromAddress(account.address)),
-        };
-      }
+      await window.keplr.enable(dexchain.node_info.chain_id);
+      const keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
       const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
       commit(MutationTypes.SET_CORRELATION_ID, encryptedUID);
-      commit(MutationTypes.SET_KEPLR, keyData);
+      commit(MutationTypes.SET_ACCOUNT, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
       analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
-      for (const chain of toQuery) {
-        if (!isCypress) {
-          await window.keplr.enable(chain.node_info.chain_id);
-          const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-        } else {
-          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-            prefix: chain.node_info.bech32_config.main_prefix,
-            hdPaths: [stringToPath(chain.derivation_path)],
-          });
-          const [account] = await signer.getAccounts();
-          const otherKey = {
-            name: 'Cypress Test',
-            algo: account.algo,
-            pubKey: account.pubkey,
-            bech32Address: account.address,
-            isNanoLedger: false,
-            address: fromHexString(keyHashfromAddress(account.address)),
-          };
-          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-        }
+      for (const chain of Object.values(chains)) {
+        await window.keplr.enable(chain.node_info.chain_id);
+        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+        commit(MutationTypes.ADD_CHAIN_KEY_DATA, {
+          keyHash: keyHashfromAddress(otherKey.bech32Address),
+          chainName: chain.chain_name,
+          pubKey: otherKey.pubKey,
+          algo: otherKey.algo,
+        });
       }
 
-      !isCypress
-        ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
-        : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
+      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
 
       dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
       dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
@@ -271,7 +234,6 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
       // This status is used for displaying skeleton loaders appropriately
 
-      const isCypress = !!window['Cypress'];
       const chains =
         rootGetters[GlobalGetterTypes.API.getChains] ??
         (await dispatch(
@@ -281,98 +243,44 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
           },
           { root: true },
         ));
-      for (const chain in chains) {
-        if (!chains[chain].node_info)
-          chains[chain] = await dispatch(
-            GlobalActionTypes.API.GET_CHAIN,
-            {
-              subscribe: true,
-              params: {
-                chain_name: chain,
-              },
-            },
-            { root: true },
-          );
-      }
-      // The only case where the getChains getter would not return full data for a chain
-      // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
-      // This happens with the autoLogin feature or if the user clicks on connect_wallet as soon as it appears
-      // Since their async load has already been initiated this does not make new requests but makes use of the _InProgress
-      // caching and just waits for the previous ones to be resolved (hence it's a threading...or lack thereof issue since
-      // no actual requests are involved)
       if (walletActionHandler.isAvailable(SupportedWallet.KEPLR))
         window.keplr.defaultOptions = {
           sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
         };
-      if (!isCypress) {
-        // for (const chain in chains) {
-        //   // TODO : implement addChain for Emeris extension and apply as well
-        // }
-        const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
-        await walletActionHandler.enable(chainIds);
-      }
+      const chainIds = (Object.values(chains) as Array<EmerisAPI.Chain>).map((x) => x.node_info.chain_id);
+      await walletActionHandler.enable(chainIds);
       const dexchain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name: rootGetters[GlobalGetterTypes.API.getDexChain],
       });
-      let keyData;
-      let signer;
-      if (!isCypress) {
-        keyData = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
-      } else {
-        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-          prefix: dexchain.node_info.bech32_config.main_prefix,
-          hdPaths: [stringToPath(dexchain.derivation_path)],
-        });
-        const [account] = await signer.getAccounts();
-        keyData = {
-          name: 'Cypress Test',
-          algo: account.algo,
-          pubKey: account.pubkey,
-          bech32Address: account.address,
-          isNanoLedger: false,
-          address: fromHexString(keyHashfromAddress(account.address)),
-        };
-      }
+      const keyData = await walletActionHandler.getAccount(dexchain.node_info.chain_id);
       const encryptedUID = hashObject(keyHashfromAddress(keyData.bech32Address));
       commit(MutationTypes.SET_CORRELATION_ID, encryptedUID);
-      commit(MutationTypes.SET_KEPLR, keyData);
+      commit(MutationTypes.SET_ACCOUNT, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
       analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of Object.values(chains)) {
-        if (!isCypress) {
-          try {
-            const otherKey = await walletActionHandler.getAccount(chain.node_info.chain_id);
-            commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-          } catch (err) {
-            console.error(err); // EmerisSigner has a weird list of networks hardcoded so it fails for some, we need to change that
-          }
-        } else {
-          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-            prefix: chain.node_info.bech32_config.main_prefix,
-            hdPaths: [stringToPath(chain.derivation_path)],
+        try {
+          const otherKey = await walletActionHandler.getAccount(chain.node_info.chain_id);
+          commit(MutationTypes.ADD_CHAIN_KEY_DATA, {
+            keyHash: keyHashfromAddress(otherKey.bech32Address),
+            chainName: chain.chain_name,
+            pubKey: otherKey.pubKey,
+            algo: otherKey.algo,
           });
-          const [account] = await signer.getAccounts();
-          const otherKey = {
-            name: 'Cypress Test',
-            algo: account.algo,
-            pubKey: account.pubkey,
-            bech32Address: account.address,
-            isNanoLedger: false,
-            address: fromHexString(keyHashfromAddress(account.address)),
-          };
-          commit(MutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        } catch (err) {
+          console.error(err); // EmerisSigner has a weird list of networks hardcoded so it fails for some, we need to change that
         }
       }
 
-      !isCypress
-        ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
-        : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
+      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
 
       dispatch(GlobalActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, undefined, { root: true });
       dispatch(GlobalActionTypes.API.GET_ALL_BALANCES, undefined, { root: true });
       dispatch(GlobalActionTypes.API.GET_ALL_STAKING_BALANCES, undefined, { root: true });
+
+      walletActionHandler.setLastSession({ timestamp: Date.now(), wallet: walletType });
       return true;
     } catch (e) {
       console.error(e);
@@ -407,10 +315,15 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
           keyHashes: chainIds.map((prefix) => keyHashfromAddress(pubkeyToAddress(pubkeyPair, prefix))),
         };
       }
-      commit(MutationTypes.SET_KEPLR, { ...key });
-      for (const hash of key.keyHashes) {
-        commit(MutationTypes.ADD_KEPLR_KEYHASH, hash);
-      }
+      commit(MutationTypes.SET_ACCOUNT, { ...key });
+      Object.entries(demoAddresses).forEach(([chainName, address]) => {
+        commit(MutationTypes.ADD_CHAIN_KEY_DATA, {
+          keyHash: keyHashfromAddress(address),
+          chainName,
+          pubKey: new Uint8Array(), // TODO
+          algo: 'secp256k1',
+        });
+      });
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       commit(MutationTypes.SET_CORRELATION_ID, keyHashfromAddress(key.bech32Address));
@@ -434,8 +347,8 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
   [ActionTypes.RESET_STATE]({ commit }) {
     commit(MutationTypes.RESET_STATE);
   },
-  async [ActionTypes.SIGN_OUT]({ state, commit, dispatch }) {
-    await dispatch(GlobalActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
+  async [ActionTypes.SIGN_OUT]({ commit, dispatch, getters }) {
+    await dispatch(GlobalActionTypes.API.SIGN_OUT, getters.getKeyhashes ?? [], { root: true });
     event('sign_out', { event_label: 'Signed out', event_category: 'authentication' });
     commit(MutationTypes.SIGN_OUT);
   },

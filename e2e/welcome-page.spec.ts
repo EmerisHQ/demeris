@@ -1,11 +1,9 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+
+import { test } from './test-with-keplr';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.on('domcontentloaded', async () => {
-    await page.evaluate('window.Cypress=true; window.chrome=true; window.keplr={}');
-  });
-  await page.goto('/welcome', { waitUntil: 'networkidle' });
 });
 
 test.describe('Welcome page elements location and availibility', () => {
