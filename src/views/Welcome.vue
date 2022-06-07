@@ -113,6 +113,7 @@ pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
 const router = useRouter();
 const { originUrl } = toRefs(props);
 const connectKeplrRef = ref(null);
+const connectWalletType = ref(null);
 const agreeWarningRef = ref(null);
 const getKeplrRef = ref(null);
 const getBrowserRef = ref(null);
@@ -140,10 +141,11 @@ const cancelAgreeWarning = () => {
 const agreeWarning = () => {
   isWarningNeeded.value = false;
   isWarningAgreed.value = true;
-  connectKeplrRef.value.signIn();
+  connectKeplrRef.value.signIn(connectWalletType.value);
 };
 
-const showWarning = () => {
+const showWarning = (walletType) => {
+  connectWalletType.value = walletType;
   isWarningNeeded.value = true;
 };
 

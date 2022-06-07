@@ -96,7 +96,7 @@ withDefaults(defineProps<Props>(), { type: undefined });
 const emit = defineEmits<{
   (e: 'cancel'): void;
   (e: 'connect'): void;
-  (e: 'warning'): void;
+  (e: 'warning', walletType: string): void;
   (e: 'try-demo'): void;
 }>();
 
@@ -126,20 +126,24 @@ const tryWalletSignIn = (walletType: SupportedWallet) => {
     store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
     isConnecting.value = true;
   } else {
-    emit('warning');
+    emit('warning', connectingWallet.value);
   }
 };
 
 const trySignIn = () => {
   if (isWarningAgreed.value) {
-    signIn();
+    signIn(connectingWallet.value);
   } else {
-    emit('warning');
+    emit('warning', connectingWallet.value);
   }
 };
 
-const signIn = () => {
-  store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+const signIn = (walletType?) => {
+  if (featureRunning('USE_EMERIS_EXTENSION')) {
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
+  } else {
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+  }
   isConnecting.value = true;
 };
 
