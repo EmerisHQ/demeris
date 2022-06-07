@@ -1,4 +1,5 @@
 <template>
+  <h1>Playground</h1>
   <h1>Skeleton Loader</h1>
   <SkeletonLoader width="100%"></SkeletonLoader>
 
@@ -13,22 +14,6 @@
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
   <hr />
-  <div class="max-w-5xl w-80 shadow-dropdown my-20 mx-auto">
-    <QuotesList
-      :quotes="[
-        { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 1, usdAmount: 12322 },
-        {
-          dex: 'gravity',
-          amount: 115.49,
-          denom: 'uosmo',
-          numberOfTransactions: 1,
-          usdAmount: 12322,
-          fee: { amount: 0.02, denom: 'uosmo' },
-        },
-        { dex: 'gravity', amount: 115.49, denom: 'uosmo', numberOfTransactions: 2, usdAmount: 12322 },
-      ]"
-    />
-  </div>
   <hr />
   <!-- DO NOT MISS THE no-default-tippy-padding parent to override default scss-->
   <div class="no-default-tippy-padding max-w-5xl w-80 shadow-dropdown my-20 mx-auto">
@@ -57,7 +42,6 @@ import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-par
 import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
 import BestPrice from '@/components/common/BestPrice.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import QuotesList from '@/components/common/QuotesList.vue';
 import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
 import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
