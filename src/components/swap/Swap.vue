@@ -14,7 +14,6 @@
 
 <script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { defineProps } from 'vue';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
