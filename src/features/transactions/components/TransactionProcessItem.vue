@@ -37,10 +37,7 @@
             class="z-0 first:z-10"
           />
         </div>
-        <div
-          v-else-if="['transacting', 'validating', 'signing'].some(state.matches)"
-          style="transform: scale(0.5) translateX(-0.75rem)"
-        >
+        <div v-else-if="['transacting', 'validating', 'signing'].some(state.matches)" class="scale-50 -translate-x-3">
           <Spinner :size="2.5" />
         </div>
         <Icon v-else name="ExclamationIcon" class="text-warning" />
@@ -79,13 +76,13 @@
           <template v-if="action == 'swap' && transactionAction.type === 'swap'">
             Swap
             <Ticker
-              :name="getBaseDenomSync(transactionAction.data.from.denom)"
-              :chain="transactionAction.data.chainName"
+              :name="getBaseDenomSync(transactionAction.data[0].from.denom)"
+              :chain="transactionAction.data[0].chainName"
             />
             &rarr;
             <Ticker
-              :name="getBaseDenomSync(transactionAction.data.to.denom)"
-              :chain="transactionAction.data.chainName"
+              :name="getBaseDenomSync(transactionAction.data[transactionAction.data.length - 1].to.denom)"
+              :chain="transactionAction.data[0].chainName"
             />
           </template>
           <template v-if="action == 'addliquidity' && transactionAction.type === 'addLiquidity'">
@@ -283,7 +280,7 @@ const getIconAssets = () => {
   }
 
   if (name === 'swap') {
-    const denom = transaction.value.data.to.denom;
+    const denom = transaction.value.data[transaction.value.data.length - 1].to.denom;
     const chainName = getSourceChainFromTransaction(transaction.value);
     assets.push({ denom, chainName });
   }

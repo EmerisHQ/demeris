@@ -21,55 +21,37 @@
   </tippy>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 
-export default defineComponent({
-  components: {
-    Icon,
-    ChainName,
-    Denom,
-  },
-  props: {
-    iconSize: {
-      type: Number,
-      default: 1.6,
-    },
-    chain: {
-      type: String,
-      default: undefined,
-    },
-    chains: {
-      type: Array as PropType<string[]>,
-      default: undefined,
-    },
-    denom: {
-      type: String,
-      default: undefined,
-    },
-    unavailable: {
-      type: String as PropType<'part' | 'full'>,
-      default: undefined,
-    },
-  },
+interface Props {
+  iconSize?: number;
+  chain?: string;
+  chains?: string[];
+  denom?: string;
+  unavailable?: 'part' | 'full';
+}
 
-  setup(props) {
-    const i18nPath = computed(() => {
-      if (props.unavailable === 'full') {
-        if (props.chains?.length > 1) {
-          return `components.chainDown.fullUnavailableMultiple`;
-        }
-        return `components.chainDown.fullUnavailable`;
-      }
+const props = withDefaults(defineProps<Props>(), {
+  iconSize: 1.6,
+  chain: undefined,
+  chains: undefined,
+  denom: undefined,
+  unavailable: undefined,
+});
 
-      return `components.chainDown.partUnavailable`;
-    });
+const i18nPath = computed(() => {
+  if (props.unavailable === 'full') {
+    if (props.chains?.length > 1) {
+      return `components.chainDown.fullUnavailableMultiple`;
+    }
+    return `components.chainDown.fullUnavailable`;
+  }
 
-    return { i18nPath };
-  },
+  return `components.chainDown.partUnavailable`;
 });
 </script>

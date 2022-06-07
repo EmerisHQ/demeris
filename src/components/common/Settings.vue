@@ -16,91 +16,57 @@
   </div>
 </template>
 
-<script lang="ts">
-import MD5 from 'crypto-js/md5';
-import avatar from 'gradient-avatar';
-import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import SettingsModal from '@/components/common/SettingsModal.vue';
 import Button from '@/components/ui/Button.vue';
-import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalGetterTypes } from '@/store';
 
-export default defineComponent({
-  name: 'Settings',
+const emitter = useEmitter();
 
-  components: {
-    AvatarBalance,
-    Button,
-    ConnectWalletModal,
-    SettingsModal,
-  },
+// wallet stuff
+const isWalletModalOpen = ref(false);
+const store = useStore();
 
-  setup() {
-    const emitter = useEmitter();
+const isSignedIn = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isSignedIn];
+});
 
-    // wallet stuff
-    const isWalletModalOpen = ref(false);
-    const store = useStore();
+const isDemoAccount = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isDemoAccount];
+});
+const toggleWalletModal = () => {
+  isWalletModalOpen.value = !isWalletModalOpen.value;
+};
+emitter.on('toggle-settings-modal', () => {
+  toggleWalletModal();
+});
 
-    const { balances } = useAccount();
+// settings menu stuff
+const menuRef = ref(null);
 
-    const isSignedIn = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isSignedIn];
-    });
+const isSettingsModalOpen = ref(false);
+const toggleSettingsModal = () => (isSettingsModalOpen.value = !isSettingsModalOpen.value);
 
-    const isDemoAccount = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
-    });
-    const toggleWalletModal = () => {
-      isWalletModalOpen.value = !isWalletModalOpen.value;
-    };
-    emitter.on('toggle-settings-modal', () => {
-      toggleWalletModal();
-    });
+const clickOutsideListener = (event: Event) => {
+  if (event.composedPath().includes(menuRef.value)) {
+    return;
+  }
 
-    // settings menu stuff
-    const menuRef = ref(null);
+  isSettingsModalOpen.value = false;
+};
 
-    const isSettingsModalOpen = ref(false);
-    const toggleSettingsModal = () => (isSettingsModalOpen.value = !isSettingsModalOpen.value);
+onMounted(() => {
+  window.addEventListener('pointerdown', clickOutsideListener);
+});
 
-    const clickOutsideListener = (event: Event) => {
-      if (event.composedPath().includes(menuRef.value)) {
-        return;
-      }
-
-      isSettingsModalOpen.value = false;
-    };
-
-    onMounted(() => {
-      window.addEventListener('pointerdown', clickOutsideListener);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener('pointerdown', clickOutsideListener);
-    });
-
-    return {
-      balances,
-      isSignedIn,
-      isWalletModalOpen,
-      toggleWalletModal,
-      isSettingsModalOpen,
-      toggleSettingsModal,
-      isDemoAccount,
-      menuRef,
-    };
-  },
-  methods: {
-    getAvatar: function (name: string): string {
-      return avatar(MD5(name) + '', 64);
-    },
-  },
+onUnmounted(() => {
+  window.removeEventListener('pointerdown', clickOutsideListener);
 });
 </script>
 

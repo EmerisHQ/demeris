@@ -187,9 +187,9 @@
     <AirdropClaimModal :open="isClaimModalOpen" :selected-airdrop="selectedAirdrop" @close="toggleClaimModal" />
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisAirdrops } from '@emeris/types';
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -199,76 +199,47 @@ import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
-export default defineComponent({
-  name: 'AirdropClaim',
-  components: {
-    Button,
-    AirdropClaimModal,
-    ConnectWalletModal,
-    Icon,
-  },
+interface Props {
+  selectedAirdrop?: EmerisAirdrops.Airdrop;
+}
 
-  props: {
-    selectedAirdrop: {
-      type: Object as PropType<EmerisAirdrops.Airdrop>,
-      default: null,
-    },
-  },
+const props = withDefaults(defineProps<Props>(), { selectedAirdrop: null });
 
-  setup(props) {
-    const typedstore = useStore() as RootStoreTyped;
+const typedstore = useStore() as RootStoreTyped;
 
-    const isClaimModalOpen = ref(false);
-    const isWalletModalOpen = ref(false);
-    let imageLoadFail = ref(false);
+const isClaimModalOpen = ref(false);
+const isWalletModalOpen = ref(false);
+let imageLoadFail = ref(false);
 
-    const toggleClaimModal = () => {
-      isClaimModalOpen.value = !isClaimModalOpen.value;
-    };
+const toggleClaimModal = () => {
+  isClaimModalOpen.value = !isClaimModalOpen.value;
+};
 
-    const isAutoDropped = computed(() => {
-      return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.AUTO_DROP;
-    });
-
-    const isClaimable = computed(() => {
-      return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE;
-    });
-
-    const goToAirdropWebsite = () => {
-      window.open(props.selectedAirdrop.projectWebsiteUrl, '_blank');
-    };
-
-    const isDemoAccount = computed(() => {
-      return (
-        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
-        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-      );
-    });
-
-    const isMultipleSnapshots = computed(() => {
-      return typeof props.selectedAirdrop.snapshotDate === 'object';
-    });
-
-    const toggleConnectWalletModal = () => {
-      isWalletModalOpen.value = !isWalletModalOpen.value;
-    };
-
-    return {
-      isClaimModalOpen,
-      isWalletModalOpen,
-      toggleClaimModal,
-      isAutoDropped,
-      isClaimable,
-      goToAirdropWebsite,
-      isDemoAccount,
-      isMultipleSnapshots,
-      toggleConnectWalletModal,
-      EmerisAirdrops,
-      imageLoadFail,
-      AirdropEligibilityStatus,
-    };
-  },
+const isAutoDropped = computed(() => {
+  return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.AUTO_DROP;
 });
+
+const isClaimable = computed(() => {
+  return props.selectedAirdrop.eligibility === AirdropEligibilityStatus.CLAIMABLE;
+});
+
+const goToAirdropWebsite = () => {
+  window.open(props.selectedAirdrop.projectWebsiteUrl, '_blank');
+};
+
+const isDemoAccount = computed(() => {
+  return (
+    !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] || typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+  );
+});
+
+const isMultipleSnapshots = computed(() => {
+  return typeof props.selectedAirdrop.snapshotDate === 'object';
+});
+
+const toggleConnectWalletModal = () => {
+  isWalletModalOpen.value = !isWalletModalOpen.value;
+};
 </script>
 
 <style lang="scss" scoped>

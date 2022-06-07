@@ -4,9 +4,9 @@
       <dt class="font-medium -text-1">Pay</dt>
       <dd class="place-self-end">
         <CoinDescription
-          :amount="transaction.data.from.amount"
-          :denom="getBaseDenomSync(transaction.data.from.denom)"
-          :chain="transaction.data.chainName"
+          :amount="firstSwapData.from.amount"
+          :denom="getBaseDenomSync(firstSwapData.from.denom)"
+          :chain="firstSwapData.chainName"
         />
       </dd>
       <dt>
@@ -15,18 +15,18 @@
       </dt>
       <dd class="place-self-end">
         <CoinDescription
-          :amount="transaction.data.to.amount"
-          :denom="getBaseDenomSync(transaction.data.to.denom)"
-          :chain="transaction.data.chainName"
+          :amount="lastSwapData.to.amount"
+          :denom="getBaseDenomSync(lastSwapData.to.denom)"
+          :chain="lastSwapData.chainName"
         />
       </dd>
     </dl>
 
-    <CollapseDescription content-class="pb-6" is-open>
+    <CollapseDescription content-class="pb-6">
       <template #title><span class="-text-1">Price</span></template>
       <template #label>
         <AmountDisplay :amount="priceInputAmount" trunc-big-balance /> ≈
-        <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
+        <AmountDisplay :amount="expectOutputAmount" :chain="firstSwapData.chainName" trunc-big-balance />
       </template>
 
       <dl class="grid grid-cols-[auto_1fr] gap-y-4 -text-1">
@@ -51,7 +51,7 @@
         <dt class="text-muted">Expected rate</dt>
         <dd class="text-right">
           <AmountDisplay :amount="priceInputAmount" /> =
-          <AmountDisplay :amount="expectOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
+          <AmountDisplay :amount="expectOutputAmount" :chain="firstSwapData.chainName" trunc-big-balance />
         </dd>
 
         <dt class="text-muted">Max slippage</dt>
@@ -62,12 +62,12 @@
           <div>(if 100% swapped)</div>
         </dt>
         <dd class="text-right">
-          <AmountDisplay :amount="minOutputAmount" :chain="transaction.data.chainName" trunc-big-balance />
+          <AmountDisplay :amount="minOutputAmount" :chain="firstSwapData.chainName" trunc-big-balance />
         </dd>
       </dl>
     </CollapseDescription>
 
-    <CollapseDescription content-class="pb-6" is-open>
+    <CollapseDescription content-class="pb-6">
       <template #title><span class="-text-1">Fees (included)</span></template>
       <template #label><AmountDisplay v-for="fee of txFeesAmount" :key="fee.denom" :amount="fee" /></template>
 
@@ -109,16 +109,29 @@ import { useSwapStore } from './state';
 // NOTE: We should not interact with the current swap machine here
 // this component is used to display a transaction in the `review` or `receipt` state.
 
-const props = defineProps(['step', 'fees', 'context', 'transactionProcessContext']);
+interface Props {
+  step: any;
+  fees: any;
+  context: any;
+  transactionProcessContext: any;
+}
+
+const props = defineProps<Props>();
 const swapStore = useSwapStore();
 
 const transaction = computed(() => {
   return props.step.transactions[0];
 });
 
+const firstSwapData = computed(() => transaction.value.data[0]);
+const lastSwapData = computed(() => transaction.value.data[transaction.value.data.length - 1]);
+
 const expectOutputAmount = computed(() => {
-  const denom = transaction.value.data.to.denom;
-  const orderPrice = getOrderPrice(transaction.value.data.from, transaction.value.data.to);
+  const denom = transaction.value.data[transaction.value.data.length - 1].to.denom;
+  const orderPrice = getOrderPrice(
+    transaction.value.data[0].from,
+    transaction.value.data[transaction.value.data.length - 1].to,
+  );
 
   const { amount } = amountToUnit({ amount: orderPrice, denom });
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
@@ -126,17 +139,20 @@ const expectOutputAmount = computed(() => {
 });
 
 const priceInputAmount = computed(() => {
-  const denom = transaction.value.data.from.denom;
+  const denom = transaction.value.data[0].from.denom;
   const { amount } = amountToUnit({ amount: '1', denom });
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return { amount, denom: baseDenom };
 });
 
 const minOutputAmount = computed(() => {
-  const denom = transaction.value.data.to.denom;
+  const denom = transaction.value.data[transaction.value.data.length - 1].to.denom;
   const baseDenom = resolveBaseDenom(denom, { swaps: swapStore.sync.swaps });
   return {
-    amount: calculateSlippage(transaction.value.data.to.amount, swapStore.getSlippageSession()),
+    amount: calculateSlippage(
+      transaction.value.data[transaction.value.data.length - 1].to.amount,
+      swapStore.getSlippageSession(),
+    ),
     denom: baseDenom,
   };
 });

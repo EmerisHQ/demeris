@@ -4,52 +4,39 @@
   </canvas>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { toCanvas } from 'qrcode';
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-export default defineComponent({
-  name: 'QrCode',
+interface Props {
+  value?: string;
+  width?: number | string;
+  background?: string;
+  color?: string;
+}
 
-  props: {
-    value: {
-      type: String,
-      default: undefined,
-    },
-    width: {
-      type: [Number, String],
-      default: 100,
-    },
-    background: {
-      type: String,
-      default: '#0000', // Transparent
-    },
-    color: {
-      type: String,
-      default: '#000000ff',
-    },
-  },
-
-  setup(props) {
-    const canvas = ref(null);
-
-    const generate = () => {
-      const options = {
-        margin: 0,
-        width: props.width,
-        color: {
-          dark: props.color,
-          light: props.background,
-        },
-      };
-
-      toCanvas(canvas.value, props.value, options);
-    };
-
-    onMounted(generate);
-    watch(props, generate);
-
-    return { canvas };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  value: undefined,
+  width: 100,
+  background: '#0000', // Transparent
+  color: '#000000ff',
 });
+
+const canvas = ref(null);
+
+const generate = () => {
+  const options = {
+    margin: 0,
+    width: props.width,
+    color: {
+      dark: props.color,
+      light: props.background,
+    },
+  };
+
+  toCanvas(canvas.value, props.value, options);
+};
+
+onMounted(generate);
+watch(props, generate);
 </script>

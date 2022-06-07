@@ -7,8 +7,7 @@
     }"
   >
     <button
-      class="w-6 h-6 flex items-center justify-evenly cursor-pointer hidden delete-button rounded-full absolute"
-      style="top: -20px; right: -12px; background: #00000054; color: white"
+      class="w-6 h-6 flex items-center justify-evenly cursor-pointer hidden delete-button rounded-full absolute -top-5 -right-3 text-white bg-black/54"
       @click="removeValidator"
     >
       <Icon :name="'CloseIcon'" :icon-size="1" />
@@ -42,8 +41,8 @@
     </label>
   </div>
 </template>
-<script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+<script setup lang="ts">
+import { computed, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -55,59 +54,49 @@ import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes } from '@/store';
 import { DesignSizes } from '@/types/util';
 
-export default defineComponent({
-  name: 'ValidatorSelect',
-  components: { AmountInput, Denom, Icon, Price, ValidatorBadge },
-  props: {
-    amount: {
-      type: String as PropType<string>,
-      required: true,
-      default: '',
-    },
-    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
-    validator: {
-      type: Object,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-  },
-  emits: ['update:amount', 'select', 'unselect'],
-  setup(props, { emit }) {
-    const route = useRoute();
-    const store = useStore();
-    const baseDenom = route.params.denom as string;
-    const precision = computed(() =>
-      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-        name: baseDenom,
-      }),
-    );
+interface Props {
+  amount: string;
+  size?: DesignSizes;
+  validator: any;
+}
 
-    const propsRef = toRefs(props);
-
-    const inputAmount = computed({
-      get: () => propsRef.amount.value,
-      set: (value) => emit('update:amount', value),
-    });
-
-    const selectValidator = () => {
-      emit('select', propsRef.validator.value);
-    };
-
-    const removeValidator = () => {
-      emit('unselect', propsRef.validator.value);
-    };
-
-    return {
-      selectValidator,
-      removeValidator,
-      inputAmount,
-      baseDenom,
-      precision,
-    };
+const props = withDefaults(defineProps<Props>(), {
+  amount: '',
+  size: 'md',
+  validator: () => {
+    return {};
   },
 });
+
+const emit = defineEmits<{
+  (e: 'update:amount', value: any): void;
+  (e: 'select', value: any): void;
+  (e: 'unselect', value: any): void;
+}>();
+
+const route = useRoute();
+const store = useStore();
+const baseDenom = route.params.denom as string;
+const precision = computed(() =>
+  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+    name: baseDenom,
+  }),
+);
+
+const propsRef = toRefs(props);
+
+const inputAmount = computed({
+  get: () => propsRef.amount.value,
+  set: (value) => emit('update:amount', value),
+});
+
+const selectValidator = () => {
+  emit('select', propsRef.validator.value);
+};
+
+const removeValidator = () => {
+  emit('unselect', propsRef.validator.value);
+};
 </script>
 <style lang="scss" scoped>
 .hover-show-delete {

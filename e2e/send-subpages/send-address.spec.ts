@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import { loginToKeplr } from '../login-to-keplr';
+import { test } from '../test-with-keplr';
 
 test.beforeEach(async ({ page }) => {
   await loginToKeplr(page, '/');
@@ -90,6 +91,7 @@ test.describe('Check availability of send/address subpage elements', function ()
       .locator('input[placeholder="0"]');
     await inputAmountOfAssets.fill('0.000001');
     await expect(nextContinueBtn).toBeEnabled();
+    await page.locator('text=Cosmos Hub').click(); // select IBC location
     await page.locator('text=Fees (included)').click();
     const slowBtn = page.locator('button:has-text("Slow")');
     await expect(slowBtn).toBeVisible();
@@ -150,6 +152,7 @@ test.describe('Check availability of send/address subpage elements', function ()
       .locator('input[placeholder="0"]');
     await inputAmountOfAssets.fill('0.000001');
     await expect(nextContinueBtn).toBeEnabled();
+    await page.locator('text=Cosmos Hub').click(); // select IBC location
     await page.locator('text=Fees (included)').click();
     const slowBtn = page.locator('button:has-text("Slow")');
     await expect(slowBtn).toBeVisible();

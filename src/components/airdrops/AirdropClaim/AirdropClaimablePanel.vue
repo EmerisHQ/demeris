@@ -77,9 +77,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
-import { computed, defineComponent, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import claimableAirdropsHeader from '@/assets/images/claimable-airdrops-header.png';
@@ -91,98 +91,65 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
 import { AirdropEligibilityStatus } from '@/utils/airdropEligibility';
 
-export default defineComponent({
-  name: 'AirdropClaimablePanel',
-  components: {
-    Icon,
-    ConnectWalletModal,
-  },
-  props: {
-    activeFilter: {
-      type: String,
-      default: 'all',
-    },
-  },
-  emits: ['active-filter'],
-  setup(props, { emit }) {
-    const theme = useTheme();
-    const typedstore = useStore() as RootStoreTyped;
-    const isWalletModalOpen = ref(false);
-
-    const airdrops = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
-    });
-
-    const isDemoAccount = computed(() => {
-      return (
-        !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] ||
-        typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
-      );
-    });
-
-    const toggleConnectWalletModal = () => {
-      isWalletModalOpen.value = !isWalletModalOpen.value;
-    };
-
-    const airdropsLoading = computed(() => {
-      return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
-    });
-
-    const noAirdropsToClaim = computed(() => {
-      return airdrops.value.every((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
-    });
-
-    const noOfClaimableAirdrops = computed(() => {
-      const claimableAirdrops = airdrops.value.filter(
-        (item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE,
-      );
-      return claimableAirdrops.length;
-    });
-
-    const showConnectWalletBanner = computed(() => {
-      return isDemoAccount.value && !airdropsLoading.value && props.activeFilter !== 'mine';
-    });
-
-    const showClaimNowBanner = computed(() => {
-      return (
-        !isDemoAccount.value && !airdropsLoading.value && !noAirdropsToClaim.value && props.activeFilter !== 'mine'
-      );
-    });
-
-    const showNoAirdropsToClaimBanner = computed(() => {
-      return (
-        !isDemoAccount.value &&
-        !airdropsLoading.value &&
-        noAirdropsToClaim.value &&
-        (props.activeFilter === 'mine' || props.activeFilter === 'all')
-      );
-    });
-
-    const goToUpcomingAirdrops = () => {
-      emit('active-filter', 'upcoming');
-    };
-
-    return {
-      theme,
-      claimableAirdropsHeader,
-      demoAccountBanner,
-      isDemoAccount,
-      isWalletModalOpen,
-      toggleConnectWalletModal,
-      airdropsLoading,
-      noAirdropsToClaim,
-      noOfClaimableAirdrops,
-      showConnectWalletBanner,
-      showClaimNowBanner,
-      showNoAirdropsToClaimBanner,
-      goToUpcomingAirdrops,
-    };
-  },
-});
-</script>
-
-<style lang="scss" scoped>
-.wrapper {
-  min-width: 20rem;
+interface Props {
+  activeFilter?: string;
 }
-</style>
+
+const props = withDefaults(defineProps<Props>(), { activeFilter: 'all' });
+
+const emit = defineEmits<{
+  (e: 'active-filter', filter: string): void;
+}>();
+
+useTheme();
+const typedstore = useStore() as RootStoreTyped;
+const isWalletModalOpen = ref(false);
+
+const airdrops = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdrops];
+});
+
+const isDemoAccount = computed(() => {
+  return (
+    !typedstore.getters[GlobalGetterTypes.USER.isSignedIn] || typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]
+  );
+});
+
+const toggleConnectWalletModal = () => {
+  isWalletModalOpen.value = !isWalletModalOpen.value;
+};
+
+const airdropsLoading = computed(() => {
+  return typedstore.getters[GlobalGetterTypes.API.getAirdropsStatus] === LoadingState.LOADING;
+});
+
+const noAirdropsToClaim = computed(() => {
+  return airdrops.value.every((item) => item.eligibility !== AirdropEligibilityStatus.CLAIMABLE);
+});
+
+const noOfClaimableAirdrops = computed(() => {
+  const claimableAirdrops = airdrops.value.filter((item) => item.eligibility === AirdropEligibilityStatus.CLAIMABLE);
+  return claimableAirdrops.length;
+});
+
+const showConnectWalletBanner = computed(() => {
+  return isDemoAccount.value && !airdropsLoading.value && props.activeFilter !== 'mine';
+});
+
+const showClaimNowBanner = computed(() => {
+  return !isDemoAccount.value && !airdropsLoading.value && !noAirdropsToClaim.value && props.activeFilter !== 'mine';
+});
+
+const showNoAirdropsToClaimBanner = computed(() => {
+  return (
+    !isDemoAccount.value &&
+    !airdropsLoading.value &&
+    noAirdropsToClaim.value &&
+    (props.activeFilter === 'mine' || props.activeFilter === 'all')
+  );
+});
+
+const goToUpcomingAirdrops = () => {
+  emit('active-filter', 'upcoming');
+};
+</script>

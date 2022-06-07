@@ -1,4 +1,4 @@
-<template>
+<template noInheritAttrs>
   <div class="input w-full max-w-md flex items-center">
     <div
       class="input__wrapper relative flex-1 w-full h-12 text-inactive hover:text-muted focus-within:text-muted transition-colors"
@@ -42,56 +42,52 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, useSlots } from 'vue';
 
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 
-export default defineComponent({
-  name: 'Input',
+const slots = useSlots();
 
-  components: {
-    HintIcon,
-  },
+interface Props {
+  modelValue?: string | number;
+  hint?: string;
+  borderColour?: string;
+  forceBorderVisible?: boolean;
+  valueFormatter?: (value: string | number) => string | number;
+  endSlotClickable?: boolean;
+  startSlotClickable?: boolean;
+}
 
-  inheritAttrs: false,
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  hint: undefined,
+  borderColour: null,
+  forceBorderVisible: false,
+  valueFormatter: null,
+  endSlotClickable: false,
+  startSlotClickable: false,
+});
 
-  props: {
-    modelValue: {
-      type: [String, Number],
-      default: '',
-    },
-    hint: {
-      type: String,
-      default: undefined,
-    },
-    borderColour: { type: String, default: null },
-    forceBorderVisible: { type: Boolean, default: false },
-    valueFormatter: { type: Function, default: null },
-    endSlotClickable: { type: Boolean, default: false },
-    startSlotClickable: { type: Boolean, default: false },
-  },
+const emit = defineEmits<{
+  (e: 'update:modelValue', currentValue: any): void;
+  (e: 'focus:value', value: any): void;
+  (e: 'blur:value', value: any): void;
+}>();
 
-  emits: ['update:modelValue', 'focus:value', 'blur:value'],
-
-  setup(props, { emit, slots }) {
-    const model = computed({
-      get: () => props.modelValue,
-      set: (value) => {
-        let currentValue = value;
-        if (props.valueFormatter) {
-          currentValue = props.valueFormatter(currentValue);
-        }
-        emit('update:modelValue', currentValue);
-      },
-    });
-
-    const hasStartSlot = computed(() => !!slots.start);
-    const hasEndSlot = computed(() => !!slots.end);
-
-    return { model, hasStartSlot, hasEndSlot };
+const model = computed({
+  get: () => props.modelValue,
+  set: (value) => {
+    let currentValue = value;
+    if (props.valueFormatter) {
+      currentValue = props.valueFormatter(currentValue);
+    }
+    emit('update:modelValue', currentValue);
   },
 });
+
+const hasStartSlot = computed(() => !!slots.start);
+const hasEndSlot = computed(() => !!slots.end);
 </script>
 
 <style lang="scss" scoped>

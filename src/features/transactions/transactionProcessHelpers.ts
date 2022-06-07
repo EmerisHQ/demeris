@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines */
 import { EmerisAPI, EmerisBase } from '@emeris/types';
 import { EmerisTransactions } from '@emeris/types';
 import BigNumber from 'bignumber.js';
@@ -43,6 +44,8 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
   switch (transaction.type) {
     case 'stake':
+      return transaction.data[0].chainName;
+    case 'swap':
       return transaction.data[0].chainName;
     default:
       return transaction.data.chainName;
@@ -118,9 +121,12 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
           const fee = transaction.chainFee[0].amount[context.input.gasPriceLevel] * context.input.gasLimit;
           const txAmount = parseInt(transaction.data.amount.amount);
           if (baseDenomBalance) {
-            const amount = parseCoins(baseDenomBalance.amount)[0];
-            if (parseInt(amount.amount) - txAmount < fee) {
-              transaction.data.amount.amount = parseInt(amount.amount) - fee + '';
+            const backwardTx = step.transactions.find((x) => x.type == 'IBCtransferBackward');
+            const backwardAmount = backwardTx ? parseInt(backwardTx.data.amount.amount) : 0;
+            const amount = backwardAmount + parseInt(parseCoins(baseDenomBalance.amount)[0].amount);
+
+            if (amount - txAmount < fee) {
+              transaction.data.amount.amount = amount - fee + '';
             }
           } else {
             transaction.data.amount.amount = txAmount - fee + '';
@@ -196,11 +202,11 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       });
       break;
     case 'swap':
-      baseDenom = getBaseDenomSync(stepTx.data.from.denom);
-      denomAmount = stepTx.data.from.amount;
+      baseDenom = getBaseDenomSync(stepTx.data[0].from.denom);
+      denomAmount = stepTx.data[0].from.amount;
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
-      const toDenom = getBaseDenomSync(stepTx.data.to.denom);
+      const toDenom = getBaseDenomSync(stepTx.data[stepTx.data.length - 1].to.denom);
 
       event('usd_volume', {
         event_label: 'Swap USD volume',
@@ -210,12 +216,12 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult)) / 100),
+        value: Math.floor((parseInt(stepTx.data[0].from.amount) * getSwappedPercent(lastResult)) / 100),
       });
       event('denom_volume', {
         event_label: 'Swap ' + baseDenom + ' -> ' + toDenom + ' volume',
         event_category: 'volume',
-        value: Math.floor((parseInt(stepTx.data.from.amount) * getSwappedPercent(lastResult)) / 100),
+        value: Math.floor((parseInt(stepTx.data[0].from.amount) * getSwappedPercent(lastResult)) / 100),
       });
       break;
     case 'createPool':

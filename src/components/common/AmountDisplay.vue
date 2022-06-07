@@ -3,11 +3,14 @@
 </template>
 <script lang="ts" setup>
 import { EmerisBase } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import { computed, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalGetterTypes } from '@/store';
 import { getBaseDenomSync, getTicker } from '@/utils/actionHandler';
+
+BigNumber.config({ EXPONENTIAL_AT: [-20, 20] });
 
 const store = useStore();
 
@@ -29,12 +32,12 @@ const precision = computed(() => {
 const ticker = ref('-');
 
 const displayValue = computed(() => {
-  return parseInt(props.amount.amount) / Math.pow(10, precision.value);
+  return new BigNumber(propsRef.amount.value.amount ?? 0).dividedBy(10 ** parseInt(precision.value));
 });
 
 const displayValueTrunc = computed(() => {
   const bigBalance = displayValue.value.toFixed(0).split('').length > 2;
-  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value;
+  return bigBalance && props.truncBigBalance ? displayValue.value.toFixed(2) : displayValue.value.precision(6);
 });
 
 watch(

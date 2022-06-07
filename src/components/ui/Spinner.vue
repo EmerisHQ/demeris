@@ -38,36 +38,25 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
-
+<script setup lang="ts">
 type SpinnerVariant = 'solid' | 'gold';
 
-export default defineComponent({
-  name: 'Spinner',
+interface Props {
+  size?: number;
+  variant?: SpinnerVariant;
+}
 
-  props: {
-    size: {
-      type: Number,
-      default: 2,
-    },
-    variant: {
-      type: String as PropType<SpinnerVariant>,
-      default: 'gold',
-    },
-  },
-
-  setup() {
-    const randomId = Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, '')
-      .substr(2, 10);
-
-    return {
-      fillId: `spinner-fill-${randomId}`,
-    };
-  },
+withDefaults(defineProps<Props>(), {
+  size: 2,
+  variant: 'gold',
 });
+
+const randomId = Math.random()
+  .toString(36)
+  .replace(/[^a-z]+/g, '')
+  .substr(2, 10);
+
+const fillId = `spinner-fill-${randomId}`;
 </script>
 
 <style lang="scss" scoped>

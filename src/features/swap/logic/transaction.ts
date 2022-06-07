@@ -30,12 +30,20 @@ export const parseEncodedEvents = (events: EncodedEvents[]): Record<string, Reco
   const result = {};
 
   for (const { type, attributes } of events) {
-    if (!result[type]) result[type] = {};
+    const obj = {};
 
     for (const attr of attributes) {
       const key = atob(attr.key);
       const value = attr.value ? atob(attr.value) : null;
-      result[type][key] = value;
+      obj[key] = value;
+    }
+
+    if (result[type] === undefined) {
+      result[type] = obj;
+    } else if (Array.isArray(result[type])) {
+      result[type] = [...result[type], obj];
+    } else {
+      result[type] = [result[type], obj];
     }
   }
 
@@ -57,19 +65,26 @@ const fetchBlockResults = async (height: string, chainName: string): Promise<Rec
   return data.result;
 };
 
-const getOsmosisResultFromDecodedEvents = (txEvents: Record<string, any>): SwapTransactionResult => {
-  const data = txEvents?.token_swapped;
-  if (!data) return;
+const getOsmosisResultFromDecodedEvents = (
+  txEvents: Record<string, any>,
+  requester?: string,
+): SwapTransactionResult => {
+  let data = txEvents?.token_swapped;
 
-  const inputCoin = parseCoins(data.tokens_in)[0];
-  const outputCoin = parseCoins(data.tokens_out)[0];
+  if (!data) return;
+  if (!Array.isArray(data)) data = [data];
+
+  if (requester) data = data.filter((item) => item.sender === requester);
+
+  const inputCoin = parseCoins(data[0].tokens_in)[0];
+  const outputCoin = parseCoins(data[data.length - 1].tokens_out)[0];
 
   return {
     inputAmount: inputCoin.amount,
     inputDenom: inputCoin.denom,
     outputAmount: outputCoin.amount,
     outputDenom: outputCoin.denom,
-    poolId: data.pool_id,
+    poolId: data[data.length - 1].pool_id,
     orderPrice: '0',
   };
 };
@@ -78,8 +93,10 @@ export const getGravityResultFromDecodedEvents = (
   endBlockEvents: Record<string, any>,
   requester?: string,
 ): SwapTransactionResult | undefined => {
-  const data = endBlockEvents.swap_transacted;
+  let data = endBlockEvents.swap_transacted;
+
   if (!data) return;
+  if (Array.isArray(data)) data = data[data.length - 1];
 
   if (requester) {
     if (data.swap_requester !== requester) return undefined;
@@ -96,19 +113,22 @@ export const getGravityResultFromDecodedEvents = (
   };
 };
 
-export const resolveSwapResponse = async (response: Record<string, any>, chainName: string) => {
+export const resolveSwapResponse = async (response: Record<string, any>, chainName: string, requester?: string) => {
   const protocol = getProtocolFromChain(chainName);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { height, tx_result } = response;
+
+  if (!requester) requester = await getOwnAddress({ chain_name: chainName });
 
   if (protocol === EmerisDEXInfo.DEX.Osmosis) {
     const parsedEvents = parseEncodedEvents(tx_result.events);
-    return getOsmosisResultFromDecodedEvents(parsedEvents);
+
+    return getOsmosisResultFromDecodedEvents(parsedEvents, requester);
   }
 
   if (protocol === EmerisDEXInfo.DEX.Gravity) {
     const blockResults = await fetchBlockResults(height, chainName);
     const parsedEvents = parseEncodedEvents(blockResults.end_block_events);
-    const requester = await getOwnAddress({ chain_name: chainName });
     return getGravityResultFromDecodedEvents(parsedEvents, requester);
   }
 };

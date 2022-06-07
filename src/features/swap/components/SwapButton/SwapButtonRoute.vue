@@ -8,7 +8,7 @@
     :disabled="state.matches('updating')"
   >
     <div v-if="state.matches('updating')" class="flex items-center">
-      <div class="absolute" style="transform: scale(0.4) translateX(-2.4rem)">
+      <div class="absolute scale-50 -translate-x-10">
         <Spinner :size="2.5" />
       </div>
       <span class="ml-5">Finding the best price</span>

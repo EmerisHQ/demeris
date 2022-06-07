@@ -57,8 +57,8 @@
   </List>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
+<script setup lang="ts">
+import { computed, onMounted, ref, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -70,69 +70,39 @@ import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
 import { getSumOfRewards } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'PreviewClaim',
+interface Props {
+  step?: Actions.Step;
+  response?: Actions.Step;
+  fees: Actions.FeeTotals;
+  context?: 'default' | 'widget';
+  isReceipt: boolean;
+}
 
-  components: {
-    AmountDisplay,
-    Price,
-    CircleSymbol,
-    List,
-    ListItem,
-    ValidatorBadge,
-  },
-
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      default: undefined,
-    },
-    response: {
-      type: Object as PropType<Actions.Step>,
-      default: undefined,
-    },
-    fees: {
-      type: Object as PropType<Actions.FeeTotals>,
-      required: true,
-    },
-    context: {
-      type: String as PropType<'default' | 'widget'>,
-      default: 'default',
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-  },
-
-  setup(props: any) {
-    const route = useRoute();
-    const { getValidatorsByBaseDenom } = useStaking();
-
-    const baseDenom = route.params.denom as string;
-    const validatorList = ref([]);
-    const propsRef = toRefs(props);
-    const rewardsAmount = computed(() => {
-      return getSumOfRewards(propsRef.step.value.transactions[0].data.total, baseDenom);
-    });
-    const validators = computed(() => {
-      return propsRef.step.value.transactions[0].data.rewards;
-    });
-    onMounted(async () => {
-      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
-    });
-    const getValidator = (val_address) => {
-      return validatorList.value.find((x) => x.operator_address == val_address);
-    };
-    return {
-      baseDenom,
-      rewardsAmount,
-      validators,
-      getValidator,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  step: undefined,
+  response: undefined,
+  context: 'default',
+  isReceipt: false,
 });
+
+const route = useRoute();
+const { getValidatorsByBaseDenom } = useStaking();
+
+const baseDenom = route.params.denom as string;
+const validatorList = ref([]);
+const propsRef = toRefs(props);
+const rewardsAmount = computed(() => {
+  return getSumOfRewards(propsRef.step.value.transactions[0].data.total, baseDenom);
+});
+const validators = computed(() => {
+  return propsRef.step.value.transactions[0].data.rewards;
+});
+onMounted(async () => {
+  validatorList.value = await getValidatorsByBaseDenom(baseDenom);
+});
+const getValidator = (val_address) => {
+  return validatorList.value.find((x) => x.operator_address == val_address);
+};
 </script>
 
 <style lang="scss" scoped></style>

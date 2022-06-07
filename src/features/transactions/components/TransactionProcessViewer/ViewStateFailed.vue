@@ -72,11 +72,17 @@
           <i18n-t scope="global" keypath="components.txHandlingModal.failedSwap">
             <template #amount>
               <AmountDisplay
-                :amount="{ amount: transaction.data.from.amount, denom: getBaseDenomSync(transaction.data.from.denom) }"
+                :amount="{
+                  amount: transaction.data[0].from.amount,
+                  denom: getBaseDenomSync(transaction.data[0].from.denom),
+                }"
               />
             </template>
             <template #denom>
-              <Denom :name="getBaseDenomSync(transaction.data.to.denom)" />
+              <Denom :name="getBaseDenomSync(transaction.data[transaction.data.length - 1].to.denom)" />
+            </template>
+            <template #chain>
+              <ChainName :name="transaction.data[transaction.data.length - 1].chainName" />
             </template>
           </i18n-t>
         </template>
@@ -122,11 +128,11 @@
         <i18n-t scope="global" keypath="components.txHandlingModal.notSwapped">
           <template #amount>
             <span class="font-bold">
-              <AmountDisplay :amount="lastResult?.transaction.data.from" />
+              <AmountDisplay :amount="lastResult?.transaction.data[0].from" />
             </span>
           </template>
           <template #chainName>
-            <ChainName :name="'cosmos-hub'" />
+            <ChainName :name="lastResult?.transaction.data[0].chainName" />
           </template>
         </i18n-t>
       </p>
@@ -137,7 +143,7 @@
         target="_blank"
         class="font-medium text-link hover:text-link-hover"
       >
-        {{ $t('components.txHandlingModal.keplrSupport') }}
+        {{ $t('components.txHandlingModal.walletSupport', { wallet: capitalize(wallet) }) }}
       </a>
 
       <Collapse
@@ -194,7 +200,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { capitalize } from 'lodash';
+import { computed, inject, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -204,6 +211,8 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { SupportedWallet } from '@/features/extension/types';
+import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { StepTransaction } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
@@ -212,6 +221,7 @@ import { useTransactionsStore } from '../../transactionsStore';
 
 const { t } = useI18n({ useScope: 'global' });
 
+const { wallet } = toRefs<{ wallet: SupportedWallet }>({ wallet: walletActionHandler.session.wallet });
 const transactionsStore = useTransactionsStore();
 const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey);
 const { state, send } = actor;
