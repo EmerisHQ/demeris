@@ -195,7 +195,7 @@ export const actions: ActionTree<USERState, RootState> & Actions = {
       analyticsConfig({ user_id: encryptedUID });
 
       await dispatch(ActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
-      for (const chain of toQuery) {
+      for (const chain of Object.values(chains)) {
         await window.keplr.enable(chain.node_info.chain_id);
         const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
         commit(MutationTypes.ADD_CHAIN_KEY_DATA, {
