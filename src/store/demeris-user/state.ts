@@ -1,4 +1,4 @@
-import { AccountData, UserData } from '@/types/user';
+import { AccountData, ChainKeyData, UserData } from '@/types/user';
 
 export type USERState = {
   gas_limit: number;
@@ -7,12 +7,7 @@ export type USERState = {
   stakingBalancesFirstLoad: boolean;
   pricesFirstLoad: boolean;
   account: AccountData;
-  chainKeyData: {
-    keyHash: string;
-    pubKey: Uint8Array;
-    algo: string;
-    chainName: string;
-  }[];
+  chainKeyData: ChainKeyData[];
   _Subscriptions: Set<string>;
   _Session: UserData | Record<string, never>;
 };
