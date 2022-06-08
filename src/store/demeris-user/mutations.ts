@@ -74,6 +74,10 @@ export const mutations: MutationTree<USERState> & Mutations = {
     } else {
       window.localStorage.setItem('lastEmerisSession', '');
     }
+
+    // TODO move into the API where the data actually is fetched
+    state.balancesFirstLoad = true;
+    state.stakingBalancesFirstLoad = true;
   },
   [MutationTypes.RESET_STATE](state: USERState) {
     Object.assign(state, getDefaultState());
