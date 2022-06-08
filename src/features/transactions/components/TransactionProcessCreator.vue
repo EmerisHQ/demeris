@@ -32,8 +32,9 @@ import { computed, nextTick, onUnmounted, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import useAccount from '@/composables/useAccount';
+import { GlobalGetterTypes } from '@/store';
 import { Step } from '@/types/actions';
+import { useStore } from '@/utils/useStore';
 
 import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessViewer from './TransactionProcessViewer.vue';
@@ -55,9 +56,10 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'pending', 'close', 'previous', 'onReceiptState']);
 
+const globalStore = useStore();
 const transactionsStore = useTransactionsStore();
 
-const { allbalances } = useAccount();
+const allbalances = computed(() => globalStore.getters[GlobalGetterTypes.API.getAllBalances]);
 
 const [stepId, service] = transactionsStore.createTransaction({
   action: props.action,
