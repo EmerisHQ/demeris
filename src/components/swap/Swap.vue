@@ -1,6 +1,7 @@
 <template>
   <FeatureRunningConditional name="SWAP_WIDGET_DISABLED">
     <template #deactivated>
+      <SwapOsmosisDown />
       <FeatureRunningConditional name="DEX_AGG">
         <template #deactivated>
           <LiquiditySwap :default-asset="nativeAsset" />
@@ -19,6 +20,7 @@ import { defineProps } from 'vue';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import SwapDisabled from '@/components/swap/SwapDisabled.vue';
+import SwapOsmosisDown from '@/components/swap/SwapOsmosisDown.vue';
 import SwapMultiDex from '@/features/swap/SwapMultiDex.vue';
 
 interface SwapProps {
