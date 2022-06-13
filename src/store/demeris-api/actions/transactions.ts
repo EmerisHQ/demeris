@@ -15,25 +15,16 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface TransactionActionsInterface {
-  //Transaction Logic Action types
-  [ActionTypes.GET_TX_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
-  ): Promise<EmerisAPI.TicketResponse>;
-  [ActionTypes.GET_NUMBERS_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
-  ): Promise<EmerisAPI.SeqNumber>;
-}
-
-export const TransactionActions: ActionTree<APIState, RootState> & TransactionActionsInterface = {
+export const TransactionActions: ActionTree<APIState, RootState> = {
   /**
    * Gets sequence and account number. Used when making a transaction.
    * @param {string} chain_name - chain name
    * @param {string} address - address
    */
-  async [ActionTypes.GET_NUMBERS_CHAIN]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_NUMBERS_CHAIN](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
+  ): Promise<EmerisAPI.SeqNumber> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.NumbersResponse> = await axios.get(
@@ -48,7 +39,10 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
     }
     return getters['getNumbersChain'](params);
   },
-  async [ActionTypes.GET_TX_STATUS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_TX_STATUS](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
+  ): Promise<EmerisAPI.TicketResponse> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.TicketResponse> = await axios.get(

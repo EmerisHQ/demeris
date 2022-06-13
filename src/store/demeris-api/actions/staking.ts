@@ -13,35 +13,14 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface StakingActionsInterface {
-  //Staking Action types
-  [ActionTypes.GET_INFLATION](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<number>;
-  [ActionTypes.GET_STAKING_REWARDS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.StakingRewardsResponse>;
-  [ActionTypes.GET_UNSTAKING_PARAM](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.StakingParams>;
-  [ActionTypes.GET_VALIDATORS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.Validator[]>;
-  [ActionTypes.GET_CHAIN_APR](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<string>;
-}
-
-export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInterface = {
+export const StakingActions: ActionTree<APIState, RootState> = {
   /**
    * Staking Logic Action types
    */
-  async [ActionTypes.GET_INFLATION]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {
+  async [ActionTypes.GET_INFLATION](
+    { getters, rootGetters }: APIActionContext,
+    { subscribe: _subscribe, params: { chain_name } }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<number> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.InflationResponse> = await axios.get(
@@ -53,7 +32,10 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
     }
   },
 
-  async [ActionTypes.GET_STAKING_REWARDS]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {
+  async [ActionTypes.GET_STAKING_REWARDS](
+    { getters, rootGetters }: APIActionContext,
+    { subscribe: _subscribe, params: { chain_name } }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<EmerisAPI.StakingRewardsResponse> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
@@ -67,8 +49,8 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
   },
 
   async [ActionTypes.GET_UNSTAKING_PARAM](
-    { commit, getters },
-    { subscribe: _subscribe, params: { chain_name } },
+    { commit, getters }: APIActionContext,
+    { subscribe: _subscribe, params: { chain_name } }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<EmerisAPI.StakingParams> {
     try {
       const {
@@ -82,8 +64,8 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
   },
 
   async [ActionTypes.GET_CHAIN_APR](
-    { commit, getters, state, rootGetters },
-    { params }: { params: EmerisAPI.ChainReq },
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { params }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
   ): Promise<string> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_APR, payload: { params } });
@@ -109,7 +91,10 @@ export const StakingActions: ActionTree<APIState, RootState> & StakingActionsInt
     return getters['getChainAPR'](params);
   },
 
-  async [ActionTypes.GET_VALIDATORS]({ getters, rootGetters }, { subscribe: _subscribe, params: { chain_name } }) {
+  async [ActionTypes.GET_VALIDATORS](
+    { getters, rootGetters }: APIActionContext,
+    { subscribe: _subscribe, params: { chain_name } }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<EmerisAPI.Validator[]> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.ValidatorsResponse> = await axios.get(

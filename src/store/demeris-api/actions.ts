@@ -18,10 +18,10 @@ import { APIStore } from '.';
 import { ActionTypes } from './action-types';
 import { AirdropActions } from './actions/airdrops';
 import { BalanceActions } from './actions/balances';
-import { ChainActions, ChainActionsInterface } from './actions/chain';
-import { PriceActions, PriceActionsInterface } from './actions/prices';
-import { StakingActions, StakingActionsInterface } from './actions/staking';
-import { TransactionActions, TransactionActionsInterface } from './actions/transactions';
+import { ChainActions } from './actions/chain';
+import { PriceActions } from './actions/prices';
+import { StakingActions } from './actions/staking';
+import { TransactionActions } from './actions/transactions';
 import { MutationTypes } from './mutation-types';
 import { APIState } from './state';
 
@@ -92,11 +92,7 @@ export type Subscription<K extends keyof Actions> = {
 };
 export type Subscriptions = Subscription<keyof Actions>;
 
-export interface Actions
-  extends ChainActionsInterface,
-    StakingActionsInterface,
-    PriceActionsInterface,
-    TransactionActionsInterface {
+export interface Actions {
   //Pools Action types
   [ActionTypes.VALIDATE_POOLS](context: APIActionContext, pools: Pool[]): Promise<Pool[]>;
 

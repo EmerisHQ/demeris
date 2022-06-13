@@ -15,27 +15,14 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface PriceActionsInterface {
-  //Prices Action types
-  [ActionTypes.GET_PRICES](context: APIActionContext, payload: SimpleSubscribable): Promise<EmerisAPI.Prices>;
-  [ActionTypes.GET_TOKEN_PRICES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TokenPriceReq>>,
-  ): Promise<ChartPrices>;
-  [ActionTypes.RESET_TOKEN_PRICES](context: APIActionContext): void;
-
-  //Coingecko Action types
-  [ActionTypes.GET_COINGECKO_ID_BY_NAMES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
-  ): Promise<any>;
-}
-
-export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterface = {
+export const PriceActions: ActionTree<APIState, RootState> = {
   /**
    * Staking Logic Action types
    */
-  async [ActionTypes.GET_PRICES]({ commit, getters, rootGetters, state, dispatch }, { subscribe = false }) {
+  async [ActionTypes.GET_PRICES](
+    { commit, getters, rootGetters, state, dispatch }: APIActionContext,
+    { subscribe = false }: SimpleSubscribable,
+  ): Promise<EmerisAPI.Prices> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_PRICES, payload: {} });
 
@@ -109,7 +96,10 @@ export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterfa
       return getters['getPrices'];
     }
   },
-  async [ActionTypes.GET_TOKEN_PRICES]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_TOKEN_PRICES](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.TokenPriceReq>>,
+  ): Promise<ChartPrices> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     commit(MutationTypes.SET_TOKEN_PRICES_STATUS, {
       value: params.showSkeleton ? LoadingState.LOADING : LoadingState.LOADED,
@@ -129,12 +119,15 @@ export const PriceActions: ActionTree<APIState, RootState> & PriceActionsInterfa
     }
     return getters['getTokenPrices'];
   },
-  [ActionTypes.RESET_TOKEN_PRICES]({ commit }) {
+  [ActionTypes.RESET_TOKEN_PRICES]({ commit }: APIActionContext): void {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
   },
 
   // Coingecko Actions
-  async [ActionTypes.GET_COINGECKO_ID_BY_NAMES]({ commit, getters, rootGetters }, { params }) {
+  async [ActionTypes.GET_COINGECKO_ID_BY_NAMES](
+    { commit, getters, rootGetters }: APIActionContext,
+    { params }: Subscribable<ActionParams<EmerisAPI.TokenIdReq>>,
+  ): Promise<any> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     commit(MutationTypes.SET_COINGECKO_ID_STATUS, {
       value: LoadingState.LOADING,
