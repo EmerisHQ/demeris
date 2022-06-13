@@ -4,7 +4,6 @@ import { test } from './test-with-keplr';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.goto('/welcome', { waitUntil: 'networkidle' });
 });
 
 test.describe('Welcome page elements location and availibility', () => {
