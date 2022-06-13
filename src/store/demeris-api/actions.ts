@@ -49,40 +49,13 @@ export type DemerisTxResultParams = {
 export type TicketResponse = {
   ticket: string;
 };
-type Namespaced<T, N extends string> = {
-  [P in keyof T & string as `${N}/${P}`]: T[P];
+
+export type Subscription = {
+  action: any;
+  payload?: any;
 };
 
-export type Subscription<K extends keyof Actions> = {
-  action: K;
-  payload?: Omit<Parameters<Actions[K]>[1], 'subscribe'>;
-};
-export type Subscriptions = Subscription<keyof Actions>;
-
-export interface Actions {
-  //Pools Action types
-  [ActionTypes.VALIDATE_POOLS](context: APIActionContext, pools: Pool[]): Promise<Pool[]>;
-
-  //Uncategorized Action types
-  [ActionTypes.GET_VERIFIED_DENOMS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<EmerisAPI.VerifiedDenoms>;
-  [ActionTypes.GET_VERIFY_TRACE](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
-  ): Promise<EmerisAPI.VerifyTrace>;
-  [ActionTypes.GET_END_BLOCK_EVENTS](context: APIActionContext, { height }: DemerisTxResultParams): Promise<unknown>;
-  [ActionTypes.INIT](context: APIActionContext, config: DemerisConfig): void;
-  [ActionTypes.RESET_STATE](context: APIActionContext): void;
-  [ActionTypes.SIGN_OUT](context: APIActionContext, keyHashes: string[]): void;
-  [ActionTypes.UNSUBSCRIBE](context: APIActionContext, subscription: Subscriptions): void;
-  [ActionTypes.STORE_UPDATE](context: APIActionContext): void;
-}
-
-export type GlobalActions = Namespaced<Actions, 'demerisAPI'>;
-
-export const actions: ActionTree<APIState, RootState> & Actions = {
+export const actions: ActionTree<APIState, RootState> = {
   ...ChainActions,
   ...AirdropActions,
   ...BalanceActions,
@@ -90,7 +63,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   ...PriceActions,
   ...TransactionActions,
 
-  async [ActionTypes.VALIDATE_POOLS]({ commit, getters }, pools) {
+  async [ActionTypes.VALIDATE_POOLS]({ commit, getters }: APIActionContext, pools: Pool[]): Promise<Pool[]> {
     try {
       const vp = await validPools(pools);
       commit(MutationTypes.SET_VALID_POOLS, vp);
@@ -100,7 +73,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [ActionTypes.GET_VERIFIED_DENOMS]({ commit, getters, rootGetters }, { subscribe = false }) {
+  async [ActionTypes.GET_VERIFIED_DENOMS](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false }: SimpleSubscribable,
+  ): Promise<EmerisAPI.VerifiedDenoms> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.VerifiedDenomsResponse> = await axios.get(
@@ -118,7 +94,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
 
   // Chain-specific endpoint actions
 
-  async [ActionTypes.GET_VERIFY_TRACE]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_VERIFY_TRACE](
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.VerifyTraceReq>>,
+  ): Promise<EmerisAPI.VerifyTrace> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_VERIFY_TRACE, payload: { params } });
     if (state._InProgess.get(reqHash)) {
@@ -161,7 +140,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       return getters['getVerifyTrace'](params);
     }
   },
-  async [ActionTypes.GET_NEW_BLOCK]({ getters }, { chain_name }) {
+  async [ActionTypes.GET_NEW_BLOCK]({ getters }: APIActionContext, { chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 30000;
 
@@ -184,7 +163,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     });
   },
 
-  async [ActionTypes.GET_END_BLOCK_EVENTS]({ getters, rootGetters }, { height, stepType }: DemerisTxResultParams) {
+  async [ActionTypes.GET_END_BLOCK_EVENTS](
+    { getters, rootGetters }: APIActionContext,
+    { height, stepType }: DemerisTxResultParams,
+  ): Promise<unknown> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     function sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -243,7 +225,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
   // Internal module actions
 
   [ActionTypes.INIT](
-    { commit, dispatch },
+    { commit, dispatch }: APIActionContext,
     {
       endpoint,
       gitEndpoint,
@@ -252,8 +234,8 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       hub_chain = 'cosmos-hub',
       refreshTime = 5000,
       gas_limit = 500000,
-    },
-  ) {
+    }: DemerisConfig,
+  ): void {
     console.log('Vuex nodule: demeris initialized!');
     commit(MutationTypes.INIT, { wsEndpoint, endpoint, gitEndpoint, rawGitEndpoint, hub_chain, gas_limit });
     if (!featureRunning('DEBUG')) {
@@ -262,10 +244,10 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }, refreshTime);
     }
   },
-  [ActionTypes.RESET_STATE]({ commit }) {
+  [ActionTypes.RESET_STATE]({ commit }: APIActionContext): void {
     commit(MutationTypes.RESET_STATE);
   },
-  async [ActionTypes.SIGN_OUT]({ commit, state }, keyHashes) {
+  async [ActionTypes.SIGN_OUT]({ commit, state }: APIActionContext, keyHashes: string[]): Promise<void> {
     commit(MutationTypes.CLEAR_SUBSCRIPTIONS);
     // Although on the CLEAR_SUBSCRIPTIONS mutation we remove any subscriptions from the previously signed in account
     // there is a chance some requests were already in progress and may return after we clear them so we await completion
@@ -273,7 +255,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
     await Promise.all(state._InProgess.values());
     commit(MutationTypes.SIGN_OUT, keyHashes);
   },
-  [ActionTypes.STORE_UPDATE]({ state, dispatch }) {
+  [ActionTypes.STORE_UPDATE]({ state, dispatch }: APIActionContext): void {
     state._Subscriptions.forEach(async (subscription_json) => {
       const subscription = JSON.parse(subscription_json);
       try {
@@ -283,7 +265,7 @@ export const actions: ActionTree<APIState, RootState> & Actions = {
       }
     });
   },
-  [ActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
+  [ActionTypes.UNSUBSCRIBE]({ commit }: APIActionContext, subscription: Subscription): void {
     commit(MutationTypes.UNSUBSCRIBE, subscription);
   },
 };
