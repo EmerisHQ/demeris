@@ -1,11 +1,9 @@
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { EmerisAPI, EmerisBase } from '@emeris/types';
+import { EmerisAPI } from '@emeris/types';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 
 import { GlobalGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
-import { UserData } from '@/types/user';
 import { ActionParams, SimpleSubscribable, Subscribable } from '@/types/util';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject } from '@/utils/basic';
@@ -43,44 +41,13 @@ export type DemerisConfig = {
   hub_chain?: string;
   gas_limit?: number;
 };
-export type DemerisTxParams = {
-  tx: string;
-  chain_name: string;
-  address: string;
-};
 export type DemerisTxResultParams = {
   height: number;
   stepType: string;
 };
-export type GasFee = {
-  amount: Array<EmerisBase.Amount>;
-  gas: string;
-};
 
-export type DemerisSignParams = {
-  msgs: Array<EncodeObject>;
-  chain_name: string;
-  fee: GasFee;
-  registry: Registry;
-  memo?: string;
-};
-export type DemerisSessionParams = {
-  data: UserData;
-};
 export type TicketResponse = {
   ticket: string;
-};
-export type DemerisGetValidatorsParam = {
-  chain_name: string;
-};
-export type DemerisGetInflationParam = {
-  chain_name: string;
-};
-export type DemerisGetRewardsParam = {
-  chain_name: string;
-};
-export type DemerisGetUnstakingParam = {
-  chain_name: string;
 };
 type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
