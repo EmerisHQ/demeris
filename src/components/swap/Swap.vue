@@ -1,7 +1,9 @@
 <template>
   <FeatureRunningConditional name="SWAP_WIDGET_DISABLED">
     <template #deactivated>
-      <SwapOsmosisDown />
+      <FeatureRunningConditional name="OSMOSIS_DOWN">
+        <SwapOsmosisDown />
+      </FeatureRunningConditional>
       <FeatureRunningConditional name="DEX_AGG">
         <template #deactivated>
           <LiquiditySwap :default-asset="nativeAsset" />
