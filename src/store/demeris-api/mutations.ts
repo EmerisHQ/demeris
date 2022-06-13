@@ -13,85 +13,49 @@ import { DemerisConfig, Subscriptions } from './actions';
 import { MutationTypes } from './mutation-types';
 import { APIState, getDefaultState } from './state';
 
-export type Mutations<S = APIState> = {
-  [MutationTypes.SET_BALANCES](state: S, payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.Balances }): void;
-  [MutationTypes.SET_POOL_BALANCES](state: S, payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.Balances }): void;
+export const mutations: MutationTree<APIState> = {
+  [MutationTypes.SET_BALANCES](
+    state: APIState,
+    payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.Balances },
+  ): void {
+    if (!isEqual(state.balances[payload.params.address], payload.value)) {
+      state.balances[payload.params.address] = payload.value;
+    }
+  },
+  [MutationTypes.SET_POOL_BALANCES](
+    state: APIState,
+    payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.Balances },
+  ): void {
+    if (!isEqual(state.balances[payload.params.address], payload.value)) {
+      state.balances[payload.params.address] = payload.value;
+    }
+  },
   [MutationTypes.SET_STAKING_BALANCES](
-    state: S,
+    state: APIState,
     payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.StakingBalances },
-  ): void;
-  [MutationTypes.SET_UNSTAKING_PARAM](
-    state: S,
-    payload: { params: EmerisAPI.ChainReq; value: EmerisAPI.StakingParams },
-  ): void;
-  [MutationTypes.SET_UNBONDING_DELEGATIONS](
-    state: S,
-    payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.UnbondingDelegations },
-  ): void;
-  [MutationTypes.SET_NUMBERS_CHAIN](
-    state: S,
-    payload: { params: EmerisAPI.ChainAddrReq; value: EmerisAPI.SeqNumber },
-  ): void;
-  [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: EmerisAPI.VerifiedDenoms }): void;
-  [MutationTypes.SET_VALID_POOLS](state: S, payload: Pool[]): void;
-  [MutationTypes.SET_CHAINS](state: S, payload: { value: EmerisAPI.SupportedChain[] }): void;
-  [MutationTypes.SET_CHAIN_APR](state: S, payload: { params: EmerisAPI.ChainReq; value: string }): void;
-  [MutationTypes.SET_PRICES](state: S, payload: { value: EmerisAPI.Prices }): void;
-  [MutationTypes.SET_TX_STATUS](
-    state: S,
-    payload: { params: EmerisAPI.TicketReq; value: EmerisAPI.TicketResponse },
-  ): void;
-
-  [MutationTypes.SET_VERIFY_TRACE](
-    state: S,
-    payload: { params: EmerisAPI.VerifyTraceReq; value: EmerisAPI.VerifyTrace },
-  ): void;
-  [MutationTypes.SET_CHAIN](state: S, payload: { params: EmerisAPI.ChainReq; value: EmerisAPI.Chain }): void;
-  [MutationTypes.SET_TOKEN_PRICES](state: S, payload: { value: Array<[number, number]> }): void;
-  [MutationTypes.SET_TOKEN_PRICES_STATUS](state: S, payload: { value: LoadingState }): void;
-  [MutationTypes.SET_AIRDROPS_STATUS](state: S, payload: { value: LoadingState }): void;
-  [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: EmerisAPI.ChainReq; value: boolean }): void;
-  [MutationTypes.SET_AIRDROPS](state: S, payload: { value: EmerisAirdrops.Airdrop }): void;
-  [MutationTypes.RESET_AIRDROPS](state: S): void;
-  [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
-  [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
-  [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
-  [MutationTypes.RESET_STATE](state: S): void;
-  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: S): void;
-  [MutationTypes.SIGN_OUT](state: S, payload: string[]): void;
-  [MutationTypes.SUBSCRIBE](state: S, subscription: Subscriptions): void;
-  [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: Subscriptions): void;
-
-  //Coingecko
-  [MutationTypes.SET_COINGECKO_ID](state: S, payload: { params: string; value: EmerisAPI.TokenIdResponse }): void;
-  [MutationTypes.SET_COINGECKO_ID_STATUS](state: S, payload: { value: LoadingState }): void;
-};
-
-export const mutations: MutationTree<APIState> & Mutations = {
-  [MutationTypes.SET_BALANCES](state, payload) {
-    if (!isEqual(state.balances[payload.params.address], payload.value)) {
-      state.balances[payload.params.address] = payload.value;
-    }
-  },
-  [MutationTypes.SET_POOL_BALANCES](state, payload) {
-    if (!isEqual(state.balances[payload.params.address], payload.value)) {
-      state.balances[payload.params.address] = payload.value;
-    }
-  },
-  [MutationTypes.SET_STAKING_BALANCES](state, payload) {
+  ): void {
     if (!isEqual(state.stakingBalances[payload.params.address], payload.value)) {
       state.stakingBalances[payload.params.address] = payload.value;
     }
   },
-  [MutationTypes.SET_UNSTAKING_PARAM](state, payload) {
+  [MutationTypes.SET_UNSTAKING_PARAM](
+    state: APIState,
+    payload: { params: EmerisAPI.ChainReq; value: EmerisAPI.StakingParams },
+  ): void {
     state.unstakingParams[payload.params.chain_name] = payload.value;
   },
-  [MutationTypes.SET_UNBONDING_DELEGATIONS](state, payload) {
+  [MutationTypes.SET_UNBONDING_DELEGATIONS](
+    state: APIState,
+    payload: { params: EmerisAPI.AddrReq; value: EmerisAPI.UnbondingDelegations },
+  ): void {
     if (!isEqual(state.unbondingDelegations[payload.params.address], payload.value)) {
       state.unbondingDelegations[payload.params.address] = payload.value;
     }
   },
-  [MutationTypes.SET_NUMBERS_CHAIN](state, payload) {
+  [MutationTypes.SET_NUMBERS_CHAIN](
+    state: APIState,
+    payload: { params: EmerisAPI.ChainAddrReq; value: EmerisAPI.SeqNumber },
+  ): void {
     if (!state.chainnumbers[payload.params.chain_name]) {
       state.chainnumbers[payload.params.chain_name] = {};
     }
@@ -99,17 +63,17 @@ export const mutations: MutationTree<APIState> & Mutations = {
       state.chainnumbers[payload.params.chain_name][payload.params.address] = payload.value;
     }
   },
-  [MutationTypes.SET_VERIFIED_DENOMS](state, payload) {
+  [MutationTypes.SET_VERIFIED_DENOMS](state: APIState, payload: { value: EmerisAPI.VerifiedDenoms }): void {
     if (!isEqual(state.verifiedDenoms, payload.value)) {
       state.verifiedDenoms = payload.value;
     }
   },
-  [MutationTypes.SET_VALID_POOLS](state: APIState, pools: Pool[]) {
+  [MutationTypes.SET_VALID_POOLS](state: APIState, pools: Pool[]): void {
     if (!isEqual(state.validPools, pools)) {
       state.validPools = pools;
     }
   },
-  [MutationTypes.SET_CHAINS](state, payload) {
+  [MutationTypes.SET_CHAINS](state: APIState, payload: { value: EmerisAPI.SupportedChain[] }): void {
     state.chains = {};
     for (const chain of payload.value) {
       if (!isEqual(state.chains[chain.chain_name], chain)) {
@@ -117,21 +81,24 @@ export const mutations: MutationTree<APIState> & Mutations = {
       }
     }
   },
-  [MutationTypes.SET_CHAIN_APR](state, payload) {
+  [MutationTypes.SET_CHAIN_APR](state: APIState, payload: { params: EmerisAPI.ChainReq; value: string }): void {
     const {
       value,
       params: { chain_name },
     } = payload;
     state.chains[chain_name].apr = value;
   },
-  [MutationTypes.SET_PRICES](state, payload) {
+  [MutationTypes.SET_PRICES](state: APIState, payload: { value: EmerisAPI.Prices }): void {
     state.prices.Fiats = payload.value.Fiats;
     state.prices.Tokens = [
       ...state.prices.Tokens.filter((x) => !payload.value.Tokens.map((x) => x.Symbol).includes(x.Symbol)),
       ...payload.value.Tokens,
     ];
   },
-  [MutationTypes.SET_TX_STATUS](state, payload) {
+  [MutationTypes.SET_TX_STATUS](
+    state: APIState,
+    payload: { params: EmerisAPI.TicketReq; value: EmerisAPI.TicketResponse },
+  ): void {
     const ticket = payload.value;
     let txPromise = state.transactions.get(JSON.stringify(payload.params));
     if (txPromise == null) {
@@ -183,7 +150,10 @@ export const mutations: MutationTree<APIState> & Mutations = {
       state.transactions.set(JSON.stringify(payload.params), txPromise);
     }
   },
-  [MutationTypes.SET_VERIFY_TRACE](state, payload) {
+  [MutationTypes.SET_VERIFY_TRACE](
+    state: APIState,
+    payload: { params: EmerisAPI.VerifyTraceReq; value: EmerisAPI.VerifyTrace },
+  ): void {
     if (state.traces[payload.params.chain_name]) {
       if (!isEqual(state.traces[payload.params.chain_name][payload.params.hash], payload.value)) {
         state.traces[payload.params.chain_name][payload.params.hash] = payload.value;
@@ -193,7 +163,7 @@ export const mutations: MutationTree<APIState> & Mutations = {
       state.traces[payload.params.chain_name][payload.params.hash] = payload.value;
     }
   },
-  [MutationTypes.SET_CHAIN](state, payload) {
+  [MutationTypes.SET_CHAIN](state: APIState, payload: { params: EmerisAPI.ChainReq; value: EmerisAPI.Chain }): void {
     const { status, ...toUpdate } = payload.value;
     if (state.chains[payload.params.chain_name].status == undefined) {
       (toUpdate as EmerisAPI.Chain).status = status;
@@ -210,13 +180,13 @@ export const mutations: MutationTree<APIState> & Mutations = {
       };
     }
   },
-  [MutationTypes.SET_IN_PROGRESS](state: APIState, payload: APIPromise) {
+  [MutationTypes.SET_IN_PROGRESS](state: APIState, payload: APIPromise): void {
     state._InProgess.set(payload.hash, payload.promise);
   },
-  [MutationTypes.DELETE_IN_PROGRESS](state: APIState, payload: string) {
+  [MutationTypes.DELETE_IN_PROGRESS](state: APIState, payload: string): void {
     state._InProgess.delete(payload);
   },
-  [MutationTypes.SET_TOKEN_PRICES](state, payload) {
+  [MutationTypes.SET_TOKEN_PRICES](state: APIState, payload: { value: Array<[number, number]> }): void {
     if (payload.value && payload.value.length > 0) {
       const historicalPrices: ChartPrices = payload.value.map((item) => {
         return {
@@ -230,12 +200,12 @@ export const mutations: MutationTree<APIState> & Mutations = {
       state.tokenPrices = [];
     }
   },
-  [MutationTypes.SET_TOKEN_PRICES_STATUS](state, payload) {
+  [MutationTypes.SET_TOKEN_PRICES_STATUS](state: APIState, payload: { value: LoadingState }): void {
     state.tokenPricesLoadingStatus = payload.value;
   },
 
   //Airdrops Mutations
-  [MutationTypes.SET_AIRDROPS](state, payload) {
+  [MutationTypes.SET_AIRDROPS](state: APIState, payload: { value: EmerisAirdrops.Airdrop }): void {
     const tempAirdrop = payload.value;
 
     if (!tempAirdrop.airdropStartDate && !tempAirdrop.airdropEndDate) {
@@ -258,37 +228,40 @@ export const mutations: MutationTree<APIState> & Mutations = {
 
     state.airdrops.push(tempAirdrop);
   },
-  [MutationTypes.SET_AIRDROPS_STATUS](state, payload) {
+  [MutationTypes.SET_AIRDROPS_STATUS](state: APIState, payload: { value: LoadingState }) {
     state.airdropsStatus = payload.value;
   },
-  [MutationTypes.RESET_AIRDROPS](state) {
+  [MutationTypes.RESET_AIRDROPS](state: APIState): void {
     state.airdrops = [];
   },
 
   //Coingecko Mutations
-  [MutationTypes.SET_COINGECKO_ID](state, payload) {
+  [MutationTypes.SET_COINGECKO_ID](
+    state: APIState,
+    payload: { params: string; value: EmerisAPI.TokenIdResponse },
+  ): void {
     state.coinGeckoId = payload.value.data[payload.params];
   },
-  [MutationTypes.SET_COINGECKO_ID_STATUS](state, payload) {
+  [MutationTypes.SET_COINGECKO_ID_STATUS](state: APIState, payload: { value: LoadingState }): void {
     state.coinGeckoIdLoadingStatus = payload.value;
   },
 
-  [MutationTypes.SET_CHAIN_STATUS](state, payload) {
+  [MutationTypes.SET_CHAIN_STATUS](state: APIState, payload: { params: EmerisAPI.ChainReq; value: boolean }): void {
     if (!isEqual(state.chains[payload.params.chain_name].status, payload.value as boolean)) {
       state.chains[payload.params.chain_name].status = payload.value as boolean;
     }
   },
-  [MutationTypes.INIT](state: APIState, payload: DemerisConfig) {
+  [MutationTypes.INIT](state: APIState, payload: DemerisConfig): void {
     state.endpoint = payload.endpoint;
     state.gitEndpoint = payload.gitEndpoint;
     state.rawGitEndpoint = payload.rawGitEndpoint;
     state.wsEndpoint = payload.wsEndpoint;
     state.hub_chain = payload.hub_chain;
   },
-  [MutationTypes.RESET_STATE](state: APIState) {
+  [MutationTypes.RESET_STATE](state: APIState): void {
     Object.assign(state, getDefaultState());
   },
-  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: APIState) {
+  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: APIState): void {
     for (const sub of state._Subscriptions.values()) {
       const subObj = JSON.parse(sub);
       if (
@@ -300,7 +273,7 @@ export const mutations: MutationTree<APIState> & Mutations = {
       }
     }
   },
-  [MutationTypes.SIGN_OUT](state: APIState, payload: string[]) {
+  [MutationTypes.SIGN_OUT](state: APIState, payload: string[]): void {
     for (const keyhash of payload ?? []) {
       delete state.balances[keyhash];
     }
@@ -309,10 +282,10 @@ export const mutations: MutationTree<APIState> & Mutations = {
     state.transactions = new Map();
     state._InProgess = new Map();
   },
-  [MutationTypes.SUBSCRIBE](state: APIState, subscription) {
+  [MutationTypes.SUBSCRIBE](state: APIState, subscription: Subscriptions): void {
     state._Subscriptions.add(JSON.stringify(subscription));
   },
-  [MutationTypes.UNSUBSCRIBE](state: APIState, subscription) {
+  [MutationTypes.UNSUBSCRIBE](state: APIState, subscription: Subscriptions): void {
     state._Subscriptions.delete(JSON.stringify(subscription));
   },
 };

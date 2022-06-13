@@ -18,24 +18,14 @@ export type GitAirdropsListReq = {
   checkEligibility: boolean;
 };
 
-export interface AirdropActionsInterface {
-  //Airdrops Action types
-  [ActionTypes.GET_GIT_AIRDROPS_LIST](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<EmerisAirdrops.AirdropList>;
-  [ActionTypes.GET_AIRDROPS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<GitAirdropsListReq>>,
-  ): Promise<void>;
-  [ActionTypes.RESET_AIRDROPS](context: APIActionContext): void;
-}
-
-export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInterface = {
+export const AirdropActions: ActionTree<APIState, RootState> = {
   /**
    * Chain Logic Action types
    */
-  async [ActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
+  async [ActionTypes.GET_GIT_AIRDROPS_LIST](
+    { commit }: APIActionContext,
+    { subscribe = false }: SimpleSubscribable,
+  ): Promise<EmerisAirdrops.AirdropList> {
     try {
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const response: AxiosResponse<EmerisAirdrops.AirdropList> = await axios.get(
@@ -49,7 +39,10 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
       throw new EmerisError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [ActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_AIRDROPS](
+    { commit, getters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<GitAirdropsListReq>>,
+  ): Promise<void> {
     let eligibility = null;
     commit(MutationTypes.SET_AIRDROPS_STATUS, {
       value: LoadingState.LOADING,
@@ -85,7 +78,7 @@ export const AirdropActions: ActionTree<APIState, RootState> & AirdropActionsInt
       throw new EmerisError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
-  [ActionTypes.RESET_AIRDROPS]({ commit }) {
+  [ActionTypes.RESET_AIRDROPS]({ commit }: APIActionContext): void {
     commit(MutationTypes.RESET_AIRDROPS);
   },
 };

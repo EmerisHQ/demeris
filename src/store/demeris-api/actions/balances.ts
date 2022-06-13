@@ -15,35 +15,15 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface BalanceActionsInterface {
-  //Balances Action types
-  [ActionTypes.GET_BALANCES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
-  ): Promise<EmerisAPI.Balances>;
-  [ActionTypes.GET_POOL_BALANCES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
-  ): Promise<EmerisAPI.Balances>;
-  [ActionTypes.GET_STAKING_BALANCES](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
-  ): Promise<EmerisAPI.StakingBalances>;
-  [ActionTypes.GET_UNBONDING_DELEGATIONS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
-  ): Promise<EmerisAPI.UnbondingDelegations>;
-  [ActionTypes.GET_ALL_BALANCES](context: APIActionContext, payload?: Subscribable<any>): Promise<EmerisAPI.Balances>;
-  [ActionTypes.GET_ALL_STAKING_BALANCES](context: APIActionContext): Promise<EmerisAPI.StakingBalances>;
-  [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS](context: APIActionContext): Promise<EmerisAPI.UnbondingDelegations>;
-}
-
-export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInterface = {
+export const BalanceActions: ActionTree<APIState, RootState> = {
   /**
    * Balances Logic Action types
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [ActionTypes.GET_BALANCES]({ commit, dispatch, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_BALANCES](
+    { commit, dispatch, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
+  ): Promise<EmerisAPI.Balances> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_BALANCES, payload: { params } });
 
@@ -103,7 +83,10 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
       return getters['getBalances'](params);
     }
   },
-  async [ActionTypes.GET_POOL_BALANCES]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_POOL_BALANCES](
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
+  ): Promise<EmerisAPI.Balances> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_POOL_BALANCES, payload: { params } });
 
@@ -142,7 +125,10 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
       return getters['getBalances'](params);
     }
   },
-  async [ActionTypes.GET_ALL_BALANCES]({ dispatch, getters, rootGetters }, params) {
+  async [ActionTypes.GET_ALL_BALANCES](
+    { dispatch, getters, rootGetters }: APIActionContext,
+    params?: Subscribable<any>,
+  ): Promise<EmerisAPI.Balances> {
     try {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
 
@@ -178,7 +164,11 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
     }
     return getters['getAllBalances'];
   },
-  async [ActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters, rootGetters }) {
+  async [ActionTypes.GET_ALL_STAKING_BALANCES]({
+    dispatch,
+    getters,
+    rootGetters,
+  }: APIActionContext): Promise<EmerisAPI.StakingBalances> {
     try {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
 
@@ -198,7 +188,11 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
     }
     return getters['getAllStakingBalances'];
   },
-  async [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({ dispatch, getters, rootGetters }) {
+  async [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({
+    dispatch,
+    getters,
+    rootGetters,
+  }: APIActionContext): Promise<EmerisAPI.UnbondingDelegations> {
     try {
       const keyHashes = rootGetters[GlobalGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
@@ -209,7 +203,10 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
     }
     return getters['getAllUnbondingDelegations'];
   },
-  async [ActionTypes.GET_STAKING_BALANCES]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_STAKING_BALANCES](
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
+  ): Promise<EmerisAPI.StakingBalances> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_STAKING_BALANCES, payload: { params } });
 
@@ -248,9 +245,9 @@ export const BalanceActions: ActionTree<APIState, RootState> & BalanceActionsInt
     }
   },
   async [ActionTypes.GET_UNBONDING_DELEGATIONS](
-    { commit, getters, state, rootGetters },
-    { subscribe = false, params },
-  ) {
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.AddrReq>>,
+  ): Promise<EmerisAPI.UnbondingDelegations> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
 

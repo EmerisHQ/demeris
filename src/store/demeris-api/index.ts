@@ -2,20 +2,16 @@ import { CommitOptions, DispatchOptions, Module, Store as VuexStore } from 'vuex
 
 import { RootState } from '@/store';
 
-import { Actions, actions, GlobalActions } from './actions';
+import { Actions, actions } from './actions';
 import { Getters, getters, GlobalGetters } from './getters';
-import { Mutations, mutations } from './mutations';
+import { mutations } from './mutations';
 import type { APIState } from './state';
 import { getDefaultState } from './state';
 
 export { APIState };
 
 export type APIStore<S = APIState> = Omit<VuexStore<S>, 'getters' | 'commit' | 'dispatch'> & {
-  commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
-    key: K,
-    payload?: P,
-    options?: CommitOptions,
-  ): ReturnType<Mutations[K]>;
+  commit<K, P>(key: K, payload?: P, options?: CommitOptions);
 } & {
   dispatch<K extends keyof Actions>(
     key: K,
@@ -28,11 +24,7 @@ export type APIStore<S = APIState> = Omit<VuexStore<S>, 'getters' | 'commit' | '
   };
 };
 export type NamespacedAPIStore<S = APIState> = Omit<APIStore<S>, 'getters' | 'dispatch'> & {
-  dispatch<K extends keyof GlobalActions>(
-    key: K,
-    payload?: Parameters<GlobalActions[K]>[1],
-    options?: DispatchOptions,
-  ): ReturnType<GlobalActions[K]>;
+  dispatch(key: string, payload?: any, options?: DispatchOptions);
 } & {
   getters: {
     [K in keyof GlobalGetters]: ReturnType<GlobalGetters[K]>;

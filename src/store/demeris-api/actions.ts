@@ -16,8 +16,8 @@ import { RootStoreTyped } from '../';
 import { featureRunning } from './../../utils/FeatureManager';
 import { APIStore } from '.';
 import { ActionTypes } from './action-types';
-import { AirdropActions, AirdropActionsInterface } from './actions/airdrops';
-import { BalanceActions, BalanceActionsInterface } from './actions/balances';
+import { AirdropActions } from './actions/airdrops';
+import { BalanceActions } from './actions/balances';
 import { ChainActions, ChainActionsInterface } from './actions/chain';
 import { PriceActions, PriceActionsInterface } from './actions/prices';
 import { StakingActions, StakingActionsInterface } from './actions/staking';
@@ -94,8 +94,6 @@ export type Subscriptions = Subscription<keyof Actions>;
 
 export interface Actions
   extends ChainActionsInterface,
-    AirdropActionsInterface,
-    BalanceActionsInterface,
     StakingActionsInterface,
     PriceActionsInterface,
     TransactionActionsInterface {
