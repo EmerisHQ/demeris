@@ -90,6 +90,8 @@ import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
 
+BigNumber.config({ EXPONENTIAL_AT: [-20, 24] });
+
 interface Props {
   data: EmerisAPI.Balances;
   type?: string;
