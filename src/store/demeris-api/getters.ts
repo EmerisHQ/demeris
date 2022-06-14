@@ -5,6 +5,7 @@ import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
+import { GlobalGetterTypes } from '@/store';
 import { Pool } from '@/types/actions';
 import { ChartPrices, LoadingState } from '@/types/util';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
@@ -126,8 +127,8 @@ export const getters: GetterTree<APIState, RootState> = {
   [GetterTypes.getExchangeAmountFromATOMPool]:
     (state: APIState, getters) =>
     (base_denom: string): number => {
-      const traces = getters['getAllVerifiedTraces'];
-      const pools = getters['getAllValidPools'];
+      const traces = getters[GlobalGetterTypes.API.getAllVerifiedTraces];
+      const pools = getters[GlobalGetterTypes.API.getAllValidPools];
 
       let referencePool = null;
       let reserveBaseDenoms = [];
@@ -149,7 +150,7 @@ export const getters: GetterTree<APIState, RootState> = {
         return;
       }
 
-      const reserveBalances = getters['getBalances']({
+      const reserveBalances = getters[GlobalGetterTypes.API.getBalances]({
         address: keyHashfromAddress(referencePool.reserve_account_address),
       });
 
@@ -164,7 +165,7 @@ export const getters: GetterTree<APIState, RootState> = {
           {
             ...parseCoins(balance.amount)[0],
             base_denom: baseDenom,
-            precision: getters['getDenomPrecision']({ name: baseDenom }) ?? 6,
+            precision: getters[GlobalGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6,
           },
         ];
       }, []);
@@ -181,7 +182,7 @@ export const getters: GetterTree<APIState, RootState> = {
   [GetterTypes.getPrice]:
     (state: APIState, getters) =>
     (params: { denom: string }): number => {
-      const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
+      const ticker = (getters[GlobalGetterTypes.API.getTicker]({ name: params.denom }) + 'USDT').toUpperCase();
       if (state.prices.Tokens.length == 0) {
         return;
       }
@@ -191,13 +192,13 @@ export const getters: GetterTree<APIState, RootState> = {
         return marketPrice;
       }
 
-      const exchangeAmountFromPool = getters['getExchangeAmountFromATOMPool'](params.denom);
+      const exchangeAmountFromPool = getters[GlobalGetterTypes.API.getExchangeAmountFromATOMPool](params.denom);
 
       if (exchangeAmountFromPool) {
-        const exchangedDenomPrecision = getters['getDenomPrecision']({
+        const exchangedDenomPrecision = getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: params.denom,
         });
-        const ATOMPrice = getters['getPrice']({ denom: 'uatom' });
+        const ATOMPrice = getters[GlobalGetterTypes.API.getPrice]({ denom: 'uatom' });
 
         return exchangeAmountFromPool * ATOMPrice * 10 ** (exchangedDenomPrecision - 6);
       }
@@ -207,7 +208,7 @@ export const getters: GetterTree<APIState, RootState> = {
   [GetterTypes.getSupply]:
     (state: APIState, getters) =>
     (params): number => {
-      const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
+      const ticker = (getters[GlobalGetterTypes.API.getTicker]({ name: params.denom }) + 'USDT').toUpperCase();
       return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Supply ?? null;
     },
   [GetterTypes.getEndpoint]: (state: APIState): string => {

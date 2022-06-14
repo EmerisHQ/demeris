@@ -30,7 +30,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getBalances'](params);
+      return getters[GlobalGetterTypes.API.getBalances](params);
     } else {
       let resolver;
       let rejecter;
@@ -41,7 +41,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.BalancesResponse> = await axios.get(
-          getters['getEndpoint'] + '/account/' + params.address + '/balance',
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/account/${params.address}/balance`,
         );
 
         if (response.data.balances) {
@@ -50,7 +50,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
             if (
               // balance.ibc holds resolved ibc denoms so we can show the name of the coin. this functions as a cache. so if it was loaded in the past we don't need to load it again.
               Object.keys(balance.ibc).length != 0 &&
-              !getters['getVerifyTrace']({
+              !getters[GlobalGetterTypes.API.getVerifyTrace]({
                 chain_name: balance.on_chain,
                 hash: balance.ibc.hash,
               })
@@ -80,7 +80,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-      return getters['getBalances'](params);
+      return getters[GlobalGetterTypes.API.getBalances](params);
     }
   },
   async [ActionTypes.GET_POOL_BALANCES](
@@ -93,7 +93,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getBalances'](params);
+      return getters[GlobalGetterTypes.API.getBalances](params);
     } else {
       let resolver;
       let rejecter;
@@ -104,7 +104,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.BalancesResponse> = await axios.get(
-          getters['getEndpoint'] + '/account/' + params.address + '/balance',
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/account/${params.address}/balance`,
         );
 
         commit(MutationTypes.SET_POOL_BALANCES, { params, value: response.data.balances });
@@ -122,7 +122,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
 
-      return getters['getBalances'](params);
+      return getters[GlobalGetterTypes.API.getBalances](params);
     }
   },
   async [ActionTypes.GET_ALL_BALANCES](
@@ -135,7 +135,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       const balanceLoads = [];
 
       const chains =
-        getters['getChains'] ??
+        getters[GlobalGetterTypes.API.getChains] ??
         (await dispatch(ActionTypes.GET_CHAINS, {
           subscribe: featureRunning('USE_NEW_CHAINS_API'),
         }));
@@ -162,7 +162,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     } catch (e) {
       throw new EmerisError('Demeris:GetAllBalances', 'Could not perform API query.');
     }
-    return getters['getAllBalances'];
+    return getters[GlobalGetterTypes.API.getAllBalances];
   },
   async [ActionTypes.GET_ALL_STAKING_BALANCES]({
     dispatch,
@@ -186,7 +186,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     } catch (e) {
       throw new EmerisError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
     }
-    return getters['getAllStakingBalances'];
+    return getters[GlobalGetterTypes.API.getAllStakingBalances];
   },
   async [ActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({
     dispatch,
@@ -201,7 +201,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     } catch (e) {
       throw new EmerisError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
     }
-    return getters['getAllUnbondingDelegations'];
+    return getters[GlobalGetterTypes.API.getAllUnbondingDelegations];
   },
   async [ActionTypes.GET_STAKING_BALANCES](
     { commit, getters, state, rootGetters }: APIActionContext,
@@ -213,7 +213,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getStakingBalances'](params);
+      return getters[GlobalGetterTypes.API.getStakingBalances](params);
     } else {
       let resolver;
       let rejecter;
@@ -224,7 +224,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.StakingBalancesResponse> = await axios.get(
-          getters['getEndpoint'] + '/account/' + params.address + '/stakingbalances',
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/account/${params.address}/stakingbalances`,
         );
         commit(MutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
         if (subscribe) {
@@ -241,7 +241,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
 
-      return getters['getStakingBalances'](params);
+      return getters[GlobalGetterTypes.API.getStakingBalances](params);
     }
   },
   async [ActionTypes.GET_UNBONDING_DELEGATIONS](
@@ -254,7 +254,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getUnbondingDelegations'](params);
+      return getters[GlobalGetterTypes.API.getUnbondingDelegations](params);
     } else {
       let resolver;
       let rejecter;
@@ -265,7 +265,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.UnbondingDelegationsResponse> = await axios.get(
-          getters['getEndpoint'] + '/account/' + params.address + '/unbondingdelegations',
+          getters[GlobalGetterTypes.API.getEndpoint] + '/account/' + params.address + '/unbondingdelegations',
         );
         commit(MutationTypes.SET_UNBONDING_DELEGATIONS, { params, value: response.data.unbonding_delegations });
         if (subscribe) {
@@ -282,7 +282,7 @@ export const BalanceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
 
-      return getters['getUnbondingDelegations'](params);
+      return getters[GlobalGetterTypes.API.getUnbondingDelegations](params);
     }
   },
 };

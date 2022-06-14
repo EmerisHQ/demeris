@@ -29,7 +29,7 @@ export const PriceActions: ActionTree<APIState, RootState> = {
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getPrices'];
+      return getters[GlobalGetterTypes.API.getPrices];
     } else {
       let resolver;
       let rejecter;
@@ -40,14 +40,14 @@ export const PriceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.PricesResponse> = await axios.get(
-          getters['getEndpoint'] + '/oracle/prices',
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/oracle/prices`,
         );
         if (response.data?.data?.Tokens) {
           commit(MutationTypes.SET_PRICES, { value: response.data.data });
 
           // Set initial prices so pool calculations can find them
           await Promise.all(
-            getters['getVerifiedDenoms'].map(async (denom) => {
+            getters[GlobalGetterTypes.API.getVerifiedDenoms].map(async (denom) => {
               if (denom.name.startsWith('pool')) {
                 const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
 
@@ -93,7 +93,7 @@ export const PriceActions: ActionTree<APIState, RootState> = {
       }
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-      return getters['getPrices'];
+      return getters[GlobalGetterTypes.API.getPrices];
     }
   },
   async [ActionTypes.GET_TOKEN_PRICES](
@@ -106,7 +106,9 @@ export const PriceActions: ActionTree<APIState, RootState> = {
     });
     try {
       const response: AxiosResponse<EmerisAPI.TokenPriceResponse> = await axios.get(
-        getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/oracle/chart/${params.token_id}?days=${
+          params.days
+        }&vs_currency=${params.currency}`,
       );
       commit(MutationTypes.SET_TOKEN_PRICES, { value: response.data.data.prices });
       commit(MutationTypes.SET_TOKEN_PRICES_STATUS, { value: LoadingState.LOADED });
@@ -117,7 +119,7 @@ export const PriceActions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_TOKEN_PRICES_STATUS, { value: LoadingState.ERROR });
       throw new EmerisError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
-    return getters['getTokenPrices'];
+    return getters[GlobalGetterTypes.API.getTokenPrices];
   },
   [ActionTypes.RESET_TOKEN_PRICES]({ commit }: APIActionContext): void {
     commit(MutationTypes.SET_TOKEN_PRICES, { value: [] });
@@ -134,11 +136,11 @@ export const PriceActions: ActionTree<APIState, RootState> = {
     });
     try {
       const response: AxiosResponse<EmerisAPI.TokenIdResponse> = await axios.get(
-        getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/oracle/geckoid?names=${params.token}`,
       );
       commit(MutationTypes.SET_COINGECKO_ID, { params: params.token, value: response.data });
       commit(MutationTypes.SET_COINGECKO_ID_STATUS, { value: LoadingState.LOADED });
-      return getters['getCoinGeckoId'];
+      return getters[GlobalGetterTypes.API.getCoinGeckoId];
     } catch (e) {
       commit(MutationTypes.SET_COINGECKO_ID_STATUS, { value: LoadingState.ERROR });
       console.error('Demeris:getCoinGeckoId: Could not perform API query.');

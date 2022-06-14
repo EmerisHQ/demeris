@@ -73,7 +73,7 @@ export const actions: ActionTree<APIState, RootState> = {
       console.error(e);
       throw new EmerisError('Demeris:ValidatePools', 'Could not perform pool validation.');
     }
-    return getters['getAllValidPools'];
+    return getters[GlobalGetterTypes.API.getAllValidPools];
   },
   async [ActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters, rootGetters }: APIActionContext,
@@ -82,7 +82,7 @@ export const actions: ActionTree<APIState, RootState> = {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.VerifiedDenomsResponse> = await axios.get(
-        getters['getEndpoint'] + '/verified_denoms',
+        getters[GlobalGetterTypes.API.getEndpoint] + '/verified_denoms',
       );
       commit(MutationTypes.SET_VERIFIED_DENOMS, { value: response.data.verified_denoms });
       if (subscribe) {
@@ -91,7 +91,7 @@ export const actions: ActionTree<APIState, RootState> = {
     } catch (e) {
       throw new EmerisError('Demeris:GetVerifiedDenoms', 'Could not perform API query.');
     }
-    return getters['getVerifiedDenoms'];
+    return getters[GlobalGetterTypes.API.getVerifiedDenoms];
   },
 
   // Chain-specific endpoint actions
@@ -104,7 +104,7 @@ export const actions: ActionTree<APIState, RootState> = {
     const reqHash = hashObject({ action: ActionTypes.GET_VERIFY_TRACE, payload: { params } });
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
-      return getters['getVerifyTrace'](params);
+      return getters[GlobalGetterTypes.API.getVerifyTrace](params);
     } else {
       let resolver;
       const promise: Promise<void> = new Promise((resolve, _) => {
@@ -113,7 +113,7 @@ export const actions: ActionTree<APIState, RootState> = {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.VerifyTraceResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name + '/denom/verify_trace/' + params.hash,
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${params.chain_name}/denom/verify_trace/${params.hash}`,
         );
         if (response?.data?.verify_trace?.trace) {
           commit(MutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
@@ -139,14 +139,14 @@ export const actions: ActionTree<APIState, RootState> = {
       }
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getVerifyTrace'](params);
+      return getters[GlobalGetterTypes.API.getVerifyTrace](params);
     }
   },
   async [ActionTypes.GET_NEW_BLOCK]({ getters }: APIActionContext, { chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 30000;
 
-      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
+      const wsUrl = `${getters[GlobalGetterTypes.API.getWebSocketEndpoint]}/chain/${chain_name}/rpc/websocket`;
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
 
       await wss.connect().catch(reject);
@@ -176,7 +176,7 @@ export const actions: ActionTree<APIState, RootState> = {
 
     try {
       await sleep(800); // Apparently it takes some time for end block events to be available on the rpc endpoint after the tx is delivered and our tx ticket updates so this is why this was added originally.
-      const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
+      const response = await axios.get(`${getters[GlobalGetterTypes.API.getEndpoint]}/block_results?height=${height}`);
       const successData = {};
 
       if (response.data.result?.end_block_events) {
@@ -184,7 +184,7 @@ export const actions: ActionTree<APIState, RootState> = {
 
         const checks = getEndBlockChecks({
           type: stepType,
-          requesterAddress: await getOwnAddress({ chain_name: getters['getDexChain'] }),
+          requesterAddress: await getOwnAddress({ chain_name: getters[GlobalGetterTypes.API.getDexChain] }),
         });
 
         response.data.result?.end_block_events?.forEach((item) => {

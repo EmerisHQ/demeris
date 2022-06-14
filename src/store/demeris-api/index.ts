@@ -33,10 +33,10 @@ export const module: Module<APIState, RootState> = {
   mutations,
   getters,
   actions,
-  namespaced: true,
+  namespaced: false,
 };
 
-import { GlobalActionTypes } from './action-types';
-import { GlobalGetterTypes } from './getter-types';
+import { ActionTypes as GlobalActionTypes } from './action-types';
+import { GetterTypes as GlobalGetterTypes } from './getter-types';
 
 export { GlobalActionTypes, GlobalGetterTypes };

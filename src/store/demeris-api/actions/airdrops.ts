@@ -3,7 +3,7 @@ import { EmerisAirdrops } from '@emeris/types';
 import axios, { AxiosResponse } from 'axios';
 import { ActionTree } from 'vuex';
 
-import { RootState } from '@/store';
+import { GlobalGetterTypes, RootState } from '@/store';
 import { ActionParams, LoadingState, SimpleSubscribable, Subscribable } from '@/types/util';
 import { getAirdropEligibility } from '@/utils/airdropEligibility';
 import EmerisError from '@/utils/EmerisError';
@@ -50,7 +50,9 @@ export const AirdropActions: ActionTree<APIState, RootState> = {
     try {
       delete axios.defaults.headers.get['X-Correlation-Id'];
       const response = await axios.get(
-        `${getters['getRawGitEndpoint']}/EmerisHQ/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+        `${getters[GlobalGetterTypes.API.getRawGitEndpoint]}/EmerisHQ/Emeris-Airdrop/main/airdropList/${
+          params.airdropFileName
+        }`,
       );
 
       if (params.checkEligibility) {

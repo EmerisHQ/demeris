@@ -24,7 +24,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.InflationResponse> = await axios.get(
-        getters['getEndpoint'] + '/chain/' + chain_name + '/mint/inflation',
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${chain_name}/mint/inflation`,
       );
       return Number(response.data?.inflation);
     } catch (e) {
@@ -40,7 +40,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     try {
       const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
       const response: AxiosResponse<EmerisAPI.StakingRewardsResponse> = await axios.get(
-        getters['getEndpoint'] + '/account/' + address + '/delegatorrewards/' + chain_name,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/account/${address}/delegatorrewards/${chain_name}`,
       );
       return response.data;
     } catch (e) {
@@ -55,9 +55,9 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     try {
       const {
         data: { params: unstakingParam },
-      } = await axios.get(`${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
+      } = await axios.get(`${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${chain_name}/staking/params`);
       commit(MutationTypes.SET_UNSTAKING_PARAM, { params: { chain_name }, value: unstakingParam });
-      return getters['getUnstakingParam']({ chain_name });
+      return getters[GlobalGetterTypes.API.getUnstakingParam]({ chain_name });
     } catch {
       throw new EmerisError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
     }
@@ -71,7 +71,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_APR, payload: { params } });
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
-      return getters['getChainAPR'](params);
+      return getters[GlobalGetterTypes.API.getChainAPR](params);
     }
     let resolver;
     const promise: Promise<void> = new Promise((resolve, _) => {
@@ -80,7 +80,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
     try {
       const response: AxiosResponse<EmerisAPI.ChainAPR> = await axios.get(
-        getters['getEndpoint'] + '/chain/' + params.chain_name + '/apr',
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${params.chain_name}/apr`,
       );
       commit(MutationTypes.SET_CHAIN_APR, { params, value: response.data.apr ? response.data.apr : '0.00' });
     } catch (e) {
@@ -88,7 +88,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     }
     resolver();
     commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-    return getters['getChainAPR'](params);
+    return getters[GlobalGetterTypes.API.getChainAPR](params);
   },
 
   async [ActionTypes.GET_VALIDATORS](
@@ -98,7 +98,7 @@ export const StakingActions: ActionTree<APIState, RootState> = {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.ValidatorsResponse> = await axios.get(
-        getters['getEndpoint'] + '/chain/' + chain_name + '/validators',
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${chain_name}/validators`,
       );
       return response.data?.validators;
     } catch (e) {
