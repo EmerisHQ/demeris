@@ -2,7 +2,7 @@ import { CommitOptions, DispatchOptions, Module, Store as VuexStore } from 'vuex
 
 import { RootState } from '@/store';
 
-import { Actions, actions } from './actions';
+import { actions } from './actions';
 import { Getters, getters, GlobalGetters } from './getters';
 import { mutations } from './mutations';
 import type { APIState } from './state';
@@ -13,11 +13,7 @@ export { APIState };
 export type APIStore<S = APIState> = Omit<VuexStore<S>, 'getters' | 'commit' | 'dispatch'> & {
   commit<K, P>(key: K, payload?: P, options?: CommitOptions);
 } & {
-  dispatch<K extends keyof Actions>(
-    key: K,
-    payload?: Parameters<Actions[K]>[1],
-    options?: DispatchOptions,
-  ): ReturnType<Actions[K]>;
+  dispatch(key: any, payload?: any, options?: DispatchOptions): any;
 } & {
   getters: {
     [K in keyof Getters]: ReturnType<Getters[K]>;

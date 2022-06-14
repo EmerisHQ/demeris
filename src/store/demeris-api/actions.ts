@@ -55,6 +55,8 @@ export type Subscription = {
   payload?: any;
 };
 
+export type Subscriptions = Subscription;
+
 export const actions: ActionTree<APIState, RootState> = {
   ...ChainActions,
   ...AirdropActions,
