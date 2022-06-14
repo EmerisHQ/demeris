@@ -3,7 +3,7 @@ import { CommitOptions, DispatchOptions, Module, Store as VuexStore } from 'vuex
 import { RootState } from '@/store';
 
 import { actions } from './actions';
-import { Getters, getters, GlobalGetters } from './getters';
+import { getters } from './getters';
 import { mutations } from './mutations';
 import type { APIState } from './state';
 import { getDefaultState } from './state';
@@ -16,14 +16,14 @@ export type APIStore<S = APIState> = Omit<VuexStore<S>, 'getters' | 'commit' | '
   dispatch(key: any, payload?: any, options?: DispatchOptions): any;
 } & {
   getters: {
-    [K in keyof Getters]: ReturnType<Getters[K]>;
+    any: any;
   };
 };
 export type NamespacedAPIStore<S = APIState> = Omit<APIStore<S>, 'getters' | 'dispatch'> & {
   dispatch(key: string, payload?: any, options?: DispatchOptions);
 } & {
   getters: {
-    [K in keyof GlobalGetters]: ReturnType<GlobalGetters[K]>;
+    any: any;
   };
 };
 export const namespace = 'demerisAPI';
