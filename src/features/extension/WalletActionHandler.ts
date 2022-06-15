@@ -46,14 +46,22 @@ class WalletActionHandler {
     return this.lastSession;
   }
   private getLastSession() {
-    if (!window.localStorage.getItem('lastEmerisSession')) {
-      this.lastSession = {
-        timestamp: 0,
-        wallet: SupportedWallet.EMERIS,
-      };
+    // wallet action handler is used in the store which is used in the service worker of the extension which doesn't have the window object
+    try {
+      if (!window.localStorage.getItem('lastEmerisSession')) {
+        this.lastSession = {
+          timestamp: 0,
+          wallet: SupportedWallet.EMERIS,
+        };
+        return;
+      }
+
+      this.lastSession.timestamp = Number(window.localStorage.getItem('lastEmerisSession'));
+      this.lastSession.wallet = window.localStorage.getItem('lastEmerisWallet') as SupportedWallet;
+    } catch (err) {
+      console.error('Couldnt get las Emeris session for Wallet Action Handler');
+      console.error(err);
     }
-    this.lastSession.timestamp = Number(window.localStorage.getItem('lastEmerisSession'));
-    this.lastSession.wallet = window.localStorage.getItem('lastEmerisWallet') as SupportedWallet;
   }
   public setLastSession(walletSession: WalletSession) {
     window.localStorage.setItem('lastEmerisSession', `${walletSession.timestamp}`);
