@@ -73,9 +73,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { capitalize } from 'lodash';
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import keplrWalletLogo from '@/assets/images/keplr-wallet-logo.png';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
@@ -87,98 +87,81 @@ import { useStore } from '@/utils/useStore';
 
 import Spinner from '../ui/Spinner.vue';
 
-export default defineComponent({
-  name: 'ConnectWallet',
+interface Props {
+  type?: string;
+}
 
-  components: {
-    FeatureRunningConditional,
-    Button,
-    Spinner,
-  },
+withDefaults(defineProps<Props>(), { type: undefined });
 
-  props: {
-    type: {
-      type: String,
-      default: undefined,
-    },
-  },
+const emit = defineEmits<{
+  (e: 'cancel'): void;
+  (e: 'connect'): void;
+  (e: 'warning', walletType: string): void;
+  (e: 'try-demo'): void;
+}>();
 
-  emits: ['cancel', 'connect', 'warning', 'try-demo'],
+const store = useStore();
+const isConnecting = ref(false);
+const isWarningAgreed = ref(null);
+const isWarningNeeded = ref(null);
+const connectingWallet = ref<SupportedWallet>(null);
 
-  // eslint-disable-next-line max-lines-per-function
-  setup(_, { emit }) {
-    const store = useStore();
-    const isConnecting = ref(false);
-    const isWarningAgreed = ref(null);
-    const isWarningNeeded = ref(null);
-    const connectingWallet = ref<SupportedWallet>(null);
+const emitCancel = () => {
+  cancel();
+  emit('cancel');
+};
 
-    const emitCancel = () => {
-      cancel();
-      emit('cancel');
-    };
+const cancel = () => {
+  isConnecting.value = false;
+};
 
-    const cancel = () => {
-      isConnecting.value = false;
-    };
+const isSignedIn = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isSignedIn];
+});
 
-    const isSignedIn = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isSignedIn];
-    });
+const tryWalletSignIn = (walletType: SupportedWallet) => {
+  if (!featureRunning('USE_EMERIS_EXTENSION')) throw new Error('should not be run with USE_EMERIS_EXTENSION off');
+  connectingWallet.value = walletType;
+  if (isWarningAgreed.value) {
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
+    isConnecting.value = true;
+  } else {
+    emit('warning', connectingWallet.value);
+  }
+};
 
-    const tryWalletSignIn = (walletType: SupportedWallet) => {
-      if (!featureRunning('USE_EMERIS_EXTENSION')) throw new Error('should not be run with USE_EMERIS_EXTENSION off');
-      connectingWallet.value = walletType;
-      if (isWarningAgreed.value) {
-        store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
-        isConnecting.value = true;
-      } else {
-        emit('warning');
-      }
-    };
+const trySignIn = () => {
+  if (isWarningAgreed.value) {
+    signIn(connectingWallet.value);
+  } else {
+    emit('warning', connectingWallet.value);
+  }
+};
 
-    const trySignIn = () => {
-      if (isWarningAgreed.value) {
-        signIn();
-      } else {
-        emit('warning');
-      }
-    };
+const signIn = (walletType?) => {
+  if (featureRunning('USE_EMERIS_EXTENSION')) {
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN_NEW, { walletType });
+  } else {
+    store.dispatch(GlobalActionTypes.USER.SIGN_IN);
+  }
+  isConnecting.value = true;
+};
 
-    const signIn = () => {
-      store.dispatch(GlobalActionTypes.USER.SIGN_IN);
-      isConnecting.value = true;
-    };
+defineExpose({ cancel, signIn });
 
-    onMounted(() => {
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
-      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
-    });
+onMounted(() => {
+  isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+  isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+});
 
-    const signInDemo = () => {
-      store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
-      isConnecting.value = true;
-    };
-    watch(isSignedIn, () => {
-      if (isSignedIn.value) {
-        emit('connect');
-      }
-    });
-
-    return {
-      isConnecting,
-      emitCancel,
-      cancel,
-      keplrWalletLogo,
-      trySignIn,
-      signInDemo,
-      tryWalletSignIn,
-      SupportedWallet,
-      connectingWallet,
-      capitalize,
-      signIn,
-    };
-  },
+const signInDemo = () => {
+  store.dispatch(GlobalActionTypes.USER.SIGN_IN_WITH_WATCHER);
+  isConnecting.value = true;
+};
+watch(isSignedIn, () => {
+  if (isSignedIn.value) {
+    emit('connect');
+  }
 });
 </script>
 <style lang="scss" scoped>

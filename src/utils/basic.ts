@@ -1,12 +1,11 @@
-import { Coin, pubkeyToAddress, Secp256k1HdWallet } from '@cosmjs/amino';
-import { sha256, stringToPath } from '@cosmjs/crypto';
+import { Coin, pubkeyToAddress } from '@cosmjs/amino';
+import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { EmerisAPI } from '@emeris/types';
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
 
-import { walletActionHandler } from '@/features/extension/WalletActionHandler';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -50,7 +49,6 @@ export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
   return keyhash !== '' ? bech32.encode(prefix.replace(/[\u200B-\u200D\uFEFF]/g, ''), words) : '';
 }
 export async function getOwnAddress({ chain_name }) {
-  const isCypress = !!window['Cypress'];
   const typedstore = useStore() as RootStoreTyped;
 
   if (typedstore.getters[GlobalGetterTypes.USER.isDemoAccount]) {
@@ -71,30 +69,8 @@ export async function getOwnAddress({ chain_name }) {
         params: { chain_name },
       });
     const chain = typedstore.getters[GlobalGetterTypes.API.getChain]({ chain_name });
-    if (isCypress) {
-      const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
-        prefix: chain.node_info.bech32_config.main_prefix,
-        hdPaths: [stringToPath(chain.derivation_path)],
-      });
-      const [account] = await signer.getAccounts();
-      const key = {
-        name: 'Cypress Test',
-        algo: account.algo,
-        pubKey: account.pubkey,
-        bech32Address: account.address,
-        isNanoLedger: false,
-        address: fromHexString(keyHashfromAddress(account.address)),
-      };
-      return key.bech32Address;
-    } else {
-      let key;
-      if (featureRunning('USE_EMERIS_EXTENSION')) {
-        key = await walletActionHandler.getAccount(chain.node_info.chain_id);
-      } else {
-        key = await window.keplr.getKey(chain.node_info.chain_id);
-      }
-      return key.bech32Address;
-    }
+    const chainKeyData = typedstore.getters[GlobalGetterTypes.USER.getChainKeyData](chain.chain_name);
+    return chainAddressfromKeyhash(chain.node_info.bech32_config.prefix_account, chainKeyData.keyHash);
   }
 }
 

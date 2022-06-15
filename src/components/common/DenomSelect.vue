@@ -8,20 +8,6 @@
       'py-6 px-5': size === 'md',
     }"
   >
-    <!--Displays a denom selection component:
-				Selected denom badge
-				Selected denom name
-				Selected chain name
-				arrow to display full list in modal (DenomSelectModal.vue)
-			  Props:
-					denoms: [] of denoms
-					disabled: [] of denoms to display as disabled
-				Dependencies:
-					vuex getter to get  chain name from chain id
-		-->
-    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
-    when it changed-->
-
     <div
       class="self-stretch flex items-center shrink-0 pr-3 cursor-pointer"
       :class="isSelected ? 'shrink-0' : 'grow'"
@@ -111,8 +97,8 @@
     @select="denomSelectHandler"
   />
 </template>
-<script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -126,87 +112,83 @@ import { DesignSizes } from '@/types/util';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
-export default defineComponent({
-  name: 'DenomSelect',
-  components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal, SkeletonLoader },
-  props: {
-    inputHeader: { type: String, required: true },
-    selectedDenom: { type: Object, required: false, default: null },
-    counterDenom: { type: Object, required: false, default: null },
-    assets: { type: Object, required: true },
-    otherAssets: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
-    amount: { type: [String, Number], required: false, default: null },
-    isOver: { type: Boolean, required: false, default: false },
-    readonly: { type: Boolean, default: false },
-    showChain: { type: Boolean, default: false },
-    size: { type: String as PropType<DesignSizes>, required: false, default: 'md' },
-    isDefaultState: { type: Boolean, default: true },
-    isAmountLoading: { type: Boolean, default: false },
+const emit = defineEmits<{
+  (e: 'update:amount', value: any): void;
+  (e: 'select', payload: any): void;
+  (e: 'modalToggle', isOpen: any): void;
+  (e: 'change', inputHeader: any): void;
+}>();
+
+interface Props {
+  inputHeader: string;
+  selectedDenom: object;
+  counterDenom: object;
+  assets: object;
+  otherAssets: object;
+  amount: any;
+  isOver: boolean;
+  readonly?: boolean;
+  showChain?: boolean;
+  size: DesignSizes;
+  isDefaultState?: boolean;
+  isAmountLoading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  inputHeader: '',
+  selectedDenom: null,
+  counterDenom: null,
+  otherAssets: () => {
+    return {};
   },
-  emits: ['update:amount', 'select', 'modalToggle', 'change'],
-  setup(props, { emit }) {
-    const inputAmount = computed({
-      get: () => props.amount,
-      set: (value) => emit('update:amount', value),
-    });
-
-    const isSelected = computed(() => {
-      return props?.selectedDenom === null ? false : true;
-    });
-
-    const hasOptions = computed(() => {
-      return props.assets.length > 0;
-    });
-
-    const displayName = ref('');
-    watch(
-      () => props.selectedDenom,
-      async () => {
-        if (props.selectedDenom?.base_denom) {
-          displayName.value = await getDisplayName(
-            props.selectedDenom.base_denom,
-            useStore().getters[GlobalGetterTypes.API.getDexChain],
-          );
-        }
-      },
-    );
-
-    const isOpen = ref(false);
-
-    function toggleDenomSelectModal() {
-      if (!hasOptions.value || props.readonly) {
-        return;
-      }
-      isOpen.value = !isOpen.value;
-      emit('modalToggle', isOpen.value);
-    }
-
-    function denomSelectHandler(payload) {
-      emit('select', payload);
-      toggleDenomSelectModal();
-    }
-    //Removes text before $
-    const displayPrice = computed(() =>
-      props.inputHeader.substring(props.inputHeader.indexOf('$'), props.inputHeader.length),
-    );
-
-    return {
-      inputAmount,
-      isSelected,
-      isOpen,
-      hasOptions,
-      toggleDenomSelectModal,
-      denomSelectHandler,
-      displayName,
-      displayPrice,
-    };
-  },
+  amount: null,
+  isOver: false,
+  readonly: false,
+  showChain: false,
+  size: 'md',
+  isDefaultState: true,
+  isAmountLoading: false,
 });
+
+const isSelected = computed(() => {
+  return props?.selectedDenom === null ? false : true;
+});
+
+const hasOptions = computed(() => {
+  return props.assets.length > 0;
+});
+
+const displayName = ref('');
+watch(
+  () => props.selectedDenom,
+  async () => {
+    if (props.selectedDenom?.base_denom) {
+      displayName.value = await getDisplayName(
+        props.selectedDenom.base_denom,
+        useStore().getters[GlobalGetterTypes.API.getDexChain],
+      );
+    }
+  },
+);
+
+const isOpen = ref(false);
+
+function toggleDenomSelectModal() {
+  if (!hasOptions.value || props.readonly) {
+    return;
+  }
+  isOpen.value = !isOpen.value;
+  emit('modalToggle', isOpen.value);
+}
+
+function denomSelectHandler(payload) {
+  emit('select', payload);
+  toggleDenomSelectModal();
+}
+//Removes text before $
+const displayPrice = computed(() =>
+  props.inputHeader.substring(props.inputHeader.indexOf('$'), props.inputHeader.length),
+);
 </script>
 <style lang="scss" scoped>
 .denom-select {

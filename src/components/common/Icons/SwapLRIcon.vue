@@ -1,3 +1,6 @@
+<script lang="ts">
+/* eslint-disable vue/no-static-inline-styles */
+</script>
 <template>
   <IconBase :width="64" :height="64" view-box="0 0 16.933333 16.933334" icon-name="Swap left right arrows icon">
     <g transform="translate(0,-280.06665)">

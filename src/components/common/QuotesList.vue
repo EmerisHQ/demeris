@@ -57,20 +57,13 @@ import SwapRoute from '@/components/common/SwapRoute.vue';
 import usePrice from '@/composables/usePrice';
 import { GlobalGetterTypes } from '@/store';
 
-// eslint-disable-next-line
-const props = defineProps({
-  routes: {
-    type: Array,
-    required: true,
-  },
-  selectedQuoteIndex: {
-    type: Number,
-    required: true,
-  },
-  typeChanged: {
-    type: String,
-  },
-});
+interface Props {
+  routes: any[];
+  selectedQuoteIndex: number;
+  typeChanged?: string;
+}
+
+const props = defineProps<Props>();
 
 const store = useStore();
 const { getDisplayPrice } = usePrice();

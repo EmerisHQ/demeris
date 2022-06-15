@@ -115,6 +115,7 @@ export const getGravityResultFromDecodedEvents = (
 
 export const resolveSwapResponse = async (response: Record<string, any>, chainName: string, requester?: string) => {
   const protocol = getProtocolFromChain(chainName);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { height, tx_result } = response;
 
   if (!requester) requester = await getOwnAddress({ chain_name: chainName });

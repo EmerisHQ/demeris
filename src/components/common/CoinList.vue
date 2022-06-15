@@ -10,7 +10,8 @@
     class="flex items-center justify-between py-4 px-3 mx-3 hover:bg-fg rounded-xl"
     :class="coin.isFullAmountUnavailable ? 'cursor-not-allowed' : 'cursor-pointer'"
     :disabled="coin.isFullAmountUnavailable"
-    @click="!coin.isFullAmountUnavailable && $emit('select', coin)"
+    :data-chain="coin.on_chain"
+    @click="!coin.isFullAmountUnavailable && emit('select', coin)"
   >
     <div class="flex items-center" :class="coin.isFullAmountUnavailable ? 'opacity-50' : ''">
       <tippy class="tippy-info mr-4">
@@ -46,7 +47,7 @@
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
           <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
           <template v-else>
-            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <AmountDisplay :amount="{ denom: coin.base_denom, amount: `${parseCoins(coin.amount)[0].amount}` }" />
             <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
               {{ $t('components.coinList.available') }}
             </span>
@@ -68,15 +69,15 @@
       </template>
     </div>
     <div v-else-if="showBalance" class="text-muted text-right">
-      <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+      <AmountDisplay :amount="{ amount: parseCoins(coin.amount)[0].amount, denom: coin.base_denom }" />
     </div>
   </div>
 </template>
-<script lang="ts">
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
+import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
@@ -89,114 +90,108 @@ import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'CoinList',
-  components: {
-    AssetChainsIndicator,
-    ChainDownWarning,
-    ChainName,
-    AmountDisplay,
-    Icon,
-    Denom,
-    CircleSymbol,
-  },
-  props: {
-    data: { type: Array as PropType<EmerisAPI.Balances>, required: true },
-    type: { type: String, required: false, default: 'chain' },
-    keyword: { type: String, required: false, default: '' },
-    showBalance: { type: Boolean, default: false },
-  },
-  emits: ['select'],
-  setup(props) {
-    const typedstore = useStore() as RootStoreTyped;
-    const modifiedData = computed(() => getUniqueCoinList(props.data));
+BigNumber.config({ EXPONENTIAL_AT: [-20, 24] });
 
-    function setWordColorByKeyword(keyword, word) {
-      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
-    }
+interface Props {
+  data: EmerisAPI.Balances;
+  type?: string;
+  keyword?: string;
+  showBalance?: boolean;
+}
 
-    function getUniqueCoinList(data) {
-      if (props.type !== 'pay') {
-        return data.map((item) => {
-          const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
-          return {
-            ...item,
-            unavailableChains,
-            isFullAmountUnavailable: !!unavailableChains.length,
-          };
-        });
-      }
+const props = withDefaults(defineProps<Props>(), { type: 'chain', keyword: '' });
 
-      const newData = JSON.parse(JSON.stringify(data));
-      let denomNameObejct = {};
-      let modifiedData = [];
+const emit = defineEmits<{
+  (e: 'select', coin: any): void;
+}>();
 
-      newData.forEach((denom) => {
-        if (denomNameObejct[denom.base_denom]) {
-          // Remove from available amount if chain is down
-          if (denomNameObejct[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
-            return;
-          }
+const typedstore = useStore() as RootStoreTyped;
+const modifiedData = computed(() => getUniqueCoinList(propsRef.data.value));
 
-          denomNameObejct[denom.base_denom].amount =
-            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
-        } else {
-          denomNameObejct[denom.base_denom] = denom;
-          const unavailableChains = getUnavailableChains(denom);
-          const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
-          let amount = denom.amount;
+const propsRef = toRefs(props);
+function setWordColorByKeyword(keyword, word) {
+  return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
+}
 
-          // Remove from available amount if chain is down
-          if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
-            amount = `0${parseCoins(denom.amount)[0].denom}`;
-          }
-
-          denomNameObejct[denom.base_denom] = {
-            ...denom,
-            amount,
-            unavailableChains,
-            isFullAmountUnavailable,
-          };
-        }
-      });
-
-      for (let denom in denomNameObejct) {
-        modifiedData.push(denomNameObejct[denom]);
-      }
-
-      return modifiedData;
-    }
-
-    const getUnavailableChains = ({ base_denom, on_chain }: Partial<EmerisAPI.Balance>) => {
-      const result = [];
-      let uniqueChainsList: string[] = [on_chain];
-
-      if (props.type === 'pay') {
-        const chainList: string[] = props.data
-          .filter((item) => item.base_denom === base_denom)
-          .map((item) => item.on_chain);
-        uniqueChainsList = [...new Set(chainList)];
-      }
-
-      for (const chain of uniqueChainsList) {
-        const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
-        if (!status) {
-          result.push({
-            chain,
-            denom: base_denom,
-            unavailable: uniqueChainsList.length > 1 ? 'part' : 'full',
-          });
-        }
-      }
-
-      return result;
-    };
-
-    const coinsByType = computed(() => {
-      return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
+function getUniqueCoinList(data) {
+  if (props.type !== 'pay') {
+    return data.map((item) => {
+      const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
+      return {
+        ...item,
+        amount: item.amount ? item.amount : '0' + item.base_denom,
+        unavailableChains,
+        isFullAmountUnavailable: !!unavailableChains.length,
+      };
     });
-    return { setWordColorByKeyword, coinsByType };
-  },
+  }
+
+  const newData = JSON.parse(JSON.stringify(data));
+  let denomNameObject = {};
+  let modifiedData = [];
+
+  newData.forEach((denom) => {
+    if (denomNameObject[denom.base_denom]) {
+      // Remove from available amount if chain is down
+      if (denomNameObject[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
+        return;
+      }
+      const denomAmount = new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0);
+      const baseDenomAmount = new BigNumber(parseCoins(denomNameObject[denom.base_denom].amount)[0].amount);
+      denomNameObject[denom.base_denom].amount = `${baseDenomAmount.plus(denomAmount).toString()}${denom.base_denom}`;
+    } else {
+      denomNameObject[denom.base_denom] = denom;
+      const unavailableChains = getUnavailableChains(denom);
+      const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
+      let amount = new BigNumber(denom.amount ? parseCoins(denom.amount)[0].amount : 0).toString();
+
+      // Remove from available amount if chain is down
+      if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
+        amount = '0';
+      }
+      amount = amount + denom.base_denom;
+      denomNameObject[denom.base_denom] = {
+        ...denom,
+        amount,
+        unavailableChains,
+        isFullAmountUnavailable,
+      };
+    }
+  });
+
+  for (let denom in denomNameObject) {
+    modifiedData.push(denomNameObject[denom]);
+  }
+  return modifiedData;
+}
+
+const getUnavailableChains = ({ base_denom, on_chain }: Partial<EmerisAPI.Balance>) => {
+  const result = [];
+  let uniqueChainsList: string[] = [on_chain];
+
+  if (props.type === 'pay') {
+    const chainList: string[] = props.data
+      .filter((item) => item.base_denom === base_denom)
+      .map((item) => item.on_chain);
+    uniqueChainsList = [...new Set(chainList)];
+  }
+
+  for (const chain of uniqueChainsList) {
+    const status = typedstore.getters[GlobalGetterTypes.API.getChainStatus]({ chain_name: chain });
+    if (!status) {
+      result.push({
+        chain,
+        denom: base_denom,
+        unavailable: uniqueChainsList.length > 1 ? 'part' : 'full',
+      });
+    }
+  }
+
+  return result;
+};
+
+const coinsByType = computed(() => {
+  return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
 });
 </script>
 <style lang="scss" scoped></style>

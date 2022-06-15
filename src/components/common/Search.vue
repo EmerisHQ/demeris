@@ -8,9 +8,9 @@
         :class="[isSearchIconVisible ? 'pl-10' : 'pl-4']"
         :type="inputType"
         :placeholder="placeholder"
-        @input="$emit('update:keyword', ($event.target as HTMLInputElement).value)"
-        @focus="$emit('focus:value', ($event.target as HTMLInputElement).value)"
-        @blur="$emit('blur:value', ($event.target as HTMLInputElement).value)"
+        @input="emit('update:keyword', ($event.target as HTMLInputElement).value)"
+        @focus="emit('focus:value', ($event.target as HTMLInputElement).value)"
+        @blur="emit('blur:value', ($event.target as HTMLInputElement).value)"
       />
       <Icon
         v-if="isSearchIconVisible"
@@ -26,7 +26,7 @@
         :icon-size="1"
         @click="
           () => {
-            $emit('update:keyword', '');
+            emit('update:keyword', '');
           }
         "
       />
@@ -38,51 +38,56 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
+<script setup lang="ts">
+import { nextTick, ref, toRefs, watch } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
-export default defineComponent({
-  name: 'Search',
-  components: { Icon },
-  props: {
-    keyword: { type: [String, Number], required: false, default: null },
-    placeholder: { type: String, required: false, default: 'Search' },
-    autofocus: { type: Boolean, default: true },
-    isSearchIconVisible: { type: Boolean, default: true },
-    isCloseIconVisible: { type: Boolean, default: true },
-    inputType: { type: String, default: 'text' },
-    borderColour: { type: String, default: null },
-  },
-  emits: ['update:keyword', 'blur:value', 'focus:value'],
-  setup(props) {
-    const searchInput = ref(null);
-    const isFocused = ref(false);
 
-    function setFocus() {
-      isFocused.value = true;
-      searchInput.value.focus();
-    }
+interface Props {
+  keyword?: string | number;
+  placeholder?: string;
+  autofocus?: boolean;
+  isSearchIconVisible?: boolean;
+  isCloseIconVisible?: boolean;
+  inputType?: string;
+  borderColour?: string;
+}
 
-    const { autofocus } = toRefs(props);
-
-    watch(
-      autofocus,
-      (value) => {
-        if (value) {
-          nextTick(() => setFocus());
-        }
-      },
-      { immediate: true },
-    );
-
-    return {
-      searchInput,
-      setFocus,
-      isFocused,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  keyword: null,
+  placeholder: 'Search',
+  autofocus: true,
+  isSearchIconVisible: true,
+  isCloseIconVisible: true,
+  inputType: 'text',
+  borderColour: null,
 });
+
+const emit = defineEmits<{
+  (e: 'update:keyword', value: any): void;
+  (e: 'blur:value', value: any): void;
+  (e: 'focus:value', value: any): void;
+}>();
+
+const searchInput = ref(null);
+const isFocused = ref(false);
+
+function setFocus() {
+  isFocused.value = true;
+  searchInput.value.focus();
+}
+
+const { autofocus } = toRefs(props);
+
+watch(
+  autofocus,
+  (value) => {
+    if (value) {
+      nextTick(() => setFocus());
+    }
+  },
+  { immediate: true },
+);
 </script>
 <style lang="scss" scoped>
 input {

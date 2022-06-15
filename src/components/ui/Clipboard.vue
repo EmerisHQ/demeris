@@ -21,38 +21,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
 
 import CopyIcon from '@/components/common/Icons/CopyIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import useClipboard from '@/composables/useClipboard';
 
-export default defineComponent({
-  name: 'Clipboard',
+interface Props {
+  text?: string;
+}
 
-  components: {
-    Button,
-    CopyIcon,
-  },
+withDefaults(defineProps<Props>(), { text: '' });
 
-  props: {
-    text: {
-      type: String,
-      default: '',
-    },
-  },
+const { copy, hasCopied } = useClipboard();
+const tippyRef = ref(null);
 
-  setup() {
-    const { copy, isSupported, hasCopied } = useClipboard();
-    const tippyRef = ref(null);
-
-    watch(hasCopied, () => {
-      hasCopied.value ? tippyRef.value.show() : tippyRef.value.hide();
-    });
-
-    return { copy, isSupported, hasCopied, tippyRef };
-  },
+watch(hasCopied, () => {
+  hasCopied.value ? tippyRef.value.show() : tippyRef.value.hide();
 });
 </script>
 

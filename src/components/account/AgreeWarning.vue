@@ -28,31 +28,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 
-export default defineComponent({
-  name: 'AgreeWarning',
+const emit = defineEmits<{
+  (e: 'cancel'): void;
+  (e: 'agree'): void;
+}>();
 
-  components: {
-    Button,
-  },
-
-  emits: ['cancel', 'agree'],
-
-  setup(_, { emit }) {
-    const emitCancel = () => {
-      emit('cancel');
-    };
-    const emitAgree = () => {
-      emit('agree');
-    };
-
-    return { emitCancel, emitAgree };
-  },
-});
+const emitCancel = () => {
+  emit('cancel');
+};
+const emitAgree = () => {
+  emit('agree');
+};
 </script>
 
 <style lang="scss" scoped>

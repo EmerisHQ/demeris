@@ -42,8 +42,9 @@
     </div>
   </header>
 </template>
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import Settings from '@/components/common/Settings.vue';
@@ -55,33 +56,19 @@ import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
 import NavbarLogo from '../common/NavbarLogo.vue';
 import IconButton from '../ui/IconButton.vue';
-export default defineComponent({
-  name: 'Header',
-  components: {
-    NavbarLogo,
-    Navbar,
-    ReceiveIcon,
-    SendIcon,
-    Settings,
-    IconButton,
-  },
-  setup() {
-    const { redeemableBalances } = useAccount();
-    const store = useStore();
-    let tip = computed(() => {
-      return redeemableBalances.value.length == 1
-        ? (tip = 'You have 1 asset to redeem')
-        : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
-    });
-    const isDemoAccount = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.isDemoAccount];
-    });
-    const showBadge = computed(() => {
-      return store.getters[GlobalGetterTypes.USER.hasSeenReedem] ? false : true;
-    });
-    const settingsRef = ref(null);
 
-    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef };
-  },
+const { redeemableBalances } = useAccount();
+const store = useStore();
+let tip = computed(() => {
+  return redeemableBalances.value.length == 1
+    ? (tip = 'You have 1 asset to redeem')
+    : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
 });
+const isDemoAccount = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.isDemoAccount];
+});
+const showBadge = computed(() => {
+  return store.getters[GlobalGetterTypes.USER.hasSeenReedem] ? false : true;
+});
+const settingsRef = ref(null);
 </script>

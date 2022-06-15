@@ -66,10 +66,10 @@
   </List>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /* eslint-disable max-lines-per-function */
 import { EmerisBase } from '@emeris/types';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -82,99 +82,69 @@ import { GlobalGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-export default defineComponent({
-  name: 'PreviewWithdrawLiquidity',
+interface Props {
+  step?: Actions.Step;
+  fees: Record<string, EmerisBase.Amount>;
+  response?: EmerisBase.WithdrawLiquidityEndBlockResponse;
+  isReceipt?: boolean;
+}
 
-  components: {
-    AmountDisplay,
-    ChainName,
-    CircleSymbol,
-    List,
-    ListItem,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  step: undefined,
+  response: undefined,
+  isReceipt: false,
+});
 
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      default: undefined,
-    },
-    fees: {
-      type: Object as PropType<Record<string, EmerisBase.Amount>>,
-      required: true,
-    },
-    response: {
-      type: Object as PropType<EmerisBase.WithdrawLiquidityEndBlockResponse>,
-      default: undefined,
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-  },
+const store = useStore();
+const { getPoolById } = usePoolsFactory();
 
-  setup(props) {
-    const store = useStore();
-    const { getPoolById } = usePoolsFactory();
-
-    const data = computed(() => {
-      if (props.response) {
-        const pool = getPoolById(props.response.pool_id);
-        const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
-        const precisions = {
-          coinA:
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-              name: getBaseDenomSync(pool.reserve_coin_denoms[0]),
-            }) ?? 6,
-          coinB:
-            store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-              name: getBaseDenomSync(pool.reserve_coin_denoms[1]),
-            }) ?? 6,
-        };
-
-        return { pool, poolCoin, precisions };
-      }
-
-      return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
-    });
-
-    const chainName = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getDexChain];
-    });
-
-    const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
-
-    const precisions = computed(() => {
-      const pool = data.value.pool;
-      return [
+const data = computed(() => {
+  if (props.response) {
+    const pool = getPoolById(props.response.pool_id);
+    const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
+    const precisions = {
+      coinA:
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: getBaseDenomSync(pool.reserve_coin_denoms[0]),
         }) ?? 6,
+      coinB:
         store.getters[GlobalGetterTypes.API.getDenomPrecision]({
           name: getBaseDenomSync(pool.reserve_coin_denoms[1]),
         }) ?? 6,
-      ];
-    });
-
-    const receiveAmount = computed(() => {
-      const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
-      const isReverse = data.value.pool.reserve_coin_denoms[0] !== result[0].denom;
-      return {
-        coinA: result[0],
-        coinB: result[1],
-        ratio: Number(result[isReverse ? 0 : 1].amount) / Number(result[isReverse ? 1 : 0].amount),
-      };
-    });
-
-    return {
-      chainName,
-      data,
-      pool,
-      pairName,
-      receiveAmount,
-      precisions,
     };
-  },
+
+    return { pool, poolCoin, precisions };
+  }
+
+  return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
+});
+
+const chainName = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getDexChain];
+});
+
+const { pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
+
+const precisions = computed(() => {
+  const pool = data.value.pool;
+  return [
+    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: getBaseDenomSync(pool.reserve_coin_denoms[0]),
+    }) ?? 6,
+    store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+      name: getBaseDenomSync(pool.reserve_coin_denoms[1]),
+    }) ?? 6,
+  ];
+});
+
+const receiveAmount = computed(() => {
+  const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
+  const isReverse = data.value.pool.reserve_coin_denoms[0] !== result[0].denom;
+  return {
+    coinA: result[0],
+    coinB: result[1],
+    ratio: Number(result[isReverse ? 0 : 1].amount) / Number(result[isReverse ? 1 : 0].amount),
+  };
 });
 </script>
 

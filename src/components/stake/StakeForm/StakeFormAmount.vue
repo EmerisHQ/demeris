@@ -105,12 +105,10 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable max-lines */
-/* eslint-disable max-lines-per-function */
+<script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, PropType, reactive, ref, toRefs } from 'vue';
+import { computed, inject, reactive, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useStore } from 'vuex';
@@ -122,7 +120,6 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
 import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
-/* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -132,200 +129,166 @@ import { GlobalGetterTypes } from '@/store';
 import { MultiStakeForm, Step } from '@/types/actions';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
-export default defineComponent({
-  name: 'StakeFormAmount',
-  components: {
-    Alert,
-    AmountDisplay,
-    Button,
-    ChainName,
-    ChainSelectModal,
-    DaysToUnstake,
-    FeeLevelSelector,
-    Icon,
-    ListItem,
-    Price,
-    ValidatorSelect,
-  },
-  props: {
-    validators: { type: Array as PropType<EmerisAPI.Validator[]>, required: true, default: () => [] },
-    steps: {
-      type: Array as PropType<Step[]>,
-      default: () => [],
-    },
-  },
 
-  emits: ['selectanother', 'next', 'unselect'],
-  setup(props, { emit }) {
-    /* hooks */
-    const { t } = useI18n({ useScope: 'global' });
-    const store = useStore();
+interface Props {
+  validators: EmerisAPI.Validator[];
+  steps: Step[];
+}
 
-    const form = inject<MultiStakeForm>('stakeForm');
-    const { balances: userBalances, getNativeBalances } = useAccount();
-
-    const state = reactive({
-      isChainsModalOpen: false,
-      chainsModalSource: 0,
-    });
-    const fees = ref({});
-    const validators = toRefs(props).validators;
-    const validatorsToStakeWith = computed(() => {
-      return form.stakes.map((x) => {
-        return { ...x, validator: validators.value.find((y) => y.operator_address == x.validatorAddress) };
-      });
-    });
-    /* meta & GA */
-    useMeta({ title: t('context.stake.title') });
-
-    /* variables */
-    const chain = computed(() => {
-      return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
-    });
-    const chainName = ref<string>(validators.value[0].chain_name);
-    const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
-    const hasIBC = computed(() => {
-      const denomTypes = form.stakes.map((x) => {
-        return isNative(x.denom) ? 'native' : 'ibc';
-      });
-      if (denomTypes.includes('ibc')) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    /* computeds */
-
-    const balances = computed(() => {
-      // Adds 0 balances for all native assets if not owned by user
-      const nativeBalances = getNativeBalances();
-      const allBalances = [...userBalances.value];
-
-      for (const nativeBalance of nativeBalances) {
-        const hasBalance = userBalances.value.some(
-          (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
-        );
-        if (!hasBalance) {
-          allBalances.push(nativeBalance);
-        }
-      }
-
-      allBalances.sort((a, b) => {
-        const coinA = parseCoins(a.amount)[0];
-        const coinB = parseCoins(b.amount)[0];
-        return +coinB.amount - +coinA.amount;
-      });
-
-      return allBalances;
-    });
-    const totalToStake = computed(() =>
-      validatorsToStakeWith.value
-        .reduce(
-          (total, val) =>
-            total + Number(val.amount ?? 0) * 10 ** precision.value + Number(val.validator.stakedAmount ?? 0),
-          0,
-        )
-        .toString(),
-    );
-    const disabled = computed(() => {
-      let chains: Record<string, { amount: BigNumber; denom: string }> = {};
-      let toStake = 0;
-      for (const validator of validatorsToStakeWith.value) {
-        toStake = toStake + Number(validator.amount ?? 0);
-        if (chains[validator.from_chain]) {
-          chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
-            new BigNumber(validator.amount != '' ? validator.amount : 0),
-          );
-        } else {
-          chains[validator.from_chain] = {
-            amount: new BigNumber(validator.amount != '' ? validator.amount : 0),
-            denom: validator.denom,
-          };
-        }
-      }
-      if (toStake == 0) {
-        return true;
-      }
-      for (const chain in chains) {
-        if (
-          chains[chain].amount
-            .multipliedBy(10 ** precision.value)
-            .isGreaterThan(chainBalance(chains[chain].denom, chain))
-        ) {
-          return true;
-        }
-      }
-      return false;
-    });
-    const precision = computed(() =>
-      store.getters[GlobalGetterTypes.API.getDenomPrecision]({
-        name: baseDenom,
-      }),
-    );
-
-    const isGreaterWithPrecision = (x, y, precision) => {
-      if (x && y) {
-        const leftOperand = new BigNumber(x);
-        const rightOperand = new BigNumber(y).dividedBy(10 ** precision);
-        return leftOperand.isGreaterThan(rightOperand);
-      } else {
-        return false;
-      }
-    };
-
-    /* functions */
-    const validatorSelectHandler = (index) => {
-      emit('selectanother', index);
-    };
-    const validatorUnselectHandler = (validator) => {
-      emit('unselect', validator);
-    };
-    const validatorAddHandler = () => {
-      event('multiple_validator_adding', {
-        event_label: 'Staking Form Add Another Validator Button Clicked',
-        event_category: 'button',
-      });
-      emit('selectanother', null);
-    };
-    const goToReview = () => {
-      form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
-      emit('next');
-    };
-    const toggleChainsModal = (asset: EmerisAPI.Balance, index: number) => {
-      if (asset) {
-        form.stakes[index].from_chain = asset.on_chain;
-        form.stakes[index].denom = parseCoins(asset.amount)[0].denom;
-      }
-      state.chainsModalSource = index;
-      state.isChainsModalOpen = !state.isChainsModalOpen;
-    };
-    const chainBalance = (denom, chain_name) => {
-      return parseCoins(
-        balances.value.find((x) => x.on_chain == chain_name && parseCoins(x.amount)[0].denom == denom).amount,
-      )[0]?.amount;
-    };
-    return {
-      balances,
-      baseDenom,
-      chainName,
-      chainBalance,
-      disabled,
-      form,
-      fees,
-      goToReview,
-      isGreaterWithPrecision,
-      hasIBC,
-      precision,
-      state,
-      toggleChainsModal,
-      totalToStake,
-      validatorSelectHandler,
-      validatorUnselectHandler,
-      validatorAddHandler,
-      validatorsToStakeWith,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  validators: () => [],
+  steps: () => [],
 });
+
+const emit = defineEmits<{
+  (e: 'selectanother', value: any): void;
+  (e: 'next'): void;
+  (e: 'unselect', value: any): void;
+}>();
+
+const { t } = useI18n({ useScope: 'global' });
+const store = useStore();
+
+const form = inject<MultiStakeForm>('stakeForm');
+const { balances: userBalances, getNativeBalances } = useAccount();
+
+const state = reactive({
+  isChainsModalOpen: false,
+  chainsModalSource: 0,
+});
+const fees = ref({});
+const validators = toRefs(props).validators;
+const validatorsToStakeWith = computed(() => {
+  return form.stakes.map((x) => {
+    return { ...x, validator: validators.value.find((y) => y.operator_address == x.validatorAddress) };
+  });
+});
+/* meta & GA */
+useMeta({ title: t('context.stake.title') });
+
+/* variables */
+const chain = computed(() => {
+  return store.getters[GlobalGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
+});
+const chainName = ref<string>(validators.value[0].chain_name);
+const baseDenom = chain.value?.denoms.find((x) => x.stakable).name;
+const hasIBC = computed(() => {
+  const denomTypes = form.stakes.map((x) => {
+    return isNative(x.denom) ? 'native' : 'ibc';
+  });
+  if (denomTypes.includes('ibc')) {
+    return true;
+  } else {
+    return false;
+  }
+});
+/* computeds */
+
+const balances = computed(() => {
+  // Adds 0 balances for all native assets if not owned by user
+  const nativeBalances = getNativeBalances();
+  const allBalances = [...userBalances.value];
+
+  for (const nativeBalance of nativeBalances) {
+    const hasBalance = userBalances.value.some(
+      (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
+    );
+    if (!hasBalance) {
+      allBalances.push(nativeBalance);
+    }
+  }
+
+  allBalances.sort((a, b) => {
+    const coinA = parseCoins(a.amount)[0];
+    const coinB = parseCoins(b.amount)[0];
+    return +coinB.amount - +coinA.amount;
+  });
+
+  return allBalances;
+});
+const totalToStake = computed(() =>
+  validatorsToStakeWith.value
+    .reduce(
+      (total, val) => total + Number(val.amount ?? 0) * 10 ** precision.value + Number(val.validator.stakedAmount ?? 0),
+      0,
+    )
+    .toString(),
+);
+const disabled = computed(() => {
+  let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+  let toStake = 0;
+  for (const validator of validatorsToStakeWith.value) {
+    toStake = toStake + Number(validator.amount ?? 0);
+    if (chains[validator.from_chain]) {
+      chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
+        new BigNumber(validator.amount != '' ? validator.amount : 0),
+      );
+    } else {
+      chains[validator.from_chain] = {
+        amount: new BigNumber(validator.amount != '' ? validator.amount : 0),
+        denom: validator.denom,
+      };
+    }
+  }
+  if (toStake == 0) {
+    return true;
+  }
+  for (const chain in chains) {
+    if (
+      chains[chain].amount.multipliedBy(10 ** precision.value).isGreaterThan(chainBalance(chains[chain].denom, chain))
+    ) {
+      return true;
+    }
+  }
+  return false;
+});
+const precision = computed(() =>
+  store.getters[GlobalGetterTypes.API.getDenomPrecision]({
+    name: baseDenom,
+  }),
+);
+
+const isGreaterWithPrecision = (x, y, precision) => {
+  if (x && y) {
+    const leftOperand = new BigNumber(x);
+    const rightOperand = new BigNumber(y).dividedBy(10 ** precision);
+    return leftOperand.isGreaterThan(rightOperand);
+  } else {
+    return false;
+  }
+};
+
+/* functions */
+const validatorSelectHandler = (index) => {
+  emit('selectanother', index);
+};
+const validatorUnselectHandler = (validator) => {
+  emit('unselect', validator);
+};
+const validatorAddHandler = () => {
+  event('multiple_validator_adding', {
+    event_label: 'Staking Form Add Another Validator Button Clicked',
+    event_category: 'button',
+  });
+  emit('selectanother', null);
+};
+const goToReview = () => {
+  form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
+  emit('next');
+};
+const toggleChainsModal = (asset: EmerisAPI.Balance, index: number) => {
+  if (asset) {
+    form.stakes[index].from_chain = asset.on_chain;
+    form.stakes[index].denom = parseCoins(asset.amount)[0].denom;
+  }
+  state.chainsModalSource = index;
+  state.isChainsModalOpen = !state.isChainsModalOpen;
+};
+const chainBalance = (denom, chain_name) => {
+  return parseCoins(
+    balances.value.find((x) => x.on_chain == chain_name && parseCoins(x.amount)[0].denom == denom).amount,
+  )[0]?.amount;
+};
 </script>
 
 <style lang="scss">

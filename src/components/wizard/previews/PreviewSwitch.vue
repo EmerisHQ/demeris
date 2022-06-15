@@ -21,15 +21,15 @@
     <!-- Price  -->
     <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.fromLbl')">
       <div class="flex justify-end items-center">
-        {{ getValidatorMoniker(tx.validatorSrcAddress) }}
-        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorSrcAddress)" />
+        {{ getValidatorMoniker(validatorSrcAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(validatorSrcAddress)" />
       </div>
     </ListItem>
 
     <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.toLbl')">
       <div class="flex justify-end items-center">
-        {{ getValidatorMoniker(tx.validatorDstAddress) }}
-        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorDstAddress)" />
+        {{ getValidatorMoniker(validatorDstAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(validatorDstAddress)" />
       </div>
     </ListItem>
     <!-- Fee -->
@@ -46,10 +46,9 @@
     </ListItem>
   </List>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisBase } from '@emeris/types';
-import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { onMounted, ref, toRefs } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -59,72 +58,40 @@ import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
-export default defineComponent({
-  name: 'PreviewSwitch',
-  components: {
-    AmountDisplay,
-    Price,
-    CircleSymbol,
-    List,
-    ListItem,
-    ValidatorBadge,
-  },
 
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      required: true,
-    },
-    fees: {
-      type: Object as PropType<Record<string, EmerisBase.Amount>>,
-      required: true,
-    },
-    context: {
-      type: String as PropType<'default' | 'widget'>,
-      default: 'default',
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-  },
+interface Props {
+  step: Actions.Step;
+  fees: Record<string, EmerisBase.Amount>;
+  context?: 'default' | 'widget';
+  isReceipt?: boolean;
+}
 
-  setup(props) {
-    const store = useStore();
-    const { getValidatorsByBaseDenom } = useStaking();
-
-    const propsRef = toRefs(props);
-    const validators = ref([]);
-    const tx = propsRef.step.value.transactions[0];
-    const baseDenom = (tx.data as Actions.RestakeData).amount.denom;
-    const chainName = (tx.data as Actions.RestakeData).chain_name;
-
-    const totalStaked = (tx.data as Actions.RestakeData).amount.amount;
-
-    onMounted(async () => {
-      validators.value = await getValidatorsByBaseDenom(baseDenom);
-    });
-    const getValidatorMoniker = (address) => {
-      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
-    };
-
-    const getValidator = (address) => {
-      return validators.value.find((x) => x.operator_address == address);
-    };
-    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
-
-    return {
-      store,
-      size,
-      tx: tx.data as Actions.RestakeData,
-      getValidator,
-      getValidatorMoniker,
-      baseDenom,
-      chainName,
-      totalStaked,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  context: 'default',
+  isReceipt: false,
 });
+
+const { getValidatorsByBaseDenom } = useStaking();
+
+const propsRef = toRefs(props);
+const validators = ref([]);
+const tx = propsRef.step.value.transactions[0];
+const baseDenom = (tx.data as Actions.RestakeData).amount.denom;
+const chainName = (tx.data as Actions.RestakeData).chain_name;
+const totalStaked = (tx.data as Actions.RestakeData).amount.amount;
+const validatorSrcAddress = tx.data.validatorSrcAddress;
+const validatorDstAddress = tx.data.validatorDstAddress;
+
+onMounted(async () => {
+  validators.value = await getValidatorsByBaseDenom(baseDenom);
+});
+const getValidatorMoniker = (address) => {
+  return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
+};
+
+const getValidator = (address) => {
+  return validators.value.find((x) => x.operator_address == address);
+};
+const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
 </script>
 <style lang="scss" scoped></style>

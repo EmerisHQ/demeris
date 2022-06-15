@@ -51,11 +51,10 @@
     </ListItem>
   </List>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { EmerisBase } from '@emeris/types';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { computed, onMounted, ref, toRefs } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -69,84 +68,50 @@ import * as Actions from '@/types/actions';
 import { DesignSizes } from '@/types/util';
 import { keyHashfromAddress } from '@/utils/basic';
 
-export default defineComponent({
-  name: 'PreviewStake',
-  components: {
-    AmountDisplay,
-    Price,
-    CircleSymbol,
-    List,
-    ListItem,
-    ValidatorBadge,
-  },
+interface Props {
+  step: Actions.Step;
+  fees: Record<string, EmerisBase.Amount>;
+  context?: 'default' | 'widget';
+  isReceipt: boolean;
+}
 
-  props: {
-    step: {
-      type: Object as PropType<Actions.Step>,
-      required: true,
-    },
-    fees: {
-      type: Object as PropType<Record<string, EmerisBase.Amount>>,
-      required: true,
-    },
-    context: {
-      type: String as PropType<'default' | 'widget'>,
-      default: 'default',
-    },
-    isReceipt: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: false,
-    },
-  },
-
-  setup(props) {
-    const store = useStore();
-    const { getChainNameByBaseDenom } = useChains();
-    const { getValidatorsByBaseDenom } = useStaking();
-    const propsRef = toRefs(props);
-    const { stakingBalancesByChain } = useAccount();
-    const validators = ref([]);
-    const tx = propsRef.step.value.transactions[0];
-    const chainName = (tx.data as Actions.StakeData[])[0].chain_name;
-    const baseDenom = (tx.data as Actions.StakeData[])[0].amount.denom;
-    const totalStaked = (tx.data as Actions.StakeData[])
-      .reduce((acc, txdata) => {
-        return acc.plus(new BigNumber(txdata.amount.amount));
-      }, new BigNumber(0))
-      .toString();
-
-    let chainNameToGetStakingBalances = ref<string>(null);
-    onMounted(async () => {
-      chainNameToGetStakingBalances.value = await getChainNameByBaseDenom(baseDenom);
-      validators.value = await getValidatorsByBaseDenom(baseDenom);
-    });
-
-    const stakingBalances = computed(() => {
-      return stakingBalancesByChain(chainNameToGetStakingBalances.value);
-    });
-    const getStakingBalance = (address) => {
-      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
-    };
-    const getValidatorMoniker = (address) => {
-      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
-    };
-    const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
-    const getValidator = (address) => {
-      return validators.value.find((x) => x.operator_address == address);
-    };
-    return {
-      store,
-      size,
-      tx: tx.data as Actions.StakeData[],
-      getValidator,
-      getValidatorMoniker,
-      getStakingBalance,
-      baseDenom,
-      chainName,
-      totalStaked,
-    };
-  },
+const props = withDefaults(defineProps<Props>(), {
+  context: 'default',
+  isReceipt: false,
 });
+
+const { getChainNameByBaseDenom } = useChains();
+const { getValidatorsByBaseDenom } = useStaking();
+const propsRef = toRefs(props);
+const { stakingBalancesByChain } = useAccount();
+const validators = ref([]);
+const tx = propsRef.step.value.transactions[0];
+const chainName = (tx.data as Actions.StakeData[])[0].chain_name;
+const baseDenom = (tx.data as Actions.StakeData[])[0].amount.denom;
+const totalStaked = (tx.data as Actions.StakeData[])
+  .reduce((acc, txdata) => {
+    return acc.plus(new BigNumber(txdata.amount.amount));
+  }, new BigNumber(0))
+  .toString();
+
+let chainNameToGetStakingBalances = ref<string>(null);
+onMounted(async () => {
+  chainNameToGetStakingBalances.value = await getChainNameByBaseDenom(baseDenom);
+  validators.value = await getValidatorsByBaseDenom(baseDenom);
+});
+
+const stakingBalances = computed(() => {
+  return stakingBalancesByChain(chainNameToGetStakingBalances.value);
+});
+const getStakingBalance = (address) => {
+  return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
+};
+const getValidatorMoniker = (address) => {
+  return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
+};
+const size: DesignSizes = props.context === 'default' ? 'md' : 'sm';
+const getValidator = (address) => {
+  return validators.value.find((x) => x.operator_address == address);
+};
 </script>
 <style lang="scss" scoped></style>
