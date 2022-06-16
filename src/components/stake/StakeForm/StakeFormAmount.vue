@@ -129,6 +129,7 @@ import { GlobalGetterTypes } from '@/store';
 import { MultiStakeForm, Step } from '@/types/actions';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+import { sortBalancesByAmount } from '@/utils/sorting';
 
 interface Props {
   validators: EmerisAPI.Validator[];
@@ -198,13 +199,7 @@ const balances = computed(() => {
     }
   }
 
-  allBalances.sort((a, b) => {
-    const coinA = parseCoins(a.amount)[0];
-    const coinB = parseCoins(b.amount)[0];
-    return +coinB.amount - +coinA.amount;
-  });
-
-  return allBalances;
+  return sortBalancesByAmount(allBalances);
 });
 const totalToStake = computed(() =>
   validatorsToStakeWith.value

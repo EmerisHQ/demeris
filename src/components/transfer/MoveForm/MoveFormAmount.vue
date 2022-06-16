@@ -253,6 +253,7 @@ import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { GasPriceLevel, MoveAssetsForm, Step } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import { sortBalancesByAmount } from '@/utils/sorting';
 
 const props = defineProps({
   balances: {
@@ -362,13 +363,7 @@ const availableChains = computed(() => {
     }
   }
 
-  results.sort((a, b) => {
-    const coinA = parseCoins(a.amount)[0];
-    const coinB = parseCoins(b.amount)[0];
-    return +coinB.amount - +coinA.amount;
-  });
-
-  return results;
+  return sortBalancesByAmount(results);
 });
 
 const hasFunds = computed(() => {
