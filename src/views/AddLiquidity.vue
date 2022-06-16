@@ -321,6 +321,7 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
+import { sortBalancesByAmount } from '@/utils/sorting';
 
 const { t } = useI18n({ useScope: 'global' });
 
@@ -480,13 +481,7 @@ const balances = computed(() => {
     }
   }
 
-  result.sort((a, b) => {
-    const coinA = parseCoins(a.amount)[0];
-    const coinB = parseCoins(b.amount)[0];
-    return +coinB.amount - +coinA.amount;
-  });
-
-  return result;
+  return sortBalancesByAmount(result);
 });
 
 const balancesForSecond = computed(() => {
