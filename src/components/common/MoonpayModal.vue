@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from '@vue/runtime-core';
+import { computed, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';

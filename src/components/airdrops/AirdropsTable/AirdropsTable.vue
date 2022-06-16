@@ -163,9 +163,9 @@ const emit = defineEmits<{
   (e: 'row-click', airdrop: any): void;
 }>();
 
-let watchedAirdrops = ref([]);
-let mappedAirdrops = ref([]);
-let imageFailIndexes = ref([]);
+const watchedAirdrops = ref([]);
+const mappedAirdrops = ref([]);
+const imageFailIndexes = ref([]);
 
 const handleClick = (airdrop: EmerisAirdrops.Airdrop) => {
   emit('row-click', airdrop);

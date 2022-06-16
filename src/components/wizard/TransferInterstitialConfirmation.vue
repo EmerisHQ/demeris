@@ -119,11 +119,11 @@ const title = computed(() => {
 });
 
 const subtitle = computed(() => {
-  let result = '';
+  const result = '';
 
   if (currentAction.value === 'transfer') {
     const backwardData = props.steps[0].transactions[0].data as AbstractIBCTransferTransactionData;
-    let fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
+    const fromChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({
       name: backwardData.chainName,
     });
     let toChain = typedstore.getters[GlobalGetterTypes.API.getDisplayChain]({ name: backwardData.toChain });

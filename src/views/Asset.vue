@@ -212,12 +212,12 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import Swap from '@/components/swap/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalActionTypes, GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { LoadingState } from '@/types/util';
 import { getDisplayName, getTicker } from '@/utils/actionHandler';
@@ -319,11 +319,11 @@ const unbondingDelegation = computed(() => {
 });
 
 const stakedAmount = computed(() => {
-  let staked = stakingBalance.value;
+  const staked = stakingBalance.value;
   let totalStakedAmount = new BigNumber(0);
   if (Array.isArray(staked)) {
     for (let i = 0; i < staked.length; i++) {
-      let amount = new BigNumber(staked[i].amount);
+      const amount = new BigNumber(staked[i].amount);
       if (amount) {
         totalStakedAmount = totalStakedAmount.plus(amount);
       }
@@ -410,7 +410,7 @@ const dataStream = computed(() => {
 });
 
 const getTokenPrices = ref(null);
-let priceDiffObject = ref(null);
+const priceDiffObject = ref(null);
 
 const setPriceDifference = (priceDiff: any) => {
   priceDiffObject.value = priceDiff;

@@ -39,7 +39,7 @@ const props = withDefaults(defineProps<Props>(), { displayDenom: 'ATOM', baseDen
 const { getChainNameByBaseDenom } = useChains();
 const { getChainDisplayInflationByBaseDenom } = useStaking();
 
-let shouldShowBanner = ref<boolean>(false);
+const shouldShowBanner = ref<boolean>(false);
 
 const onBannerClick = () => {
   event('staking_entry_point', { event_label: 'Portfolio Page Staking Banner Click', event_category: 'banner' });

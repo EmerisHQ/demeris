@@ -127,8 +127,8 @@ function getUniqueCoinList(data) {
   }
 
   const newData = JSON.parse(JSON.stringify(data));
-  let denomNameObject = {};
-  let modifiedData = [];
+  const denomNameObject = {};
+  const modifiedData = [];
 
   newData.forEach((denom) => {
     if (denomNameObject[denom.base_denom]) {
@@ -159,7 +159,7 @@ function getUniqueCoinList(data) {
     }
   });
 
-  for (let denom in denomNameObject) {
+  for (const denom in denomNameObject) {
     modifiedData.push(denomNameObject[denom]);
   }
   return modifiedData;

@@ -163,13 +163,13 @@ onMounted(async () => {
   isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
 
   // @ts-ignore
-  let isChromium = window.chrome;
-  let winNav = window.navigator;
-  let vendorName = winNav.vendor;
+  const isChromium = window.chrome;
+  const winNav = window.navigator;
+  const vendorName = winNav.vendor;
   // @ts-ignore
   // let isBrave = typeof navigator.brave !== 'undefined';
   // @ts-ignore
-  let isOpera = typeof window.opr !== 'undefined';
+  const isOpera = typeof window.opr !== 'undefined';
   // let isIEedge = winNav.userAgent.indexOf('Edg') > -1;
 
   isEmerisSupported.value =

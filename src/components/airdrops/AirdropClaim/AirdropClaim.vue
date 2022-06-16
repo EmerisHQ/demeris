@@ -209,7 +209,7 @@ const typedstore = useStore() as RootStoreTyped;
 
 const isClaimModalOpen = ref(false);
 const isWalletModalOpen = ref(false);
-let imageLoadFail = ref(false);
+const imageLoadFail = ref(false);
 
 const toggleClaimModal = () => {
   isClaimModalOpen.value = !isClaimModalOpen.value;

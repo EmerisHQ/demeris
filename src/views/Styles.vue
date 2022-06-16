@@ -186,11 +186,11 @@ import { ref } from 'vue';
 
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 
 const validator1 = ref({ moniker: 'Valerie' });
 const validator2 = ref({

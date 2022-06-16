@@ -295,7 +295,7 @@ watch(
     const payAmount = props.swapData.pay.amount;
     const receiveAmount = props.swapData.receive.amount;
 
-    let slippageTolerancePercent = 1 - state.slippage / 100;
+    const slippageTolerancePercent = 1 - state.slippage / 100;
     limitPriceText.value = `1 ${payDisplayName} = ${
       payAmount
         ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000

@@ -79,8 +79,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from '@vue/runtime-core';
 import groupBy from 'lodash.groupby';
+import { computed } from 'vue';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -96,13 +96,13 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import Intro from '@/components/common/Intro.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import StakingTable from '@/components/stake/StakingTable/StakingTable.vue';
 import Swap from '@/components/swap/Swap.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';

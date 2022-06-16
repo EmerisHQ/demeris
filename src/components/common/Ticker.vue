@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<Props>(), {
   chain: undefined,
 });
 
-let ticker = ref('-');
+const ticker = ref('-');
 const loaded = false;
 const { useDenom } = useDenoms();
 watch(

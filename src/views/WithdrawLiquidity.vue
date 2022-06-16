@@ -276,7 +276,7 @@ const feesAmount = computed(() => {
   return result;
 });
 
-let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+const usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
 watch(
   () => poolId.value,
   async () => {

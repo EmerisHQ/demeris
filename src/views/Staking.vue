@@ -115,7 +115,7 @@ const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? r
 const inModal = ref(undefined);
 const { getChainNameByBaseDenom } = useChains();
 
-let chainName = ref<string>(null);
+const chainName = ref<string>(null);
 
 onMounted(async () => {
   chainName.value = await getChainNameByBaseDenom(baseDenom);
@@ -179,7 +179,7 @@ const allSteps = {
 const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
 
 const metaSource = computed(() => {
-  let title = t('context.stake.title');
+  const title = t('context.stake.title');
 
   return {
     title,

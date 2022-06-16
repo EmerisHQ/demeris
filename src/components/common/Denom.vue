@@ -18,7 +18,7 @@ const props = defineProps<Props>();
 
 const typedstore = useStore() as RootStoreTyped;
 const propName = toRefs(props).name;
-let display = ref('-');
+const display = ref('-');
 const updateDenom = async (denomName) => {
   display.value = await getDisplayName(denomName, typedstore.getters[GlobalGetterTypes.API.getDexChain]);
 };

@@ -61,9 +61,9 @@
 
 <script setup lang="ts">
 import { EmerisAPI } from '@emeris/types';
-import { reactive, toRefs } from '@vue/reactivity';
-import { computed, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
+import { reactive, toRefs } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 

@@ -94,7 +94,7 @@ const totalStaked = (tx.data as Actions.StakeData[])
   }, new BigNumber(0))
   .toString();
 
-let chainNameToGetStakingBalances = ref<string>(null);
+const chainNameToGetStakingBalances = ref<string>(null);
 onMounted(async () => {
   chainNameToGetStakingBalances.value = await getChainNameByBaseDenom(baseDenom);
   validators.value = await getValidatorsByBaseDenom(baseDenom);

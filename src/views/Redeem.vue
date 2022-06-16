@@ -125,7 +125,7 @@ watch(
   async (newBalances) => {
     augmentedBalances.value = await Promise.all(
       newBalances.map(async (newBalance) => {
-        let balance = { ...newBalance };
+        const balance = { ...newBalance };
         balance.hops = [];
         const verifyTrace =
           typedstore.getters[GlobalGetterTypes.API.getVerifyTrace]({
@@ -143,7 +143,7 @@ watch(
             },
             { root: true },
           ));
-        for (let hop of verifyTrace.trace) {
+        for (const hop of verifyTrace.trace) {
           balance.hops.unshift(hop.counterparty_name);
         }
         balance.steps = await actionHandler({

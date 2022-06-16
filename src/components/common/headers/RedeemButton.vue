@@ -22,7 +22,7 @@ export default defineComponent({
 
     const balances = store.getters[GlobalGetterTypes.API.getAllBalances];
     const redeemable = [];
-    for (let balance of balances) {
+    for (const balance of balances) {
       // TODO: check for redeemable
       redeemable.push(balance);
     }

@@ -211,13 +211,13 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -335,8 +335,8 @@ const exchangeAmount = computed(() => {
     typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
       name: reserveBalances.value[1].base_denom,
     }) ?? 6;
-  let balanceA = reserveBalances.value[0].amount;
-  let balanceB = reserveBalances.value[1].amount;
+  const balanceA = reserveBalances.value[0].amount;
+  const balanceB = reserveBalances.value[1].amount;
   if (balanceA && balanceB) {
     return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
   }

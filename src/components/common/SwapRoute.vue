@@ -76,9 +76,9 @@ const route = computed(() => {
   const items = [];
   let carryOver = null;
   let lastType = null;
-  let steps = props.quote.steps;
+  const steps = props.quote.steps;
   for (let stepIndex = steps.length - 1; stepIndex >= 0; stepIndex--) {
-    let item = { transactions: [] };
+    const item = { transactions: [] };
     if (lastType !== steps[stepIndex].type && carryOver) {
       (item as any).transactions.push(carryOver);
     }

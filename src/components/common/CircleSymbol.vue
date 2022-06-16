@@ -257,7 +257,7 @@ watch(
   () => toRefs(props),
   async () => {
     if (isPoolCoin.value) {
-      let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
+      const existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
 
       if (existingPool) {
         denoms.value = await getReserveBaseDenoms(existingPool);

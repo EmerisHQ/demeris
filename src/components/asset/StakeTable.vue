@@ -28,7 +28,7 @@ const propsRef = toRefs(props);
 
 const { getChainNameByBaseDenom } = useChains();
 
-let chainName = ref<string>(null);
+const chainName = ref<string>(null);
 
 onMounted(async () => {
   chainName.value = await getChainNameByBaseDenom(propsRef.denom.value);

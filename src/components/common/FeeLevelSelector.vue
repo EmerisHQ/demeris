@@ -137,7 +137,7 @@ watch(
 );
 const txCount = computed(() => {
   let count = 0;
-  for (let step of props.steps as Step[]) {
+  for (const step of props.steps as Step[]) {
     count = count + step.transactions.length;
   }
   return count;

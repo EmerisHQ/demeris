@@ -10,14 +10,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
 import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
 
 const { t } = useI18n({ useScope: 'global' });

@@ -176,12 +176,12 @@ const chartData = ref({
 });
 
 const activeFilterItem = ref('1');
-let highestPrice = ref('');
-let lowestPrice = ref('');
-let openingPrice = ref(0);
-let closingPrice = ref(0);
-let priceDiff = ref('');
-let priceDiffPercent = ref('');
+const highestPrice = ref('');
+const lowestPrice = ref('');
+const openingPrice = ref(0);
+const closingPrice = ref(0);
+const priceDiff = ref('');
+const priceDiffPercent = ref('');
 
 watch(
   () => activeFilterItem.value,

@@ -9,13 +9,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import AppLayout from '@/layouts/AppLayout.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
 
 const { t } = useI18n({ useScope: 'global' });
