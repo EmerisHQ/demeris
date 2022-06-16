@@ -2,7 +2,7 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import vue from '@vitejs/plugin-vue';
 import * as path from 'path';
-import { dynamicImport } from 'vite-plugin-dynamic-import';
+import dynamicImport from 'vite-plugin-dynamic-import';
 import envCompatible from 'vite-plugin-env-compatible';
 import eslintPlugin from 'vite-plugin-eslint';
 import { defineConfig } from 'vitest/config';
