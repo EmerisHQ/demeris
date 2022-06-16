@@ -1,5 +1,5 @@
 <template>
-  <component :is="layout">
+  <component :is="layout || DefaultLayout">
     <slot />
   </component>
 </template>
@@ -9,18 +9,21 @@ import { markRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
 
 const layout = markRaw(DefaultLayout);
 const route = useRoute();
+
+const components = {
+  DefaultLayout,
+  NoMarginLayout,
+};
+
 watch(
   () => route.meta,
-  async (meta) => {
-    try {
-      const component = await import(/* @vite-ignore */ `../../layouts/${meta.layout}.vue`);
-      layout.value = component?.default || DefaultLayout;
-    } catch (e) {
-      layout.value = DefaultLayout;
-    }
+  (meta) => {
+    const component = components[meta.layout as string];
+    layout.value = component;
   },
   { immediate: true },
 );
