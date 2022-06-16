@@ -4,7 +4,7 @@
       <!-- eslint-disable vue/no-v-html -->
       <div
         class="absolute rounded-full overflow-hidden w-full h-full opacity-50 filter blur-md top-1"
-        v-html="getAvatar(keplrAccountName)"
+        v-html="getAvatar(accountName)"
       />
       <div
         v-if="accountName != 'Demo Account'"

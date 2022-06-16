@@ -116,10 +116,11 @@ useMeta(
 );
 
 const router = useRouter();
-const { balances, stakingBalances } = useAccount();
+const { stakingBalances } = useAccount();
 const { pools } = usePools();
 
 const store = useStore();
+const balances = computed(() => store.getters[GlobalGetterTypes.API.getAllBalances]);
 
 const activeFilter = ref('all');
 

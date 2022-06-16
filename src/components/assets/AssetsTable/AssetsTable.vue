@@ -156,7 +156,7 @@ import { EmerisAPI } from '@emeris/types';
 import BigNumber from 'bignumber.js';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, ComputedRef, ref, toRefs } from 'vue';
+import { computed, ComputedRef, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -172,7 +172,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
+import { useAccount } from '@/composables/useAccount';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -212,7 +212,6 @@ const { stakingBalances, unbondingDelegations } = useAccount();
 const verifiedDenoms = computed(() => {
   return store.getters[GlobalGetterTypes.API.getVerifiedDenoms] ?? [];
 });
-const propsRef = toRefs(props);
 
 const tableColumns = ref(['35%', '20%', '35%', '10%']);
 if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
@@ -220,10 +219,10 @@ if (featureRunning('STAKING_PORTFOLIO') && props.showAvailableAsset) {
 }
 
 const allBalances = computed(() => {
-  let balances = propsRef.balances.value;
+  let balances = store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
   if (props.showAllAssets) {
     balances = [
-      ...propsRef.balances.value,
+      ...balances,
       ...verifiedDenoms.value.map((denom) => ({
         base_denom: denom.name,
         on_chain: denom.chain_name,
@@ -256,14 +255,13 @@ const allBalances = computed(() => {
 
 const balancesByAsset = computed(() => {
   const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-  const verifiedDenoms = store.getters[GlobalGetterTypes.API.getVerifiedDenoms];
   const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
     let totalAmount = balances.reduce(
       (acc, item) => acc.plus(new BigNumber(parseCoins(item.amount)[0].amount)),
       new BigNumber(0),
     );
     const chainsNames = balances.map((item) => item.on_chain);
-    const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+    const denom_details = verifiedDenoms.value.filter((x) => x.name == denom && x.stakable);
     let stakedAmount = new BigNumber(0);
     let unstakedAmount = new BigNumber(0);
     if (denom_details.length > 0) {
@@ -286,7 +284,7 @@ const balancesByAsset = computed(() => {
     };
   });
   if (allBalances.value.length > 0) {
-    for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
+    for (const denom of verifiedDenoms.value.filter((x) => x.stakable)) {
       const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
       if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
         const calcStakedAmount = stakedAmounts.reduce(

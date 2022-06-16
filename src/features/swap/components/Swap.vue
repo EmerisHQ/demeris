@@ -50,7 +50,6 @@ import { computed, nextTick, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
 import SwapButtonSwap from '@/features/swap/components/SwapButton/SwapButtonSwap.vue';
 import { useSwapMachine, useSwapStore } from '@/features/swap/state';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -76,11 +75,12 @@ const props = defineProps<Props>();
 const globalStore = useStore();
 const swapStore = useSwapStore();
 const { state, send } = useSwapMachine(props.defaultDenom);
-const { allbalances, isValidatingBalances } = useAccount();
 
 const isBalancesLoaded = computed(() => {
-  return globalStore.getters[GlobalGetterTypes.USER.isAllBalancesLoaded] && !isValidatingBalances.value;
+  return globalStore.getters[GlobalGetterTypes.USER.isAllBalancesLoaded];
 });
+
+const allbalances = computed(() => globalStore.getters[GlobalGetterTypes.API.getAllBalances]);
 const isSignedIn = computed(() => globalStore.getters[GlobalGetterTypes.USER.isSignedIn]);
 const hasSubmitted = computed(() => state.value.matches('submitted'));
 const showConfirming = computed(() => state.value.matches('ready.confirming'));

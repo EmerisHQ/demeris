@@ -16,18 +16,9 @@ export function useAccount() {
   const isDemoAccount = computed(() => {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
-  const allbalances = computed(() => {
-    // TODO: Remove after cloud is fully deployed
-    /*
-    if (import.meta.env.NODE_ENV === 'production') {
-      return TEST_DATA.balances;
-    }
-    */
-    return store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
-  });
 
   const redeemableBalances = ref([]);
-  const balances = ref(allbalances.value);
+  const balances = ref(store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances));
   const isValidatingBalances = ref(false);
   /*
   watch(
@@ -42,7 +33,7 @@ export function useAccount() {
   */
 
   watch(
-    () => allbalances.value,
+    () => store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances),
     async (newBalances) => {
       isValidatingBalances.value = true;
       const result = await validBalances(newBalances);
@@ -200,7 +191,6 @@ export function useAccount() {
     getNativeBalances,
     stakableBalances,
     getStakableBalances,
-    allbalances,
     balancesByDenom,
     orderBalancesByPrice,
     userAccountBalances,
