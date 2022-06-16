@@ -211,13 +211,13 @@ import FeatureRunningConditional from '@/components/common/FeatureRunningConditi
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';

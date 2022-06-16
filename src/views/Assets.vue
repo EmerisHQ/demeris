@@ -15,7 +15,7 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import AppLayout from '@/layouts/AppLayout.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
 
 const { t } = useI18n({ useScope: 'global' });

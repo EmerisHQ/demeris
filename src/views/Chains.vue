@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
 export default {
   name: 'Chains',
   components: { AppLayout },
