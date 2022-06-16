@@ -145,7 +145,8 @@
       </table>
     </div>
   </template>
-  <SkeletonLoader v-else width="100%" height="300px" />
+  <SkeletonLoader v-else width="100%" height="300px" class="mt-8" />
+  <StakeTableBanner v-if="validatorList.length > 0 && stakingBalances.length === 0" :denom="denom" />
 </template>
 <script lang="ts" setup>
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -155,6 +156,7 @@ import { computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import StakeTableBanner from '@/components/asset/StakeTableBanner.vue';
 import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
