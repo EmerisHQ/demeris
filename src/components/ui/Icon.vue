@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), { iconSize: 1.5, color: 'inheri
 const currentIcon = shallowRef('');
 const isReady = ref(false);
 onMounted(async () => {
-  const icon = await defineAsyncComponent(() => import(`@/components/common/Icons/${props.name}.vue`));
+  const icon = await defineAsyncComponent(() => import(`../common/Icons/${props.name}.vue`));
   currentIcon.value = icon;
   isReady.value = true;
 });
