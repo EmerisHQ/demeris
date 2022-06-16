@@ -16,12 +16,6 @@ export function useAccount() {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
   const allbalances = computed(() => {
-    // TODO: Remove after cloud is fully deployed
-    /*
-    if (import.meta.env.NODE_ENV === 'production') {
-      return TEST_DATA.balances;
-    }
-    */
     return store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
   });
 
