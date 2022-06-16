@@ -101,6 +101,7 @@ module.exports = {
         allowBinding: false,
       },
     ],
+    'vue/no-reserved-component-names': 'off',
   },
   overrides: [
     {

@@ -335,8 +335,8 @@ const exchangeAmount = computed(() => {
     typedstore.getters[GlobalGetterTypes.API.getDenomPrecision]({
       name: reserveBalances.value[1].base_denom,
     }) ?? 6;
-  let balanceA = reserveBalances.value[0].amount;
-  let balanceB = reserveBalances.value[1].amount;
+  const balanceA = reserveBalances.value[0].amount;
+  const balanceB = reserveBalances.value[1].amount;
   if (balanceA && balanceB) {
     return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
   }

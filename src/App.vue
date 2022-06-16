@@ -45,8 +45,8 @@ const showMaintenanceScreen = !!featureRunning('MAINTENANCE_SCREEN');
 const store = useStore();
 let liquidityEndpoint = import.meta.env.VITE_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
 let emerisEndpoint = import.meta.env.VITE_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
-let githubEndpoint = import.meta.env.VITE_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
-let rawGithubEndpoint = import.meta.env.VITE_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
+const githubEndpoint = import.meta.env.VITE_EMERIS_GITHUB_ENDPOINT ?? 'https://api.github.com';
+const rawGithubEndpoint = import.meta.env.VITE_EMERIS_RAW_GITHUB_ENDPOINT ?? 'https://raw.githubusercontent.com';
 let wsEndpoint = import.meta.env.VITE_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
 if (featureRunning('USE_STAGING')) {
   liquidityEndpoint = import.meta.env.VITE_EMERIS_STAGING_LIQUIDITY_ENDPOINT;

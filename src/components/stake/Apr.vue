@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts" setup>
-import { toRefs } from '@vue/reactivity';
+import { toRefs } from 'vue';
 import { ref, watch } from 'vue';
 
 import useStaking from '@/composables/useStaking';

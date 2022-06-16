@@ -43,7 +43,7 @@ export default defineComponent({
   },
 
   setup() {
-    let imageLoadFail = ref(false);
+    const imageLoadFail = ref(false);
 
     return { imageLoadFail };
   },

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from '@vue/runtime-core';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Modal from '@/components/ui/Modal.vue';
@@ -69,13 +69,13 @@ const goSimplex = () => {
       (window as any).simplexAsyncFunction = function () {
         (window as any)?.Simplex?.init({ public_key: 'pk_live_450069ac-11e8-46bc-b1a9-73b7e812d113' });
       };
-      let simplexCDNScript = document.createElement('script');
+      const simplexCDNScript = document.createElement('script');
       simplexCDNScript.setAttribute('src', 'https://cdn.simplex.com/sdk/v1/js/sdk.js');
       simplexCDNScript.id = 'simplex-cdn-script';
       simplexCDNScript.async = true;
       document.head?.appendChild(simplexCDNScript);
 
-      let simplexIframeScript = document.createElement('script');
+      const simplexIframeScript = document.createElement('script');
       simplexIframeScript.setAttribute('src', 'https://iframe.simplex-affiliates.com/form-sdk.js');
       simplexIframeScript.type = 'text/javascript';
       simplexIframeScript.id = 'simplex-iframe-script';
@@ -92,14 +92,14 @@ const goSimplex = () => {
         );
       };
 
-      let simplexTrackingScript = document.createElement('script');
+      const simplexTrackingScript = document.createElement('script');
       simplexTrackingScript.setAttribute('src', 'https://checkout.simplexcc.com/splx.js');
       simplexTrackingScript.id = 'simplex-tracking-script';
       document.body?.appendChild(simplexTrackingScript);
 
-      let styleTag = document.createElement('style');
+      const styleTag = document.createElement('style');
       styleTag.id = 'simplex-css';
-      let cssStyles = document.createTextNode(`
+      const cssStyles = document.createTextNode(`
         .simplex-form{} .simplex-continue-button {background: #000000 !important;
         border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { width: 80px !important; color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
         .form-control { border-radius: 10px !important;} .simplex-input {border: 1px solid #ced4da !important;} .error-box {padding: 15px 30px !important;}

@@ -181,7 +181,7 @@ const assetStakingAPY = ref<number | string>('-');
 const validatorList = ref<Array<any>>([]);
 const props = defineProps<{ denom: string; selectedTab: number; totalRewardsAmount: number }>();
 const propsRef = toRefs(props);
-let chainName = ref<string>(null);
+const chainName = ref<string>(null);
 
 const { getChainNameByBaseDenom } = useChains();
 

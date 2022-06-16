@@ -319,11 +319,11 @@ const unbondingDelegation = computed(() => {
 });
 
 const stakedAmount = computed(() => {
-  let staked = stakingBalance.value;
+  const staked = stakingBalance.value;
   let totalStakedAmount = new BigNumber(0);
   if (Array.isArray(staked)) {
     for (let i = 0; i < staked.length; i++) {
-      let amount = new BigNumber(staked[i].amount);
+      const amount = new BigNumber(staked[i].amount);
       if (amount) {
         totalStakedAmount = totalStakedAmount.plus(amount);
       }
@@ -410,7 +410,7 @@ const dataStream = computed(() => {
 });
 
 const getTokenPrices = ref(null);
-let priceDiffObject = ref(null);
+const priceDiffObject = ref(null);
 
 const setPriceDifference = (priceDiff: any) => {
   priceDiffObject.value = priceDiff;

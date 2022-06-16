@@ -441,7 +441,7 @@ const allBalances = computed(() => {
 });
 const assetsToPay = computed(() => {
   const hasBalance = balances.value.length > 0;
-  let payAssets = allBalances.value.filter((balance) => {
+  const payAssets = allBalances.value.filter((balance) => {
     return (
       balance?.base_denom !== data?.receiveCoinData?.base_denom &&
       verifiedDenoms.value.find(

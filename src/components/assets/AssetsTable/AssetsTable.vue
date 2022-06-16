@@ -313,7 +313,7 @@ const balancesFiltered = computed(() => {
 });
 
 const balancesWithValue = computed(() => {
-  let balances = balancesByAsset.value;
+  const balances = balancesByAsset.value;
 
   if (balances.length > 0) {
     balances.map((b) => {
@@ -334,18 +334,18 @@ const balancesWithName: ComputedRef<
     };
   }[]
 > = computed(() => {
-  let balances = balancesWithValue.value;
+  const balances = balancesWithValue.value;
   balances.map(async (b) => {
-    let name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
+    const name = await getDisplayName(b.denom, store.getters[GlobalGetterTypes.API.getDexChain]);
     (b as any).name = name;
   });
   return balances;
 });
 
 const balancesWithMarketCap = computed(() => {
-  let balances = balancesWithName.value;
+  const balances = balancesWithName.value;
   balances.map((b) => {
-    let marketCap = getMarketCap(b.denom);
+    const marketCap = getMarketCap(b.denom);
     if (marketCap) {
       (b as any).marketCap = marketCap;
     }
@@ -411,7 +411,7 @@ const orderedAllBalances = computed(() => {
 const getMarketCap = (denom: string) => {
   const price = store.getters[GlobalGetterTypes.API.getPrice]({ denom });
   const supply = store.getters[GlobalGetterTypes.API.getSupply]({ denom });
-  let marketCap = price * supply;
+  const marketCap = price * supply;
   return marketCap;
 };
 

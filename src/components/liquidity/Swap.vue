@@ -392,9 +392,9 @@ onMounted(async () => {
   const newPools = pools.value;
   if (newPools) {
     // pools.value may be null
-    for (let pool of newPools) {
-      let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
-      let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+    for (const pool of newPools) {
+      const reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+      const reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
 
       if (isNative(pool.reserve_coin_denoms[0])) {
         reserveCoinA.base_denom = reserveCoinA.denom;
@@ -482,9 +482,9 @@ watch(
   async (newPools, oldPools) => {
     if (JSON.stringify(newPools) != JSON.stringify(oldPools)) {
       const pairs = [];
-      for (let pool of newPools) {
-        let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
-        let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+      for (const pool of newPools) {
+        const reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+        const reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
 
         if (isNative(pool.reserve_coin_denoms[0])) {
           reserveCoinA.base_denom = reserveCoinA.denom;
@@ -571,7 +571,7 @@ watch(
 
 const availablePaySide = computed(() => {
   if (data?.receiveCoinData) {
-    let paySide = availablePairs.value.filter(
+    const paySide = availablePairs.value.filter(
       (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
     );
     return paySide;
@@ -581,7 +581,7 @@ const availablePaySide = computed(() => {
 });
 const availableReceiveSide = computed(() => {
   if (data?.payCoinData) {
-    let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
+    const receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
     return receiveSide;
   } else {
     return availablePairs.value.filter(
@@ -624,7 +624,7 @@ const allBalances = computed(() => {
 });
 const assetsToPay = computed(() => {
   const hasBalance = balances.value.length > 0;
-  let payAssets = allBalances.value.filter((x) => {
+  const payAssets = allBalances.value.filter((x) => {
     return availablePaySide.value.find(
       (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
     );
@@ -632,7 +632,7 @@ const assetsToPay = computed(() => {
   return payAssets;
 });
 const assetsToReceive = computed(() => {
-  let assets = availableReceiveSide.value.map((x) => {
+  const assets = availableReceiveSide.value.map((x) => {
     const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
     return {
       denom: x.receive.denom,
@@ -648,7 +648,7 @@ const otherAssetsToPay = computed(() => {
     return [];
   }
 
-  let assets = allBalances.value.filter((x) => {
+  const assets = allBalances.value.filter((x) => {
     return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
   });
 
@@ -671,11 +671,11 @@ const otherAssetsToReceive = computed(() => {
     return [];
   }
 
-  let receivalbePairs = availablePairs.value.filter(
+  const receivalbePairs = availablePairs.value.filter(
     (pair, index, self) => index === self.findIndex((p) => p.pay.denom === pair.pay.denom),
   );
 
-  let assets = receivalbePairs.map((x) => {
+  const assets = receivalbePairs.map((x) => {
     return {
       denom: x.pay.denom,
       base_denom: x.pay.base_denom,

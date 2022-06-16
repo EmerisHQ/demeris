@@ -215,7 +215,7 @@ const totalToStake = computed(() =>
     .toString(),
 );
 const disabled = computed(() => {
-  let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+  const chains: Record<string, { amount: BigNumber; denom: string }> = {};
   let toStake = 0;
   for (const validator of validatorsToStakeWith.value) {
     toStake = toStake + Number(validator.amount ?? 0);

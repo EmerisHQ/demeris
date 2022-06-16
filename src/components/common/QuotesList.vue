@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from '@vue/reactivity';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import FeeToken from '@/components/common/FeeToken.vue';
@@ -83,10 +83,10 @@ const visualizeRoute = ({ index }) => {
 };
 
 const routesTransformedToQuotes = computed(() => {
-  let quotesArr = [] as any;
-  for (let route of props.routes) {
-    let routeObj = {} as any;
-    let numberOfSteps = (route as any).steps.length;
+  const quotesArr = [] as any;
+  for (const route of props.routes) {
+    const routeObj = {} as any;
+    const numberOfSteps = (route as any).steps.length;
     routeObj.dex = (route as any).steps[0].protocol; //can steps have diff protocols? incorprate if yes
     routeObj.amount = (
       (route as any).steps[numberOfSteps - 1].data.to.amount /

@@ -84,9 +84,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from '@vue/reactivity';
-import { computed, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
+import { ref } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';

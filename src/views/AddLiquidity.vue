@@ -442,7 +442,7 @@ watch(
   },
   { immediate: true },
 );
-let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+const usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
 watch(
   () => poolId.value,
   async () => {
@@ -598,7 +598,7 @@ const hasFunds = computed(() => {
 });
 
 const hasSufficientFunds = computed(() => {
-  let hasAssetFunds = hasFunds.value.all;
+  const hasAssetFunds = hasFunds.value.all;
   let coinA = true;
   let coinB = true;
 
@@ -681,8 +681,8 @@ const updateTotalCurrencyPrice = () => {
 
 const submitButtonHint = computed(() => {
   if (featureRunning('POOL_MIN_AMOUNT')) {
-    let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
-    let insufficientAmount = +state.receiveAmount <= 0;
+    const emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+    const insufficientAmount = +state.receiveAmount <= 0;
     if (insufficientAmount && !emptyFields) {
       return t('pages.addLiquidity.insufficientAmountHint');
     }
@@ -692,10 +692,10 @@ const submitButtonHint = computed(() => {
 });
 
 const submitButtonName = computed(() => {
-  let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
-  let insufficientFunds = !hasSufficientFunds.value.total;
-  let insufficientAmount = featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0;
-  let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
+  const emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+  const insufficientFunds = !hasSufficientFunds.value.total;
+  const insufficientAmount = featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0;
+  const invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
 
   if (emptyFields) {
     return t('generic_cta.continue');
