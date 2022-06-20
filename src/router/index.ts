@@ -76,10 +76,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:pathMatch(.*)*',
     redirect: { name: 'Portfolio' },
   },
-  {
-    path: '/playground',
-    component: () => import('../views/Playground.vue'),
-  },
 ];
 if (featureRunning('STAKING')) {
   routes.push({
