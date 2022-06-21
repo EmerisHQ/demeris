@@ -1,4 +1,4 @@
-import { KeplrKeyData, UserData } from '@/types/user';
+import { AccountData, ChainKeyData, UserData } from '@/types/user';
 
 export type USERState = {
   gas_limit: number;
@@ -6,7 +6,8 @@ export type USERState = {
   correlationId: string;
   stakingBalancesFirstLoad: boolean;
   pricesFirstLoad: boolean;
-  keplr: KeplrKeyData;
+  account: AccountData;
+  chainKeyData: ChainKeyData[];
   _Subscriptions: Set<string>;
   _Session: UserData | Record<string, never>;
 };
@@ -17,7 +18,8 @@ export function getDefaultState(): USERState {
     stakingBalancesFirstLoad: true,
     pricesFirstLoad: true,
     correlationId: '',
-    keplr: null,
+    account: null,
+    chainKeyData: [],
     _Subscriptions: new Set(),
     _Session: {},
   };

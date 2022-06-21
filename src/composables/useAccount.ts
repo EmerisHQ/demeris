@@ -7,6 +7,7 @@ import { computed, Ref, ref, unref, watch } from 'vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import { sortBalancesByAmount } from '@/utils/sorting';
 import { useStore } from '@/utils/useStore';
 
 let useAccountsInstance = null;
@@ -16,12 +17,6 @@ export function useAccount() {
     return store.getters[GlobalGetterTypes.USER.isDemoAccount];
   });
   const allbalances = computed(() => {
-    // TODO: Remove after cloud is fully deployed
-    /*
-    if (import.meta.env.NODE_ENV === 'production') {
-      return TEST_DATA.balances;
-    }
-    */
     return store.getters[GlobalGetterTypes.API.getAllBalances] || ([] as EmerisAPI.Balances);
   });
 
@@ -45,11 +40,7 @@ export function useAccount() {
     async (newBalances) => {
       isValidatingBalances.value = true;
       const result = await validBalances(newBalances);
-      balances.value = result.sort((a, b) => {
-        const coinA = parseCoins(a.amount)[0];
-        const coinB = parseCoins(b.amount)[0];
-        return +coinB.amount - +coinA.amount;
-      });
+      balances.value = sortBalancesByAmount(result);
       isValidatingBalances.value = false;
     },
     { immediate: true },

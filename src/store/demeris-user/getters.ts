@@ -2,27 +2,25 @@ import { EmerisFees } from '@emeris/types';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { KeplrKeyData } from '@/types/user';
 import { Namespaced } from '@/types/util';
-import { keyHashfromAddress } from '@/utils/basic';
 
+import { AccountData, ChainKeyData } from './../../types/user';
 import { GetterTypes } from './getter-types';
 import { USERState } from './state';
 
 export type Getters = {
-  [GetterTypes.getKeplr](state: USERState): KeplrKeyData;
+  [GetterTypes.getAccount](state: USERState): AccountData;
+  [GetterTypes.getChainKeyData](state: USERState): (chainName: string) => ChainKeyData;
   [GetterTypes.getGasLimit](state: USERState): number;
   [GetterTypes.isSignedIn](state: USERState): boolean;
   [GetterTypes.getKeyhashes](state: USERState): string[];
   [GetterTypes.getCorrelationId](state: USERState): string;
-  [GetterTypes.getKeplrAccountName](state: USERState): string | null;
   [GetterTypes.isDemoAccount](state: USERState): boolean;
   [GetterTypes.hasSeenReedem](state: USERState): boolean;
   [GetterTypes.viewUnverified](state: USERState): boolean;
   [GetterTypes.viewLPAssetPools](state: USERState): boolean;
   [GetterTypes.allowCustomSlippage](state: USERState): boolean;
   [GetterTypes.getSlippagePerc](state: USERState): number;
-  [GetterTypes.getKeplrAddress](state): string;
   [GetterTypes.theme](state: USERState): string;
   [GetterTypes.getPreferredGasPriceLevel](state: USERState): EmerisFees.GasPriceLevel;
   [GetterTypes.isAllBalancesLoaded](state: USERState): boolean;
@@ -31,8 +29,11 @@ export type Getters = {
 export type GlobalGetters = Namespaced<Getters, 'demerisUSER'>;
 
 export const getters: GetterTree<USERState, RootState> & Getters = {
-  [GetterTypes.getKeplr]: (state) => {
-    return state.keplr ?? null;
+  [GetterTypes.getAccount]: (state) => {
+    return state.account ?? null;
+  },
+  [GetterTypes.getChainKeyData]: (state) => (chainName) => {
+    return state.chainKeyData.find((chainKeyData) => chainKeyData.chainName === chainName);
   },
   [GetterTypes.getSlippagePerc]: (state) => {
     return state._Session.slippagePerc;
@@ -62,24 +63,11 @@ export const getters: GetterTree<USERState, RootState> & Getters = {
     return state._Session.viewLPAssetPools;
   },
   [GetterTypes.isSignedIn]: (state) => {
-    return state.keplr ? true : false;
-  },
-  [GetterTypes.getKeplrAccountName]: (state) => {
-    return state.keplr?.name ?? null;
-  },
-  [GetterTypes.getKeplrAddress]: (state) => {
-    if (state.keplr) {
-      return keyHashfromAddress(state.keplr.bech32Address);
-    } else {
-      return null;
-    }
+    return state.account ? true : false;
   },
   [GetterTypes.getKeyhashes]: (state) => {
-    if (state.keplr && state.keplr.keyHashes) {
-      return state.keplr.keyHashes;
-    } else {
-      return null;
-    }
+    // dedupe
+    return [...new Set(state.chainKeyData.map(({ keyHash }) => keyHash))];
   },
   [GetterTypes.getBalancesFirstLoad]: (state) => {
     return state.balancesFirstLoad;

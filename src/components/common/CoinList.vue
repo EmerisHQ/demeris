@@ -10,6 +10,7 @@
     class="flex items-center justify-between py-4 px-3 mx-3 hover:bg-fg rounded-xl"
     :class="coin.isFullAmountUnavailable ? 'cursor-not-allowed' : 'cursor-pointer'"
     :disabled="coin.isFullAmountUnavailable"
+    :data-chain="coin.on_chain"
     @click="!coin.isFullAmountUnavailable && emit('select', coin)"
   >
     <div class="flex items-center" :class="coin.isFullAmountUnavailable ? 'opacity-50' : ''">
@@ -88,6 +89,8 @@ import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalGetterTypes, RootStoreTyped } from '@/store';
 import { parseCoins } from '@/utils/basic';
+
+BigNumber.config({ EXPONENTIAL_AT: [-20, 24] });
 
 interface Props {
   data: EmerisAPI.Balances;

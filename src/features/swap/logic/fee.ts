@@ -29,7 +29,6 @@ export const calculateInputAmountWithTransactionFees = (
   if (!nativeChain) return inputAmount;
 
   const chainFees = getFeeForChain(nativeChain);
-
   const denomFee = chainFees.find((fee) => fee.denom === baseDenom);
 
   if (!denomFee) return inputAmount;
@@ -40,6 +39,10 @@ export const calculateInputAmountWithTransactionFees = (
   if (requiredFee.isZero()) return inputAmount;
 
   const fee = amountToHuman({ amount: requiredFee.toString(), denom });
+  const inputAmountBN = new BigNumber(inputAmount);
+
+  // Ignore the fee if it is greater than the input amount
+  if (inputAmountBN.isLessThan(fee.amount)) return inputAmount;
 
   return new BigNumber(inputAmount).minus(fee.amount).toString();
 };

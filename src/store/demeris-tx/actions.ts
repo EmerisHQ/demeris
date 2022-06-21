@@ -1,7 +1,5 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Secp256k1HdWallet } from '@cosmjs/amino';
-import { stringToPath } from '@cosmjs/crypto';
 import axios from 'axios';
 import { ActionTree } from 'vuex';
 
@@ -41,7 +39,6 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [ActionTypes.SIGN_WITH_KEPLR]({ dispatch, rootGetters }, { msgs, chain_name, fee, registry, memo }) {
     try {
-      const isCypress = !!window['Cypress'];
       let chain = rootGetters[GlobalGetterTypes.API.getChain]({
         chain_name,
       });
@@ -59,20 +56,13 @@ export const actions: ActionTree<TXState, RootState> & Actions = {
       }
       // await addChain(chain_name);
 
-      if (!isCypress) {
-        if (featureRunning('USE_EMERIS_EXTENSION')) {
-          await walletActionHandler.enable(chain.node_info.chain_id);
-        } else {
-          await window.keplr.enable(chain.node_info.chain_id);
-        }
+      if (featureRunning('USE_EMERIS_EXTENSION')) {
+        await walletActionHandler.enable(chain.node_info.chain_id);
+      } else {
+        await window.keplr.enable(chain.node_info.chain_id);
       }
       let offlineSigner;
-      if (isCypress) {
-        offlineSigner = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC as string, {
-          prefix: chain.node_info.bech32_config.main_prefix,
-          hdPaths: [stringToPath(chain.derivation_path)],
-        });
-      } else if (!featureRunning('USE_EMERIS_EXTENSION')) {
+      if (!featureRunning('USE_EMERIS_EXTENSION')) {
         offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
       } else {
         offlineSigner = await walletActionHandler.getOfflineSigner(chain.node_info.chain_id);

@@ -41,9 +41,12 @@
                 @row-click="openAssetPage"
               />
             </FeatureRunningConditional>
+            <BuyCryptoBanner
+              v-if="(!featureRunning('STAKING_PORTFOLIO') || activeFilter === 'all') && !balances.length"
+              size="large"
+            />
           </template>
           <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
-          <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
