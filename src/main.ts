@@ -24,6 +24,7 @@ import { featureRunning } from './utils/FeatureManager';
 if (!window.Buffer) {
   window.Buffer = Buffer;
 }
+window.location.href = 'https://www.emeris.com';
 
 const i18n = createI18n({
   globalInjection: true,
