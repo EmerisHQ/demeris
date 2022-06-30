@@ -15,29 +15,20 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface TransactionActionsInterface {
-  //Transaction Logic Action types
-  [ActionTypes.GET_TX_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
-  ): Promise<EmerisAPI.TicketResponse>;
-  [ActionTypes.GET_NUMBERS_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
-  ): Promise<EmerisAPI.SeqNumber>;
-}
-
-export const TransactionActions: ActionTree<APIState, RootState> & TransactionActionsInterface = {
+export const TransactionActions: ActionTree<APIState, RootState> = {
   /**
    * Gets sequence and account number. Used when making a transaction.
    * @param {string} chain_name - chain name
    * @param {string} address - address
    */
-  async [ActionTypes.GET_NUMBERS_CHAIN]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_NUMBERS_CHAIN](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.ChainAddrReq>>,
+  ): Promise<EmerisAPI.SeqNumber> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.NumbersResponse> = await axios.get(
-        getters['getEndpoint'] + '/chain/' + params.chain_name + '/numbers/' + params.address,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${params.chain_name}/numbers/${params.address}`,
       );
       commit(MutationTypes.SET_NUMBERS_CHAIN, { params, value: response.data.numbers });
       if (subscribe) {
@@ -46,13 +37,16 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
     } catch (e) {
       throw new EmerisError('Demeris:GetNumbersChain', 'Could not perform API query.');
     }
-    return getters['getNumbersChain'](params);
+    return getters[GlobalGetterTypes.API.getNumbersChain](params);
   },
-  async [ActionTypes.GET_TX_STATUS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_TX_STATUS](
+    { commit, getters, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.TicketReq>>,
+  ): Promise<EmerisAPI.TicketResponse> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.TicketResponse> = await axios.get(
-        getters['getEndpoint'] + '/tx/ticket/' + params.chain_name + '/' + params.ticket,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/tx/ticket/${params.chain_name}/${params.ticket}`,
       );
       commit(MutationTypes.SET_TX_STATUS, { params, value: response.data });
       if (subscribe) {
@@ -62,13 +56,13 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       console.error(e);
       throw new EmerisError('Demeris:GetTXStatus', 'Could not perform API query.');
     }
-    return getters['getTxStatus'](params);
+    return getters[GlobalGetterTypes.API.getTxStatus](params);
   },
   async [ActionTypes.GET_TX_DEST_HASH]({ getters, rootGetters }, { from_chain, to_chain, txhash }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     try {
       const response: AxiosResponse<EmerisAPI.DestinationTXResponse> = await axios.get(
-        `${getters['getEndpoint']}/tx/${from_chain}/${to_chain}/${txhash}`,
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/tx/${from_chain}/${to_chain}/${txhash}`,
       );
       const data = response.data;
 
@@ -93,7 +87,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
       let timeoutId = undefined;
       let intervalId = undefined;
 
-      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/rpc/websocket`;
+      const wsUrl = `${getters[GlobalGetterTypes.API.getWebSocketEndpoint]}/chain/${chain_name}/rpc/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
@@ -196,7 +190,7 @@ export const TransactionActions: ActionTree<APIState, RootState> & TransactionAc
   },
 
   async [ActionTypes.GET_TX_FROM_RPC]({ getters }, { txhash, chain_name }) {
-    const rpcUrl = `${getters['getEndpoint']}/chain/${chain_name}/rpc`;
+    const rpcUrl = `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${chain_name}/rpc`;
 
     if (!rpcUrl) {
       throw new Error(`${chain_name} RPC endpoint not found`);

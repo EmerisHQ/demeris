@@ -2,40 +2,28 @@ import { CommitOptions, DispatchOptions, Module, Store as VuexStore } from 'vuex
 
 import { RootState } from '@/store';
 
-import { Actions, actions, GlobalActions } from './actions';
-import { Getters, getters, GlobalGetters } from './getters';
-import { Mutations, mutations } from './mutations';
+import { actions } from './actions';
+import { getters } from './getters';
+import { mutations } from './mutations';
 import type { APIState } from './state';
 import { getDefaultState } from './state';
 
 export { APIState };
 
 export type APIStore<S = APIState> = Omit<VuexStore<S>, 'getters' | 'commit' | 'dispatch'> & {
-  commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
-    key: K,
-    payload?: P,
-    options?: CommitOptions,
-  ): ReturnType<Mutations[K]>;
+  commit<K, P>(key: K, payload?: P, options?: CommitOptions);
 } & {
-  dispatch<K extends keyof Actions>(
-    key: K,
-    payload?: Parameters<Actions[K]>[1],
-    options?: DispatchOptions,
-  ): ReturnType<Actions[K]>;
+  dispatch(key: any, payload?: any, options?: DispatchOptions): any;
 } & {
   getters: {
-    [K in keyof Getters]: ReturnType<Getters[K]>;
+    any: any;
   };
 };
 export type NamespacedAPIStore<S = APIState> = Omit<APIStore<S>, 'getters' | 'dispatch'> & {
-  dispatch<K extends keyof GlobalActions>(
-    key: K,
-    payload?: Parameters<GlobalActions[K]>[1],
-    options?: DispatchOptions,
-  ): ReturnType<GlobalActions[K]>;
+  dispatch(key: string, payload?: any, options?: DispatchOptions);
 } & {
   getters: {
-    [K in keyof GlobalGetters]: ReturnType<GlobalGetters[K]>;
+    any: any;
   };
 };
 export const namespace = 'demerisAPI';
@@ -45,10 +33,10 @@ export const module: Module<APIState, RootState> = {
   mutations,
   getters,
   actions,
-  namespaced: true,
+  namespaced: false,
 };
 
-import { GlobalActionTypes } from './action-types';
-import { GlobalGetterTypes } from './getter-types';
+import { ActionTypes as GlobalActionTypes } from './action-types';
+import { GetterTypes as GlobalGetterTypes } from './getter-types';
 
 export { GlobalActionTypes, GlobalGetterTypes };

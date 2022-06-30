@@ -14,38 +14,21 @@ import { MutationTypes } from '../mutation-types';
 import { APIState } from '../state';
 import { APIActionContext } from './api-action-context-type';
 
-export interface ChainActionsInterface {
-  //Chain Action Types
-  [ActionTypes.GET_CHAIN](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<EmerisAPI.Chain>;
-  [ActionTypes.GET_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
-  ): Promise<boolean>;
-  [ActionTypes.GET_CHAINS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<Record<string, EmerisAPI.Chain>>;
-  [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS](
-    context: APIActionContext,
-    payload: SimpleSubscribable,
-  ): Promise<Record<string, EmerisAPI.Chain>>;
-}
-
-export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterface = {
+export const ChainActions: ActionTree<APIState, RootState> = {
   /**
    * Chain Logic Action types
    */
-  async [ActionTypes.GET_CHAIN]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_CHAIN](
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params }: Subscribable<ActionParams<EmerisAPI.ChainReq>>,
+  ): Promise<EmerisAPI.Chain> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getChain'](params);
+      return getters[GlobalGetterTypes.API.getChain](params);
     } else {
       let resolver;
       let rejecter;
@@ -56,7 +39,7 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.ChainResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name,
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${params.chain_name}`,
         );
         commit(MutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
         if (subscribe) {
@@ -72,17 +55,20 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
       }
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChain'](params);
+      return getters[GlobalGetterTypes.API.getChain](params);
     }
   },
-  async [ActionTypes.GET_CHAIN_STATUS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [ActionTypes.GET_CHAIN_STATUS](
+    { commit, getters, state, rootGetters }: APIActionContext,
+    { subscribe = false, params },
+  ): Promise<boolean> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAIN_STATUS, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
 
-      return getters['getChainStatus'](params);
+      return getters[GlobalGetterTypes.API.getChainStatus](params);
     } else {
       let resolver;
       let rejecter;
@@ -93,7 +79,7 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response: AxiosResponse<EmerisAPI.ChainStatusResponse> = await axios.get(
-          getters['getEndpoint'] + '/chain/' + params.chain_name + '/status',
+          `${getters[GlobalGetterTypes.API.getEndpoint]}/chain/${params.chain_name}/status`,
         );
         commit(MutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
         if (subscribe) {
@@ -109,16 +95,19 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
       }
       resolver();
       commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-      return getters['getChainStatus'](params);
+      return getters[GlobalGetterTypes.API.getChainStatus](params);
     }
   },
-  async [ActionTypes.GET_CHAINS]({ commit, getters, rootGetters, state }, { subscribe = false }) {
+  async [ActionTypes.GET_CHAINS](
+    { commit, getters, rootGetters, state }: APIActionContext,
+    { subscribe = false }: SimpleSubscribable,
+  ): Promise<Record<string, EmerisAPI.Chain>> {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: ActionTypes.GET_CHAINS, payload: {} });
 
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
-      return getters['getChains'];
+      return getters[GlobalGetterTypes.API.getChains];
     }
     let resolver;
     const promise: Promise<void> = new Promise((resolve, _) => {
@@ -126,7 +115,9 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
     });
     try {
       commit(MutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
-      const response: AxiosResponse<EmerisAPI.ChainsResponse> = await axios.get(getters['getEndpoint'] + '/chains');
+      const response: AxiosResponse<EmerisAPI.ChainsResponse> = await axios.get(
+        `${getters[GlobalGetterTypes.API.getEndpoint]}/chains`,
+      );
       commit(MutationTypes.SET_CHAINS, { value: response.data.chains });
       if (subscribe) {
         commit(MutationTypes.SUBSCRIBE, { action: ActionTypes.GET_CHAINS, payload: {} });
@@ -136,9 +127,12 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
     }
     resolver();
     commit(MutationTypes.DELETE_IN_PROGRESS, reqHash);
-    return getters['getChains'];
+    return getters[GlobalGetterTypes.API.getChains];
   },
-  async [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS]({ dispatch, getters }, { subscribe = false }) {
+  async [ActionTypes.GET_CHAINS_AND_CHAIN_STATUS](
+    { dispatch, getters }: APIActionContext,
+    { subscribe = false }: SimpleSubscribable,
+  ): Promise<Record<string, EmerisAPI.Chain>> {
     if (featureRunning('USE_NEW_CHAINS_API')) {
       dispatch(ActionTypes.GET_CHAINS, {
         subscribe: true,
@@ -168,6 +162,6 @@ export const ChainActions: ActionTree<APIState, RootState> & ChainActionsInterfa
           console.error('Could not load chain information: ' + e);
         });
     }
-    return getters['getChains'];
+    return getters[GlobalGetterTypes.API.getChains];
   },
 };

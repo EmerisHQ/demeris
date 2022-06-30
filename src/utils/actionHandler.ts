@@ -672,7 +672,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 export async function chainStatusForSteps(steps: Actions.Step[]) {
   const typedstore = useStore() as RootStoreTyped;
   let allClear = true;
-  let relayerStatus = true;
+  const relayerStatus = true;
   const failedChains = [];
   for (const step of steps) {
     for (const stepTx of step.transactions) {
@@ -703,13 +703,6 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           } else {
             failedChains.push(dest_chain_name);
           }
-        }
-
-        if (
-          !typedstore.getters[GlobalGetterTypes.API.getRelayerChainStatus]({ chain_name }) ||
-          !typedstore.getters[GlobalGetterTypes.API.getRelayerChainStatus]({ chain_name: dest_chain_name })
-        ) {
-          relayerStatus = false;
         }
       }
       if (stepTx.type == 'IBCtransferForward') {
