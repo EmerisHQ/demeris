@@ -128,6 +128,9 @@
     "vitest": "^0.7.10",
     "vue-tsc": "^0.33.7"
   },
+  "resolutions": {
+    "**/@starport/vuex/@confio/relayer/axios": "0.21.2"
+  },
   "engines": {
     "node": "16.x"
   },
@@ -137,7 +140,7 @@
       "prettier --write"
     ],
     "*.{js,ts,tsx,vue}": [
-      "npm run lint"
+      "yarn lint"
     ]
   },
   "simple-git-hooks": {

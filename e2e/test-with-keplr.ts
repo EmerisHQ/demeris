@@ -1,6 +1,7 @@
 import { chromium, test as base, webkit } from '@playwright/test';
 
 export const test = base.extend({
+  // eslint-disable-next-line max-lines-per-function
   context: async ({ browserName }, use) => {
     const browserTypes = { chromium, webkit };
     const launchOptions = {
