@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - develop
-  schedule:
-    - cron: '0,30 * * * *'
 
 env:
   VITE_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
