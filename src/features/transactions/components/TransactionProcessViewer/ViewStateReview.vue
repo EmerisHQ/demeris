@@ -57,6 +57,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
+import PreviewReinvest from '@/components/wizard/previews/PreviewReinvest.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
@@ -90,6 +91,7 @@ const previewComponentMap = {
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
   claim: PreviewClaim,
+  reinvest: PreviewReinvest,
   switch: PreviewSwitch,
 };
 
@@ -104,6 +106,7 @@ const titleMap = {
   withdrawliquidity: t('context.transactions.review.withdrawliquidity'),
   createpool: t('context.transactions.review.createpool'),
   claim: t('context.transactions.review.claim'),
+  reinvest: t('context.transactions.review.reinvest'),
   switch: t('context.transactions.review.switch'),
 };
 

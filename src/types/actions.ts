@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { AminoMsg } from '@cosmjs/amino';
 import { Registry } from '@cosmjs/proto-signing';
 import { EmerisBase, EmerisTransactions } from '@emeris/types';
@@ -41,6 +42,13 @@ export type ClaimRewardsParams = {
   total: string;
   chainName: string;
 };
+
+export type ReinvestParams = {
+  rewards: { validator_address: string; reward: string }[];
+  total: string;
+  chainName: string;
+};
+
 export type StakeParams = {
   validatorAddress: string;
   amount: EmerisBase.ChainAmount;
@@ -67,6 +75,7 @@ export type TransferAction = BaseAction & { name: 'transfer'; params: TransferPa
 export type MemoTransferAction = BaseAction & { name: 'memo-transfer'; params: TransferParams };
 export type CreatePoolAction = BaseAction & { name: 'createpool'; params: CreatePoolParams };
 export type ClaimRewardsAction = BaseAction & { name: 'claim'; params: ClaimRewardsParams };
+export type ReinvestAction = BaseAction & { name: 'reinvest'; params: ReinvestParams };
 export type MultiStakeAction = BaseAction & { name: 'multistake'; params: MultiStakeParams };
 export type StakeAction = BaseAction & { name: 'stake'; params: StakeParams };
 export type UnstakeAction = BaseAction & { name: 'unstake'; params: UnstakeParams };
@@ -81,6 +90,7 @@ export type UserAction =
   | CreatePoolAction
   | MoveAction
   | ClaimRewardsAction
+  | ReinvestAction
   | StakeAction
   | MultiStakeAction
   | UnstakeAction
@@ -172,6 +182,7 @@ export type AddLiqStepTx = BaseStepTx & EmerisTransactions.AbstractAddLiquidityT
 export type WithdrawLiqStepTx = BaseStepTx & EmerisTransactions.AbstractWithdrawLiquidityTransaction;
 export type CreatePoolStepTx = BaseStepTx & EmerisTransactions.AbstractCreatePoolTransaction;
 export type ClaimStepTx = BaseStepTx & EmerisTransactions.AbstractClaimRewardsTransaction;
+export type ReinvestStepTx = BaseStepTx & EmerisTransactions.AbstractReinvestTransaction;
 export type StakeStepTx = BaseStepTx & EmerisTransactions.AbstractStakeTransaction;
 export type UnstakeStepTx = BaseStepTx & EmerisTransactions.AbstractUnstakeTransaction;
 export type RestakeStepTx = BaseStepTx & EmerisTransactions.AbstractRestakeTransaction;
@@ -184,6 +195,7 @@ export type StepTransaction =
   | WithdrawLiqStepTx
   | CreatePoolStepTx
   | ClaimStepTx
+  | ReinvestStepTx
   | StakeStepTx
   | UnstakeStepTx
   | RestakeStepTx;
@@ -197,6 +209,7 @@ export type Step = {
     | 'createpool'
     | 'move'
     | 'claim'
+    | 'reinvest'
     | 'stake'
     | 'unstake'
     | 'switch';
@@ -288,6 +301,7 @@ export enum StakingActions {
   UNSTAKE = 'unstake',
   SWITCH = 'switch',
   CLAIM = 'claim',
+  REINVEST = 'reinvest',
 }
 export enum StakingActionSteps {
   VALIDATOR = 'Validator',
@@ -298,6 +312,7 @@ export enum StakingActionSteps {
   UNSTAKE = 'Unstake',
   TRANSFER = 'Transfer',
   CLAIM = 'Claim',
+  REINVEST = 'Reinvest',
 }
 export type ActionStepResult = {
   steps: StepTransaction[];

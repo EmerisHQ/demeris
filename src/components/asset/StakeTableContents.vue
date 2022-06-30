@@ -42,6 +42,36 @@
               </div>
             </td>
           </tr>
+          <!-- claim and reinvest rewards -->
+          <tr
+            v-if="totalRewardsAmount && totalRewardsAmount > 1"
+            class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
+            @click="goStakeActionPage(StakingActions.REINVEST)"
+          >
+            <td class="py-6 flex items-center rounded-l-xl bg-surface">
+              <div class="inline-flex items-center ml-6 mr-4">
+                <img src="@/assets/svg/icons/reward.svg" />
+              </div>
+              <span class="text-left overflow-hidden text-ellipsis whitespace-nowrap font-medium">
+                {{ $t('components.stakeTable.claimAndReinvest') }}
+              </span>
+            </td>
+            <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
+            <td class="text-right font-medium bg-surface">
+              <div class="flex justify-end">
+                +<Price :amount="{ denom: denom, amount: totalRewardsAmount + '' }" :show-dash="false" />
+              </div>
+            </td>
+            <td class="text-right rounded-r-xl bg-surface">
+              <div class="flex justify-end">
+                <Icon
+                  name="CaretRightIcon"
+                  :icon-size="1"
+                  class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                />
+              </div>
+            </td>
+          </tr>
 
           <!-- staked validators -->
           <tr v-for="validator of stakingBalances" :key="validator.validator_address" data-cy="validator-row">
@@ -256,6 +286,9 @@ const goStakeActionPage = (action: string, valAddress = '') => {
     case StakingActions.UNSTAKE:
     case StakingActions.SWITCH:
       router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
+      return;
+    case StakingActions.REINVEST:
+      router.push(`/staking/${props.denom}/${StakingActions.REINVEST}`);
       return;
     default:
       router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);

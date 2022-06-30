@@ -87,6 +87,16 @@
             />
           </p>
         </template>
+        <template v-if="transaction.type === 'reinvest'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: getStakedAmount(),
+                denom: getStakableBaseDenomFromChainName(transaction.data?.chainName),
+              }"
+            />
+          </p>
+        </template>
         <template v-if="transaction.type === 'swap'">
           <template v-if="isSwapComponent">
             <i18n-t
@@ -271,6 +281,7 @@ import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
+import PreviewReinvest from '@/components/wizard/previews/PreviewReinvest.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
@@ -309,6 +320,7 @@ const titleMap = {
   withdrawLiquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
   createPool: t('components.txHandlingModal.createPoolActionComplete'),
   claim: t('components.txHandlingModal.claimActionComplete'),
+  reinvest: t('components.txHandlingModal.reinvestActionComplete'),
   switch: t('components.txHandlingModal.switchActionComplete'),
   stake: t('components.txHandlingModal.stakeActionComplete'),
   multistake: t('components.txHandlingModal.stakeActionComplete'),
@@ -324,6 +336,7 @@ const previewComponentMap = {
   multistake: PreviewStake,
   unstake: PreviewUnstake,
   claim: PreviewClaim,
+  reinvest: PreviewReinvest,
   switch: PreviewSwitch,
   addLiquidity: PreviewAddLiquidity,
   withdrawLiquidity: PreviewWithdrawLiquidity,
@@ -372,6 +385,10 @@ const getStakedAmount = () => {
     return transaction.value.data.amount.amount;
   }
   if (transaction.value.type == 'claim') {
+    const baseDenom = getStakableBaseDenomFromChainName(transaction.value.data.chainName);
+    return getSumOfRewards(transaction.value.data.total, baseDenom).toString();
+  }
+  if (transaction.value.type == 'reinvest') {
     const baseDenom = getStakableBaseDenomFromChainName(transaction.value.data.chainName);
     return getSumOfRewards(transaction.value.data.total, baseDenom).toString();
   }

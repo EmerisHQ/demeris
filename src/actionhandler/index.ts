@@ -259,6 +259,14 @@ export async function actionHandler(action: Actions.UserAction): Promise<Array<A
           transactions: [{ type: 'claim', status: 'pending', data: action.params }],
         });
         break;
+      case 'reinvest':
+        steps.push({
+          name: 'reinvest',
+          description: 'reinvest',
+          memo: '',
+          transactions: [{ type: 'reinvest', status: 'pending', data: action.params }],
+        });
+        break;
       case 'unstake':
         steps.push({
           name: 'unstake',
