@@ -25,8 +25,18 @@ export type Getters = {
   [GetterTypes.getChainAPR](state: APIState): { (params: EmerisAPI.ChainReq): string };
   [GetterTypes.getRelayerChainStatus](state: APIState): { (params: EmerisAPI.ChainReq): boolean };
   [GetterTypes.getAllBalances](state: APIState, getters, rootState, rootGetters): EmerisAPI.Balances | null;
-  [GetterTypes.getAllStakingBalances](state: APIState): EmerisAPI.StakingBalances | null;
-  [GetterTypes.getAllUnbondingDelegations](state: APIState): EmerisAPI.UnbondingDelegations | null;
+  [GetterTypes.getAllStakingBalances](
+    state: APIState,
+    getters,
+    rootState,
+    rootGetters,
+  ): EmerisAPI.StakingBalances | null;
+  [GetterTypes.getAllUnbondingDelegations](
+    state: APIState,
+    getters,
+    rootState,
+    rootGetters,
+  ): EmerisAPI.UnbondingDelegations | null;
   [GetterTypes.getVerifiedDenoms](state: APIState): EmerisAPI.VerifiedDenoms | null;
   [GetterTypes.getChains](state: APIState): Record<string, EmerisAPI.Chain>;
   [GetterTypes.getPrices](state: APIState): EmerisAPI.Prices;
@@ -116,14 +126,20 @@ export const getters: GetterTree<APIState, RootState> & Getters = {
   [GetterTypes.getAllValidPools]: (state) => {
     return state.validPools;
   },
-  [GetterTypes.getAllStakingBalances]: (state) => {
-    const stakingBalances = Object.values(state.stakingBalances)
+  [GetterTypes.getAllStakingBalances]: (state, _getters, _rootState, rootGetters) => {
+    const keyHashes = rootGetters[GlobalUserGetterTypes.getKeyhashes];
+    const stakingBalances = Object.entries(state.stakingBalances)
+      .filter(([address]) => keyHashes.includes(address))
+      .map(([, balance]) => balance)
       .filter((balance) => balance !== null)
       .flat();
     return stakingBalances.length > 0 ? stakingBalances : null;
   },
-  [GetterTypes.getAllUnbondingDelegations]: (state) => {
-    const unbondingDelegations = Object.values(state.unbondingDelegations)
+  [GetterTypes.getAllUnbondingDelegations]: (state, _getters, _rootState, rootGetters) => {
+    const keyHashes = rootGetters[GlobalUserGetterTypes.getKeyhashes];
+    const unbondingDelegations = Object.entries(state.unbondingDelegations)
+      .filter(([address]) => keyHashes.includes(address))
+      .map(([, balance]) => balance)
       .filter((balance) => balance !== null)
       .flat();
     return unbondingDelegations.length > 0 ? unbondingDelegations : null;

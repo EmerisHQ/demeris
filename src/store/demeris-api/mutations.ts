@@ -303,9 +303,9 @@ export const mutations: MutationTree<APIState> & Mutations = {
   [MutationTypes.SIGN_OUT](state: APIState, payload: string[]) {
     for (const keyhash of payload ?? []) {
       delete state.balances[keyhash];
+      delete state.stakingBalances[keyhash];
+      delete state.unbondingDelegations[keyhash];
     }
-    state.stakingBalances = {};
-    state.unbondingDelegations = {};
     state.transactions = new Map();
     state._InProgess = new Map();
   },
